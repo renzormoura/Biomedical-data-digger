@@ -317,18 +317,15 @@ Para cada medicamento ou intervenção terapêutica identificado no artigo, apre
         {"role": "system", "content": sys_prompt},
         {"role": "user", "content": user_prompt}
     ]
+
+
+def generate_response(messages: List[Dict[str, str]], model: str) -> str:
     """
     Generates a response from the LLM based on the provided messages.
     Uses Groq API when GROQ_API_KEY is set, otherwise falls back to local Ollama.
-
-    Args:
-        messages (List[Dict[str, str]]): The message payload for the LLM.
-        model (str): The model name selected in the UI.
-    Returns:
-        str: The content of the LLM's response.
     """
     if USE_GROQ:
-        groq_model = GROQ_MODEL_MAP.get(model, "llama-3.3-70b-versatile")
+        groq_model = GROQ_MODEL_MAP.get(model, "openai/gpt-oss-20b")
         response = groq_client.chat.completions.create(
             model=groq_model,
             messages=messages,
