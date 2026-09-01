@@ -332,6 +332,11 @@ def summariser(article_id: str, model: str, build_fn) -> str:
 
     return f"## 📝 Título do Artigo: {article_title}\n\n### 📌 Resumo:\n{summary}"
 
+
+def summariser_with_label(article_id: str, model: str, build_fn, label: str) -> str:
+    result = summariser(article_id, model, build_fn)
+    return f"---\n> 🔖 Tipo de resumo gerado: **{label}**\n\n---\n{result}"
+
 INTRO_TXT = "Este é um sumarizador simples de artigos biomédicos. Ele aceita PMCID ou PMID para buscar artigos do Europe PMC (EPMC). Atualmente utiliza apenas o abstract do artigo. Melhorias futuras incluirão integração com o texto completo."
 INST_TXT = "Digite um **PMCID** (ex: `PMC1234567`) ou **PMID** numérico (ex: `33970586`) e selecione um modelo para gerar um resumo estruturado"
 def gradio_ui():
@@ -350,25 +355,25 @@ def gradio_ui():
           btn_clinico          = gr.Button("Resumo Clínico",   variant="secondary")
           btn_simples          = gr.Button("Resumo Simples",   variant="secondary")
       with gr.Column(scale=1):
-        output_box = gr.Markdown()
+        output_box = gr.Markdown(value="*O resumo aparecerá aqui...*")
 
     btn_sumario.click(
-        fn=lambda aid, mdl: summariser(aid, mdl, build_message_sumario),
+        fn=lambda aid, mdl: summariser_with_label(aid, mdl, build_message_sumario, "Súmario"),
         inputs=[article_id, model_choice], outputs=output_box,
         show_progress="full"
     )
     btn_academico.click(
-        fn=lambda aid, mdl: summariser(aid, mdl, build_message_resumo_academico),
+        fn=lambda aid, mdl: summariser_with_label(aid, mdl, build_message_resumo_academico, "Resumo Acadêmico"),
         inputs=[article_id, model_choice], outputs=output_box,
         show_progress="full"
     )
     btn_clinico.click(
-        fn=lambda aid, mdl: summariser(aid, mdl, build_message_resumo_clinico),
+        fn=lambda aid, mdl: summariser_with_label(aid, mdl, build_message_resumo_clinico, "Resumo Clínico"),
         inputs=[article_id, model_choice], outputs=output_box,
         show_progress="full"
     )
     btn_simples.click(
-        fn=lambda aid, mdl: summariser(aid, mdl, build_message_resumo_simples),
+        fn=lambda aid, mdl: summariser_with_label(aid, mdl, build_message_resumo_simples, "Resumo Simples"),
         inputs=[article_id, model_choice], outputs=output_box,
         show_progress="full"
     )
