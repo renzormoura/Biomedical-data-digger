@@ -246,7 +246,77 @@ Resuma o artigo em português de forma direta e objetiva. Comece com uma frase c
         {"role": "user", "content": user_prompt}
     ]
 
-def generate_response(messages: List[Dict[str, str]], model: str) -> str:
+def build_message_medicamentos(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
+    """
+    Constructs the payload for a Pharmacology / Protocols summary (clinical use in emergency settings).
+    """
+    user_prompt = f"""Você é um farmacologista clínico sênior com especialização em medicina de urgência e emergência. Analise o artigo a seguir e extraia todas as informações farmacológicas e de protocolos clínicos mencionados, com rigor técnico e precisão para uso em ambiente de pronto-socorro.
+
+Título: {article_title}
+Abstract:
+{abstract_text}
+
+**AVISO DE USO CLÍNICO:** As informações abaixo são extraídas exclusivamente do artigo fornecido. Não substitui bulas, diretrizes institucionais ou julgamento clínico individualizado.
+
+Para cada medicamento ou intervenção terapêutica identificado no artigo, apresente:
+
+1. **Nome do Medicamento / Intervenção**
+   - Nome genérico e comercial (se mencionado no artigo)
+   - Classe farmacológica e mecanismo de ação (se descrito)
+
+2. **Posologia por Perfil de Paciente**
+   Para cada população estudada no artigo (ex: saudáveis, insuficiência renal, diálise, idosos, pediátricos), detalhe:
+   - Dose recomendada (mg, mg/kg, UI, etc.)
+   - Via de administração
+   - Diluição recomendada (diluente, volume final, concentração resultante — se descrito)
+   - Velocidade de administração (ex: EV em bolus, infusão lenta em X minutos, gotejamento em X mL/h — se descrito)
+   - Intervalo entre doses e duração do tratamento
+   - Ajuste de dose necessário em populações especiais
+
+3. **Compatibilidade e Estabilidade**
+   - Diluentes compatíveis e incompatíveis (se descritos)
+   - Compatibilidade com outros medicamentos na mesma via ou solução (se descrito)
+   - Tempo de estabilidade após diluição e condições de armazenamento (temperatura, proteção da luz — se descrito)
+
+4. **Farmacocinética Clínica**
+   - Meia-vida de eliminação (t½) por perfil de paciente
+   - Pico de ação (Tmax) e início do efeito
+   - Ligação proteica e volume de distribuição (se mencionado)
+   - Metabolismo e via de eliminação
+   - Impacto de disfunção renal ou hepática sobre a farmacocinética
+
+5. **Eficácia e Desfechos Clínicos**
+   - Desfechos primários e secundários avaliados
+   - Resultados quantitativos (ex: redução de X%, NNT, p-value, IC 95%)
+
+6. **Segurança e Efeitos Adversos**
+   - Efeitos adversos relatados com frequência (%)
+   - Efeitos graves ou que exijam monitoramento especial
+   - Contraindicações mencionadas
+   - Interações medicamentosas relevantes (se descritas)
+
+7. **Monitoramento Terapêutico**
+   - Parâmetros clínicos e laboratoriais a monitorar durante o uso (ex: função renal, PA, FC, nível sérico)
+   - Momento e frequência do monitoramento recomendados (se descritos)
+   - Valores de alerta ou limiares de toxicidade mencionados
+
+8. **Conduta em Toxicidade ou Superdose**
+   - Sinais e sintomas de toxicidade descritos no artigo
+   - Antídoto ou tratamento de suporte mencionado
+   - Dose tóxica ou letal citada (se houver)
+
+9. **Considerações Práticas para o Pronto-Socorro**
+   - Pontos de atenção para uso em urgência/emergência
+   - Populações que requerem maior cautela
+   - O que o artigo sugere que deve ser monitorado durante o uso
+   - Comparação direta entre populações quando o artigo apresentar dados para mais de um perfil de paciente (ex: saudável vs. diálise)
+
+**Restrição absoluta:** Apresente somente informações explicitamente descritas no artigo. Se algum campo não for abordado, indique "Não descrito no artigo" — nunca preencha com conhecimento externo ou suposições."""
+
+    return [
+        {"role": "system", "content": sys_prompt},
+        {"role": "user", "content": user_prompt}
+    ]
     """
     Generates a response from the LLM based on the provided messages.
     Uses Groq API when GROQ_API_KEY is set, otherwise falls back to local Ollama.
@@ -354,6 +424,8 @@ def gradio_ui():
         with gr.Row():
           btn_clinico          = gr.Button("Resumo Clínico",   variant="secondary")
           btn_simples          = gr.Button("Resumo Simples",   variant="secondary")
+        with gr.Row():
+          btn_medicamentos     = gr.Button("💊 Medicamentos / Protocolos", variant="secondary")
       with gr.Column(scale=1):
         output_box = gr.Markdown(value="*O resumo aparecerá aqui...*")
 
@@ -374,6 +446,11 @@ def gradio_ui():
     )
     btn_simples.click(
         fn=lambda aid, mdl: summariser_with_label(aid, mdl, build_message_resumo_simples, "Resumo Simples"),
+        inputs=[article_id, model_choice], outputs=output_box,
+        show_progress="full"
+    )
+    btn_medicamentos.click(
+        fn=lambda aid, mdl: summariser_with_label(aid, mdl, build_message_medicamentos, "💊 Medicamentos / Protocolos"),
         inputs=[article_id, model_choice], outputs=output_box,
         show_progress="full"
     )
