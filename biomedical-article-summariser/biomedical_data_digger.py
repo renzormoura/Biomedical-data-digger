@@ -26,11 +26,11 @@ if USE_GROQ:
     groq_client = Groq(api_key=GROQ_API_KEY)
     # Mapeamento de nomes amigáveis → modelos Groq disponíveis
     GROQ_MODEL_MAP = {
-        "llama3.2":    "llama-3.1-8b-instant",
-        "deepseek-r1": "deepseek-r1-distill-llama-70b",
-        "gemma3":      "gemma2-9b-it",
-        "mistral":     "mixtral-8x7b-32768",
-        "gpt-oss":     "gpt-oss-20b",
+        "llama3.2":    "openai/gpt-oss-20b",
+        "deepseek-r1": "qwen/qwen3.6-27b",
+        "gemma3":      "qwen/qwen3.8-27b",
+        "mistral":     "openai/gpt-oss-120b",
+        "gpt-oss":     "openai/gpt-oss-120b",
     }
 else:
     import ollama
