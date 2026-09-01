@@ -296,26 +296,39 @@ def get_abstract_from_pmid(pmid: str) -> Tuple[str, str]:
 
 
 def summariser(article_id: str, model: str, build_fn) -> str:
-    if article_id and not re.match(r"^(PMC\d{5,8}|\d{5,9})$", article_id):
+    # Validação do ID
+    if not article_id or not article_id.strip():
+        raise gr.Error("Por favor, digite um PMCID ou PMID antes de gerar o resumo.")
+
+    article_id = article_id.strip()
+
+    if not re.match(r"^(PMC\d{5,8}|\d{5,9})$", article_id):
         raise gr.Error("Formato de ID inválido. Use um PMCID (ex: 'PMC1234567') ou um PMID numérico (ex: '12345678').")
 
-    # Se for PMID numérico, busca via endpoint de busca (suporta artigos não Open Access)
-    if re.match(r"^\d+$", article_id):
-        article_title, abstract_text = get_abstract_from_pmid(article_id)
-    else:
-        # PMCID: tenta buscar o XML completo
-        url = f"https://www.ebi.ac.uk/europepmc/webservices/rest/{article_id}/fullTextXML"
-        soup = get_xml_from_url(url)
-        article_title, abstract_text = fetch_article_abstract(soup)
+    # Verificação do backend LLM
+    if not USE_GROQ:
+        raise gr.Error("Nenhum backend de LLM disponível. Configure a variável GROQ_API_KEY.")
+
+    # Busca do artigo
+    try:
+        if re.match(r"^\d+$", article_id):
+            article_title, abstract_text = get_abstract_from_pmid(article_id)
+        else:
+            url = f"https://www.ebi.ac.uk/europepmc/webservices/rest/{article_id}/fullTextXML"
+            soup = get_xml_from_url(url)
+            article_title, abstract_text = fetch_article_abstract(soup)
+    except Exception as e:
+        raise gr.Error(f"Erro ao buscar artigo: {str(e)}")
 
     if not abstract_text:
         raise gr.Error(f"Nenhum abstract encontrado para: {article_title}")
-    messages = build_fn(article_title, abstract_text)
 
-    #puxa o modelo do ollama (só em modo local)
-    if not USE_GROQ:
-        ollama.pull(model)
-    summary = generate_response(messages, model)
+    # Geração do resumo
+    try:
+        messages = build_fn(article_title, abstract_text)
+        summary = generate_response(messages, model)
+    except Exception as e:
+        raise gr.Error(f"Erro ao gerar resumo com a LLM: {str(e)}")
 
     return f"## 📝 Título do Artigo: {article_title}\n\n### 📌 Resumo:\n{summary}"
 
@@ -341,19 +354,23 @@ def gradio_ui():
 
     btn_sumario.click(
         fn=lambda aid, mdl: summariser(aid, mdl, build_message_sumario),
-        inputs=[article_id, model_choice], outputs=output_box
+        inputs=[article_id, model_choice], outputs=output_box,
+        show_progress="full"
     )
     btn_academico.click(
         fn=lambda aid, mdl: summariser(aid, mdl, build_message_resumo_academico),
-        inputs=[article_id, model_choice], outputs=output_box
+        inputs=[article_id, model_choice], outputs=output_box,
+        show_progress="full"
     )
     btn_clinico.click(
         fn=lambda aid, mdl: summariser(aid, mdl, build_message_resumo_clinico),
-        inputs=[article_id, model_choice], outputs=output_box
+        inputs=[article_id, model_choice], outputs=output_box,
+        show_progress="full"
     )
     btn_simples.click(
         fn=lambda aid, mdl: summariser(aid, mdl, build_message_resumo_simples),
-        inputs=[article_id, model_choice], outputs=output_box
+        inputs=[article_id, model_choice], outputs=output_box,
+        show_progress="full"
     )
 
   return demo
