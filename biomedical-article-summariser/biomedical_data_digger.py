@@ -258,6 +258,8 @@ Abstract:
 
 **AVISO DE USO CLÍNICO:** As informações abaixo são extraídas exclusivamente do artigo fornecido. Não substitui bulas, diretrizes institucionais ou julgamento clínico individualizado.
 
+**FORMATO OBRIGATÓRIO:** Use exclusivamente títulos em negrito e listas com marcadores (bullet points). Não use tabelas, colunas ou qualquer formatação tabular. O texto deve ser legível em telas de celular.
+
 Para cada medicamento ou intervenção terapêutica identificado no artigo, apresente:
 
 1. **Nome do Medicamento / Intervenção**
