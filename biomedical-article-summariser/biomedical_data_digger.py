@@ -1,12 +1,13 @@
 import re
 import os
-
+import threading
+from functools import lru_cache
 from dotenv import load_dotenv
 load_dotenv()  # carrega o .env automaticamente em modo local
 
 import requests
 import functools
-from typing import List, Tuple, Dict, Any
+from typing import List, Tuple, Dict, Any, Generator
 
 from loguru import logger
 
@@ -34,6 +35,25 @@ if USE_GROQ:
     }
 else:
     import ollama
+
+
+# ---------------------------------------------------------------------------
+# Cache de artigos em memória (evita buscar o mesmo artigo duas vezes)
+# ---------------------------------------------------------------------------
+_article_cache: Dict[str, Tuple[str, str]] = {}
+_cache_lock = threading.Lock()
+
+def get_cached_article(article_id: str) -> Tuple[str, str] | None:
+    with _cache_lock:
+        return _article_cache.get(article_id)
+
+def set_cached_article(article_id: str, title: str, abstract: str) -> None:
+    with _cache_lock:
+        # mantém no máximo 20 artigos em cache
+        if len(_article_cache) >= 20:
+            oldest = next(iter(_article_cache))
+            del _article_cache[oldest]
+        _article_cache[article_id] = (title, abstract)
 
 
 
@@ -712,6 +732,33 @@ def build_dynamic_sys_prompt(
     return prompt
 
 
+def generate_response_stream(messages: List[Dict[str, str]], model: str) -> Generator[str, None, None]:
+    """
+    Streams the LLM response token by token.
+    Yields accumulated text so Gradio can update the UI progressively.
+    """
+    if USE_GROQ:
+        groq_model = GROQ_MODEL_MAP.get(model, "openai/gpt-oss-120b")
+        stream = groq_client.chat.completions.create(
+            model=groq_model,
+            messages=messages,
+            stream=True,
+            timeout=120,
+        )
+        accumulated = ""
+        for chunk in stream:
+            delta = chunk.choices[0].delta.content or ""
+            accumulated += delta
+            yield accumulated
+    else:
+        ollama.pull(model)
+        accumulated = ""
+        for chunk in ollama.chat(model=model, messages=messages, stream=True):
+            delta = chunk["message"]["content"] or ""
+            accumulated += delta
+            yield accumulated
+
+
 def generate_response(messages: List[Dict[str, str]], model: str) -> str:
     """
     Generates a response from the LLM based on the provided messages.
@@ -722,6 +769,7 @@ def generate_response(messages: List[Dict[str, str]], model: str) -> str:
         response = groq_client.chat.completions.create(
             model=groq_model,
             messages=messages,
+            timeout=120,
         )
         return response.choices[0].message.content
     else:
@@ -757,7 +805,7 @@ def get_abstract_from_pmid(pmid: str) -> Tuple[str, str]:
 
 def summariser(article_id: str, model: str, build_fn,
                publico: str = "", tom: str = "", idioma: str = "",
-               detalhe: str = "", foco: str = "") -> str:
+               detalhe: str = "", foco: str = "") -> Generator[str, None, None]:
     # Validação do ID
     if not article_id or not article_id.strip():
         raise gr.Error("Por favor, digite um PMCID ou PMID antes de gerar o resumo.")
@@ -767,160 +815,184 @@ def summariser(article_id: str, model: str, build_fn,
     if not re.match(r"^(PMC\d{5,8}|\d{5,9})$", article_id):
         raise gr.Error("Formato de ID inválido. Use um PMCID (ex: 'PMC1234567') ou um PMID numérico (ex: '12345678').")
 
-    # Verificação do backend LLM
     if not USE_GROQ:
         raise gr.Error("Nenhum backend de LLM disponível. Configure a variável GROQ_API_KEY.")
 
-    # Busca do artigo
-    try:
-        if re.match(r"^\d+$", article_id):
-            article_title, abstract_text = get_abstract_from_pmid(article_id)
-        else:
-            url = f"https://www.ebi.ac.uk/europepmc/webservices/rest/{article_id}/fullTextXML"
-            soup = get_xml_from_url(url)
-            article_title, abstract_text = fetch_article_abstract(soup)
-    except Exception as e:
-        raise gr.Error(f"Erro ao buscar artigo: {str(e)}")
+    # Busca do artigo — usa cache se disponível
+    cached = get_cached_article(article_id)
+    if cached:
+        article_title, abstract_text = cached
+    else:
+        try:
+            if re.match(r"^\d+$", article_id):
+                article_title, abstract_text = get_abstract_from_pmid(article_id)
+            else:
+                url = f"https://www.ebi.ac.uk/europepmc/webservices/rest/{article_id}/fullTextXML"
+                soup = get_xml_from_url(url)
+                article_title, abstract_text = fetch_article_abstract(soup)
+            set_cached_article(article_id, article_title, abstract_text)
+        except Exception as e:
+            raise gr.Error(f"Erro ao buscar artigo: {str(e)}")
 
     if not abstract_text:
         raise gr.Error(f"Nenhum abstract encontrado para: {article_title}")
 
-    # Monta o sys_prompt dinâmico com os filtros selecionados
     dynamic_prompt = build_dynamic_sys_prompt(publico, tom, idioma, detalhe, foco)
 
-    # Geração do resumo
     try:
         messages = build_fn(article_title, abstract_text, sys_prompt=dynamic_prompt)
-        summary = generate_response(messages, model)
+        header = f"## Título do Artigo: {article_title}\n\n### Resumo:\n"
+        for partial in generate_response_stream(messages, model):
+            yield header + partial
     except Exception as e:
         raise gr.Error(f"Erro ao gerar resumo com a LLM: {str(e)}")
-
-    return f"## 📝 Título do Artigo: {article_title}\n\n### 📌 Resumo:\n{summary}"
 
 
 def summariser_with_label(article_id: str, model: str, build_fn, label: str,
                           publico: str = "", tom: str = "", idioma: str = "",
-                          detalhe: str = "", foco: str = "") -> str:
-    result = summariser(article_id, model, build_fn, publico, tom, idioma, detalhe, foco)
+                          detalhe: str = "", foco: str = "") -> Generator[str, None, None]:
     filtros_ativos = [f for f in [publico, tom, idioma, detalhe, foco] if f]
     filtros_str = "  |  ".join(filtros_ativos) if filtros_ativos else "Padrão"
-    return f"---\n> 🔖 **{label}**  &nbsp;·&nbsp;  🎛️ Filtros: *{filtros_str}*\n\n---\n{result}"
+    header = f"---\n> **{label}**  ·  Filtros: *{filtros_str}*\n\n---\n"
+    for partial in summariser(article_id, model, build_fn, publico, tom, idioma, detalhe, foco):
+        yield header + partial
 
-INTRO_TXT = "Este é um sumarizador simples de artigos biomédicos. Ele aceita PMCID ou PMID para buscar artigos do Europe PMC (EPMC). Atualmente utiliza apenas o abstract do artigo. Melhorias futuras incluirão integração com o texto completo."
+INTRO_TXT = "Sumarizador de artigos biomédicos. Aceita PMCID ou PMID para buscar artigos do Europe PMC."
 INST_TXT = "Digite um **PMCID** (ex: `PMC1234567`) ou **PMID** numérico (ex: `33970586`) e selecione um modelo para gerar um resumo estruturado"
+
 def gradio_ui():
   with gr.Blocks(theme=gr.themes.Soft()) as demo:
-    gr.Markdown(INTRO_TXT)
+    gr.Markdown(f"## Biomedical Data Digger\n{INTRO_TXT}")
     gr.Markdown(INST_TXT)
+
+    # Estado de histórico da sessão (lista de tuplas: (pmid, título))
+    session_history = gr.State([])
 
     with gr.Row():
       with gr.Column(scale=1):
-        article_id = gr.Textbox(label="Digite o PMCID ou PMID do artigo", placeholder="ex: PMC1234567 ou 12345678")
+        article_id = gr.Textbox(label="PMCID ou PMID do artigo", placeholder="ex: PMC1234567 ou 12345678")
         model_choice = gr.Dropdown(
             choices=["GPT-OSS 120B (Groq)", "GPT-OSS 20B (Groq)", "Qwen 3.6 27B (Groq)", "Qwen 3.8 27B (Groq)", "Llama (local)"],
             value="GPT-OSS 120B (Groq)",
             label="Modelo"
         )
 
+        # ── Histórico de sessão ───────────────────────────────────────────
+        with gr.Accordion("Histórico da sessão", open=False):
+          history_display = gr.Dataframe(
+              headers=["ID", "Título"],
+              datatype=["str", "str"],
+              interactive=False,
+              label=None,
+              wrap=True,
+          )
+          btn_usar_historico = gr.Button("Usar ID selecionado", size="sm", visible=False)
+        # ─────────────────────────────────────────────────────────────────
+
         # ── Painel de personalização ──────────────────────────────────────
-        with gr.Accordion("🎛️ Personalização (opcional)", open=False):
+        with gr.Accordion("Personalização (opcional)", open=False):
           gr.Markdown("Selecione os filtros desejados. Sem seleção, o comportamento é o padrão de cada botão.")
           filtro_publico = gr.Radio(
               choices=["Médico / Especialista", "Residente / Interno", "Estudante de Medicina", "Paciente / Leigo", "Enfermagem / Farmácia"],
-              value=None, label="👤 Público-alvo", interactive=True
+              value=None, label="Público-alvo", interactive=True
           )
           filtro_tom = gr.Radio(
               choices=["Formal e Técnico", "Direto e Objetivo", "Didático"],
-              value=None, label="🗣️ Tom da resposta", interactive=True
+              value=None, label="Tom da resposta", interactive=True
           )
           filtro_idioma = gr.Radio(
               choices=["Português (BR)", "English", "Español"],
-              value=None, label="🌐 Idioma", interactive=True
+              value=None, label="Idioma", interactive=True
           )
           filtro_detalhe = gr.Radio(
               choices=["Resumido", "Completo", "Ultra-detalhado"],
-              value=None, label="📏 Nível de detalhe", interactive=True
+              value=None, label="Nível de detalhe", interactive=True
           )
           filtro_foco = gr.Radio(
               choices=["Farmacologia", "Estatística", "Segurança", "Metodologia", "Clínico/Prático"],
-              value=None, label="🔍 Foco temático", interactive=True
+              value=None, label="Foco temático", interactive=True
           )
           btn_limpar_filtros = gr.Button("Limpar filtros", size="sm")
         # ─────────────────────────────────────────────────────────────────
 
         with gr.Row():
-          btn_sumario          = gr.Button("Sumário",              variant="secondary")
-          btn_academico        = gr.Button("Resumo Acadêmico", variant="secondary")
+          btn_sumario          = gr.Button("Sumário",                   variant="secondary")
+          btn_academico        = gr.Button("Resumo Acadêmico",          variant="secondary")
         with gr.Row():
-          btn_clinico          = gr.Button("Resumo Clínico",   variant="secondary")
-          btn_resumo           = gr.Button("Resumo",           variant="secondary")
+          btn_clinico          = gr.Button("Resumo Clínico",            variant="secondary")
+          btn_resumo           = gr.Button("Resumo",                    variant="secondary")
         with gr.Row():
-          btn_medicamentos     = gr.Button("Medicamentos / Protocolos",  variant="secondary")
-          btn_alertas          = gr.Button("Alertas e Contraindicações",  variant="secondary")
+          btn_medicamentos     = gr.Button("Medicamentos / Protocolos", variant="secondary")
+          btn_alertas          = gr.Button("Alertas e Contraindicações",variant="secondary")
         with gr.Row():
-          btn_checklist        = gr.Button("Checklist Pré-Conduta",      variant="secondary")
-          btn_pico             = gr.Button("Pergunta PICO",               variant="secondary")
+          btn_checklist        = gr.Button("Checklist Pré-Conduta",     variant="secondary")
+          btn_pico             = gr.Button("Pergunta PICO",             variant="secondary")
         with gr.Row():
-          btn_estatisticas     = gr.Button("Dados Estatísticos",           variant="secondary")
-          btn_aplicabilidade   = gr.Button("Aplicabilidade Brasileira",    variant="secondary")
+          btn_estatisticas     = gr.Button("Dados Estatísticos",        variant="secondary")
+          btn_aplicabilidade   = gr.Button("Aplicabilidade Brasileira", variant="secondary")
         with gr.Row():
-          btn_critica          = gr.Button("Crítica Metodológica",         variant="secondary")
+          btn_critica          = gr.Button("Crítica Metodológica",      variant="secondary")
 
       with gr.Column(scale=1):
         output_box = gr.Markdown(value="*O resumo aparecerá aqui...*")
 
-    # inputs comuns a todos os botões
-    common_inputs = [article_id, model_choice, filtro_publico, filtro_tom, filtro_idioma, filtro_detalhe, filtro_foco]
+    # ── Lógica do histórico ───────────────────────────────────────────────
+    def update_history(article_id_val: str, history: list) -> tuple:
+        """Adiciona o artigo ao histórico após busca bem-sucedida."""
+        aid = article_id_val.strip() if article_id_val else ""
+        if not aid:
+            return history, gr.update()
+        cached = get_cached_article(aid)
+        if cached and not any(row[0] == aid for row in history):
+            title = cached[0][:60] + "..." if len(cached[0]) > 60 else cached[0]
+            history = [[aid, title]] + history
+            history = history[:10]  # mantém últimas 10
+        rows = history if history else [["—", "Nenhum artigo consultado ainda"]]
+        return history, gr.update(value=rows)
 
     btn_limpar_filtros.click(
         fn=lambda: (None, None, None, None, None),
         inputs=[], outputs=[filtro_publico, filtro_tom, filtro_idioma, filtro_detalhe, filtro_foco]
     )
 
-    btn_sumario.click(
-        fn=lambda aid, mdl, pub, tom, idi, det, foc: summariser_with_label(aid, mdl, build_message_sumario, "Súmario", pub or "", tom or "", idi or "", det or "", foc or ""),
-        inputs=common_inputs, outputs=output_box, show_progress="full"
-    )
-    btn_academico.click(
-        fn=lambda aid, mdl, pub, tom, idi, det, foc: summariser_with_label(aid, mdl, build_message_resumo_academico, "Resumo Acadêmico", pub or "", tom or "", idi or "", det or "", foc or ""),
-        inputs=common_inputs, outputs=output_box, show_progress="full"
-    )
-    btn_clinico.click(
-        fn=lambda aid, mdl, pub, tom, idi, det, foc: summariser_with_label(aid, mdl, build_message_resumo_clinico, "Resumo Clínico", pub or "", tom or "", idi or "", det or "", foc or ""),
-        inputs=common_inputs, outputs=output_box, show_progress="full"
-    )
-    btn_resumo.click(
-        fn=lambda aid, mdl, pub, tom, idi, det, foc: summariser_with_label(aid, mdl, build_message_resumo, "Resumo", pub or "", tom or "", idi or "", det or "", foc or ""),
-        inputs=common_inputs, outputs=output_box, show_progress="full"
-    )
-    btn_medicamentos.click(
-        fn=lambda aid, mdl, pub, tom, idi, det, foc: summariser_with_label(aid, mdl, build_message_medicamentos, "💊 Medicamentos / Protocolos", pub or "", tom or "", idi or "", det or "", foc or ""),
-        inputs=common_inputs, outputs=output_box, show_progress="full"
-    )
-    btn_alertas.click(
-        fn=lambda aid, mdl, pub, tom, idi, det, foc: summariser_with_label(aid, mdl, build_message_alertas, "⚠️ Alertas e Contraindicações", pub or "", tom or "", idi or "", det or "", foc or ""),
-        inputs=common_inputs, outputs=output_box, show_progress="full"
-    )
-    btn_checklist.click(
-        fn=lambda aid, mdl, pub, tom, idi, det, foc: summariser_with_label(aid, mdl, build_message_checklist, "📋 Checklist Pré-Conduta", pub or "", tom or "", idi or "", det or "", foc or ""),
-        inputs=common_inputs, outputs=output_box, show_progress="full"
-    )
-    btn_pico.click(
-        fn=lambda aid, mdl, pub, tom, idi, det, foc: summariser_with_label(aid, mdl, build_message_pico, "🩺 Pergunta PICO", pub or "", tom or "", idi or "", det or "", foc or ""),
-        inputs=common_inputs, outputs=output_box, show_progress="full"
-    )
-    btn_estatisticas.click(
-        fn=lambda aid, mdl, pub, tom, idi, det, foc: summariser_with_label(aid, mdl, build_message_estatisticas, "📊 Dados Estatísticos", pub or "", tom or "", idi or "", det or "", foc or ""),
-        inputs=common_inputs, outputs=output_box, show_progress="full"
-    )
-    btn_aplicabilidade.click(
-        fn=lambda aid, mdl, pub, tom, idi, det, foc: summariser_with_label(aid, mdl, build_message_aplicabilidade_br, "🌍 Aplicabilidade Brasileira", pub or "", tom or "", idi or "", det or "", foc or ""),
-        inputs=common_inputs, outputs=output_box, show_progress="full"
-    )
-    btn_critica.click(
-        fn=lambda aid, mdl, pub, tom, idi, det, foc: summariser_with_label(aid, mdl, build_message_critica_metodologica, "🔬 Crítica Metodológica", pub or "", tom or "", idi or "", det or "", foc or ""),
-        inputs=common_inputs, outputs=output_box, show_progress="full"
-    )
+    common_inputs = [article_id, model_choice, filtro_publico, filtro_tom, filtro_idioma, filtro_detalhe, filtro_foco]
+
+    def make_fn(build_fn, label):
+        def fn(aid, mdl, pub, tom, idi, det, foc):
+            yield from summariser_with_label(
+                aid, mdl, build_fn, label,
+                pub or "", tom or "", idi or "", det or "", foc or ""
+            )
+        return fn
+
+    def make_fn_with_history(build_fn, label):
+        def fn(aid, mdl, pub, tom, idi, det, foc, history):
+            last = ""
+            for partial in summariser_with_label(
+                aid, mdl, build_fn, label,
+                pub or "", tom or "", idi or "", det or "", foc or ""
+            ):
+                last = partial
+                yield partial, history, gr.update()
+            # atualiza histórico após completar
+            new_history, new_display = update_history(aid, history)
+            yield last, new_history, new_display
+        return fn
+
+    all_inputs = common_inputs + [session_history]
+    all_outputs = [output_box, session_history, history_display]
+
+    btn_sumario.click(fn=make_fn_with_history(build_message_sumario, "Sumário"), inputs=all_inputs, outputs=all_outputs)
+    btn_academico.click(fn=make_fn_with_history(build_message_resumo_academico, "Resumo Acadêmico"), inputs=all_inputs, outputs=all_outputs)
+    btn_clinico.click(fn=make_fn_with_history(build_message_resumo_clinico, "Resumo Clínico"), inputs=all_inputs, outputs=all_outputs)
+    btn_resumo.click(fn=make_fn_with_history(build_message_resumo, "Resumo"), inputs=all_inputs, outputs=all_outputs)
+    btn_medicamentos.click(fn=make_fn_with_history(build_message_medicamentos, "Medicamentos / Protocolos"), inputs=all_inputs, outputs=all_outputs)
+    btn_alertas.click(fn=make_fn_with_history(build_message_alertas, "Alertas e Contraindicações"), inputs=all_inputs, outputs=all_outputs)
+    btn_checklist.click(fn=make_fn_with_history(build_message_checklist, "Checklist Pré-Conduta"), inputs=all_inputs, outputs=all_outputs)
+    btn_pico.click(fn=make_fn_with_history(build_message_pico, "Pergunta PICO"), inputs=all_inputs, outputs=all_outputs)
+    btn_estatisticas.click(fn=make_fn_with_history(build_message_estatisticas, "Dados Estatísticos"), inputs=all_inputs, outputs=all_outputs)
+    btn_aplicabilidade.click(fn=make_fn_with_history(build_message_aplicabilidade_br, "Aplicabilidade Brasileira"), inputs=all_inputs, outputs=all_outputs)
+    btn_critica.click(fn=make_fn_with_history(build_message_critica_metodologica, "Crítica Metodológica"), inputs=all_inputs, outputs=all_outputs)
 
   return demo
 
