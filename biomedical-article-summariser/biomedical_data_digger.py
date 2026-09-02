@@ -26,11 +26,11 @@ if USE_GROQ:
     groq_client = Groq(api_key=GROQ_API_KEY)
     # Mapeamento de nomes amigáveis → modelos Groq disponíveis
     GROQ_MODEL_MAP = {
-        "llama3.2":    "openai/gpt-oss-20b",
-        "deepseek-r1": "qwen/qwen3.6-27b",
-        "gemma3":      "qwen/qwen3.8-27b",
-        "mistral":     "openai/gpt-oss-120b",
-        "gpt-oss":     "openai/gpt-oss-120b",
+        "GPT-OSS 120B (Groq)": "openai/gpt-oss-120b",
+        "GPT-OSS 20B (Groq)":  "openai/gpt-oss-20b",
+        "Qwen 3.6 27B (Groq)": "qwen/qwen3.6-27b",
+        "Qwen 3.8 27B (Groq)": "qwen/qwen3.8-27b",
+        "Llama (local)":        "llama3.2",
     }
 else:
     import ollama
@@ -718,7 +718,7 @@ def generate_response(messages: List[Dict[str, str]], model: str) -> str:
     Uses Groq API when GROQ_API_KEY is set, otherwise falls back to local Ollama.
     """
     if USE_GROQ:
-        groq_model = GROQ_MODEL_MAP.get(model, "openai/gpt-oss-20b")
+        groq_model = GROQ_MODEL_MAP.get(model, "openai/gpt-oss-120b")
         response = groq_client.chat.completions.create(
             model=groq_model,
             messages=messages,
@@ -816,7 +816,11 @@ def gradio_ui():
     with gr.Row():
       with gr.Column(scale=1):
         article_id = gr.Textbox(label="Digite o PMCID ou PMID do artigo", placeholder="ex: PMC1234567 ou 12345678")
-        model_choice = gr.Dropdown(choices=["llama3.2", "deepseek-r1", "gemma3", "mistral", "gpt-oss"], value="llama3.2", label="Select a model")
+        model_choice = gr.Dropdown(
+            choices=["GPT-OSS 120B (Groq)", "GPT-OSS 20B (Groq)", "Qwen 3.6 27B (Groq)", "Qwen 3.8 27B (Groq)", "Llama (local)"],
+            value="GPT-OSS 120B (Groq)",
+            label="Modelo"
+        )
 
         # ── Painel de personalização ──────────────────────────────────────
         with gr.Accordion("🎛️ Personalização (opcional)", open=False):
