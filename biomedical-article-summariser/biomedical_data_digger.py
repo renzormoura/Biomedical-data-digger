@@ -663,6 +663,24 @@ Estruture a análise com os seguintes tópicos:
         return response["message"]["content"]
 
 
+def generate_response(messages: List[Dict[str, str]], model: str) -> str:
+    """
+    Generates a response from the LLM based on the provided messages.
+    Uses Groq API when GROQ_API_KEY is set, otherwise falls back to local Ollama.
+    """
+    if USE_GROQ:
+        groq_model = GROQ_MODEL_MAP.get(model, "openai/gpt-oss-20b")
+        response = groq_client.chat.completions.create(
+            model=groq_model,
+            messages=messages,
+        )
+        return response.choices[0].message.content
+    else:
+        ollama.pull(model)
+        response = ollama.chat(model=model, messages=messages)
+        return response["message"]["content"]
+
+
 @catch_request_error
 @logger.catch
 def get_abstract_from_pmid(pmid: str) -> Tuple[str, str]:
