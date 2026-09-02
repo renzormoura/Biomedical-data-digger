@@ -841,26 +841,26 @@ def gradio_ui():
               choices=["Farmacologia", "Estatística", "Segurança", "Metodologia", "Clínico/Prático"],
               value=None, label="🔍 Foco temático", interactive=True
           )
-          btn_limpar_filtros = gr.Button("🗑️ Limpar filtros", size="sm")
+          btn_limpar_filtros = gr.Button("Limpar filtros", size="sm")
         # ─────────────────────────────────────────────────────────────────
 
         with gr.Row():
-          btn_sumario          = gr.Button("Súmario",          variant="primary")
+          btn_sumario          = gr.Button("Sumário",              variant="secondary")
           btn_academico        = gr.Button("Resumo Acadêmico", variant="secondary")
         with gr.Row():
           btn_clinico          = gr.Button("Resumo Clínico",   variant="secondary")
           btn_resumo           = gr.Button("Resumo",           variant="secondary")
         with gr.Row():
-          btn_medicamentos     = gr.Button("💊 Medicamentos / Protocolos", variant="secondary")
-          btn_alertas          = gr.Button("⚠️ Alertas e Contraindicações", variant="secondary")
+          btn_medicamentos     = gr.Button("Medicamentos / Protocolos",  variant="secondary")
+          btn_alertas          = gr.Button("Alertas e Contraindicações",  variant="secondary")
         with gr.Row():
-          btn_checklist        = gr.Button("📋 Checklist Pré-Conduta",     variant="secondary")
-          btn_pico             = gr.Button("🩺 Pergunta PICO",              variant="secondary")
+          btn_checklist        = gr.Button("Checklist Pré-Conduta",      variant="secondary")
+          btn_pico             = gr.Button("Pergunta PICO",               variant="secondary")
         with gr.Row():
-          btn_estatisticas     = gr.Button("📊 Dados Estatísticos",         variant="secondary")
-          btn_aplicabilidade   = gr.Button("🌍 Aplicabilidade Brasileira",  variant="secondary")
+          btn_estatisticas     = gr.Button("Dados Estatísticos",           variant="secondary")
+          btn_aplicabilidade   = gr.Button("Aplicabilidade Brasileira",    variant="secondary")
         with gr.Row():
-          btn_critica          = gr.Button("🔬 Crítica Metodológica",       variant="secondary")
+          btn_critica          = gr.Button("Crítica Metodológica",         variant="secondary")
 
       with gr.Column(scale=1):
         output_box = gr.Markdown(value="*O resumo aparecerá aqui...*")
