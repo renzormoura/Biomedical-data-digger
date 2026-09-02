@@ -205,25 +205,26 @@ Instruções de Estrutura:
     ]
 
 
-def build_message_resumo_simples(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
+def build_message_resumo(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
     """
-    Constructs the payload for a Simplified Summary (Layperson / Patient / Student focus).
+    Constructs the payload for a balanced general summary — not too simple, not too advanced.
+    Designed to be the neutral starting point, refined by user filters.
     """
-    user_prompt = f"""Você é um divulgador científico especializado em saúde. Explique os achados deste artigo médico de forma simples, clara e acessível para leigos, pacientes ou estudantes iniciantes.
+    user_prompt = f"""Analise o artigo biomédico a seguir e produza um resumo equilibrado, adequado para qualquer profissional da área da saúde independentemente do nível de especialização.
 
 Título: {article_title}
 Abstract:
 {abstract_text}
 
-Instruções de Estrutura:
-- Utilize uma linguagem fácil de entender, evitando jargões médicos complexos ou explicando-os brevemente de forma didática quando forem essenciais.
-- Evite fórmulas estatísticas densas.
+Instruções:
+- Use linguagem clara e acessível, sem ser simplista. Mantenha termos técnicos essenciais, mas não sobrecarregue com jargões desnecessários.
+- Seja completo sem ser excessivamente longo.
 - Estruture a resposta com os tópicos:
-  1. Qual era o objetivo principal da pesquisa?
-  2. Como o estudo foi feito? (Exposição didática)
-  3. O que os pesquisadores descobriram?
-  4. Por que essa descoberta importa?
-  5. O que isso muda na prática? (em um parágrafo final amigável)"""
+  1. **O que foi estudado** — contexto e objetivo do estudo
+  2. **Como foi feito** — desenho e metodologia em linguagem direta
+  3. **O que foi encontrado** — principais resultados com dados relevantes
+  4. **O que isso significa** — implicações práticas ou científicas
+  5. **Síntese final** — um parágrafo curto de fechamento"""
 
     return [
         {"role": "system", "content": sys_prompt},
@@ -848,7 +849,7 @@ def gradio_ui():
           btn_academico        = gr.Button("Resumo Acadêmico", variant="secondary")
         with gr.Row():
           btn_clinico          = gr.Button("Resumo Clínico",   variant="secondary")
-          btn_simples          = gr.Button("Resumo Simples",   variant="secondary")
+          btn_resumo           = gr.Button("Resumo",           variant="secondary")
         with gr.Row():
           btn_medicamentos     = gr.Button("💊 Medicamentos / Protocolos", variant="secondary")
           btn_alertas          = gr.Button("⚠️ Alertas e Contraindicações", variant="secondary")
@@ -884,8 +885,8 @@ def gradio_ui():
         fn=lambda aid, mdl, pub, tom, idi, det, foc: summariser_with_label(aid, mdl, build_message_resumo_clinico, "Resumo Clínico", pub or "", tom or "", idi or "", det or "", foc or ""),
         inputs=common_inputs, outputs=output_box, show_progress="full"
     )
-    btn_simples.click(
-        fn=lambda aid, mdl, pub, tom, idi, det, foc: summariser_with_label(aid, mdl, build_message_resumo_simples, "Resumo Simples", pub or "", tom or "", idi or "", det or "", foc or ""),
+    btn_resumo.click(
+        fn=lambda aid, mdl, pub, tom, idi, det, foc: summariser_with_label(aid, mdl, build_message_resumo, "Resumo", pub or "", tom or "", idi or "", det or "", foc or ""),
         inputs=common_inputs, outputs=output_box, show_progress="full"
     )
     btn_medicamentos.click(
