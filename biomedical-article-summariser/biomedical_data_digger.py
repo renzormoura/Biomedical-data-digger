@@ -321,7 +321,331 @@ Para cada medicamento ou intervenção terapêutica identificado no artigo, apre
     ]
 
 
-def generate_response(messages: List[Dict[str, str]], model: str) -> str:
+def build_message_critica_metodologica(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
+    """
+    Constructs the payload for a Methodological Critique.
+    """
+    user_prompt = f"""Você é um epidemiologista clínico sênior e revisor de periódicos de alto impacto. Analise criticamente o artigo a seguir sob a perspectiva metodológica, avaliando a qualidade da evidência produzida.
+
+Título: {article_title}
+Abstract:
+{abstract_text}
+
+**FORMATO OBRIGATÓRIO:** Use exclusivamente títulos em negrito e listas com marcadores (bullet points). Não use tabelas. O texto deve ser legível em telas de celular.
+
+Estruture a análise com os seguintes tópicos:
+
+1. **Desenho do Estudo**
+   - Tipo de estudo (RCT, coorte, caso-controle, transversal, revisão sistemática, etc.)
+   - Nível de evidência segundo a pirâmide de evidências
+   - Adequação do desenho à pergunta de pesquisa
+
+2. **Amostra e População**
+   - Tamanho amostral (N) e se há cálculo de poder estatístico mencionado
+   - Critérios de inclusão e exclusão
+   - Representatividade e generalizabilidade da amostra
+
+3. **Vieses Potenciais**
+   - Viés de seleção (se identificável)
+   - Viés de informação ou aferição
+   - Viés de confundimento e estratégias de controle utilizadas
+   - Viés de publicação (se aplicável)
+
+4. **Validade Interna**
+   - Randomização e cegamento (se aplicável)
+   - Controle de variáveis de confundimento
+   - Perdas de seguimento e análise por intenção de tratar (se aplicável)
+
+5. **Validade Externa**
+   - Aplicabilidade dos resultados a outras populações
+   - Limitações geográficas, étnicas ou contextuais
+
+6. **Qualidade Estatística**
+   - Adequação dos testes estatísticos ao tipo de dado
+   - Presença de intervalos de confiança e tamanho de efeito
+   - Significância estatística vs. relevância clínica
+
+7. **Conclusão Crítica**
+   - Pontos fortes do estudo
+   - Principais limitações que impactam a confiança nos resultados
+   - Grau de confiança recomendado na evidência apresentada (em um parágrafo síntese)
+
+**Restrição absoluta:** Baseie a análise exclusivamente no que está descrito no artigo. Se algum campo não puder ser avaliado pelo abstract, indique "Não avaliável pelo abstract disponível"."""
+
+    return [
+        {"role": "system", "content": sys_prompt},
+        {"role": "user", "content": user_prompt}
+    ]
+
+
+def build_message_estatisticas(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
+    """
+    Constructs the payload for a Statistical Data extraction and explanation.
+    """
+    user_prompt = f"""Você é um bioestatístico clínico com experiência em ensinar medicina baseada em evidências para médicos e residentes. Extraia e explique todos os dados estatísticos presentes no artigo a seguir, traduzindo seu significado clínico de forma acessível.
+
+Título: {article_title}
+Abstract:
+{abstract_text}
+
+**FORMATO OBRIGATÓRIO:** Use exclusivamente títulos em negrito e listas com marcadores (bullet points). Não use tabelas. O texto deve ser legível em telas de celular.
+
+Estruture a resposta com os seguintes tópicos:
+
+1. **Métricas de Efeito Encontradas**
+   Para cada medida estatística identificada no artigo, apresente:
+   - O valor reportado (ex: RR = 0,72; OR = 1,45; HR = 0,88)
+   - O intervalo de confiança (IC 95%) quando disponível
+   - O valor de p quando disponível
+   - O que essa medida representa em linguagem clínica simples
+
+2. **Significância Estatística vs. Relevância Clínica**
+   - O resultado é estatisticamente significativo? (p < 0,05)
+   - O tamanho do efeito é clinicamente relevante?
+   - Há diferença entre significância estatística e importância prática?
+
+3. **NNT / NNH (se aplicável)**
+   - Número necessário para tratar (NNT) — se não reportado, calcule a partir dos dados disponíveis
+   - Número necessário para causar dano (NNH) — se disponível
+   - Interpretação clínica direta (ex: "a cada 10 pacientes tratados, 1 se beneficia")
+
+4. **Medidas de Acurácia Diagnóstica (se aplicável)**
+   - Sensibilidade e Especificidade
+   - Valor Preditivo Positivo (VPP) e Negativo (VPN)
+   - Área sob a curva ROC (AUC) se disponível
+   - Interpretação prática de cada medida
+
+5. **Poder Estatístico e Tamanho Amostral**
+   - N total e por grupo
+   - Cálculo de poder mencionado (beta, poder do estudo)
+   - Risco de erro tipo II (falso negativo) se amostra for pequena
+
+6. **Resumo Estatístico para a Prática**
+   - Síntese em linguagem direta do que os números significam para a decisão clínica (em um parágrafo final)
+
+**Restrição absoluta:** Apresente somente dados explicitamente descritos no artigo. Se um campo não estiver disponível, indique "Não reportado no artigo". Não calcule nem estime valores não presentes no texto, exceto NNT quando houver dados suficientes."""
+
+    return [
+        {"role": "system", "content": sys_prompt},
+        {"role": "user", "content": user_prompt}
+    ]
+
+
+def build_message_pico(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
+    """
+    Constructs the payload for a PICO framework analysis.
+    """
+    user_prompt = f"""Você é um especialista em medicina baseada em evidências (MBE) com ampla experiência em ensinar o framework PICO para médicos e estudantes. Estruture o artigo a seguir no formato PICO de forma precisa e completa.
+
+Título: {article_title}
+Abstract:
+{abstract_text}
+
+**FORMATO OBRIGATÓRIO:** Use exclusivamente títulos em negrito e listas com marcadores (bullet points). Não use tabelas. O texto deve ser legível em telas de celular.
+
+Estruture a resposta com os seguintes tópicos:
+
+1. **P — Paciente / População / Problema**
+   - Quem são os pacientes estudados?
+   - Características demográficas principais (idade, sexo, comorbidades)
+   - Condição clínica ou problema de saúde investigado
+   - Critérios de inclusão e exclusão relevantes (se descritos)
+
+2. **I — Intervenção**
+   - O que foi feito, aplicado ou exposto ao grupo de intervenção?
+   - Dose, duração, frequência ou protocolo (se descritos)
+   - Contexto de aplicação (ambulatorial, hospitalar, PS, etc.)
+
+3. **C — Comparação / Controle**
+   - Qual foi o grupo comparador? (placebo, tratamento padrão, outra dose, sem intervenção)
+   - Características relevantes do grupo controle
+
+4. **O — Outcome / Desfecho**
+   - Desfecho primário: o que foi medido como resultado principal?
+   - Desfechos secundários (se descritos)
+   - Como e quando os desfechos foram medidos?
+   - Resultado encontrado para cada desfecho (com valores se disponíveis)
+
+5. **T — Tipo de Estudo (extensão PICOT)**
+   - Desenho do estudo
+   - Duração do seguimento
+   - Nível de evidência
+
+6. **Pergunta PICO Formatada**
+   - Escreva a pergunta clínica completa no formato: "Em [P], a [I] comparada a [C] resulta em [O]?"
+
+7. **Aplicabilidade Clínica**
+   - O perfil do paciente estudado corresponde aos pacientes que você atende?
+   - A intervenção é disponível e aplicável no seu contexto?
+   - Os desfechos medidos são relevantes para a prática clínica? (em um parágrafo final)
+
+**Restrição absoluta:** Preencha cada elemento PICO exclusivamente com informações do artigo. Se algum componente não estiver explícito, indique "Não descrito no artigo"."""
+
+    return [
+        {"role": "system", "content": sys_prompt},
+        {"role": "user", "content": user_prompt}
+    ]
+
+
+def build_message_alertas(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
+    """
+    Constructs the payload for a Safety Alerts and Contraindications summary.
+    """
+    user_prompt = f"""Você é um médico de urgência e emergência com foco em segurança do paciente. Analise o artigo a seguir e extraia exclusivamente as informações de segurança, alertas e contraindicações, organizadas para consulta rápida à beira do leito.
+
+Título: {article_title}
+Abstract:
+{abstract_text}
+
+**AVISO:** As informações abaixo são extraídas exclusivamente do artigo fornecido. Não substitui bulas, diretrizes institucionais ou julgamento clínico individualizado.
+
+**FORMATO OBRIGATÓRIO:** Use exclusivamente títulos em negrito e listas com marcadores (bullet points). Não use tabelas. Seja direto e objetivo — este material será consultado em situações de urgência.
+
+Estruture a resposta com os seguintes tópicos:
+
+1. **🚫 Contraindicações Absolutas**
+   - Situações em que a intervenção/medicamento NÃO deve ser usado em hipótese alguma (conforme descrito no artigo)
+
+2. **⚠️ Contraindicações Relativas e Populações de Risco**
+   - Grupos que requerem cautela especial ou ajuste de conduta
+   - Ex: gestantes, idosos, insuficiência renal/hepática, crianças, imunossuprimidos
+
+3. **🔴 Efeitos Adversos Graves**
+   - Reações adversas com risco de vida ou que exijam interrupção imediata
+   - Frequência reportada (%) quando disponível
+
+4. **🟡 Efeitos Adversos Relevantes**
+   - Efeitos adversos frequentes ou que impactem adesão/conduta
+   - Frequência reportada (%) quando disponível
+
+5. **💊 Interações Medicamentosas**
+   - Interações descritas no artigo com potencial de dano clínico
+   - Mecanismo da interação (se descrito)
+
+6. **📊 Sinais de Alerta para Monitoramento**
+   - Parâmetros clínicos e laboratoriais que indicam toxicidade ou falha terapêutica
+   - Valores limítrofes de alerta mencionados
+
+7. **🆘 Conduta em Caso de Reação Grave**
+   - O que o artigo descreve como manejo de toxicidade ou reação adversa grave
+   - Antídoto ou tratamento de suporte mencionado
+
+8. **✅ Checklist de Segurança Pré-Uso**
+   - Lista rápida de verificações recomendadas antes de iniciar a intervenção (baseada nos dados do artigo)
+
+**Restrição absoluta:** Inclua apenas informações de segurança explicitamente descritas no artigo. Se um campo não for abordado, indique "Não descrito no artigo". Nunca infira riscos não documentados."""
+
+    return [
+        {"role": "system", "content": sys_prompt},
+        {"role": "user", "content": user_prompt}
+    ]
+
+
+def build_message_checklist(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
+    """
+    Constructs the payload for a Pre-Conduct Checklist for bedside use.
+    """
+    user_prompt = f"""Você é um médico intensivista com vasta experiência em protocolos operacionais de pronto-socorro. Com base no artigo a seguir, elabore um checklist prático pré-conduta para ser usado diretamente à beira do leito antes de aplicar a intervenção descrita.
+
+Título: {article_title}
+Abstract:
+{abstract_text}
+
+**AVISO:** Este checklist é baseado exclusivamente nos dados do artigo fornecido. Não substitui protocolos institucionais ou julgamento clínico individualizado.
+
+**FORMATO OBRIGATÓRIO:** Use exclusivamente títulos em negrito e listas com marcadores (bullet points) em formato de checklist (itens curtos e diretos com "[ ]" antes de cada item). Não use tabelas. Otimizado para leitura rápida em celular.
+
+Estruture o checklist com os seguintes tópicos:
+
+1. **👤 Critérios de Elegibilidade do Paciente**
+   - [ ] Perfil do paciente que se beneficia da intervenção (conforme o artigo)
+   - [ ] Critérios de inclusão que devem estar presentes
+
+2. **🚫 Critérios de Exclusão — Não Aplicar Se:**
+   - [ ] Condições que contraindicam a intervenção (conforme o artigo)
+
+3. **🔬 Exames e Avaliações Pré-Intervenção**
+   - [ ] Exames laboratoriais necessários antes de iniciar
+   - [ ] Avaliações clínicas recomendadas (PA, FC, função renal, etc.)
+
+4. **💊 Preparo da Intervenção / Medicamento**
+   - [ ] Dose correta para o perfil do paciente
+   - [ ] Diluição e preparo (se aplicável)
+   - [ ] Via e velocidade de administração
+
+5. **🩺 Monitoramento Durante a Intervenção**
+   - [ ] Parâmetros a monitorar e frequência
+   - [ ] Sinais de alerta que indicam interrupção imediata
+
+6. **📋 Documentação e Seguimento**
+   - [ ] O que deve ser registrado em prontuário
+   - [ ] Quando reavaliar o paciente após a intervenção
+   - [ ] Exames de controle pós-intervenção (se descritos)
+
+7. **🆘 Plano de Contingência**
+   - [ ] O que fazer se ocorrer reação adversa grave
+   - [ ] Antídoto ou suporte disponível (se descrito no artigo)
+
+**Restrição absoluta:** Preencha os itens do checklist exclusivamente com informações do artigo. Se um campo não puder ser preenchido, indique "[ ] Verificar protocolo institucional — não descrito no artigo"."""
+
+    return [
+        {"role": "system", "content": sys_prompt},
+        {"role": "user", "content": user_prompt}
+    ]
+
+
+def build_message_aplicabilidade_br(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
+    """
+    Constructs the payload for a Brazilian applicability analysis.
+    """
+    user_prompt = f"""Você é um médico brasileiro com experiência em saúde pública, medicina baseada em evidências e no sistema de saúde nacional (SUS e saúde suplementar). Analise o artigo a seguir sob a perspectiva da aplicabilidade ao contexto clínico brasileiro.
+
+Título: {article_title}
+Abstract:
+{abstract_text}
+
+**FORMATO OBRIGATÓRIO:** Use exclusivamente títulos em negrito e listas com marcadores (bullet points). Não use tabelas. O texto deve ser legível em telas de celular.
+
+Estruture a análise com os seguintes tópicos:
+
+1. **🌍 Origem do Estudo e Contexto Original**
+   - País(es) onde o estudo foi conduzido (se mencionado)
+   - Perfil da população estudada e sistema de saúde envolvido
+   - Contexto clínico original (ambulatorial, hospitalar, PS, atenção primária)
+
+2. **👥 Comparação Populacional**
+   - Semelhanças e diferenças entre a população do estudo e a população brasileira
+   - Diferenças étnicas, epidemiológicas ou de comorbidades relevantes (se inferíveis do artigo)
+   - Faixa etária e perfil socioeconômico estudado vs. realidade brasileira
+
+3. **💊 Disponibilidade dos Medicamentos / Intervenções no Brasil**
+   - Os medicamentos ou tecnologias estudados estão disponíveis no Brasil?
+   - Estão na RENAME (Relação Nacional de Medicamentos Essenciais) ou disponíveis pelo SUS?
+   - Há alternativas nacionais equivalentes?
+
+4. **🏥 Aplicabilidade por Nível de Atenção**
+   - A intervenção é viável na Atenção Primária (UBS)?
+   - É aplicável em Pronto-Socorro ou UPA?
+   - Requer estrutura hospitalar especializada (UTI, centro cirúrgico)?
+
+5. **⚖️ Barreiras e Facilitadores para Implementação no Brasil**
+   - Principais barreiras: custo, infraestrutura, treinamento, regulação (ANVISA)
+   - Facilitadores: políticas públicas, protocolos do Ministério da Saúde, disponibilidade
+
+6. **📊 Força da Evidência para o Contexto Brasileiro**
+   - Os resultados são diretamente extrapoláveis para o Brasil?
+   - Quais adaptações seriam necessárias?
+   - Qual o grau de confiança recomendado para aplicar esses resultados na prática brasileira?
+
+7. **🎯 Recomendação Prática para o Médico Brasileiro**
+   - Síntese objetiva sobre se e como aplicar os achados do artigo no contexto clínico brasileiro (em um parágrafo final direto)
+
+**Restrição absoluta:** Base a análise nos dados do artigo. Para a seção de disponibilidade no Brasil e contexto do SUS, é permitido usar conhecimento geral sobre o sistema de saúde brasileiro, mas indique claramente quando uma informação vai além do que está no artigo."""
+
+    return [
+        {"role": "system", "content": sys_prompt},
+        {"role": "user", "content": user_prompt}
+    ]
     """
     Generates a response from the LLM based on the provided messages.
     Uses Groq API when GROQ_API_KEY is set, otherwise falls back to local Ollama.
@@ -425,6 +749,15 @@ def gradio_ui():
           btn_simples          = gr.Button("Resumo Simples",   variant="secondary")
         with gr.Row():
           btn_medicamentos     = gr.Button("💊 Medicamentos / Protocolos", variant="secondary")
+          btn_alertas          = gr.Button("⚠️ Alertas e Contraindicações", variant="secondary")
+        with gr.Row():
+          btn_checklist        = gr.Button("📋 Checklist Pré-Conduta",     variant="secondary")
+          btn_pico             = gr.Button("🩺 Pergunta PICO",              variant="secondary")
+        with gr.Row():
+          btn_estatisticas     = gr.Button("📊 Dados Estatísticos",         variant="secondary")
+          btn_aplicabilidade   = gr.Button("🌍 Aplicabilidade Brasileira",  variant="secondary")
+        with gr.Row():
+          btn_critica          = gr.Button("🔬 Crítica Metodológica",       variant="secondary")
       with gr.Column(scale=1):
         output_box = gr.Markdown(value="*O resumo aparecerá aqui...*")
 
@@ -450,6 +783,36 @@ def gradio_ui():
     )
     btn_medicamentos.click(
         fn=lambda aid, mdl: summariser_with_label(aid, mdl, build_message_medicamentos, "💊 Medicamentos / Protocolos"),
+        inputs=[article_id, model_choice], outputs=output_box,
+        show_progress="full"
+    )
+    btn_alertas.click(
+        fn=lambda aid, mdl: summariser_with_label(aid, mdl, build_message_alertas, "⚠️ Alertas e Contraindicações"),
+        inputs=[article_id, model_choice], outputs=output_box,
+        show_progress="full"
+    )
+    btn_checklist.click(
+        fn=lambda aid, mdl: summariser_with_label(aid, mdl, build_message_checklist, "📋 Checklist Pré-Conduta"),
+        inputs=[article_id, model_choice], outputs=output_box,
+        show_progress="full"
+    )
+    btn_pico.click(
+        fn=lambda aid, mdl: summariser_with_label(aid, mdl, build_message_pico, "🩺 Pergunta PICO"),
+        inputs=[article_id, model_choice], outputs=output_box,
+        show_progress="full"
+    )
+    btn_estatisticas.click(
+        fn=lambda aid, mdl: summariser_with_label(aid, mdl, build_message_estatisticas, "📊 Dados Estatísticos"),
+        inputs=[article_id, model_choice], outputs=output_box,
+        show_progress="full"
+    )
+    btn_aplicabilidade.click(
+        fn=lambda aid, mdl: summariser_with_label(aid, mdl, build_message_aplicabilidade_br, "🌍 Aplicabilidade Brasileira"),
+        inputs=[article_id, model_choice], outputs=output_box,
+        show_progress="full"
+    )
+    btn_critica.click(
+        fn=lambda aid, mdl: summariser_with_label(aid, mdl, build_message_critica_metodologica, "🔬 Crítica Metodológica"),
         inputs=[article_id, model_choice], outputs=output_box,
         show_progress="full"
     )
