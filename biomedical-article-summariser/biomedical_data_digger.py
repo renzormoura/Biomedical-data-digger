@@ -841,21 +841,20 @@ def summariser(article_id: str, model: str, build_fn,
 
     try:
         messages = build_fn(article_title, abstract_text, sys_prompt=dynamic_prompt)
-        header = f"## Título do Artigo: {article_title}\n\n### Resumo:\n"
-        for partial in generate_response_stream(messages, model):
-            yield header + partial
+        summary = generate_response(messages, model)
     except Exception as e:
         raise gr.Error(f"Erro ao gerar resumo com a LLM: {str(e)}")
+
+    return f"## Título do Artigo: {article_title}\n\n### Resumo:\n{summary}"
 
 
 def summariser_with_label(article_id: str, model: str, build_fn, label: str,
                           publico: str = "", tom: str = "", idioma: str = "",
-                          detalhe: str = "", foco: str = "") -> Generator[str, None, None]:
+                          detalhe: str = "", foco: str = "") -> str:
+    result = summariser(article_id, model, build_fn, publico, tom, idioma, detalhe, foco)
     filtros_ativos = [f for f in [publico, tom, idioma, detalhe, foco] if f]
     filtros_str = "  |  ".join(filtros_ativos) if filtros_ativos else "Padrão"
-    header = f"---\n> **{label}**  ·  Filtros: *{filtros_str}*\n\n---\n"
-    for partial in summariser(article_id, model, build_fn, publico, tom, idioma, detalhe, foco):
-        yield header + partial
+    return f"---\n> **{label}**  ·  Filtros: *{filtros_str}*\n\n---\n{result}"
 
 INTRO_TXT = "Sumarizador de artigos biomédicos. Aceita PMCID ou PMID para buscar artigos do Europe PMC."
 INST_TXT = "Digite um **PMCID** (ex: `PMC1234567`) ou **PMID** numérico (ex: `33970586`) e selecione um modelo para gerar um resumo estruturado"
@@ -967,32 +966,28 @@ def gradio_ui():
 
     def make_fn_with_history(build_fn, label):
         def fn(aid, mdl, pub, tom, idi, det, foc, history):
-            last = ""
-            for partial in summariser_with_label(
+            result = summariser_with_label(
                 aid, mdl, build_fn, label,
                 pub or "", tom or "", idi or "", det or "", foc or ""
-            ):
-                last = partial
-                yield partial, history, gr.update()
-            # atualiza histórico após completar
+            )
             new_history, new_display = update_history(aid, history)
-            yield last, new_history, new_display
+            return result, new_history, new_display
         return fn
 
     all_inputs = common_inputs + [session_history]
     all_outputs = [output_box, session_history, history_display]
 
-    btn_sumario.click(fn=make_fn_with_history(build_message_sumario, "Sumário"), inputs=all_inputs, outputs=all_outputs)
-    btn_academico.click(fn=make_fn_with_history(build_message_resumo_academico, "Resumo Acadêmico"), inputs=all_inputs, outputs=all_outputs)
-    btn_clinico.click(fn=make_fn_with_history(build_message_resumo_clinico, "Resumo Clínico"), inputs=all_inputs, outputs=all_outputs)
-    btn_resumo.click(fn=make_fn_with_history(build_message_resumo, "Resumo"), inputs=all_inputs, outputs=all_outputs)
-    btn_medicamentos.click(fn=make_fn_with_history(build_message_medicamentos, "Medicamentos / Protocolos"), inputs=all_inputs, outputs=all_outputs)
-    btn_alertas.click(fn=make_fn_with_history(build_message_alertas, "Alertas e Contraindicações"), inputs=all_inputs, outputs=all_outputs)
-    btn_checklist.click(fn=make_fn_with_history(build_message_checklist, "Checklist Pré-Conduta"), inputs=all_inputs, outputs=all_outputs)
-    btn_pico.click(fn=make_fn_with_history(build_message_pico, "Pergunta PICO"), inputs=all_inputs, outputs=all_outputs)
-    btn_estatisticas.click(fn=make_fn_with_history(build_message_estatisticas, "Dados Estatísticos"), inputs=all_inputs, outputs=all_outputs)
-    btn_aplicabilidade.click(fn=make_fn_with_history(build_message_aplicabilidade_br, "Aplicabilidade Brasileira"), inputs=all_inputs, outputs=all_outputs)
-    btn_critica.click(fn=make_fn_with_history(build_message_critica_metodologica, "Crítica Metodológica"), inputs=all_inputs, outputs=all_outputs)
+    btn_sumario.click(fn=make_fn_with_history(build_message_sumario, "Sumário"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_academico.click(fn=make_fn_with_history(build_message_resumo_academico, "Resumo Acadêmico"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_clinico.click(fn=make_fn_with_history(build_message_resumo_clinico, "Resumo Clínico"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_resumo.click(fn=make_fn_with_history(build_message_resumo, "Resumo"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_medicamentos.click(fn=make_fn_with_history(build_message_medicamentos, "Medicamentos / Protocolos"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_alertas.click(fn=make_fn_with_history(build_message_alertas, "Alertas e Contraindicações"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_checklist.click(fn=make_fn_with_history(build_message_checklist, "Checklist Pré-Conduta"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_pico.click(fn=make_fn_with_history(build_message_pico, "Pergunta PICO"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_estatisticas.click(fn=make_fn_with_history(build_message_estatisticas, "Dados Estatísticos"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_aplicabilidade.click(fn=make_fn_with_history(build_message_aplicabilidade_br, "Aplicabilidade Brasileira"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_critica.click(fn=make_fn_with_history(build_message_critica_metodologica, "Crítica Metodológica"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
 
   return demo
 
