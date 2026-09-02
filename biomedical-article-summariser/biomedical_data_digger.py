@@ -646,21 +646,69 @@ Estruture a análise com os seguintes tópicos:
         {"role": "system", "content": sys_prompt},
         {"role": "user", "content": user_prompt}
     ]
+
+
+def build_dynamic_sys_prompt(
+    publico: str,
+    tom: str,
+    idioma: str,
+    detalhe: str,
+    foco: str,
+) -> str:
     """
-    Generates a response from the LLM based on the provided messages.
-    Uses Groq API when GROQ_API_KEY is set, otherwise falls back to local Ollama.
+    Builds a dynamic system prompt by appending user-selected filters
+    to the base SYS_PROMPT. Empty/default values are ignored.
     """
-    if USE_GROQ:
-        groq_model = GROQ_MODEL_MAP.get(model, "openai/gpt-oss-20b")
-        response = groq_client.chat.completions.create(
-            model=groq_model,
-            messages=messages,
-        )
-        return response.choices[0].message.content
-    else:
-        ollama.pull(model)
-        response = ollama.chat(model=model, messages=messages)
-        return response["message"]["content"]
+    prompt = SYS_PROMPT.strip()
+    extras = []
+
+    PUBLICO_MAP = {
+        "Médico / Especialista":  "Dirija a resposta a um médico ou especialista clínico com pleno domínio da linguagem técnica médica.",
+        "Residente / Interno":    "Dirija a resposta a um médico residente ou interno: use linguagem técnica, mas explique brevemente conceitos avançados quando necessário.",
+        "Estudante de Medicina":  "Dirija a resposta a um estudante de medicina: use linguagem didática, explique termos técnicos e contextualize os achados.",
+        "Paciente / Leigo":       "Dirija a resposta a um paciente ou leigo: use linguagem simples, evite jargões e explique tudo de forma acessível.",
+        "Enfermagem / Farmácia":  "Dirija a resposta a profissionais de enfermagem ou farmácia: foque em aspectos práticos de administração, monitoramento e segurança.",
+    }
+    TOM_MAP = {
+        "Formal e Técnico":   "Use um tom formal, científico e altamente técnico.",
+        "Direto e Objetivo":  "Use um tom direto e objetivo, sem rodeios. Priorize clareza e brevidade.",
+        "Didático":           "Use um tom didático e explicativo, como se estivesse ensinando o conteúdo a alguém.",
+    }
+    IDIOMA_MAP = {
+        "Português (BR)": "Responda inteiramente em português brasileiro.",
+        "English":        "Respond entirely in English.",
+        "Español":        "Responde completamente en español.",
+    }
+    DETALHE_MAP = {
+        "Resumido":        "Seja conciso: priorize os pontos mais importantes e evite detalhes excessivos.",
+        "Completo":        "Seja completo: cubra todos os pontos relevantes com nível de detalhe adequado.",
+        "Ultra-detalhado": "Seja extremamente detalhado: explore cada ponto em profundidade, incluindo nuances e informações secundárias.",
+    }
+    FOCO_MAP = {
+        "Farmacologia":  "Dê ênfase especial a informações farmacológicas: doses, mecanismos, interações e efeitos adversos.",
+        "Estatística":   "Dê ênfase especial aos dados estatísticos: métricas de efeito, intervalos de confiança, NNT e significância clínica.",
+        "Segurança":     "Dê ênfase especial à segurança do paciente: contraindicações, alertas, efeitos adversos e monitoramento.",
+        "Metodologia":   "Dê ênfase especial à qualidade metodológica: desenho do estudo, vieses e nível de evidência.",
+        "Clínico/Prático": "Dê ênfase especial à aplicabilidade clínica direta: o que muda na conduta, como e quando aplicar.",
+    }
+
+    if publico and publico in PUBLICO_MAP:
+        extras.append(PUBLICO_MAP[publico])
+    if tom and tom in TOM_MAP:
+        extras.append(TOM_MAP[tom])
+    if idioma and idioma in IDIOMA_MAP:
+        extras.append(IDIOMA_MAP[idioma])
+    if detalhe and detalhe in DETALHE_MAP:
+        extras.append(DETALHE_MAP[detalhe])
+    if foco and foco in FOCO_MAP:
+        extras.append(FOCO_MAP[foco])
+
+    if extras:
+        prompt += "\n\n**Instruções de Personalização (aplicar sobre o prompt acima):**\n"
+        for item in extras:
+            prompt += f"- {item}\n"
+
+    return prompt
 
 
 def generate_response(messages: List[Dict[str, str]], model: str) -> str:
@@ -706,7 +754,9 @@ def get_abstract_from_pmid(pmid: str) -> Tuple[str, str]:
     return title, abstract
 
 
-def summariser(article_id: str, model: str, build_fn) -> str:
+def summariser(article_id: str, model: str, build_fn,
+               publico: str = "", tom: str = "", idioma: str = "",
+               detalhe: str = "", foco: str = "") -> str:
     # Validação do ID
     if not article_id or not article_id.strip():
         raise gr.Error("Por favor, digite um PMCID ou PMID antes de gerar o resumo.")
@@ -734,9 +784,12 @@ def summariser(article_id: str, model: str, build_fn) -> str:
     if not abstract_text:
         raise gr.Error(f"Nenhum abstract encontrado para: {article_title}")
 
+    # Monta o sys_prompt dinâmico com os filtros selecionados
+    dynamic_prompt = build_dynamic_sys_prompt(publico, tom, idioma, detalhe, foco)
+
     # Geração do resumo
     try:
-        messages = build_fn(article_title, abstract_text)
+        messages = build_fn(article_title, abstract_text, sys_prompt=dynamic_prompt)
         summary = generate_response(messages, model)
     except Exception as e:
         raise gr.Error(f"Erro ao gerar resumo com a LLM: {str(e)}")
@@ -744,9 +797,13 @@ def summariser(article_id: str, model: str, build_fn) -> str:
     return f"## 📝 Título do Artigo: {article_title}\n\n### 📌 Resumo:\n{summary}"
 
 
-def summariser_with_label(article_id: str, model: str, build_fn, label: str) -> str:
-    result = summariser(article_id, model, build_fn)
-    return f"---\n> 🔖 Tipo de resumo gerado: **{label}**\n\n---\n{result}"
+def summariser_with_label(article_id: str, model: str, build_fn, label: str,
+                          publico: str = "", tom: str = "", idioma: str = "",
+                          detalhe: str = "", foco: str = "") -> str:
+    result = summariser(article_id, model, build_fn, publico, tom, idioma, detalhe, foco)
+    filtros_ativos = [f for f in [publico, tom, idioma, detalhe, foco] if f]
+    filtros_str = "  |  ".join(filtros_ativos) if filtros_ativos else "Padrão"
+    return f"---\n> 🔖 **{label}**  &nbsp;·&nbsp;  🎛️ Filtros: *{filtros_str}*\n\n---\n{result}"
 
 INTRO_TXT = "Este é um sumarizador simples de artigos biomédicos. Ele aceita PMCID ou PMID para buscar artigos do Europe PMC (EPMC). Atualmente utiliza apenas o abstract do artigo. Melhorias futuras incluirão integração com o texto completo."
 INST_TXT = "Digite um **PMCID** (ex: `PMC1234567`) ou **PMID** numérico (ex: `33970586`) e selecione um modelo para gerar um resumo estruturado"
@@ -759,6 +816,33 @@ def gradio_ui():
       with gr.Column(scale=1):
         article_id = gr.Textbox(label="Digite o PMCID ou PMID do artigo", placeholder="ex: PMC1234567 ou 12345678")
         model_choice = gr.Dropdown(choices=["llama3.2", "deepseek-r1", "gemma3", "mistral", "gpt-oss"], value="llama3.2", label="Select a model")
+
+        # ── Painel de personalização ──────────────────────────────────────
+        with gr.Accordion("🎛️ Personalização (opcional)", open=False):
+          gr.Markdown("Selecione os filtros desejados. Sem seleção, o comportamento é o padrão de cada botão.")
+          filtro_publico = gr.Radio(
+              choices=["Médico / Especialista", "Residente / Interno", "Estudante de Medicina", "Paciente / Leigo", "Enfermagem / Farmácia"],
+              value=None, label="👤 Público-alvo", interactive=True
+          )
+          filtro_tom = gr.Radio(
+              choices=["Formal e Técnico", "Direto e Objetivo", "Didático"],
+              value=None, label="🗣️ Tom da resposta", interactive=True
+          )
+          filtro_idioma = gr.Radio(
+              choices=["Português (BR)", "English", "Español"],
+              value=None, label="🌐 Idioma", interactive=True
+          )
+          filtro_detalhe = gr.Radio(
+              choices=["Resumido", "Completo", "Ultra-detalhado"],
+              value=None, label="📏 Nível de detalhe", interactive=True
+          )
+          filtro_foco = gr.Radio(
+              choices=["Farmacologia", "Estatística", "Segurança", "Metodologia", "Clínico/Prático"],
+              value=None, label="🔍 Foco temático", interactive=True
+          )
+          btn_limpar_filtros = gr.Button("🗑️ Limpar filtros", size="sm")
+        # ─────────────────────────────────────────────────────────────────
+
         with gr.Row():
           btn_sumario          = gr.Button("Súmario",          variant="primary")
           btn_academico        = gr.Button("Resumo Acadêmico", variant="secondary")
@@ -776,63 +860,61 @@ def gradio_ui():
           btn_aplicabilidade   = gr.Button("🌍 Aplicabilidade Brasileira",  variant="secondary")
         with gr.Row():
           btn_critica          = gr.Button("🔬 Crítica Metodológica",       variant="secondary")
+
       with gr.Column(scale=1):
         output_box = gr.Markdown(value="*O resumo aparecerá aqui...*")
 
+    # inputs comuns a todos os botões
+    common_inputs = [article_id, model_choice, filtro_publico, filtro_tom, filtro_idioma, filtro_detalhe, filtro_foco]
+
+    btn_limpar_filtros.click(
+        fn=lambda: (None, None, None, None, None),
+        inputs=[], outputs=[filtro_publico, filtro_tom, filtro_idioma, filtro_detalhe, filtro_foco]
+    )
+
     btn_sumario.click(
-        fn=lambda aid, mdl: summariser_with_label(aid, mdl, build_message_sumario, "Súmario"),
-        inputs=[article_id, model_choice], outputs=output_box,
-        show_progress="full"
+        fn=lambda aid, mdl, pub, tom, idi, det, foc: summariser_with_label(aid, mdl, build_message_sumario, "Súmario", pub or "", tom or "", idi or "", det or "", foc or ""),
+        inputs=common_inputs, outputs=output_box, show_progress="full"
     )
     btn_academico.click(
-        fn=lambda aid, mdl: summariser_with_label(aid, mdl, build_message_resumo_academico, "Resumo Acadêmico"),
-        inputs=[article_id, model_choice], outputs=output_box,
-        show_progress="full"
+        fn=lambda aid, mdl, pub, tom, idi, det, foc: summariser_with_label(aid, mdl, build_message_resumo_academico, "Resumo Acadêmico", pub or "", tom or "", idi or "", det or "", foc or ""),
+        inputs=common_inputs, outputs=output_box, show_progress="full"
     )
     btn_clinico.click(
-        fn=lambda aid, mdl: summariser_with_label(aid, mdl, build_message_resumo_clinico, "Resumo Clínico"),
-        inputs=[article_id, model_choice], outputs=output_box,
-        show_progress="full"
+        fn=lambda aid, mdl, pub, tom, idi, det, foc: summariser_with_label(aid, mdl, build_message_resumo_clinico, "Resumo Clínico", pub or "", tom or "", idi or "", det or "", foc or ""),
+        inputs=common_inputs, outputs=output_box, show_progress="full"
     )
     btn_simples.click(
-        fn=lambda aid, mdl: summariser_with_label(aid, mdl, build_message_resumo_simples, "Resumo Simples"),
-        inputs=[article_id, model_choice], outputs=output_box,
-        show_progress="full"
+        fn=lambda aid, mdl, pub, tom, idi, det, foc: summariser_with_label(aid, mdl, build_message_resumo_simples, "Resumo Simples", pub or "", tom or "", idi or "", det or "", foc or ""),
+        inputs=common_inputs, outputs=output_box, show_progress="full"
     )
     btn_medicamentos.click(
-        fn=lambda aid, mdl: summariser_with_label(aid, mdl, build_message_medicamentos, "💊 Medicamentos / Protocolos"),
-        inputs=[article_id, model_choice], outputs=output_box,
-        show_progress="full"
+        fn=lambda aid, mdl, pub, tom, idi, det, foc: summariser_with_label(aid, mdl, build_message_medicamentos, "💊 Medicamentos / Protocolos", pub or "", tom or "", idi or "", det or "", foc or ""),
+        inputs=common_inputs, outputs=output_box, show_progress="full"
     )
     btn_alertas.click(
-        fn=lambda aid, mdl: summariser_with_label(aid, mdl, build_message_alertas, "⚠️ Alertas e Contraindicações"),
-        inputs=[article_id, model_choice], outputs=output_box,
-        show_progress="full"
+        fn=lambda aid, mdl, pub, tom, idi, det, foc: summariser_with_label(aid, mdl, build_message_alertas, "⚠️ Alertas e Contraindicações", pub or "", tom or "", idi or "", det or "", foc or ""),
+        inputs=common_inputs, outputs=output_box, show_progress="full"
     )
     btn_checklist.click(
-        fn=lambda aid, mdl: summariser_with_label(aid, mdl, build_message_checklist, "📋 Checklist Pré-Conduta"),
-        inputs=[article_id, model_choice], outputs=output_box,
-        show_progress="full"
+        fn=lambda aid, mdl, pub, tom, idi, det, foc: summariser_with_label(aid, mdl, build_message_checklist, "📋 Checklist Pré-Conduta", pub or "", tom or "", idi or "", det or "", foc or ""),
+        inputs=common_inputs, outputs=output_box, show_progress="full"
     )
     btn_pico.click(
-        fn=lambda aid, mdl: summariser_with_label(aid, mdl, build_message_pico, "🩺 Pergunta PICO"),
-        inputs=[article_id, model_choice], outputs=output_box,
-        show_progress="full"
+        fn=lambda aid, mdl, pub, tom, idi, det, foc: summariser_with_label(aid, mdl, build_message_pico, "🩺 Pergunta PICO", pub or "", tom or "", idi or "", det or "", foc or ""),
+        inputs=common_inputs, outputs=output_box, show_progress="full"
     )
     btn_estatisticas.click(
-        fn=lambda aid, mdl: summariser_with_label(aid, mdl, build_message_estatisticas, "📊 Dados Estatísticos"),
-        inputs=[article_id, model_choice], outputs=output_box,
-        show_progress="full"
+        fn=lambda aid, mdl, pub, tom, idi, det, foc: summariser_with_label(aid, mdl, build_message_estatisticas, "📊 Dados Estatísticos", pub or "", tom or "", idi or "", det or "", foc or ""),
+        inputs=common_inputs, outputs=output_box, show_progress="full"
     )
     btn_aplicabilidade.click(
-        fn=lambda aid, mdl: summariser_with_label(aid, mdl, build_message_aplicabilidade_br, "🌍 Aplicabilidade Brasileira"),
-        inputs=[article_id, model_choice], outputs=output_box,
-        show_progress="full"
+        fn=lambda aid, mdl, pub, tom, idi, det, foc: summariser_with_label(aid, mdl, build_message_aplicabilidade_br, "🌍 Aplicabilidade Brasileira", pub or "", tom or "", idi or "", det or "", foc or ""),
+        inputs=common_inputs, outputs=output_box, show_progress="full"
     )
     btn_critica.click(
-        fn=lambda aid, mdl: summariser_with_label(aid, mdl, build_message_critica_metodologica, "🔬 Crítica Metodológica"),
-        inputs=[article_id, model_choice], outputs=output_box,
-        show_progress="full"
+        fn=lambda aid, mdl, pub, tom, idi, det, foc: summariser_with_label(aid, mdl, build_message_critica_metodologica, "🔬 Crítica Metodológica", pub or "", tom or "", idi or "", det or "", foc or ""),
+        inputs=common_inputs, outputs=output_box, show_progress="full"
     )
 
   return demo
