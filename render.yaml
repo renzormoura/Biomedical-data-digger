@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: biomedical-data-digger
+    runtime: python
+    rootDir: biomedical-article-summariser
+    buildCommand: pip install -r requirements.txt
+    startCommand: python biomedical_data_digger.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: GROQ_API_KEY
+        sync: false
