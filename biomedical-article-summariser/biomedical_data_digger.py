@@ -148,7 +148,7 @@ def make_page_geral():
         </div>
         <button class="theme-toggle" id="theme-toggle-btn-geral"
           onclick="(function(){
-            const c=document.querySelector('.gradio-container');
+            const c=this.closest('.gradio-container');
             c.classList.toggle('light-theme');
             this.textContent=c.classList.contains('light-theme')?'🌙 Escuro':'☀️ Claro';
           }).call(this)">☀️ Claro</button>
@@ -294,6 +294,7 @@ def make_page_geral():
 def make_page_medicina():
     """Cria a página Medicina como um gr.Blocks independente."""
     with gr.Blocks(
+    elem_id="medical-page",
         theme=gr.themes.Base(
             primary_hue=gr.themes.colors.blue,
             neutral_hue=gr.themes.colors.slate,
@@ -310,7 +311,7 @@ def make_page_medicina():
         </div>
         <button class="theme-toggle" id="theme-toggle-btn-med"
           onclick="(function(){
-            const c=document.querySelector('.gradio-container');
+            const c=this.closest('.gradio-container');
             c.classList.toggle('light-theme');
             this.textContent=c.classList.contains('light-theme')?'🌙 Escuro':'☀️ Claro';
           }).call(this)">☀️ Claro</button>

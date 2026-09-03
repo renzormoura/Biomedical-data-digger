@@ -325,7 +325,7 @@ button.primary:hover, .gr-button-primary:hover {
 
 
 /* === MEDICAL_OVERRIDES === */
-:root {
+#medical-page {
     --accent:        #0ea5e9;
     --accent-hover:  #0284c7;
     --accent-glow:   rgba(14,165,233,0.20);
@@ -334,7 +334,7 @@ button.primary:hover, .gr-button-primary:hover {
     --border-hover:  rgba(14,165,233,0.50);
     --shadow-glow:   0 0 20px rgba(14,165,233,0.14);
 }
-.light-theme {
+#medical-page.light-theme {
     --accent:        #0284c7;
     --accent-hover:  #0369a1;
     --accent-glow:   rgba(2,132,199,0.14);
