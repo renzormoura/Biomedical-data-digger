@@ -1,4 +1,4 @@
-import re
+﻿import re
 import os
 import threading
 from functools import lru_cache
@@ -1631,6 +1631,27 @@ function() {
 }
 """
 
+# CSS da página Medicina — azul hospitalar/clínico
+MEDICAL_CSS = CUSTOM_CSS + """
+:root {
+    --accent:        #0ea5e9;
+    --accent-hover:  #0284c7;
+    --accent-glow:   rgba(14,165,233,0.20);
+    --accent-dim:    rgba(14,165,233,0.10);
+    --border:        rgba(14,165,233,0.20);
+    --border-hover:  rgba(14,165,233,0.50);
+    --shadow-glow:   0 0 20px rgba(14,165,233,0.14);
+}
+.light-theme {
+    --accent:        #0284c7;
+    --accent-hover:  #0369a1;
+    --accent-glow:   rgba(2,132,199,0.14);
+    --accent-dim:    rgba(2,132,199,0.08);
+    --border:        rgba(2,132,199,0.20);
+    --border-hover:  rgba(2,132,199,0.45);
+}
+"""
+
 
 def build_message_implicacoes_praticas(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
     """Universal: what this research changes in the real world."""
@@ -1887,7 +1908,7 @@ def make_page_medicina():
             font=[gr.themes.GoogleFont("Inter"), "system-ui", "sans-serif"],
             font_mono=[gr.themes.GoogleFont("JetBrains Mono"), "monospace"],
         ),
-        css=CUSTOM_CSS,
+        css=MEDICAL_CSS,
     ) as page:
 
         gr.HTML("""
