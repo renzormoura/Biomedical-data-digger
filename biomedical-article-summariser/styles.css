@@ -1,0 +1,344 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ── Variáveis de tema ─────────────────────────────────────────────────── */
+:root {
+    --bg-primary:    #0a0e1a;
+    --bg-secondary:  #111827;
+    --bg-card:       #1a2236;
+    --bg-input:      #151e2e;
+    --accent:        #3b82f6;
+    --accent-hover:  #2563eb;
+    --accent-glow:   rgba(59,130,246,0.18);
+    --accent-dim:    rgba(59,130,246,0.10);
+    --text-primary:  #e2e8f0;
+    --text-muted:    #94a3b8;
+    --text-dim:      #64748b;
+    --border:        rgba(59,130,246,0.18);
+    --border-hover:  rgba(59,130,246,0.45);
+    --radius:        10px;
+    --radius-lg:     14px;
+    --font-main:     'Inter', system-ui, sans-serif;
+    --font-mono:     'JetBrains Mono', monospace;
+    --shadow:        0 4px 24px rgba(0,0,0,0.45);
+    --shadow-glow:   0 0 20px rgba(59,130,246,0.12);
+}
+
+/* Tema claro */
+.light-theme {
+    --bg-primary:    #f0f4ff;
+    --bg-secondary:  #e8edf8;
+    --bg-card:       #ffffff;
+    --bg-input:      #f8faff;
+    --accent:        #2563eb;
+    --accent-hover:  #1d4ed8;
+    --accent-glow:   rgba(37,99,235,0.12);
+    --accent-dim:    rgba(37,99,235,0.07);
+    --text-primary:  #0f172a;
+    --text-muted:    #475569;
+    --text-dim:      #94a3b8;
+    --border:        rgba(37,99,235,0.18);
+    --border-hover:  rgba(37,99,235,0.40);
+    --shadow:        0 4px 24px rgba(0,0,0,0.10);
+    --shadow-glow:   0 0 20px rgba(37,99,235,0.08);
+}
+
+/* ── Base ──────────────────────────────────────────────────────────────── */
+body, .gradio-container {
+    background: var(--bg-primary) !important;
+    font-family: var(--font-main) !important;
+    color: var(--text-primary) !important;
+}
+
+.gradio-container {
+    max-width: 1400px !important;
+    margin: 0 auto !important;
+    padding: 24px !important;
+}
+
+/* ── Header ────────────────────────────────────────────────────────────── */
+.app-header {
+    text-align: center;
+    padding: 32px 0 20px 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 28px;
+}
+
+.app-header h1 {
+    font-family: var(--font-main) !important;
+    font-size: 2rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.5px !important;
+    color: var(--text-primary) !important;
+    margin: 0 0 6px 0 !important;
+}
+
+.app-header .accent { color: var(--accent) !important; }
+
+.app-subtitle {
+    color: var(--text-muted) !important;
+    font-size: 0.9rem !important;
+    font-weight: 400 !important;
+    margin: 0 !important;
+}
+
+/* ── Painel de controles ───────────────────────────────────────────────── */
+.control-panel {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-lg) !important;
+    padding: 20px !important;
+    box-shadow: var(--shadow) !important;
+}
+
+/* ── Input / Textbox ───────────────────────────────────────────────────── */
+input[type="text"], textarea, .gr-text-input, .gr-textbox textarea {
+    background: var(--bg-input) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    color: var(--text-primary) !important;
+    font-family: var(--font-mono) !important;
+    font-size: 0.95rem !important;
+    padding: 12px 16px !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+
+input[type="text"]:focus, textarea:focus {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 3px var(--accent-dim) !important;
+    outline: none !important;
+}
+
+/* ── Labels ────────────────────────────────────────────────────────────── */
+label, .gr-form label, span.svelte-1gfkn6j {
+    font-family: var(--font-main) !important;
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+    color: var(--text-muted) !important;
+}
+
+/* ── Dropdown ──────────────────────────────────────────────────────────── */
+.gr-dropdown select, select {
+    background: var(--bg-input) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    color: var(--text-primary) !important;
+    font-family: var(--font-main) !important;
+    padding: 10px 14px !important;
+}
+
+/* ── Botões secundários ────────────────────────────────────────────────── */
+button.secondary, .gr-button-secondary, button[variant="secondary"] {
+    background: var(--bg-input) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    color: var(--text-primary) !important;
+    font-family: var(--font-main) !important;
+    font-size: 0.82rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.02em !important;
+    padding: 10px 14px !important;
+    transition: all 0.2s !important;
+    cursor: pointer !important;
+}
+
+button.secondary:hover, .gr-button-secondary:hover {
+    background: var(--accent-dim) !important;
+    border-color: var(--accent) !important;
+    color: var(--accent) !important;
+    box-shadow: var(--shadow-glow) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ── Botão primário (Confiabilidade) ───────────────────────────────────── */
+button.primary, .gr-button-primary, button[variant="primary"] {
+    background: var(--accent) !important;
+    border: none !important;
+    border-radius: var(--radius) !important;
+    color: #fff !important;
+    font-family: var(--font-main) !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.04em !important;
+    padding: 12px 18px !important;
+    transition: all 0.2s !important;
+    box-shadow: 0 0 16px var(--accent-glow) !important;
+    cursor: pointer !important;
+}
+
+button.primary:hover, .gr-button-primary:hover {
+    background: var(--accent-hover) !important;
+    box-shadow: 0 0 24px rgba(59,130,246,0.35) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ── Accordion ─────────────────────────────────────────────────────────── */
+.gr-accordion, details {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    margin-bottom: 8px !important;
+    overflow: hidden !important;
+    transition: border-color 0.2s !important;
+}
+
+.gr-accordion:hover, details:hover {
+    border-color: var(--border-hover) !important;
+}
+
+.gr-accordion summary, details summary {
+    font-family: var(--font-main) !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.07em !important;
+    color: var(--text-muted) !important;
+    padding: 14px 18px !important;
+    cursor: pointer !important;
+    transition: color 0.2s !important;
+    user-select: none !important;
+}
+
+.gr-accordion summary:hover, details summary:hover {
+    color: var(--accent) !important;
+}
+
+/* ── Output box ────────────────────────────────────────────────────────── */
+.output-panel {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-lg) !important;
+    padding: 24px !important;
+    min-height: 400px !important;
+    box-shadow: var(--shadow) !important;
+    font-family: var(--font-main) !important;
+    font-size: 0.95rem !important;
+    line-height: 1.75 !important;
+    color: var(--text-primary) !important;
+}
+
+.output-panel h2 {
+    font-size: 1.15rem !important;
+    font-weight: 700 !important;
+    color: var(--accent) !important;
+    border-bottom: 1px solid var(--border) !important;
+    padding-bottom: 10px !important;
+    margin-bottom: 16px !important;
+}
+
+.output-panel h3 {
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    color: var(--text-muted) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    margin-bottom: 12px !important;
+}
+
+.output-panel ul, .output-panel ol {
+    padding-left: 20px !important;
+}
+
+.output-panel li {
+    margin-bottom: 6px !important;
+    color: var(--text-primary) !important;
+}
+
+.output-panel strong {
+    color: var(--text-primary) !important;
+    font-weight: 600 !important;
+}
+
+.output-panel blockquote, .output-panel > blockquote {
+    border-left: 3px solid var(--accent) !important;
+    background: var(--accent-dim) !important;
+    padding: 10px 16px !important;
+    border-radius: 0 var(--radius) var(--radius) 0 !important;
+    margin: 12px 0 !important;
+    color: var(--text-muted) !important;
+    font-size: 0.85rem !important;
+}
+
+/* ── Radio buttons ─────────────────────────────────────────────────────── */
+.gr-radio input[type="radio"] + label,
+.gr-form .gr-radio span {
+    font-family: var(--font-main) !important;
+    font-size: 0.85rem !important;
+    color: var(--text-muted) !important;
+}
+
+/* ── Dataframe / Tabela ────────────────────────────────────────────────── */
+.gr-dataframe table, table {
+    background: var(--bg-input) !important;
+    border-radius: var(--radius) !important;
+    font-family: var(--font-mono) !important;
+    font-size: 0.8rem !important;
+}
+
+.gr-dataframe th {
+    background: var(--bg-card) !important;
+    color: var(--text-muted) !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    padding: 10px 14px !important;
+}
+
+.gr-dataframe td {
+    color: var(--text-primary) !important;
+    padding: 8px 14px !important;
+    border-color: var(--border) !important;
+}
+
+/* ── Toggle de tema ────────────────────────────────────────────────────── */
+.theme-toggle {
+    position: fixed !important;
+    top: 16px !important;
+    right: 16px !important;
+    z-index: 9999 !important;
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 20px !important;
+    padding: 6px 14px !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    color: var(--text-muted) !important;
+    transition: all 0.2s !important;
+    letter-spacing: 0.04em !important;
+}
+
+.theme-toggle:hover {
+    border-color: var(--accent) !important;
+    color: var(--accent) !important;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* ── Progress bar ──────────────────────────────────────────────────────── */
+.progress-bar { background: var(--accent) !important; height: 2px !important; }
+
+
+/* === MEDICAL_OVERRIDES === */
+:root {
+    --accent:        #0ea5e9;
+    --accent-hover:  #0284c7;
+    --accent-glow:   rgba(14,165,233,0.20);
+    --accent-dim:    rgba(14,165,233,0.10);
+    --border:        rgba(14,165,233,0.20);
+    --border-hover:  rgba(14,165,233,0.50);
+    --shadow-glow:   0 0 20px rgba(14,165,233,0.14);
+}
+.light-theme {
+    --accent:        #0284c7;
+    --accent-hover:  #0369a1;
+    --accent-glow:   rgba(2,132,199,0.14);
+    --accent-dim:    rgba(2,132,199,0.08);
+    --border:        rgba(2,132,199,0.20);
+    --border-hover:  rgba(2,132,199,0.45);
+}
