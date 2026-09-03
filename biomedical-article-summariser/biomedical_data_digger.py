@@ -1711,243 +1711,326 @@ Estruture em:
     return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
 
 
-def gradio_ui():
-  with gr.Blocks(
-      theme=gr.themes.Base(
-          primary_hue=gr.themes.colors.blue,
-          neutral_hue=gr.themes.colors.slate,
-          font=[gr.themes.GoogleFont("Inter"), "system-ui", "sans-serif"],
-          font_mono=[gr.themes.GoogleFont("JetBrains Mono"), "monospace"],
-      ),
-      css=CUSTOM_CSS,
-      title="Biomedical Data Digger",
-  ) as demo:
 
-    gr.HTML("""
-    <div class="app-header">
-      <h1><span class="accent">Biomedical</span> Data Digger</h1>
-      <p class="app-subtitle">Análise inteligente de artigos científicos · Europe PMC · arXiv · DOI · Groq AI</p>
-    </div>
-    <button class="theme-toggle" id="theme-toggle-btn"
-      onclick="(function(){
-        const c=document.querySelector('.gradio-container');
-        c.classList.toggle('light-theme');
-        this.textContent=c.classList.contains('light-theme')?'🌙 Escuro':'☀️ Claro';
-      }).call(this)">☀️ Claro</button>
-    """)
+# ===========================================================================
+# PÁGINAS INDEPENDENTES
+# ===========================================================================
 
-    session_history = gr.State([])
+def make_page_geral():
+    """Cria a página Geral como um gr.Blocks independente."""
+    with gr.Blocks(
+        theme=gr.themes.Base(
+            primary_hue=gr.themes.colors.blue,
+            neutral_hue=gr.themes.colors.slate,
+            font=[gr.themes.GoogleFont("Inter"), "system-ui", "sans-serif"],
+            font_mono=[gr.themes.GoogleFont("JetBrains Mono"), "monospace"],
+        ),
+        css=CUSTOM_CSS,
+    ) as page:
 
-    with gr.Row(equal_height=False):
+        gr.HTML("""
+        <div class="app-header">
+          <h1><span class="accent">Biomedical</span> Data Digger</h1>
+          <p class="app-subtitle">Análise científica universal · Europe PMC · arXiv · DOI · OpenAlex</p>
+        </div>
+        <button class="theme-toggle" id="theme-toggle-btn-geral"
+          onclick="(function(){
+            const c=document.querySelector('.gradio-container');
+            c.classList.toggle('light-theme');
+            this.textContent=c.classList.contains('light-theme')?'🌙 Escuro':'☀️ Claro';
+          }).call(this)">☀️ Claro</button>
+        """)
 
-      with gr.Column(scale=1, min_width=320):
+        session_history = gr.State([])
 
-        with gr.Group():
-          article_id = gr.Textbox(
-              label="ID ou URL do artigo",
-              placeholder="ex: 33984217 · PMC8234567 · 10.1038/nature · arxiv.org/abs/2301.00001",
-              show_label=True,
-          )
-          model_choice = gr.Dropdown(
-              choices=["GPT-OSS 20B (Groq)", "GPT-OSS 120B (Groq)", "Qwen 3.6 27B (Groq)", "Qwen 3.8 27B (Groq)", "Llama (local)"],
-              value="GPT-OSS 20B (Groq)",
-              label="Modelo de linguagem",
-          )
+        with gr.Row(equal_height=False):
+          with gr.Column(scale=1, min_width=320):
 
-        with gr.Accordion("Como encontrar o ID ou URL do artigo?", open=False):
-          gr.Markdown("""
+            with gr.Group():
+              article_id = gr.Textbox(
+                  label="ID ou URL do artigo",
+                  placeholder="ex: 33984217 · PMC8234567 · 10.1038/nature · arxiv.org/abs/2301.00001",
+              )
+              model_choice = gr.Dropdown(
+                  choices=["GPT-OSS 20B (Groq)", "GPT-OSS 120B (Groq)", "Qwen 3.6 27B (Groq)", "Qwen 3.8 27B (Groq)", "Llama (local)"],
+                  value="GPT-OSS 20B (Groq)",
+                  label="Modelo de linguagem",
+              )
+
+            with gr.Accordion("Como encontrar o ID ou URL?", open=False):
+              gr.Markdown("""
 **Cole qualquer um destes formatos — o sistema detecta automaticamente:**
 
----
+**PubMed (PMID):** `33984217` ou `https://pubmed.ncbi.nlm.nih.gov/33984217/`
 
-**PubMed (PMID)**
-Acesse [pubmed.ncbi.nlm.nih.gov](https://pubmed.ncbi.nlm.nih.gov), pesquise o artigo e copie o número da URL ou cole a URL inteira.
-`33984217` ou `https://pubmed.ncbi.nlm.nih.gov/33984217/`
+**PubMed Central (PMCID):** `PMC8234567` ou `https://pmc.ncbi.nlm.nih.gov/articles/PMC8234567/`
 
----
+**DOI (qualquer área):** `10.1038/s41586-021-03819-2` ou `https://doi.org/10.1038/s41586-021-03819-2`
 
-**PubMed Central (PMCID)**
-Acesse [pmc.ncbi.nlm.nih.gov](https://pmc.ncbi.nlm.nih.gov), abra o artigo e copie o ID da URL.
-`PMC8234567` ou `https://pmc.ncbi.nlm.nih.gov/articles/PMC8234567/`
+**arXiv:** `2301.00001` ou `https://arxiv.org/abs/2301.00001`
 
----
+**OpenAlex:** `W2741809807` ou `https://openalex.org/W2741809807`
 
-**DOI (qualquer área)**
-O DOI aparece na página do artigo ou no próprio PDF. Funciona para artigos de qualquer revista.
-`10.1038/s41586-021-03819-2` ou `https://doi.org/10.1038/s41586-021-03819-2`
+💡 **Dica:** Copie a URL da barra do navegador e cole aqui diretamente.
+              """)
 
----
+            with gr.Accordion("Histórico da sessão", open=False):
+              history_display = gr.Dataframe(
+                  headers=["ID", "Título"], datatype=["str", "str"],
+                  interactive=False, label=None, wrap=True,
+              )
 
-**arXiv (física, matemática, computação, biologia)**
-Acesse [arxiv.org](https://arxiv.org), pesquise o artigo e copie o ID ou a URL.
-`2301.00001` ou `https://arxiv.org/abs/2301.00001`
-
----
-
-**OpenAlex**
-Acesse [openalex.org](https://openalex.org), pesquise e copie o ID da URL (começa com W).
-`W2741809807` ou `https://openalex.org/W2741809807`
-
----
-
-💡 **Dica:** Se estiver lendo no celular, basta copiar a URL da barra do navegador e colar aqui.
-          """)
-
-        with gr.Accordion("Histórico da sessão", open=False):
-          history_display = gr.Dataframe(
-              headers=["ID", "Título"],
-              datatype=["str", "str"],
-              interactive=False,
-              label=None,
-              wrap=True,
-          )
-
-        with gr.Accordion("Personalização (opcional)", open=False):
-          gr.Markdown("<small>Filtros opcionais — sem seleção, cada botão usa seu padrão.</small>")
-          filtro_publico  = gr.Radio(choices=["Médico / Especialista", "Residente / Interno", "Estudante", "Pesquisador", "Leigo / Paciente"], value=None, label="Público-alvo")
-          filtro_tom      = gr.Radio(choices=["Formal e Técnico", "Direto e Objetivo", "Didático"], value=None, label="Tom")
-          filtro_idioma   = gr.Radio(choices=["Português (BR)", "English", "Español"], value=None, label="Idioma")
-          filtro_detalhe  = gr.Radio(choices=["Resumido", "Completo", "Ultra-detalhado"], value=None, label="Detalhe")
-          filtro_foco     = gr.Radio(choices=["Farmacologia", "Estatística", "Segurança", "Metodologia", "Clínico/Prático"], value=None, label="Foco")
-          btn_limpar_filtros = gr.Button("↺  Limpar filtros", size="sm", variant="secondary")
-
-        # ── TABS: separação Geral / Medicina ─────────────────────────────
-        with gr.Tabs():
-
-          # ── ABA GERAL ──────────────────────────────────────────────────
-          with gr.TabItem("☰  Geral"):
+            with gr.Accordion("Personalização (opcional)", open=False):
+              gr.Markdown("<small>Filtros opcionais — sem seleção, cada botão usa seu padrão.</small>")
+              filtro_publico = gr.Radio(choices=["Médico / Especialista", "Residente / Interno", "Estudante", "Pesquisador", "Leigo / Paciente"], value=None, label="Público-alvo")
+              filtro_tom     = gr.Radio(choices=["Formal e Técnico", "Direto e Objetivo", "Didático"], value=None, label="Tom")
+              filtro_idioma  = gr.Radio(choices=["Português (BR)", "English", "Español"], value=None, label="Idioma")
+              filtro_detalhe = gr.Radio(choices=["Resumido", "Completo", "Ultra-detalhado"], value=None, label="Detalhe")
+              filtro_foco    = gr.Radio(choices=["Farmacologia", "Estatística", "Segurança", "Metodologia", "Clínico/Prático"], value=None, label="Foco")
+              btn_limpar     = gr.Button("↺  Limpar filtros", size="sm", variant="secondary")
 
             with gr.Accordion("Visão Geral", open=True):
               with gr.Row():
-                btn_sumario          = gr.Button("Sumário",            variant="secondary")
-                btn_resumo           = gr.Button("Resumo",             variant="secondary")
+                btn_sumario      = gr.Button("Sumário",            variant="secondary")
+                btn_resumo       = gr.Button("Resumo",             variant="secondary")
               with gr.Row():
-                btn_pontos_chave     = gr.Button("Pontos-Chave",       variant="secondary")
-                btn_resumo_intro     = gr.Button("Resumo Introdutório",variant="secondary")
+                btn_pontos_chave = gr.Button("Pontos-Chave",       variant="secondary")
+                btn_resumo_intro = gr.Button("Resumo Introdutório",variant="secondary")
 
             with gr.Accordion("Análise Científica", open=False):
               with gr.Row():
-                btn_academico        = gr.Button("Resumo Acadêmico",     variant="secondary")
-                btn_critica          = gr.Button("Crítica Metodológica", variant="secondary")
+                btn_academico  = gr.Button("Resumo Acadêmico",     variant="secondary")
+                btn_critica    = gr.Button("Crítica Metodológica", variant="secondary")
               with gr.Row():
-                btn_estatisticas     = gr.Button("Dados Estatísticos",   variant="secondary")
-                btn_pico             = gr.Button("PICO",                 variant="secondary")
+                btn_estatist   = gr.Button("Dados Estatísticos",   variant="secondary")
+                btn_pico       = gr.Button("PICO",                 variant="secondary")
               with gr.Row():
-                btn_lacunas          = gr.Button("Lacunas de Pesquisa",  variant="secondary")
-                btn_comparacao       = gr.Button("Comparação Literatura",variant="secondary")
+                btn_lacunas    = gr.Button("Lacunas de Pesquisa",  variant="secondary")
+                btn_comparacao = gr.Button("Comparação Literatura",variant="secondary")
               with gr.Row():
-                btn_implicacoes      = gr.Button("Implicações Práticas", variant="secondary")
+                btn_implicacoes = gr.Button("Implicações Práticas", variant="secondary")
               with gr.Row():
-                btn_confiabilidade   = gr.Button("Confiabilidade do Artigo", variant="primary")
+                btn_confiab    = gr.Button("Confiabilidade do Artigo", variant="primary")
 
             with gr.Accordion("Educacional", open=False):
               with gr.Row():
-                btn_leigo            = gr.Button("Para Leigo / Paciente",variant="secondary")
-                btn_estudante        = gr.Button("Para Estudante",       variant="secondary")
+                btn_leigo    = gr.Button("Para Leigo / Paciente",  variant="secondary")
+                btn_estudante = gr.Button("Para Estudante",        variant="secondary")
               with gr.Row():
-                btn_questoes         = gr.Button("Questões para Discussão",variant="secondary")
-                btn_glossario        = gr.Button("Glossário de Termos",  variant="secondary")
+                btn_questoes  = gr.Button("Questões para Discussão",variant="secondary")
+                btn_glossario = gr.Button("Glossário de Termos",   variant="secondary")
 
             with gr.Accordion("Contexto Brasileiro", open=False):
               with gr.Row():
-                btn_impacto_brasil   = gr.Button("Impacto no Brasil",    variant="secondary")
-                btn_aplicabilidade   = gr.Button("Aplicabilidade BR",    variant="secondary")
+                btn_impacto_br = gr.Button("Impacto no Brasil",    variant="secondary")
+                btn_aplicab    = gr.Button("Aplicabilidade BR",    variant="secondary")
 
-          # ── ABA MEDICINA ───────────────────────────────────────────────
-          with gr.TabItem("⚕  Medicina"):
+          with gr.Column(scale=2, min_width=480):
+            output_box = gr.Markdown(
+                value="*Selecione um tipo de análise e clique em um botão para começar.*",
+                elem_classes=["output-panel"],
+            )
+
+        def update_history(aid_val, history):
+            aid = aid_val.strip() if aid_val else ""
+            if not aid: return history, gr.update()
+            cached = get_cached_article(aid)
+            if cached and not any(r[0] == aid for r in history):
+                title = cached[0][:60] + "..." if len(cached[0]) > 60 else cached[0]
+                history = [[aid, title]] + history
+                history = history[:10]
+            rows = history if history else [["—", "Nenhum artigo consultado ainda"]]
+            return history, gr.update(value=rows)
+
+        btn_limpar.click(fn=lambda: (None,None,None,None,None), inputs=[],
+                         outputs=[filtro_publico, filtro_tom, filtro_idioma, filtro_detalhe, filtro_foco])
+
+        ci = [article_id, model_choice, filtro_publico, filtro_tom, filtro_idioma, filtro_detalhe, filtro_foco]
+        ai = ci + [session_history]
+        ao = [output_box, session_history, history_display]
+
+        def mfh(build_fn, label):
+            def fn(aid, mdl, pub, tom, idi, det, foc, hist):
+                result = summariser_with_label(aid, mdl, build_fn, label, pub or "", tom or "", idi or "", det or "", foc or "")
+                nh, nd = update_history(aid, hist)
+                return result, nh, nd
+            return fn
+
+        btn_sumario.click(fn=mfh(build_message_sumario,"Sumário"), inputs=ai, outputs=ao, show_progress="full")
+        btn_resumo.click(fn=mfh(build_message_resumo,"Resumo"), inputs=ai, outputs=ao, show_progress="full")
+        btn_pontos_chave.click(fn=mfh(build_message_pontos_chave,"Pontos-Chave"), inputs=ai, outputs=ao, show_progress="full")
+        btn_resumo_intro.click(fn=mfh(build_message_resumo_introdutorio,"Resumo Introdutório"), inputs=ai, outputs=ao, show_progress="full")
+        btn_academico.click(fn=mfh(build_message_resumo_academico,"Resumo Acadêmico"), inputs=ai, outputs=ao, show_progress="full")
+        btn_critica.click(fn=mfh(build_message_critica_metodologica,"Crítica Metodológica"), inputs=ai, outputs=ao, show_progress="full")
+        btn_estatist.click(fn=mfh(build_message_estatisticas,"Dados Estatísticos"), inputs=ai, outputs=ao, show_progress="full")
+        btn_pico.click(fn=mfh(build_message_pico,"Pergunta PICO"), inputs=ai, outputs=ao, show_progress="full")
+        btn_lacunas.click(fn=mfh(build_message_lacunas_pesquisa,"Lacunas de Pesquisa"), inputs=ai, outputs=ao, show_progress="full")
+        btn_comparacao.click(fn=mfh(build_message_comparacao_literatura,"Comparação com Literatura"), inputs=ai, outputs=ao, show_progress="full")
+        btn_implicacoes.click(fn=mfh(build_message_implicacoes_praticas,"Implicações Práticas"), inputs=ai, outputs=ao, show_progress="full")
+        btn_confiab.click(fn=mfh(build_message_confiabilidade,"Confiabilidade do Artigo"), inputs=ai, outputs=ao, show_progress="full")
+        btn_leigo.click(fn=mfh(build_message_resumo_paciente,"Para Leigo / Paciente"), inputs=ai, outputs=ao, show_progress="full")
+        btn_estudante.click(fn=mfh(build_message_resumo_estudante,"Para Estudante"), inputs=ai, outputs=ao, show_progress="full")
+        btn_questoes.click(fn=mfh(build_message_questoes_discussao,"Questões para Discussão"), inputs=ai, outputs=ao, show_progress="full")
+        btn_glossario.click(fn=mfh(build_message_glossario,"Glossário de Termos"), inputs=ai, outputs=ao, show_progress="full")
+        btn_impacto_br.click(fn=mfh(build_message_impacto_brasil,"Impacto no Brasil"), inputs=ai, outputs=ao, show_progress="full")
+        btn_aplicab.click(fn=mfh(build_message_aplicabilidade_br,"Aplicabilidade Brasileira"), inputs=ai, outputs=ao, show_progress="full")
+
+    return page
+
+
+def make_page_medicina():
+    """Cria a página Medicina como um gr.Blocks independente."""
+    with gr.Blocks(
+        theme=gr.themes.Base(
+            primary_hue=gr.themes.colors.blue,
+            neutral_hue=gr.themes.colors.slate,
+            font=[gr.themes.GoogleFont("Inter"), "system-ui", "sans-serif"],
+            font_mono=[gr.themes.GoogleFont("JetBrains Mono"), "monospace"],
+        ),
+        css=CUSTOM_CSS,
+    ) as page:
+
+        gr.HTML("""
+        <div class="app-header">
+          <h1><span class="accent">Biomedical</span> Data Digger <span style="font-size:1rem;color:#94a3b8;font-weight:400">— Medicina</span></h1>
+          <p class="app-subtitle">Pronto-Socorro · Farmacologia · Segurança do Paciente · Contexto Brasileiro</p>
+        </div>
+        <button class="theme-toggle" id="theme-toggle-btn-med"
+          onclick="(function(){
+            const c=document.querySelector('.gradio-container');
+            c.classList.toggle('light-theme');
+            this.textContent=c.classList.contains('light-theme')?'🌙 Escuro':'☀️ Claro';
+          }).call(this)">☀️ Claro</button>
+        """)
+
+        session_history = gr.State([])
+
+        with gr.Row(equal_height=False):
+          with gr.Column(scale=1, min_width=320):
+
+            with gr.Group():
+              article_id = gr.Textbox(
+                  label="ID ou URL do artigo",
+                  placeholder="ex: 33984217 · PMC8234567 · 10.1038/nature12373",
+              )
+              model_choice = gr.Dropdown(
+                  choices=["GPT-OSS 20B (Groq)", "GPT-OSS 120B (Groq)", "Qwen 3.6 27B (Groq)", "Qwen 3.8 27B (Groq)", "Llama (local)"],
+                  value="GPT-OSS 20B (Groq)",
+                  label="Modelo de linguagem",
+              )
+
+            with gr.Accordion("Como encontrar o ID ou URL?", open=False):
+              gr.Markdown("""
+**Cole qualquer um destes formatos — o sistema detecta automaticamente:**
+
+**PubMed (PMID):** `33984217` ou `https://pubmed.ncbi.nlm.nih.gov/33984217/`
+
+**PubMed Central (PMCID):** `PMC8234567` ou `https://pmc.ncbi.nlm.nih.gov/articles/PMC8234567/`
+
+**DOI:** `10.1038/s41586-021-03819-2` ou `https://doi.org/10.1038/s41586-021-03819-2`
+
+💡 **Dica:** Copie a URL da barra do navegador e cole aqui diretamente.
+              """)
+
+            with gr.Accordion("Histórico da sessão", open=False):
+              history_display = gr.Dataframe(
+                  headers=["ID", "Título"], datatype=["str", "str"],
+                  interactive=False, label=None, wrap=True,
+              )
+
+            with gr.Accordion("Personalização (opcional)", open=False):
+              gr.Markdown("<small>Filtros opcionais — sem seleção, cada botão usa seu padrão.</small>")
+              filtro_publico = gr.Radio(choices=["Médico / Especialista", "Residente / Interno", "Estudante de Medicina", "Enfermagem / Farmácia"], value=None, label="Público-alvo")
+              filtro_tom     = gr.Radio(choices=["Formal e Técnico", "Direto e Objetivo", "Didático"], value=None, label="Tom")
+              filtro_idioma  = gr.Radio(choices=["Português (BR)", "English", "Español"], value=None, label="Idioma")
+              filtro_detalhe = gr.Radio(choices=["Resumido", "Completo", "Ultra-detalhado"], value=None, label="Detalhe")
+              filtro_foco    = gr.Radio(choices=["Farmacologia", "Estatística", "Segurança", "Metodologia", "Clínico/Prático"], value=None, label="Foco")
+              btn_limpar     = gr.Button("↺  Limpar filtros", size="sm", variant="secondary")
 
             with gr.Accordion("Resumos Clínicos", open=True):
               with gr.Row():
-                btn_clinico          = gr.Button("Resumo Clínico",       variant="secondary")
-                btn_resumo_med       = gr.Button("Resumo Médico",        variant="secondary")
+                btn_clinico    = gr.Button("Resumo Clínico",        variant="secondary")
+                btn_resumo_med = gr.Button("Resumo Médico",         variant="secondary")
 
             with gr.Accordion("Farmacologia e Protocolos", open=False):
               with gr.Row():
-                btn_medicamentos     = gr.Button("Medicamentos / Protocolos", variant="secondary")
-                btn_pop_especiais    = gr.Button("Populações Especiais",      variant="secondary")
+                btn_medicamentos  = gr.Button("Medicamentos / Protocolos", variant="secondary")
+                btn_pop_especiais = gr.Button("Populações Especiais",      variant="secondary")
               with gr.Row():
-                btn_conduta_urgencia = gr.Button("Conduta em Urgência",       variant="secondary")
+                btn_conduta = gr.Button("Conduta em Urgência", variant="secondary")
 
             with gr.Accordion("Segurança do Paciente", open=False):
               with gr.Row():
-                btn_alertas          = gr.Button("Alertas e Contraindicações",variant="secondary")
-                btn_checklist        = gr.Button("Checklist Pré-Conduta",     variant="secondary")
+                btn_alertas   = gr.Button("Alertas e Contraindicações", variant="secondary")
+                btn_checklist = gr.Button("Checklist Pré-Conduta",      variant="secondary")
+              with gr.Row():
+                btn_confiab   = gr.Button("Confiabilidade do Artigo",   variant="primary")
 
             with gr.Accordion("Contexto BR — Saúde", open=False):
               with gr.Row():
-                btn_sus              = gr.Button("Disponib. SUS",        variant="secondary")
-                btn_anvisa           = gr.Button("Vigilância Sanitária", variant="secondary")
+                btn_sus    = gr.Button("Disponib. SUS",        variant="secondary")
+                btn_anvisa = gr.Button("Vigilância Sanitária", variant="secondary")
+              with gr.Row():
+                btn_aplicab = gr.Button("Aplicabilidade BR", variant="secondary")
 
-      with gr.Column(scale=2, min_width=480):
-        output_box = gr.Markdown(
-            value="*Selecione uma aba e clique em um botão para começar.*",
-            elem_classes=["output-panel"],
-        )
+          with gr.Column(scale=2, min_width=480):
+            output_box = gr.Markdown(
+                value="*Selecione um tipo de análise e clique em um botão para começar.*",
+                elem_classes=["output-panel"],
+            )
 
-    # ── Lógica ──────────────────────────────────────────────────────────
-    def update_history(article_id_val, history):
-        aid = article_id_val.strip() if article_id_val else ""
-        if not aid:
-            return history, gr.update()
-        cached = get_cached_article(aid)
-        if cached and not any(row[0] == aid for row in history):
-            title = cached[0][:60] + "..." if len(cached[0]) > 60 else cached[0]
-            history = [[aid, title]] + history
-            history = history[:10]
-        rows = history if history else [["—", "Nenhum artigo consultado ainda"]]
-        return history, gr.update(value=rows)
+        def update_history(aid_val, history):
+            aid = aid_val.strip() if aid_val else ""
+            if not aid: return history, gr.update()
+            cached = get_cached_article(aid)
+            if cached and not any(r[0] == aid for r in history):
+                title = cached[0][:60] + "..." if len(cached[0]) > 60 else cached[0]
+                history = [[aid, title]] + history
+                history = history[:10]
+            rows = history if history else [["—", "Nenhum artigo consultado ainda"]]
+            return history, gr.update(value=rows)
 
-    btn_limpar_filtros.click(
-        fn=lambda: (None, None, None, None, None),
-        inputs=[], outputs=[filtro_publico, filtro_tom, filtro_idioma, filtro_detalhe, filtro_foco]
+        btn_limpar.click(fn=lambda: (None,None,None,None,None), inputs=[],
+                         outputs=[filtro_publico, filtro_tom, filtro_idioma, filtro_detalhe, filtro_foco])
+
+        ci = [article_id, model_choice, filtro_publico, filtro_tom, filtro_idioma, filtro_detalhe, filtro_foco]
+        ai = ci + [session_history]
+        ao = [output_box, session_history, history_display]
+
+        def mfh(build_fn, label):
+            def fn(aid, mdl, pub, tom, idi, det, foc, hist):
+                result = summariser_with_label(aid, mdl, build_fn, label, pub or "", tom or "", idi or "", det or "", foc or "")
+                nh, nd = update_history(aid, hist)
+                return result, nh, nd
+            return fn
+
+        btn_clinico.click(fn=mfh(build_message_resumo_clinico,"Resumo Clínico"), inputs=ai, outputs=ao, show_progress="full")
+        btn_resumo_med.click(fn=mfh(build_message_resumo_academico,"Resumo Médico"), inputs=ai, outputs=ao, show_progress="full")
+        btn_medicamentos.click(fn=mfh(build_message_medicamentos,"Medicamentos / Protocolos"), inputs=ai, outputs=ao, show_progress="full")
+        btn_pop_especiais.click(fn=mfh(build_message_populacoes_especiais,"Populações Especiais"), inputs=ai, outputs=ao, show_progress="full")
+        btn_conduta.click(fn=mfh(build_message_conduta_urgencia,"Conduta em Urgência"), inputs=ai, outputs=ao, show_progress="full")
+        btn_alertas.click(fn=mfh(build_message_alertas,"Alertas e Contraindicações"), inputs=ai, outputs=ao, show_progress="full")
+        btn_checklist.click(fn=mfh(build_message_checklist,"Checklist Pré-Conduta"), inputs=ai, outputs=ao, show_progress="full")
+        btn_confiab.click(fn=mfh(build_message_confiabilidade,"Confiabilidade do Artigo"), inputs=ai, outputs=ao, show_progress="full")
+        btn_sus.click(fn=mfh(build_message_disponibilidade_sus,"Disponibilidade no SUS"), inputs=ai, outputs=ao, show_progress="full")
+        btn_anvisa.click(fn=mfh(build_message_vigilancia_sanitaria,"Vigilância Sanitária"), inputs=ai, outputs=ao, show_progress="full")
+        btn_aplicab.click(fn=mfh(build_message_aplicabilidade_br,"Aplicabilidade Brasileira"), inputs=ai, outputs=ao, show_progress="full")
+
+    return page
+
+
+def gradio_ui():
+    page_geral = make_page_geral()
+    page_medicina = make_page_medicina()
+    app = gr.TabbedInterface(
+        [page_geral, page_medicina],
+        tab_names=["☰  Geral", "⚕  Medicina"],
+        title="Biomedical Data Digger",
     )
-
-    common_inputs = [article_id, model_choice, filtro_publico, filtro_tom, filtro_idioma, filtro_detalhe, filtro_foco]
-    all_inputs    = common_inputs + [session_history]
-    all_outputs   = [output_box, session_history, history_display]
-
-    def make_fn_with_history(build_fn, label):
-        def fn(aid, mdl, pub, tom, idi, det, foc, history):
-            result = summariser_with_label(aid, mdl, build_fn, label, pub or "", tom or "", idi or "", det or "", foc or "")
-            new_history, new_display = update_history(aid, history)
-            return result, new_history, new_display
-        return fn
-
-    # Aba Geral
-    btn_sumario.click(fn=make_fn_with_history(build_message_sumario, "Sumário"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_resumo.click(fn=make_fn_with_history(build_message_resumo, "Resumo"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_pontos_chave.click(fn=make_fn_with_history(build_message_pontos_chave, "Pontos-Chave"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_resumo_intro.click(fn=make_fn_with_history(build_message_resumo_introdutorio, "Resumo Introdutório"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_academico.click(fn=make_fn_with_history(build_message_resumo_academico, "Resumo Acadêmico"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_critica.click(fn=make_fn_with_history(build_message_critica_metodologica, "Crítica Metodológica"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_estatisticas.click(fn=make_fn_with_history(build_message_estatisticas, "Dados Estatísticos"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_pico.click(fn=make_fn_with_history(build_message_pico, "Pergunta PICO"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_lacunas.click(fn=make_fn_with_history(build_message_lacunas_pesquisa, "Lacunas de Pesquisa"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_comparacao.click(fn=make_fn_with_history(build_message_comparacao_literatura, "Comparação com Literatura"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_implicacoes.click(fn=make_fn_with_history(build_message_implicacoes_praticas, "Implicações Práticas"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_confiabilidade.click(fn=make_fn_with_history(build_message_confiabilidade, "Confiabilidade do Artigo"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_leigo.click(fn=make_fn_with_history(build_message_resumo_paciente, "Para Leigo / Paciente"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_estudante.click(fn=make_fn_with_history(build_message_resumo_estudante, "Para Estudante"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_questoes.click(fn=make_fn_with_history(build_message_questoes_discussao, "Questões para Discussão"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_glossario.click(fn=make_fn_with_history(build_message_glossario, "Glossário de Termos"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_impacto_brasil.click(fn=make_fn_with_history(build_message_impacto_brasil, "Impacto no Brasil"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_aplicabilidade.click(fn=make_fn_with_history(build_message_aplicabilidade_br, "Aplicabilidade Brasileira"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-
-    # Aba Medicina
-    btn_clinico.click(fn=make_fn_with_history(build_message_resumo_clinico, "Resumo Clínico"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_resumo_med.click(fn=make_fn_with_history(build_message_resumo_academico, "Resumo Médico"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_medicamentos.click(fn=make_fn_with_history(build_message_medicamentos, "Medicamentos / Protocolos"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_pop_especiais.click(fn=make_fn_with_history(build_message_populacoes_especiais, "Populações Especiais"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_conduta_urgencia.click(fn=make_fn_with_history(build_message_conduta_urgencia, "Conduta em Urgência"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_alertas.click(fn=make_fn_with_history(build_message_alertas, "Alertas e Contraindicações"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_checklist.click(fn=make_fn_with_history(build_message_checklist, "Checklist Pré-Conduta"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_sus.click(fn=make_fn_with_history(build_message_disponibilidade_sus, "Disponibilidade no SUS"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_anvisa.click(fn=make_fn_with_history(build_message_vigilancia_sanitaria, "Vigilância Sanitária"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-
-  return demo
+    return app
 
 
 if __name__ == "__main__":
-  app = gradio_ui()
-  port = int(os.environ.get("PORT", 7860))
-  app.launch(server_name="0.0.0.0", server_port=port)
+    app = gradio_ui()
+    port = int(os.environ.get("PORT", 7860))
+    app.launch(server_name="0.0.0.0", server_port=port)
