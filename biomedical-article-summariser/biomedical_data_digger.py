@@ -171,7 +171,58 @@ def fetch_article_abstract(soup: bs) -> Tuple[str, str]:
 
 
 
-from typing import List, Dict
+def fetch_full_text(soup: bs) -> Tuple[str, str]:
+    """
+    Extracts the full text from the XML soup, combining all main sections.
+    Falls back to abstract-only if no body sections are found.
+
+    Returns:
+        Tuple(article_title (str), full_text (str))
+    """
+    if soup is None:
+        return "No XML found", ""
+
+    article_title = soup.find("article-title").get_text(strip=True) if soup.find("article-title") else "No Title Found"
+
+    # Seções principais do artigo
+    SECTION_LABELS = {
+        "intro":        "Introdução",
+        "methods":      "Métodos",
+        "results":      "Resultados",
+        "discussion":   "Discussão",
+        "conclusions":  "Conclusão",
+        "abstract":     "Abstract",
+    }
+
+    sections = []
+
+    # Tenta extrair pelo atributo sec-type
+    for sec in soup.find_all("sec"):
+        sec_type = (sec.get("sec-type") or "").lower()
+        label = None
+        for key, name in SECTION_LABELS.items():
+            if key in sec_type:
+                label = name
+                break
+        if label is None:
+            title_tag = sec.find("title")
+            if title_tag:
+                label = title_tag.get_text(strip=True)
+            else:
+                continue
+        paragraphs = [clean_text(p.get_text(strip=True)) for p in sec.find_all("p") if p.get_text(strip=True)]
+        if paragraphs:
+            sections.append(f"**{label}:**\n" + " ".join(paragraphs))
+
+    # Se não encontrou seções, usa o abstract como fallback
+    if not sections:
+        abstract_tag = soup.find("abstract")
+        if abstract_tag:
+            abstract_text = ' '.join([clean_text(p.get_text(strip=True)) for p in abstract_tag.find_all("p") if p.get_text(strip=True)])
+            return article_title, abstract_text
+        return article_title, ""
+
+    return article_title, "\n\n".join(sections)
 
 def build_message_resumo_academico(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
     """
@@ -805,7 +856,8 @@ def get_abstract_from_pmid(pmid: str) -> Tuple[str, str]:
 
 def summariser(article_id: str, model: str, build_fn,
                publico: str = "", tom: str = "", idioma: str = "",
-               detalhe: str = "", foco: str = "") -> Generator[str, None, None]:
+               detalhe: str = "", foco: str = "",
+               modo: str = "Rápido") -> str:
     # Validação do ID
     if not article_id or not article_id.strip():
         raise gr.Error("Por favor, digite um PMCID ou PMID antes de gerar o resumo.")
@@ -818,29 +870,47 @@ def summariser(article_id: str, model: str, build_fn,
     if not USE_GROQ:
         raise gr.Error("Nenhum backend de LLM disponível. Configure a variável GROQ_API_KEY.")
 
-    # Busca do artigo — usa cache se disponível
-    cached = get_cached_article(article_id)
+    # Chave de cache inclui o modo para não misturar abstract com texto completo
+    cache_key = f"{article_id}_{modo}"
+    cached = get_cached_article(cache_key)
     if cached:
-        article_title, abstract_text = cached
+        article_title, content_text = cached
+        fonte = "cache"
     else:
         try:
-            if re.match(r"^\d+$", article_id):
-                article_title, abstract_text = get_abstract_from_pmid(article_id)
+            usar_completo = (modo == "Completo") and re.match(r"^PMC\d+$", article_id)
+
+            if usar_completo:
+                # Tenta buscar texto completo via fullTextXML
+                url = f"https://www.ebi.ac.uk/europepmc/webservices/rest/{article_id}/fullTextXML"
+                soup = get_xml_from_url(url)
+                article_title, content_text = fetch_full_text(soup)
+                # Se texto completo vazio, cai para abstract
+                if not content_text:
+                    article_title, content_text = fetch_article_abstract(soup)
+                    fonte = "abstract (fallback)"
+                else:
+                    fonte = "texto completo"
+            elif re.match(r"^\d+$", article_id):
+                article_title, content_text = get_abstract_from_pmid(article_id)
+                fonte = "abstract"
             else:
                 url = f"https://www.ebi.ac.uk/europepmc/webservices/rest/{article_id}/fullTextXML"
                 soup = get_xml_from_url(url)
-                article_title, abstract_text = fetch_article_abstract(soup)
-            set_cached_article(article_id, article_title, abstract_text)
+                article_title, content_text = fetch_article_abstract(soup)
+                fonte = "abstract"
+
+            set_cached_article(cache_key, article_title, content_text)
         except Exception as e:
             raise gr.Error(f"Erro ao buscar artigo: {str(e)}")
 
-    if not abstract_text:
-        raise gr.Error(f"Nenhum abstract encontrado para: {article_title}")
+    if not content_text:
+        raise gr.Error(f"Nenhum conteúdo encontrado para: {article_title}")
 
     dynamic_prompt = build_dynamic_sys_prompt(publico, tom, idioma, detalhe, foco)
 
     try:
-        messages = build_fn(article_title, abstract_text, sys_prompt=dynamic_prompt)
+        messages = build_fn(article_title, content_text, sys_prompt=dynamic_prompt)
         summary = generate_response(messages, model)
     except Exception as e:
         raise gr.Error(f"Erro ao gerar resumo com a LLM: {str(e)}")
@@ -850,11 +920,13 @@ def summariser(article_id: str, model: str, build_fn,
 
 def summariser_with_label(article_id: str, model: str, build_fn, label: str,
                           publico: str = "", tom: str = "", idioma: str = "",
-                          detalhe: str = "", foco: str = "") -> str:
-    result = summariser(article_id, model, build_fn, publico, tom, idioma, detalhe, foco)
+                          detalhe: str = "", foco: str = "",
+                          modo: str = "Rápido") -> str:
+    result = summariser(article_id, model, build_fn, publico, tom, idioma, detalhe, foco, modo)
     filtros_ativos = [f for f in [publico, tom, idioma, detalhe, foco] if f]
     filtros_str = "  |  ".join(filtros_ativos) if filtros_ativos else "Padrão"
-    return f"---\n> **{label}**  ·  Filtros: *{filtros_str}*\n\n---\n{result}"
+    modo_badge = "Texto Completo" if modo == "Completo" else "Abstract"
+    return f"---\n> **{label}**  ·  Filtros: *{filtros_str}*  ·  Fonte: *{modo_badge}*\n\n---\n{result}"
 
 INTRO_TXT = "Sumarizador de artigos biomédicos. Aceita PMCID ou PMID para buscar artigos do Europe PMC."
 INST_TXT = "Digite um **PMCID** (ex: `PMC1234567`) ou **PMID** numérico (ex: `33970586`) e selecione um modelo para gerar um resumo estruturado"
@@ -870,6 +942,13 @@ def gradio_ui():
     with gr.Row():
       with gr.Column(scale=1):
         article_id = gr.Textbox(label="PMCID ou PMID do artigo", placeholder="ex: PMC1234567 ou 12345678")
+        modo_analise = gr.Radio(
+            choices=["Rápido", "Completo"],
+            value="Rápido",
+            label="Modo de análise",
+            info="Rápido = abstract (sempre disponível)  |  Completo = texto integral (apenas PMCIDs Open Access)",
+            interactive=True,
+        )
         model_choice = gr.Dropdown(
             choices=["GPT-OSS 120B (Groq)", "GPT-OSS 20B (Groq)", "Qwen 3.6 27B (Groq)", "Qwen 3.8 27B (Groq)", "Llama (local)"],
             value="GPT-OSS 120B (Groq)",
@@ -954,7 +1033,7 @@ def gradio_ui():
         inputs=[], outputs=[filtro_publico, filtro_tom, filtro_idioma, filtro_detalhe, filtro_foco]
     )
 
-    common_inputs = [article_id, model_choice, filtro_publico, filtro_tom, filtro_idioma, filtro_detalhe, filtro_foco]
+    common_inputs = [article_id, model_choice, filtro_publico, filtro_tom, filtro_idioma, filtro_detalhe, filtro_foco, modo_analise]
 
     def make_fn(build_fn, label):
         def fn(aid, mdl, pub, tom, idi, det, foc):
@@ -965,10 +1044,11 @@ def gradio_ui():
         return fn
 
     def make_fn_with_history(build_fn, label):
-        def fn(aid, mdl, pub, tom, idi, det, foc, history):
+        def fn(aid, mdl, pub, tom, idi, det, foc, modo, history):
             result = summariser_with_label(
                 aid, mdl, build_fn, label,
-                pub or "", tom or "", idi or "", det or "", foc or ""
+                pub or "", tom or "", idi or "", det or "", foc or "",
+                modo or "Rápido"
             )
             new_history, new_display = update_history(aid, history)
             return result, new_history, new_display
