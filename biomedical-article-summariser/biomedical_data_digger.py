@@ -218,29 +218,22 @@ def fetch_full_text(soup: bs) -> Tuple[str, str]:
 
 
 def build_message_resumo_academico(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
-    """
-    Constructs the payload for an Academic/Scientific Summary (Research & Methodology focus).
-    """
-    user_prompt = f"""Você é um pesquisador sênior e revisor de periódicos médicos. Analise o artigo a seguir e forneça um resumo técnico de alto nível, voltado para acadêmicos, cientistas e estudantes de pós-graduação.
+    user_prompt = f"""Você é um pesquisador sênior com experiência em revisão de periódicos científicos nas áreas da saúde e ciências da vida. Analise o artigo a seguir e forneça um resumo técnico de alto nível para acadêmicos, pesquisadores e estudantes de pós-graduação.
 
 Título: {article_title}
 Abstract:
 {abstract_text}
 
-Instruções de Estrutura:
-- Use linguagem científica avançada, rigorosa e precisa.
-- Apresente métricas estatísticas e quantitativas sempre que disponíveis no texto (ex: p-value, IC 95%, HR, N).
-- Estruture a resposta com os tópicos:
-  1. Desenho do Estudo e Amostra (N)
-  2. Racional Científico & Hipótese
-  3. Metodologia e Principais Achados
-  4. Análise Crítica: Limitações do Estudo e Lacunas de Conhecimento
-  5. Conclusão Acadêmica (em um parágrafo síntese ao final)"""
+Estruture a resposta com os tópicos:
+1. Desenho do Estudo e Amostra (N)
+2. Racional Científico e Hipótese
+3. Metodologia e Principais Achados (com métricas quando disponíveis: p-value, IC 95%, HR, N)
+4. Análise Crítica: Limitações e Lacunas de Conhecimento
+5. Conclusão Acadêmica (parágrafo síntese)
 
-    return [
-        {"role": "system", "content": sys_prompt},
-        {"role": "user", "content": user_prompt}
-    ]
+**FORMATO:** Bullet points e linguagem científica rigorosa. Sem tabelas.
+**Restrição absoluta:** Somente informações do artigo."""
+    return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
 
 
 def build_message_resumo_clinico(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
@@ -270,46 +263,36 @@ Instruções de Estrutura:
 
 
 def build_message_resumo(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
-    """
-    Constructs the payload for a balanced general summary — not too simple, not too advanced.
-    Designed to be the neutral starting point, refined by user filters.
-    """
-    user_prompt = f"""Analise o artigo biomédico a seguir e produza um resumo equilibrado, adequado para qualquer profissional da área da saúde independentemente do nível de especialização.
+    user_prompt = f"""Analise o artigo científico a seguir e produza um resumo equilibrado. O artigo pode ser de qualquer área científica — adapte a linguagem ao contexto do texto, priorizando clareza para profissionais da área da saúde e ciências correlatas.
 
 Título: {article_title}
 Abstract:
 {abstract_text}
 
-Instruções:
-- Use linguagem clara e acessível, sem ser simplista. Mantenha termos técnicos essenciais, mas não sobrecarregue com jargões desnecessários.
-- Seja completo sem ser excessivamente longo.
-- Estruture a resposta com os tópicos:
-  1. **O que foi estudado** — contexto e objetivo do estudo
-  2. **Como foi feito** — desenho e metodologia em linguagem direta
-  3. **O que foi encontrado** — principais resultados com dados relevantes
-  4. **O que isso significa** — implicações práticas ou científicas
-  5. **Síntese final** — um parágrafo curto de fechamento"""
+Estruture a resposta com os tópicos:
+1. **O que foi estudado** — contexto e objetivo
+2. **Como foi feito** — metodologia em linguagem direta
+3. **O que foi encontrado** — principais resultados com dados relevantes
+4. **O que isso significa** — implicações práticas ou científicas
+5. **Síntese final** — parágrafo curto de fechamento
 
-    return [
-        {"role": "system", "content": sys_prompt},
-        {"role": "user", "content": user_prompt}
-    ]
+**FORMATO:** Bullet points e parágrafos curtos. Sem tabelas.
+**Restrição absoluta:** Somente informações do artigo."""
+    return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
 
 
 def build_message_sumario(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
-    """
-    Constructs the payload for a Quick Bulleted Summary / Overview.
-    """
-    user_prompt = f"""Você está analisando um artigo médico com o título: {article_title}.
-O abstract do artigo é o seguinte:
+    user_prompt = f"""Analise o artigo científico a seguir e produza um sumário direto e objetivo, adequado para profissionais e pesquisadores da área da saúde e ciências da vida.
+
+Título: {article_title}
+Abstract:
 {abstract_text}
 
-Resuma o artigo em português de forma direta e objetiva. Comece com uma frase curta (de até 2 linhas) que sintetize o tema principal do artigo, seguida de uma lista em marcadores (bullet points) destacando os 4 a 6 pontos mais importantes do estudo (objetivo, métodos, resultados e conclusão). Finalize com um parágrafo curto de fechamento."""
+Comece com uma frase de até 2 linhas que sintetize o tema principal. Em seguida, liste de 4 a 6 bullet points com os pontos mais importantes (objetivo, métodos, resultados e conclusão). Finalize com um parágrafo curto de fechamento.
 
-    return [
-        {"role": "system", "content": sys_prompt},
-        {"role": "user", "content": user_prompt}
-    ]
+**FORMATO:** Bullet points concisos. Sem tabelas.
+**Restrição absoluta:** Somente informações presentes no artigo."""
+    return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
 
 
 def build_message_medicamentos(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
@@ -1209,40 +1192,40 @@ Abstract:
 
 
 def build_message_resumo_paciente(article_title, abstract_text, sys_prompt=SYS_PROMPT):
-    user_prompt = f"""Explique os achados deste artigo para um paciente sem formação na área da saúde, usando linguagem completamente acessível.
+    user_prompt = f"""Explique os achados deste artigo científico para uma pessoa leiga — sem formação técnica na área. Use linguagem simples, acessível e clara, como se estivesse explicando para um familiar ou paciente.
 
 Título: {article_title}
 Abstract:
 {abstract_text}
 
-**FORMATO OBRIGATÓRIO:** Parágrafos curtos e simples. Explique termos médicos entre parênteses. Texto deve soar como uma conversa.
-
-**O que os médicos estavam tentando descobrir?**
+Estruture a resposta com os tópicos:
+**O que os pesquisadores estavam tentando descobrir?**
 **Como eles fizeram a pesquisa?**
 **O que eles descobriram?**
-**Isso muda alguma coisa no meu tratamento?**
+**Por que isso importa para mim ou para a sociedade?**
 **O que ainda não sabemos?**
 
+**FORMATO:** Parágrafos curtos e simples. Explique termos técnicos entre parênteses. Sem bullet points densos.
 **Restrição absoluta:** Somente informações do artigo."""
     return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
 
 
 def build_message_resumo_estudante(article_title, abstract_text, sys_prompt=SYS_PROMPT):
-    user_prompt = f"""Você é um professor de medicina. Explique este artigo para um estudante de medicina de forma didática e formativa.
+    user_prompt = f"""Você é um professor com experiência em ensino nas áreas da saúde e ciências da vida. Explique este artigo para um estudante de graduação de forma didática e formativa — adaptando a linguagem ao contexto do artigo.
 
 Título: {article_title}
 Abstract:
 {abstract_text}
 
-**FORMATO OBRIGATÓRIO:** Misture bullet points e parágrafos curtos. Linguagem técnica correta com explicação dos conceitos avançados.
-
-1. **Contexto Clínico** — por que este tema é importante na medicina?
+Estruture a resposta com os tópicos:
+1. **Contexto** — por que este tema é relevante na área científica do artigo?
 2. **O Estudo** — desenho e metodologia de forma didática
-3. **Os Achados** — resultados com explicação dos termos estatísticos
-4. **Para a Prática** — como aplicar como futuro médico
+3. **Os Achados** — resultados com explicação dos termos técnicos e estatísticos
+4. **Para a Prática** — como aplicar esse conhecimento profissionalmente
 5. **Conceitos-Chave** — termos técnicos do artigo com breve definição
 
-**Restrição absoluta:** Somente informações do artigo. Explicações didáticas sobre conceitos mencionados no texto, não sobre o tema em geral."""
+**FORMATO:** Misture bullet points e parágrafos curtos. Linguagem técnica correta mas explicativa.
+**Restrição absoluta:** Somente informações do artigo."""
     return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
 
 
@@ -1649,6 +1632,85 @@ function() {
 """
 
 
+def build_message_implicacoes_praticas(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
+    """Universal: what this research changes in the real world."""
+    user_prompt = f"""Analise o artigo a seguir e extraia exclusivamente as implicações práticas dos achados — o que este estudo muda ou pode mudar no mundo real, na prática profissional ou na sociedade.
+
+Título: {article_title}
+Abstract:
+{abstract_text}
+
+Estruture em:
+1. **Implicação Imediata** — o que muda agora com base nestes achados
+2. **Impacto para Profissionais** — como afeta quem trabalha na área
+3. **Impacto para a Sociedade** — benefícios ou riscos para o público geral
+4. **Próximos Passos Necessários** — o que precisa acontecer para essa descoberta ter impacto real
+
+**FORMATO:** Bullet points diretos. Sem tabelas.
+**Restrição absoluta:** Somente informações do artigo. Se o artigo não mencionar implicações práticas, indique explicitamente."""
+    return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
+
+
+def build_message_glossario(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
+    """Universal: extract and explain technical terms from the article."""
+    user_prompt = f"""Analise o artigo a seguir e extraia todos os termos técnicos, siglas, metodologias e jargões especializados presentes no texto, explicando cada um de forma clara e concisa.
+
+Título: {article_title}
+Abstract:
+{abstract_text}
+
+Para cada termo identificado, apresente:
+- **Termo / Sigla**
+- **Definição:** explicação clara em 1-3 linhas
+- **Contexto no artigo:** como o termo é usado neste estudo específico
+
+Ordene do mais ao menos técnico. Priorize termos que um leitor sem formação na área não conheceria.
+
+**FORMATO:** Lista estruturada. Sem tabelas.
+**Restrição absoluta:** Somente termos presentes no artigo. Definições podem usar conhecimento geral para explicar, mas o contexto deve ser do artigo."""
+    return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
+
+
+def build_message_impacto_brasil(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
+    """Universal Brazilian context - not health-specific."""
+    user_prompt = f"""Analise o artigo a seguir e avalie sua relevância e aplicabilidade ao contexto brasileiro, considerando aspectos sociais, econômicos, regulatórios e práticos — independentemente da área do artigo.
+
+Título: {article_title}
+Abstract:
+{abstract_text}
+
+**FORMATO:** Bullet points. Indique quando informação vem do artigo e quando é contexto geral sobre o Brasil.
+
+Estruture em:
+1. **Contexto Original do Estudo** — onde foi conduzido, qual população/contexto *(do artigo)*
+2. **Relevância para o Brasil** — por que este estudo importa para o contexto brasileiro
+3. **Barreiras de Implementação no Brasil** — custo, infraestrutura, regulação, cultura *[contexto geral - sinalizado]*
+4. **Oportunidades** — onde o Brasil pode se beneficiar ou já está avançado nesta área *[contexto geral - sinalizado]*
+5. **Recomendação Prática** — o que um profissional brasileiro deve considerar ao aplicar estes achados"""
+    return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
+
+
+def build_message_resumo_introdutorio(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
+    """For someone starting to learn about the topic."""
+    user_prompt = f"""Você é um professor com habilidade em introduzir tópicos complexos para iniciantes. Explique este artigo para alguém que está começando a estudar a área — com contexto suficiente para entender a importância do estudo.
+
+Título: {article_title}
+Abstract:
+{abstract_text}
+
+Estruture em:
+1. **Contexto da Área** — o que é importante saber sobre este campo para entender o artigo (baseado no que o próprio artigo menciona)
+2. **O Problema que o Estudo Aborda** — qual questão estava sem resposta
+3. **O que os Pesquisadores Fizeram** — metodologia simplificada
+4. **O que Descobriram** — resultados principais em linguagem acessível
+5. **Por que é Importante** — relevância para a área e para a prática
+6. **O que Estudar Mais** — conceitos-chave mencionados no artigo para aprofundar
+
+**FORMATO:** Parágrafos curtos e didáticos. Evite jargões sem explicação.
+**Restrição absoluta:** O contexto da área deve ser baseado no que o artigo menciona, não em conhecimento externo adicionado."""
+    return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
+
+
 def gradio_ui():
   with gr.Blocks(
       theme=gr.themes.Base(
@@ -1661,11 +1723,10 @@ def gradio_ui():
       title="Biomedical Data Digger",
   ) as demo:
 
-    # ── Header ──────────────────────────────────────────────────────────
     gr.HTML("""
     <div class="app-header">
       <h1><span class="accent">Biomedical</span> Data Digger</h1>
-      <p class="app-subtitle">Análise inteligente de artigos científicos · Europe PMC · Groq AI</p>
+      <p class="app-subtitle">Análise inteligente de artigos científicos · Europe PMC · arXiv · DOI · Groq AI</p>
     </div>
     <button class="theme-toggle" id="theme-toggle-btn"
       onclick="(function(){
@@ -1675,21 +1736,15 @@ def gradio_ui():
       }).call(this)">☀️ Claro</button>
     """)
 
-    gr.Markdown(
-        f"> {INST_TXT}",
-        elem_classes=["app-subtitle"]
-    )
-
     session_history = gr.State([])
 
     with gr.Row(equal_height=False):
 
-      # ── Coluna esquerda: controles ───────────────────────────────────
       with gr.Column(scale=1, min_width=320):
 
         with gr.Group():
           article_id = gr.Textbox(
-              label="PMCID ou PMID",
+              label="ID ou URL do artigo",
               placeholder="ex: 33984217 · PMC8234567 · 10.1038/nature · arxiv.org/abs/2301.00001",
               show_label=True,
           )
@@ -1697,7 +1752,6 @@ def gradio_ui():
               choices=["GPT-OSS 20B (Groq)", "GPT-OSS 120B (Groq)", "Qwen 3.6 27B (Groq)", "Qwen 3.8 27B (Groq)", "Llama (local)"],
               value="GPT-OSS 20B (Groq)",
               label="Modelo de linguagem",
-              show_label=True,
           )
 
         with gr.Accordion("Como encontrar o ID ou URL do artigo?", open=False):
@@ -1719,7 +1773,7 @@ Acesse [pmc.ncbi.nlm.nih.gov](https://pmc.ncbi.nlm.nih.gov), abra o artigo e cop
 ---
 
 **DOI (qualquer área)**
-O DOI aparece na página do artigo ou no próprio PDF (geralmente no topo ou rodapé). Funciona para artigos de qualquer revista — Nature, Lancet, NEJM, etc.
+O DOI aparece na página do artigo ou no próprio PDF. Funciona para artigos de qualquer revista.
 `10.1038/s41586-021-03819-2` ou `https://doi.org/10.1038/s41586-021-03819-2`
 
 ---
@@ -1736,10 +1790,10 @@ Acesse [openalex.org](https://openalex.org), pesquise e copie o ID da URL (come�
 
 ---
 
-💡 **Dica rápida:** Se estiver lendo um artigo no celular, basta copiar a URL da barra do navegador e colar aqui.
+💡 **Dica:** Se estiver lendo no celular, basta copiar a URL da barra do navegador e colar aqui.
           """)
 
-        with gr.Accordion("📋 Histórico da sessão", open=False):
+        with gr.Accordion("Histórico da sessão", open=False):
           history_display = gr.Dataframe(
               headers=["ID", "Título"],
               datatype=["str", "str"],
@@ -1747,67 +1801,86 @@ Acesse [openalex.org](https://openalex.org), pesquise e copie o ID da URL (come�
               label=None,
               wrap=True,
           )
-          btn_usar_historico = gr.Button("Usar ID selecionado", size="sm", visible=False)
 
-        with gr.Accordion("🎛️ Personalização", open=False):
+        with gr.Accordion("Personalização (opcional)", open=False):
           gr.Markdown("<small>Filtros opcionais — sem seleção, cada botão usa seu padrão.</small>")
-          filtro_publico  = gr.Radio(choices=["Médico / Especialista", "Residente / Interno", "Estudante de Medicina", "Paciente / Leigo", "Enfermagem / Farmácia"], value=None, label="Público-alvo")
+          filtro_publico  = gr.Radio(choices=["Médico / Especialista", "Residente / Interno", "Estudante", "Pesquisador", "Leigo / Paciente"], value=None, label="Público-alvo")
           filtro_tom      = gr.Radio(choices=["Formal e Técnico", "Direto e Objetivo", "Didático"], value=None, label="Tom")
           filtro_idioma   = gr.Radio(choices=["Português (BR)", "English", "Español"], value=None, label="Idioma")
           filtro_detalhe  = gr.Radio(choices=["Resumido", "Completo", "Ultra-detalhado"], value=None, label="Detalhe")
           filtro_foco     = gr.Radio(choices=["Farmacologia", "Estatística", "Segurança", "Metodologia", "Clínico/Prático"], value=None, label="Foco")
           btn_limpar_filtros = gr.Button("↺  Limpar filtros", size="sm", variant="secondary")
 
-        with gr.Accordion("◈  Visão Geral", open=True):
-          with gr.Row():
-            btn_sumario      = gr.Button("Sumário",      variant="secondary")
-            btn_resumo       = gr.Button("Resumo",       variant="secondary")
-          with gr.Row():
-            btn_pontos_chave = gr.Button("Pontos-Chave", variant="secondary")
+        # ── TABS: separação Geral / Medicina ─────────────────────────────
+        with gr.Tabs():
 
-        with gr.Accordion("⚕  Clínico / Pronto-Socorro", open=False):
-          with gr.Row():
-            btn_clinico          = gr.Button("Resumo Clínico",            variant="secondary")
-            btn_medicamentos     = gr.Button("Medicamentos",               variant="secondary")
-          with gr.Row():
-            btn_alertas          = gr.Button("Alertas",                    variant="secondary")
-            btn_checklist        = gr.Button("Checklist",                  variant="secondary")
-          with gr.Row():
-            btn_conduta_urgencia = gr.Button("Conduta em Urgência",        variant="secondary")
-            btn_pop_especiais    = gr.Button("Populações Especiais",       variant="secondary")
+          # ── ABA GERAL ──────────────────────────────────────────────────
+          with gr.TabItem("☰  Geral"):
 
-        with gr.Accordion("◎  Acadêmico / Pesquisa", open=False):
-          with gr.Row():
-            btn_academico     = gr.Button("Resumo Acadêmico",     variant="secondary")
-            btn_critica       = gr.Button("Crítica Metodológica", variant="secondary")
-          with gr.Row():
-            btn_estatisticas  = gr.Button("Dados Estatísticos",   variant="secondary")
-            btn_pico          = gr.Button("PICO",                 variant="secondary")
-          with gr.Row():
-            btn_lacunas       = gr.Button("Lacunas de Pesquisa",  variant="secondary")
-            btn_comparacao    = gr.Button("Comparação Literatura", variant="secondary")
+            with gr.Accordion("Visão Geral", open=True):
+              with gr.Row():
+                btn_sumario          = gr.Button("Sumário",            variant="secondary")
+                btn_resumo           = gr.Button("Resumo",             variant="secondary")
+              with gr.Row():
+                btn_pontos_chave     = gr.Button("Pontos-Chave",       variant="secondary")
+                btn_resumo_intro     = gr.Button("Resumo Introdutório",variant="secondary")
 
-        with gr.Accordion("🇧🇷  Contexto Brasileiro", open=False):
-          with gr.Row():
-            btn_aplicabilidade = gr.Button("Aplicabilidade BR",    variant="secondary")
-            btn_sus            = gr.Button("Disponib. SUS",        variant="secondary")
-          with gr.Row():
-            btn_anvisa         = gr.Button("Vigilância Sanitária", variant="secondary")
+            with gr.Accordion("Análise Científica", open=False):
+              with gr.Row():
+                btn_academico        = gr.Button("Resumo Acadêmico",     variant="secondary")
+                btn_critica          = gr.Button("Crítica Metodológica", variant="secondary")
+              with gr.Row():
+                btn_estatisticas     = gr.Button("Dados Estatísticos",   variant="secondary")
+                btn_pico             = gr.Button("PICO",                 variant="secondary")
+              with gr.Row():
+                btn_lacunas          = gr.Button("Lacunas de Pesquisa",  variant="secondary")
+                btn_comparacao       = gr.Button("Comparação Literatura",variant="secondary")
+              with gr.Row():
+                btn_implicacoes      = gr.Button("Implicações Práticas", variant="secondary")
+              with gr.Row():
+                btn_confiabilidade   = gr.Button("Confiabilidade do Artigo", variant="primary")
 
-        with gr.Accordion("◑  Educacional", open=False):
-          with gr.Row():
-            btn_paciente  = gr.Button("Para Paciente",  variant="secondary")
-            btn_estudante = gr.Button("Para Estudante", variant="secondary")
-          with gr.Row():
-            btn_questoes  = gr.Button("Questões para Discussão", variant="secondary")
+            with gr.Accordion("Educacional", open=False):
+              with gr.Row():
+                btn_leigo            = gr.Button("Para Leigo / Paciente",variant="secondary")
+                btn_estudante        = gr.Button("Para Estudante",       variant="secondary")
+              with gr.Row():
+                btn_questoes         = gr.Button("Questões para Discussão",variant="secondary")
+                btn_glossario        = gr.Button("Glossário de Termos",  variant="secondary")
 
-        with gr.Accordion("◆  Avaliação do Artigo", open=False):
-          btn_confiabilidade = gr.Button("⬡  Confiabilidade do Artigo", variant="primary")
+            with gr.Accordion("Contexto Brasileiro", open=False):
+              with gr.Row():
+                btn_impacto_brasil   = gr.Button("Impacto no Brasil",    variant="secondary")
+                btn_aplicabilidade   = gr.Button("Aplicabilidade BR",    variant="secondary")
 
-      # ── Coluna direita: output ───────────────────────────────────────
+          # ── ABA MEDICINA ───────────────────────────────────────────────
+          with gr.TabItem("⚕  Medicina"):
+
+            with gr.Accordion("Resumos Clínicos", open=True):
+              with gr.Row():
+                btn_clinico          = gr.Button("Resumo Clínico",       variant="secondary")
+                btn_resumo_med       = gr.Button("Resumo Médico",        variant="secondary")
+
+            with gr.Accordion("Farmacologia e Protocolos", open=False):
+              with gr.Row():
+                btn_medicamentos     = gr.Button("Medicamentos / Protocolos", variant="secondary")
+                btn_pop_especiais    = gr.Button("Populações Especiais",      variant="secondary")
+              with gr.Row():
+                btn_conduta_urgencia = gr.Button("Conduta em Urgência",       variant="secondary")
+
+            with gr.Accordion("Segurança do Paciente", open=False):
+              with gr.Row():
+                btn_alertas          = gr.Button("Alertas e Contraindicações",variant="secondary")
+                btn_checklist        = gr.Button("Checklist Pré-Conduta",     variant="secondary")
+
+            with gr.Accordion("Contexto BR — Saúde", open=False):
+              with gr.Row():
+                btn_sus              = gr.Button("Disponib. SUS",        variant="secondary")
+                btn_anvisa           = gr.Button("Vigilância Sanitária", variant="secondary")
+
       with gr.Column(scale=2, min_width=480):
         output_box = gr.Markdown(
-            value="*Selecione um tipo de análise e clique em um botão para começar.*",
+            value="*Selecione uma aba e clique em um botão para começar.*",
             elem_classes=["output-panel"],
         )
 
@@ -1840,28 +1913,36 @@ Acesse [openalex.org](https://openalex.org), pesquise e copie o ID da URL (come�
             return result, new_history, new_display
         return fn
 
+    # Aba Geral
     btn_sumario.click(fn=make_fn_with_history(build_message_sumario, "Sumário"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
     btn_resumo.click(fn=make_fn_with_history(build_message_resumo, "Resumo"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
     btn_pontos_chave.click(fn=make_fn_with_history(build_message_pontos_chave, "Pontos-Chave"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_clinico.click(fn=make_fn_with_history(build_message_resumo_clinico, "Resumo Clínico"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_medicamentos.click(fn=make_fn_with_history(build_message_medicamentos, "Medicamentos / Protocolos"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_alertas.click(fn=make_fn_with_history(build_message_alertas, "Alertas e Contraindicações"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_checklist.click(fn=make_fn_with_history(build_message_checklist, "Checklist Pré-Conduta"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_conduta_urgencia.click(fn=make_fn_with_history(build_message_conduta_urgencia, "Conduta em Urgência"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_pop_especiais.click(fn=make_fn_with_history(build_message_populacoes_especiais, "Populações Especiais"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_resumo_intro.click(fn=make_fn_with_history(build_message_resumo_introdutorio, "Resumo Introdutório"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
     btn_academico.click(fn=make_fn_with_history(build_message_resumo_academico, "Resumo Acadêmico"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
     btn_critica.click(fn=make_fn_with_history(build_message_critica_metodologica, "Crítica Metodológica"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
     btn_estatisticas.click(fn=make_fn_with_history(build_message_estatisticas, "Dados Estatísticos"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
     btn_pico.click(fn=make_fn_with_history(build_message_pico, "Pergunta PICO"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
     btn_lacunas.click(fn=make_fn_with_history(build_message_lacunas_pesquisa, "Lacunas de Pesquisa"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
     btn_comparacao.click(fn=make_fn_with_history(build_message_comparacao_literatura, "Comparação com Literatura"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_implicacoes.click(fn=make_fn_with_history(build_message_implicacoes_praticas, "Implicações Práticas"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_confiabilidade.click(fn=make_fn_with_history(build_message_confiabilidade, "Confiabilidade do Artigo"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_leigo.click(fn=make_fn_with_history(build_message_resumo_paciente, "Para Leigo / Paciente"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_estudante.click(fn=make_fn_with_history(build_message_resumo_estudante, "Para Estudante"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_questoes.click(fn=make_fn_with_history(build_message_questoes_discussao, "Questões para Discussão"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_glossario.click(fn=make_fn_with_history(build_message_glossario, "Glossário de Termos"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_impacto_brasil.click(fn=make_fn_with_history(build_message_impacto_brasil, "Impacto no Brasil"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
     btn_aplicabilidade.click(fn=make_fn_with_history(build_message_aplicabilidade_br, "Aplicabilidade Brasileira"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+
+    # Aba Medicina
+    btn_clinico.click(fn=make_fn_with_history(build_message_resumo_clinico, "Resumo Clínico"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_resumo_med.click(fn=make_fn_with_history(build_message_resumo_academico, "Resumo Médico"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_medicamentos.click(fn=make_fn_with_history(build_message_medicamentos, "Medicamentos / Protocolos"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_pop_especiais.click(fn=make_fn_with_history(build_message_populacoes_especiais, "Populações Especiais"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_conduta_urgencia.click(fn=make_fn_with_history(build_message_conduta_urgencia, "Conduta em Urgência"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_alertas.click(fn=make_fn_with_history(build_message_alertas, "Alertas e Contraindicações"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_checklist.click(fn=make_fn_with_history(build_message_checklist, "Checklist Pré-Conduta"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
     btn_sus.click(fn=make_fn_with_history(build_message_disponibilidade_sus, "Disponibilidade no SUS"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
     btn_anvisa.click(fn=make_fn_with_history(build_message_vigilancia_sanitaria, "Vigilância Sanitária"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_paciente.click(fn=make_fn_with_history(build_message_resumo_paciente, "Resumo para Paciente"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_estudante.click(fn=make_fn_with_history(build_message_resumo_estudante, "Resumo para Estudante"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_questoes.click(fn=make_fn_with_history(build_message_questoes_discussao, "Questões para Discussão"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_confiabilidade.click(fn=make_fn_with_history(build_message_confiabilidade, "Confiabilidade do Artigo"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
 
   return demo
 
