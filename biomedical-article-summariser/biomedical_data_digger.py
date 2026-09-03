@@ -56,7 +56,6 @@ def set_cached_article(article_id: str, title: str, abstract: str) -> None:
         _article_cache[article_id] = (title, abstract)
 
 
-
 SYS_PROMPT = """
 You are an expert in biomedical text mining and information extraction. You excel at breaking down complex articles into digestible contents for your audience, which comprises students, early researchers, and professionals in the field.
 
@@ -86,8 +85,6 @@ The tone should be professional and clear.
 """
 
 
-
-
 def catch_request_error(func):
     """
     Função wrapper para capturar erros de requisição e retornar None caso ocorra um erro.
@@ -103,7 +100,6 @@ def catch_request_error(func):
     return wrapper
 
 
-
 @catch_request_error
 @logger.catch
 def get_xml_from_url(url: str) -> bs:
@@ -117,35 +113,32 @@ def get_xml_from_url(url: str) -> bs:
         soup (bs4.BeautifulSoup): Parsed XML content.
     """
     response = requests.get(url)
-    response.raise_for_status() #check for request errors
-    return bs(response.content, "lxml-xml")  
+    response.raise_for_status()  # check for request errors
+    return bs(response.content, "lxml-xml")
 
 
-
-
-def clean_text(text:str) -> str:
+def clean_text(text: str) -> str:
     """
-    This function cleans a text by filtering reference patterns in text, 
+    This function cleans a text by filtering reference patterns in text,
     extra whitespaces, escaped latex-style formatting appearing in text body instead of predefined latex tags
 
-    Args: 
+    Args:
     text(str): The text to be cleaned
-    
-    Returns: 
-    tex(str): The cleaned text 
-    
+
+    Returns:
+    tex(str): The cleaned text
+
     """
-   
     # Remove LaTeX-style math and formatting tags #already filtered from soup content but some still appear
     text = re.sub(r"\{.*?\}", "", text)  # Matches and removes anything inside curly braces {}
     text = re.sub(r"\\[a-zA-Z]+", "", text)  # Matches and removes characters that appears with numbers
-    
+
     # Remove reference tags like [34] or [1,2,3]
     text = re.sub(r"\[\s*(\d+\s*(,\s*\d+\s*)*)\]", "", text)
-    
+
     # Remove extra whitespace
     text = re.sub(r"\s+", " ", text).strip()
-    
+
     return text
 
 
@@ -168,7 +161,6 @@ def fetch_article_abstract(soup: bs) -> Tuple[str, str]:
     else:
         abstract_text = ""
     return article_title, abstract_text
-
 
 
 def fetch_full_text(soup: bs) -> Tuple[str, str]:
@@ -223,6 +215,7 @@ def fetch_full_text(soup: bs) -> Tuple[str, str]:
         return article_title, ""
 
     return article_title, "\n\n".join(sections)
+
 
 def build_message_resumo_academico(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
     """
@@ -317,6 +310,7 @@ Resuma o artigo em português de forma direta e objetiva. Comece com uma frase c
         {"role": "system", "content": sys_prompt},
         {"role": "user", "content": user_prompt}
     ]
+
 
 def build_message_medicamentos(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
     """
@@ -575,34 +569,34 @@ Abstract:
 
 Estruture a resposta com os seguintes tópicos:
 
-1. **🚫 Contraindicações Absolutas**
+1. **Contraindicações Absolutas**
    - Situações em que a intervenção/medicamento NÃO deve ser usado em hipótese alguma (conforme descrito no artigo)
 
-2. **⚠️ Contraindicações Relativas e Populações de Risco**
+2. **Contraindicações Relativas e Populações de Risco**
    - Grupos que requerem cautela especial ou ajuste de conduta
    - Ex: gestantes, idosos, insuficiência renal/hepática, crianças, imunossuprimidos
 
-3. **🔴 Efeitos Adversos Graves**
+3. **Efeitos Adversos Graves**
    - Reações adversas com risco de vida ou que exijam interrupção imediata
    - Frequência reportada (%) quando disponível
 
-4. **🟡 Efeitos Adversos Relevantes**
+4. **Efeitos Adversos Relevantes**
    - Efeitos adversos frequentes ou que impactem adesão/conduta
    - Frequência reportada (%) quando disponível
 
-5. **💊 Interações Medicamentosas**
+5. **Interações Medicamentosas**
    - Interações descritas no artigo com potencial de dano clínico
    - Mecanismo da interação (se descrito)
 
-6. **📊 Sinais de Alerta para Monitoramento**
+6. **Sinais de Alerta para Monitoramento**
    - Parâmetros clínicos e laboratoriais que indicam toxicidade ou falha terapêutica
    - Valores limítrofes de alerta mencionados
 
-7. **🆘 Conduta em Caso de Reação Grave**
+7. **Conduta em Caso de Reação Grave**
    - O que o artigo descreve como manejo de toxicidade ou reação adversa grave
    - Antídoto ou tratamento de suporte mencionado
 
-8. **✅ Checklist de Segurança Pré-Uso**
+8. **Checklist de Segurança Pré-Uso**
    - Lista rápida de verificações recomendadas antes de iniciar a intervenção (baseada nos dados do artigo)
 
 **Restrição absoluta:** Inclua apenas informações de segurança explicitamente descritas no artigo. Se um campo não for abordado, indique "Não descrito no artigo". Nunca infira riscos não documentados."""
@@ -629,32 +623,32 @@ Abstract:
 
 Estruture o checklist com os seguintes tópicos:
 
-1. **👤 Critérios de Elegibilidade do Paciente**
+1. **Critérios de Elegibilidade do Paciente**
    - [ ] Perfil do paciente que se beneficia da intervenção (conforme o artigo)
    - [ ] Critérios de inclusão que devem estar presentes
 
-2. **🚫 Critérios de Exclusão — Não Aplicar Se:**
+2. **Critérios de Exclusão — Não Aplicar Se:**
    - [ ] Condições que contraindicam a intervenção (conforme o artigo)
 
-3. **🔬 Exames e Avaliações Pré-Intervenção**
+3. **Exames e Avaliações Pré-Intervenção**
    - [ ] Exames laboratoriais necessários antes de iniciar
    - [ ] Avaliações clínicas recomendadas (PA, FC, função renal, etc.)
 
-4. **💊 Preparo da Intervenção / Medicamento**
+4. **Preparo da Intervenção / Medicamento**
    - [ ] Dose correta para o perfil do paciente
    - [ ] Diluição e preparo (se aplicável)
    - [ ] Via e velocidade de administração
 
-5. **🩺 Monitoramento Durante a Intervenção**
+5. **Monitoramento Durante a Intervenção**
    - [ ] Parâmetros a monitorar e frequência
    - [ ] Sinais de alerta que indicam interrupção imediata
 
-6. **📋 Documentação e Seguimento**
+6. **Documentação e Seguimento**
    - [ ] O que deve ser registrado em prontuário
    - [ ] Quando reavaliar o paciente após a intervenção
    - [ ] Exames de controle pós-intervenção (se descritos)
 
-7. **🆘 Plano de Contingência**
+7. **Plano de Contingência**
    - [ ] O que fazer se ocorrer reação adversa grave
    - [ ] Antídoto ou suporte disponível (se descrito no artigo)
 
@@ -680,36 +674,36 @@ Abstract:
 
 Estruture a análise com os seguintes tópicos:
 
-1. **🌍 Origem do Estudo e Contexto Original**
+1. **Origem do Estudo e Contexto Original**
    - País(es) onde o estudo foi conduzido (se mencionado)
    - Perfil da população estudada e sistema de saúde envolvido
    - Contexto clínico original (ambulatorial, hospitalar, PS, atenção primária)
 
-2. **👥 Comparação Populacional**
+2. **Comparação Populacional**
    - Semelhanças e diferenças entre a população do estudo e a população brasileira
    - Diferenças étnicas, epidemiológicas ou de comorbidades relevantes (se inferíveis do artigo)
    - Faixa etária e perfil socioeconômico estudado vs. realidade brasileira
 
-3. **💊 Disponibilidade dos Medicamentos / Intervenções no Brasil**
+3. **Disponibilidade dos Medicamentos / Intervenções no Brasil**
    - Os medicamentos ou tecnologias estudados estão disponíveis no Brasil?
    - Estão na RENAME (Relação Nacional de Medicamentos Essenciais) ou disponíveis pelo SUS?
    - Há alternativas nacionais equivalentes?
 
-4. **🏥 Aplicabilidade por Nível de Atenção**
+4. **Aplicabilidade por Nível de Atenção**
    - A intervenção é viável na Atenção Primária (UBS)?
    - É aplicável em Pronto-Socorro ou UPA?
    - Requer estrutura hospitalar especializada (UTI, centro cirúrgico)?
 
-5. **⚖️ Barreiras e Facilitadores para Implementação no Brasil**
+5. **Barreiras e Facilitadores para Implementação no Brasil**
    - Principais barreiras: custo, infraestrutura, treinamento, regulação (ANVISA)
    - Facilitadores: políticas públicas, protocolos do Ministério da Saúde, disponibilidade
 
-6. **📊 Força da Evidência para o Contexto Brasileiro**
+6. **Força da Evidência para o Contexto Brasileiro**
    - Os resultados são diretamente extrapoláveis para o Brasil?
    - Quais adaptações seriam necessárias?
    - Qual o grau de confiança recomendado para aplicar esses resultados na prática brasileira?
 
-7. **🎯 Recomendação Prática para o Médico Brasileiro**
+7. **Recomendação Prática para o Médico Brasileiro**
    - Síntese objetiva sobre se e como aplicar os achados do artigo no contexto clínico brasileiro (em um parágrafo final direto)
 
 **Restrição absoluta:** Base a análise nos dados do artigo. Para a seção de disponibilidade no Brasil e contexto do SUS, é permitido usar conhecimento geral sobre o sistema de saúde brasileiro, mas indique claramente quando uma informação vai além do que está no artigo."""
@@ -757,10 +751,10 @@ def build_dynamic_sys_prompt(
         "Ultra-detalhado": "Seja extremamente detalhado: explore cada ponto em profundidade, incluindo nuances e informações secundárias.",
     }
     FOCO_MAP = {
-        "Farmacologia":  "Dê ênfase especial a informações farmacológicas: doses, mecanismos, interações e efeitos adversos.",
-        "Estatística":   "Dê ênfase especial aos dados estatísticos: métricas de efeito, intervalos de confiança, NNT e significância clínica.",
-        "Segurança":     "Dê ênfase especial à segurança do paciente: contraindicações, alertas, efeitos adversos e monitoramento.",
-        "Metodologia":   "Dê ênfase especial à qualidade metodológica: desenho do estudo, vieses e nível de evidência.",
+        "Farmacologia":    "Dê ênfase especial a informações farmacológicas: doses, mecanismos, interações e efeitos adversos.",
+        "Estatística":     "Dê ênfase especial aos dados estatísticos: métricas de efeito, intervalos de confiança, NNT e significância clínica.",
+        "Segurança":       "Dê ênfase especial à segurança do paciente: contraindicações, alertas, efeitos adversos e monitoramento.",
+        "Metodologia":     "Dê ênfase especial à qualidade metodológica: desenho do estudo, vieses e nível de evidência.",
         "Clínico/Prático": "Dê ênfase especial à aplicabilidade clínica direta: o que muda na conduta, como e quando aplicar.",
     }
 
@@ -905,88 +899,312 @@ def summariser_with_label(article_id: str, model: str, build_fn, label: str,
     filtros_str = "  |  ".join(filtros_ativos) if filtros_ativos else "Padrão"
     return f"---\n> **{label}**  ·  Filtros: *{filtros_str}*\n\n---\n{result}"
 
+
 INTRO_TXT = "Sumarizador de artigos biomédicos. Aceita PMCID ou PMID para buscar artigos do Europe PMC."
 INST_TXT = "Digite um **PMCID** (ex: `PMC1234567`) ou **PMID** numérico (ex: `33970586`) e selecione um modelo para gerar um resumo estruturado"
+
+
+# ===========================================================================
+# NOVAS FUNÇÕES DE PROMPT
+# ===========================================================================
+
+def build_message_pontos_chave(article_title, abstract_text, sys_prompt=SYS_PROMPT):
+    user_prompt = f"""Você é um especialista em síntese científica. Leia o artigo a seguir e extraia exatamente os 5 achados mais importantes, apresentados como frases curtas e diretas.
+
+Título: {article_title}
+Abstract:
+{abstract_text}
+
+**FORMATO OBRIGATÓRIO:** Liste exatamente 5 pontos numerados. Cada ponto deve ter no máximo 2 linhas. Sem subtópicos, sem parágrafos adicionais.
+
+**Restrição absoluta:** Todos os pontos devem ser extraídos exclusivamente do texto fornecido. Nenhuma inferência, complemento ou conhecimento externo."""
+    return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
+
+
+def build_message_conduta_urgencia(article_title, abstract_text, sys_prompt=SYS_PROMPT):
+    user_prompt = f"""Você é um médico emergencista. Extraia EXCLUSIVAMENTE o protocolo de manejo de urgência/emergência descrito no artigo a seguir.
+
+Título: {article_title}
+Abstract:
+{abstract_text}
+
+**AVISO DE USO CLÍNICO:** Informações extraídas exclusivamente do artigo. Não substitui protocolos institucionais ou julgamento clínico. Validar antes de aplicar em pacientes reais.
+
+**FORMATO OBRIGATÓRIO:** Bullet points curtos. Sem tabelas.
+
+1. **Indicação de Uso em Urgência** — quando aplicar (critérios do artigo)
+2. **Sequência de Ações (passo a passo)** — ordem e tempo entre etapas (se mencionado)
+3. **Doses Agudas e Vias de Administração** — dose de ataque, manutenção, velocidade de infusão
+4. **Sinais de Resposta e Falha Terapêutica** — como reconhecer sucesso ou falha
+5. **O que NÃO fazer** — contraindicações em urgência
+
+**Restrição absoluta:** Se o artigo não descrever protocolo de urgência explícito, informe: "Este artigo não descreve um protocolo de manejo agudo de urgência." Nunca complete com conhecimento externo."""
+    return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
+
+
+def build_message_populacoes_especiais(article_title, abstract_text, sys_prompt=SYS_PROMPT):
+    user_prompt = f"""Você é um clínico especializado em populações vulneráveis. Extraia como a intervenção descrita no artigo se modifica para populações especiais.
+
+Título: {article_title}
+Abstract:
+{abstract_text}
+
+**AVISO:** Informações extraídas exclusivamente do artigo.
+
+**FORMATO OBRIGATÓRIO:** Para cada população presente no artigo, subtítulo em negrito seguido de bullet points. Se não mencionada: "Não descrito no artigo".
+
+Analise: Gestantes/Lactantes, Idosos (≥65 anos), Pediátricos, Insuficiência Renal, Insuficiência Hepática, Imunossuprimidos, Outras populações mencionadas.
+
+Para cada uma: ajuste de dose, contraindicações, monitoramento adicional, precauções.
+
+**Restrição absoluta:** Somente informações do artigo. Nenhum ajuste baseado em conhecimento externo."""
+    return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
+
+
+def build_message_lacunas_pesquisa(article_title, abstract_text, sys_prompt=SYS_PROMPT):
+    user_prompt = f"""Você é um pesquisador sênior. Extraia as lacunas de conhecimento e direções futuras mencionadas pelos autores do artigo.
+
+Título: {article_title}
+Abstract:
+{abstract_text}
+
+**FORMATO OBRIGATÓRIO:** Bullet points por subtópico em negrito.
+
+1. **O que o estudo NÃO respondeu** — perguntas em aberto, limitações impeditivas
+2. **Direções Futuras Sugeridas pelos Autores** — estudos recomendados, populações a investigar
+3. **Lacunas Metodológicas** — o que precisaria ser feito diferente em estudos futuros
+4. **Aplicabilidade Clínica Pendente** — o que ainda precisa ser demonstrado antes de aplicar na prática
+
+**Restrição absoluta:** Somente lacunas e direções explicitamente mencionadas pelos autores. Não inferir lacunas baseadas em conhecimento externo."""
+    return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
+
+
+def build_message_comparacao_literatura(article_title, abstract_text, sys_prompt=SYS_PROMPT):
+    user_prompt = f"""Você é um revisor científico. Analise como o artigo se posiciona em relação à literatura prévia, conforme descrito pelos autores.
+
+Título: {article_title}
+Abstract:
+{abstract_text}
+
+**FORMATO OBRIGATÓRIO:** Bullet points com subtítulos em negrito.
+
+1. **O que os autores dizem sobre estudos anteriores** — estado atual da evidência, estudos citados
+2. **Como este estudo se diferencia** — o que é novo, vantagens metodológicas citadas
+3. **Concordâncias com literatura prévia** — achados que confirmam estudos anteriores
+4. **Contradições ou Discordâncias** — achados que contradizem literatura (e como os autores explicam)
+
+**Restrição absoluta:** Somente comparações que os próprios autores fazem. Não adicionar comparações baseadas em conhecimento externo."""
+    return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
+
+
+def build_message_disponibilidade_sus(article_title, abstract_text, sys_prompt=SYS_PROMPT):
+    user_prompt = f"""Você é um médico com experiência no sistema público de saúde brasileiro. Avalie a disponibilidade das intervenções descritas no artigo no contexto do SUS.
+
+Título: {article_title}
+Abstract:
+{abstract_text}
+
+**FORMATO OBRIGATÓRIO:** Bullet points. Indique claramente quando informação vem do artigo e quando é conhecimento geral sobre o SUS.
+
+1. **Intervenções Descritas no Artigo** *(do artigo)*
+2. **Disponibilidade no SUS** — disponível/não disponível/parcial, presença na RENAME *[conhecimento geral - sinalizado]*
+3. **Alternativas Disponíveis no SUS** *[conhecimento geral - sinalizado]*
+4. **Impacto para o Médico do SUS** — o que pode ou não aplicar com base neste artigo"""
+    return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
+
+
+def build_message_vigilancia_sanitaria(article_title, abstract_text, sys_prompt=SYS_PROMPT):
+    user_prompt = f"""Você é um médico com conhecimento em regulação sanitária brasileira. Analise o artigo sob perspectiva regulatória para o contexto brasileiro.
+
+Título: {article_title}
+Abstract:
+{abstract_text}
+
+**FORMATO OBRIGATÓRIO:** Bullet points. Diferencie o que vem do artigo e o que é contexto regulatório geral.
+
+1. **Intervenções Estudadas** *(do artigo)*
+2. **Situação Regulatória no Brasil** — aprovação ANVISA, restrições *[conhecimento geral - sinalizado]*
+3. **Considerações para Prescrição** — receituário especial, restrições por especialidade *[conhecimento geral - sinalizado]*
+4. **Riscos Regulatórios** — o que o médico deve considerar legalmente ao aplicar os achados no Brasil"""
+    return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
+
+
+def build_message_resumo_paciente(article_title, abstract_text, sys_prompt=SYS_PROMPT):
+    user_prompt = f"""Explique os achados deste artigo para um paciente sem formação na área da saúde, usando linguagem completamente acessível.
+
+Título: {article_title}
+Abstract:
+{abstract_text}
+
+**FORMATO OBRIGATÓRIO:** Parágrafos curtos e simples. Explique termos médicos entre parênteses. Texto deve soar como uma conversa.
+
+**O que os médicos estavam tentando descobrir?**
+**Como eles fizeram a pesquisa?**
+**O que eles descobriram?**
+**Isso muda alguma coisa no meu tratamento?**
+**O que ainda não sabemos?**
+
+**Restrição absoluta:** Somente informações do artigo."""
+    return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
+
+
+def build_message_resumo_estudante(article_title, abstract_text, sys_prompt=SYS_PROMPT):
+    user_prompt = f"""Você é um professor de medicina. Explique este artigo para um estudante de medicina de forma didática e formativa.
+
+Título: {article_title}
+Abstract:
+{abstract_text}
+
+**FORMATO OBRIGATÓRIO:** Misture bullet points e parágrafos curtos. Linguagem técnica correta com explicação dos conceitos avançados.
+
+1. **Contexto Clínico** — por que este tema é importante na medicina?
+2. **O Estudo** — desenho e metodologia de forma didática
+3. **Os Achados** — resultados com explicação dos termos estatísticos
+4. **Para a Prática** — como aplicar como futuro médico
+5. **Conceitos-Chave** — termos técnicos do artigo com breve definição
+
+**Restrição absoluta:** Somente informações do artigo. Explicações didáticas sobre conceitos mencionados no texto, não sobre o tema em geral."""
+    return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
+
+
+def build_message_questoes_discussao(article_title, abstract_text, sys_prompt=SYS_PROMPT):
+    user_prompt = f"""Você é um professor de medicina baseada em evidências. Elabore exatamente 5 perguntas para debate em grupo de estudo ou journal club baseadas neste artigo.
+
+Título: {article_title}
+Abstract:
+{abstract_text}
+
+**FORMATO OBRIGATÓRIO:** 5 perguntas numeradas em negrito, cada uma seguida de justificativa de 1-2 linhas. Sem respostas.
+
+Cubra: validade metodológica, aplicabilidade clínica, aspectos éticos/segurança, comparação com conhecimento prévio (mencionado no artigo), direções futuras.
+
+**Restrição absoluta:** Perguntas baseadas nos achados específicos do artigo."""
+    return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
+
+
+def build_message_confiabilidade(article_title, abstract_text, sys_prompt=SYS_PROMPT):
+    user_prompt = f"""Você é um epidemiologista clínico sênior. Avalie a confiabilidade deste artigo de forma rigorosa. Esta é a ÚNICA análise em que você deve expressar sua própria opinião fundamentada. Seja extremamente rigoroso — este resultado pode influenciar condutas em pacientes reais em pronto-socorro. Em caso de dúvida, seja conservador.
+
+Título: {article_title}
+Abstract:
+{abstract_text}
+
+**FORMATO OBRIGATÓRIO:** Bullet points com subtítulos em negrito.
+
+Avalie cada dimensão e indique impacto na confiabilidade (alto/médio/baixo):
+
+1. **Desenho do Estudo** — tipo, nível de evidência, adequação. Impacto: [alto/médio/baixo]
+2. **Tamanho Amostral e Poder** — N reportado, risco de erro tipo II. Impacto: [alto/médio/baixo]
+3. **Controle de Vieses** — randomização, cegamento, grupos comparáveis. Impacto: [alto/médio/baixo]
+4. **Qualidade Estatística** — IC 95%, significância vs. relevância clínica. Impacto: [alto/médio/baixo]
+5. **Conflito de Interesses** — financiamento declarado. Impacto: [alto/médio/baixo]
+6. **Generalizabilidade** — representatividade, extrapolação. Impacto: [alto/médio/baixo]
+7. **Limitações Declaradas** — limitações reconhecidas pelos autores. Impacto: [alto/médio/baixo]
+
+---
+
+**VEREDICTO FINAL**
+
+**Score de Confiabilidade: X%**
+
+- 90–100%: Evidência muito sólida
+- 70–89%: Evidência boa, aplicável com cautela
+- 50–69%: Evidência moderada, referência auxiliar
+- 30–49%: Evidência fraca, não aplicar diretamente
+- 0–29%: Evidência insuficiente, não utilizar para condutas
+
+**Justificativa do Score:** (2-3 linhas)
+
+**Recomendação para uso em Pronto-Socorro:** [PODE USAR COM SEGURANÇA / USAR COM CAUTELA / NÃO USAR COMO BASE PRINCIPAL / NÃO RECOMENDADO]
+
+*Esta avaliação é uma opinião técnica fundamentada nos dados do abstract. Avaliação completa requer leitura do artigo na íntegra.*"""
+    return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
+
+
+# ===========================================================================
+# INTERFACE GRADIO
+# ===========================================================================
 
 def gradio_ui():
   with gr.Blocks(theme=gr.themes.Soft()) as demo:
     gr.Markdown(f"## Biomedical Data Digger\n{INTRO_TXT}")
     gr.Markdown(INST_TXT)
 
-    # Estado de histórico da sessão (lista de tuplas: (pmid, título))
     session_history = gr.State([])
 
     with gr.Row():
       with gr.Column(scale=1):
         article_id = gr.Textbox(label="PMCID ou PMID do artigo", placeholder="ex: PMC1234567 ou 12345678")
         model_choice = gr.Dropdown(
-            choices=["GPT-OSS 120B (Groq)", "GPT-OSS 20B (Groq)", "Qwen 3.6 27B (Groq)", "Qwen 3.8 27B (Groq)", "Llama (local)"],
-            value="GPT-OSS 120B (Groq)",
+            choices=["GPT-OSS 20B (Groq)", "GPT-OSS 120B (Groq)", "Qwen 3.6 27B (Groq)", "Qwen 3.8 27B (Groq)", "Llama (local)"],
+            value="GPT-OSS 20B (Groq)",
             label="Modelo"
         )
 
-        # ── Histórico de sessão ───────────────────────────────────────────
         with gr.Accordion("Histórico da sessão", open=False):
-          history_display = gr.Dataframe(
-              headers=["ID", "Título"],
-              datatype=["str", "str"],
-              interactive=False,
-              label=None,
-              wrap=True,
-          )
+          history_display = gr.Dataframe(headers=["ID", "Título"], datatype=["str", "str"], interactive=False, label=None, wrap=True)
           btn_usar_historico = gr.Button("Usar ID selecionado", size="sm", visible=False)
-        # ─────────────────────────────────────────────────────────────────
 
-        # ── Painel de personalização ──────────────────────────────────────
         with gr.Accordion("Personalização (opcional)", open=False):
           gr.Markdown("Selecione os filtros desejados. Sem seleção, o comportamento é o padrão de cada botão.")
-          filtro_publico = gr.Radio(
-              choices=["Médico / Especialista", "Residente / Interno", "Estudante de Medicina", "Paciente / Leigo", "Enfermagem / Farmácia"],
-              value=None, label="Público-alvo", interactive=True
-          )
-          filtro_tom = gr.Radio(
-              choices=["Formal e Técnico", "Direto e Objetivo", "Didático"],
-              value=None, label="Tom da resposta", interactive=True
-          )
-          filtro_idioma = gr.Radio(
-              choices=["Português (BR)", "English", "Español"],
-              value=None, label="Idioma", interactive=True
-          )
-          filtro_detalhe = gr.Radio(
-              choices=["Resumido", "Completo", "Ultra-detalhado"],
-              value=None, label="Nível de detalhe", interactive=True
-          )
-          filtro_foco = gr.Radio(
-              choices=["Farmacologia", "Estatística", "Segurança", "Metodologia", "Clínico/Prático"],
-              value=None, label="Foco temático", interactive=True
-          )
+          filtro_publico  = gr.Radio(choices=["Médico / Especialista", "Residente / Interno", "Estudante de Medicina", "Paciente / Leigo", "Enfermagem / Farmácia"], value=None, label="Público-alvo", interactive=True)
+          filtro_tom      = gr.Radio(choices=["Formal e Técnico", "Direto e Objetivo", "Didático"], value=None, label="Tom da resposta", interactive=True)
+          filtro_idioma   = gr.Radio(choices=["Português (BR)", "English", "Español"], value=None, label="Idioma", interactive=True)
+          filtro_detalhe  = gr.Radio(choices=["Resumido", "Completo", "Ultra-detalhado"], value=None, label="Nível de detalhe", interactive=True)
+          filtro_foco     = gr.Radio(choices=["Farmacologia", "Estatística", "Segurança", "Metodologia", "Clínico/Prático"], value=None, label="Foco temático", interactive=True)
           btn_limpar_filtros = gr.Button("Limpar filtros", size="sm")
-        # ─────────────────────────────────────────────────────────────────
 
-        with gr.Row():
-          btn_sumario          = gr.Button("Sumário",                   variant="secondary")
-          btn_academico        = gr.Button("Resumo Acadêmico",          variant="secondary")
-        with gr.Row():
-          btn_clinico          = gr.Button("Resumo Clínico",            variant="secondary")
-          btn_resumo           = gr.Button("Resumo",                    variant="secondary")
-        with gr.Row():
-          btn_medicamentos     = gr.Button("Medicamentos / Protocolos", variant="secondary")
-          btn_alertas          = gr.Button("Alertas e Contraindicações",variant="secondary")
-        with gr.Row():
-          btn_checklist        = gr.Button("Checklist Pré-Conduta",     variant="secondary")
-          btn_pico             = gr.Button("Pergunta PICO",             variant="secondary")
-        with gr.Row():
-          btn_estatisticas     = gr.Button("Dados Estatísticos",        variant="secondary")
-          btn_aplicabilidade   = gr.Button("Aplicabilidade Brasileira", variant="secondary")
-        with gr.Row():
-          btn_critica          = gr.Button("Crítica Metodológica",      variant="secondary")
+        with gr.Accordion("Visão Geral", open=True):
+          with gr.Row():
+            btn_sumario      = gr.Button("Sumário",      variant="secondary")
+            btn_resumo       = gr.Button("Resumo",       variant="secondary")
+          with gr.Row():
+            btn_pontos_chave = gr.Button("Pontos-Chave", variant="secondary")
+
+        with gr.Accordion("Clínico / Pronto-Socorro", open=False):
+          with gr.Row():
+            btn_clinico          = gr.Button("Resumo Clínico",             variant="secondary")
+            btn_medicamentos     = gr.Button("Medicamentos / Protocolos",  variant="secondary")
+          with gr.Row():
+            btn_alertas          = gr.Button("Alertas e Contraindicações", variant="secondary")
+            btn_checklist        = gr.Button("Checklist Pré-Conduta",      variant="secondary")
+          with gr.Row():
+            btn_conduta_urgencia = gr.Button("Conduta em Urgência",        variant="secondary")
+            btn_pop_especiais    = gr.Button("Populações Especiais",       variant="secondary")
+
+        with gr.Accordion("Acadêmico / Pesquisa", open=False):
+          with gr.Row():
+            btn_academico     = gr.Button("Resumo Acadêmico",          variant="secondary")
+            btn_critica       = gr.Button("Crítica Metodológica",      variant="secondary")
+          with gr.Row():
+            btn_estatisticas  = gr.Button("Dados Estatísticos",        variant="secondary")
+            btn_pico          = gr.Button("Pergunta PICO",             variant="secondary")
+          with gr.Row():
+            btn_lacunas       = gr.Button("Lacunas de Pesquisa",       variant="secondary")
+            btn_comparacao    = gr.Button("Comparação com Literatura", variant="secondary")
+
+        with gr.Accordion("Contexto Brasileiro", open=False):
+          with gr.Row():
+            btn_aplicabilidade = gr.Button("Aplicabilidade Brasileira", variant="secondary")
+            btn_sus            = gr.Button("Disponibilidade no SUS",    variant="secondary")
+          with gr.Row():
+            btn_anvisa         = gr.Button("Vigilância Sanitária",      variant="secondary")
+
+        with gr.Accordion("Educacional", open=False):
+          with gr.Row():
+            btn_paciente  = gr.Button("Resumo para Paciente",    variant="secondary")
+            btn_estudante = gr.Button("Resumo para Estudante",   variant="secondary")
+          with gr.Row():
+            btn_questoes  = gr.Button("Questões para Discussão", variant="secondary")
+
+        with gr.Accordion("Avaliação do Artigo", open=False):
+          with gr.Row():
+            btn_confiabilidade = gr.Button("Confiabilidade do Artigo", variant="primary")
 
       with gr.Column(scale=1):
         output_box = gr.Markdown(value="*O resumo aparecerá aqui...*")
 
-    # ── Lógica do histórico ───────────────────────────────────────────────
-    def update_history(article_id_val: str, history: list) -> tuple:
-        """Adiciona o artigo ao histórico após busca bem-sucedida."""
+    def update_history(article_id_val, history):
         aid = article_id_val.strip() if article_id_val else ""
         if not aid:
             return history, gr.update()
@@ -994,7 +1212,7 @@ def gradio_ui():
         if cached and not any(row[0] == aid for row in history):
             title = cached[0][:60] + "..." if len(cached[0]) > 60 else cached[0]
             history = [[aid, title]] + history
-            history = history[:10]  # mantém últimas 10
+            history = history[:10]
         rows = history if history else [["—", "Nenhum artigo consultado ainda"]]
         return history, gr.update(value=rows)
 
@@ -1004,48 +1222,43 @@ def gradio_ui():
     )
 
     common_inputs = [article_id, model_choice, filtro_publico, filtro_tom, filtro_idioma, filtro_detalhe, filtro_foco]
-
-    def make_fn(build_fn, label):
-        def fn(aid, mdl, pub, tom, idi, det, foc):
-            yield from summariser_with_label(
-                aid, mdl, build_fn, label,
-                pub or "", tom or "", idi or "", det or "", foc or ""
-            )
-        return fn
+    all_inputs    = common_inputs + [session_history]
+    all_outputs   = [output_box, session_history, history_display]
 
     def make_fn_with_history(build_fn, label):
         def fn(aid, mdl, pub, tom, idi, det, foc, history):
-            result = summariser_with_label(
-                aid, mdl, build_fn, label,
-                pub or "", tom or "", idi or "", det or "", foc or ""
-            )
+            result = summariser_with_label(aid, mdl, build_fn, label, pub or "", tom or "", idi or "", det or "", foc or "")
             new_history, new_display = update_history(aid, history)
             return result, new_history, new_display
         return fn
 
-    all_inputs = common_inputs + [session_history]
-    all_outputs = [output_box, session_history, history_display]
-
     btn_sumario.click(fn=make_fn_with_history(build_message_sumario, "Sumário"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_academico.click(fn=make_fn_with_history(build_message_resumo_academico, "Resumo Acadêmico"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_clinico.click(fn=make_fn_with_history(build_message_resumo_clinico, "Resumo Clínico"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
     btn_resumo.click(fn=make_fn_with_history(build_message_resumo, "Resumo"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_pontos_chave.click(fn=make_fn_with_history(build_message_pontos_chave, "Pontos-Chave"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_clinico.click(fn=make_fn_with_history(build_message_resumo_clinico, "Resumo Clínico"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
     btn_medicamentos.click(fn=make_fn_with_history(build_message_medicamentos, "Medicamentos / Protocolos"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
     btn_alertas.click(fn=make_fn_with_history(build_message_alertas, "Alertas e Contraindicações"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
     btn_checklist.click(fn=make_fn_with_history(build_message_checklist, "Checklist Pré-Conduta"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_pico.click(fn=make_fn_with_history(build_message_pico, "Pergunta PICO"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_estatisticas.click(fn=make_fn_with_history(build_message_estatisticas, "Dados Estatísticos"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
-    btn_aplicabilidade.click(fn=make_fn_with_history(build_message_aplicabilidade_br, "Aplicabilidade Brasileira"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_conduta_urgencia.click(fn=make_fn_with_history(build_message_conduta_urgencia, "Conduta em Urgência"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_pop_especiais.click(fn=make_fn_with_history(build_message_populacoes_especiais, "Populações Especiais"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_academico.click(fn=make_fn_with_history(build_message_resumo_academico, "Resumo Acadêmico"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
     btn_critica.click(fn=make_fn_with_history(build_message_critica_metodologica, "Crítica Metodológica"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_estatisticas.click(fn=make_fn_with_history(build_message_estatisticas, "Dados Estatísticos"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_pico.click(fn=make_fn_with_history(build_message_pico, "Pergunta PICO"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_lacunas.click(fn=make_fn_with_history(build_message_lacunas_pesquisa, "Lacunas de Pesquisa"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_comparacao.click(fn=make_fn_with_history(build_message_comparacao_literatura, "Comparação com Literatura"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_aplicabilidade.click(fn=make_fn_with_history(build_message_aplicabilidade_br, "Aplicabilidade Brasileira"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_sus.click(fn=make_fn_with_history(build_message_disponibilidade_sus, "Disponibilidade no SUS"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_anvisa.click(fn=make_fn_with_history(build_message_vigilancia_sanitaria, "Vigilância Sanitária"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_paciente.click(fn=make_fn_with_history(build_message_resumo_paciente, "Resumo para Paciente"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_estudante.click(fn=make_fn_with_history(build_message_resumo_estudante, "Resumo para Estudante"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_questoes.click(fn=make_fn_with_history(build_message_questoes_discussao, "Questões para Discussão"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
+    btn_confiabilidade.click(fn=make_fn_with_history(build_message_confiabilidade, "Confiabilidade do Artigo"), inputs=all_inputs, outputs=all_outputs, show_progress="full")
 
   return demo
 
 
 if __name__ == "__main__":
   app = gradio_ui()
-  # Render injeta a porta via variável de ambiente PORT
   port = int(os.environ.get("PORT", 7860))
   app.launch(server_name="0.0.0.0", server_port=port)
-
-
-
