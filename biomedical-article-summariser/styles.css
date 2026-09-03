@@ -2,19 +2,19 @@
 
 /* ── Variáveis de tema ─────────────────────────────────────────────────── */
 :root {
-    --bg-primary:    #0a0e1a;
-    --bg-secondary:  #111827;
-    --bg-card:       #1a2236;
-    --bg-input:      #151e2e;
-    --accent:        #3b82f6;
-    --accent-hover:  #2563eb;
-    --accent-glow:   rgba(59,130,246,0.18);
-    --accent-dim:    rgba(59,130,246,0.10);
+    --bg-primary:    #080808;
+    --bg-secondary:  #111111;
+    --bg-card:       #1a1a1a;
+    --bg-input:      #121212;
+    --accent:        #f97316;
+    --accent-hover:  #ea580c;
+    --accent-glow:   rgba(249,115,22,0.18);
+    --accent-dim:    rgba(249,115,22,0.10);
     --text-primary:  #e2e8f0;
     --text-muted:    #94a3b8;
     --text-dim:      #64748b;
-    --border:        rgba(59,130,246,0.18);
-    --border-hover:  rgba(59,130,246,0.45);
+    --border:        rgba(249,115,22,0.18);
+    --border-hover:  rgba(249,115,22,0.45);
     --radius:        10px;
     --radius-lg:     14px;
     --font-main:     'Inter', system-ui, sans-serif;
@@ -169,7 +169,7 @@ button.primary, .gr-button-primary, button[variant="primary"] {
 
 button.primary:hover, .gr-button-primary:hover {
     background: var(--accent-hover) !important;
-    box-shadow: 0 0 24px rgba(59,130,246,0.35) !important;
+    box-shadow: 0 0 24px var(--accent-glow) !important;
     transform: translateY(-1px) !important;
 }
 
