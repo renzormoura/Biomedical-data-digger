@@ -856,9 +856,7 @@ def get_abstract_from_pmid(pmid: str) -> Tuple[str, str]:
 
 def summariser(article_id: str, model: str, build_fn,
                publico: str = "", tom: str = "", idioma: str = "",
-               detalhe: str = "", foco: str = "",
-               modo: str = "Rápido") -> str:
-    # Validação do ID
+               detalhe: str = "", foco: str = "") -> str:
     if not article_id or not article_id.strip():
         raise gr.Error("Por favor, digite um PMCID ou PMID antes de gerar o resumo.")
 
@@ -870,47 +868,28 @@ def summariser(article_id: str, model: str, build_fn,
     if not USE_GROQ:
         raise gr.Error("Nenhum backend de LLM disponível. Configure a variável GROQ_API_KEY.")
 
-    # Chave de cache inclui o modo para não misturar abstract com texto completo
-    cache_key = f"{article_id}_{modo}"
-    cached = get_cached_article(cache_key)
+    cached = get_cached_article(article_id)
     if cached:
-        article_title, content_text = cached
-        fonte = "cache"
+        article_title, abstract_text = cached
     else:
         try:
-            usar_completo = (modo == "Completo") and re.match(r"^PMC\d+$", article_id)
-
-            if usar_completo:
-                # Tenta buscar texto completo via fullTextXML
-                url = f"https://www.ebi.ac.uk/europepmc/webservices/rest/{article_id}/fullTextXML"
-                soup = get_xml_from_url(url)
-                article_title, content_text = fetch_full_text(soup)
-                # Se texto completo vazio, cai para abstract
-                if not content_text:
-                    article_title, content_text = fetch_article_abstract(soup)
-                    fonte = "abstract (fallback)"
-                else:
-                    fonte = "texto completo"
-            elif re.match(r"^\d+$", article_id):
-                article_title, content_text = get_abstract_from_pmid(article_id)
-                fonte = "abstract"
+            if re.match(r"^\d+$", article_id):
+                article_title, abstract_text = get_abstract_from_pmid(article_id)
             else:
                 url = f"https://www.ebi.ac.uk/europepmc/webservices/rest/{article_id}/fullTextXML"
                 soup = get_xml_from_url(url)
-                article_title, content_text = fetch_article_abstract(soup)
-                fonte = "abstract"
-
-            set_cached_article(cache_key, article_title, content_text)
+                article_title, abstract_text = fetch_article_abstract(soup)
+            set_cached_article(article_id, article_title, abstract_text)
         except Exception as e:
             raise gr.Error(f"Erro ao buscar artigo: {str(e)}")
 
-    if not content_text:
-        raise gr.Error(f"Nenhum conteúdo encontrado para: {article_title}")
+    if not abstract_text:
+        raise gr.Error(f"Nenhum abstract encontrado para: {article_title}")
 
     dynamic_prompt = build_dynamic_sys_prompt(publico, tom, idioma, detalhe, foco)
 
     try:
-        messages = build_fn(article_title, content_text, sys_prompt=dynamic_prompt)
+        messages = build_fn(article_title, abstract_text, sys_prompt=dynamic_prompt)
         summary = generate_response(messages, model)
     except Exception as e:
         raise gr.Error(f"Erro ao gerar resumo com a LLM: {str(e)}")
@@ -920,13 +899,11 @@ def summariser(article_id: str, model: str, build_fn,
 
 def summariser_with_label(article_id: str, model: str, build_fn, label: str,
                           publico: str = "", tom: str = "", idioma: str = "",
-                          detalhe: str = "", foco: str = "",
-                          modo: str = "Rápido") -> str:
-    result = summariser(article_id, model, build_fn, publico, tom, idioma, detalhe, foco, modo)
+                          detalhe: str = "", foco: str = "") -> str:
+    result = summariser(article_id, model, build_fn, publico, tom, idioma, detalhe, foco)
     filtros_ativos = [f for f in [publico, tom, idioma, detalhe, foco] if f]
     filtros_str = "  |  ".join(filtros_ativos) if filtros_ativos else "Padrão"
-    modo_badge = "Texto Completo" if modo == "Completo" else "Abstract"
-    return f"---\n> **{label}**  ·  Filtros: *{filtros_str}*  ·  Fonte: *{modo_badge}*\n\n---\n{result}"
+    return f"---\n> **{label}**  ·  Filtros: *{filtros_str}*\n\n---\n{result}"
 
 INTRO_TXT = "Sumarizador de artigos biomédicos. Aceita PMCID ou PMID para buscar artigos do Europe PMC."
 INST_TXT = "Digite um **PMCID** (ex: `PMC1234567`) ou **PMID** numérico (ex: `33970586`) e selecione um modelo para gerar um resumo estruturado"
@@ -942,13 +919,6 @@ def gradio_ui():
     with gr.Row():
       with gr.Column(scale=1):
         article_id = gr.Textbox(label="PMCID ou PMID do artigo", placeholder="ex: PMC1234567 ou 12345678")
-        modo_analise = gr.Radio(
-            choices=["Rápido", "Completo"],
-            value="Rápido",
-            label="Modo de análise",
-            info="Rápido = abstract (sempre disponível)  |  Completo = texto integral (apenas PMCIDs Open Access)",
-            interactive=True,
-        )
         model_choice = gr.Dropdown(
             choices=["GPT-OSS 120B (Groq)", "GPT-OSS 20B (Groq)", "Qwen 3.6 27B (Groq)", "Qwen 3.8 27B (Groq)", "Llama (local)"],
             value="GPT-OSS 120B (Groq)",
@@ -1033,7 +1003,7 @@ def gradio_ui():
         inputs=[], outputs=[filtro_publico, filtro_tom, filtro_idioma, filtro_detalhe, filtro_foco]
     )
 
-    common_inputs = [article_id, model_choice, filtro_publico, filtro_tom, filtro_idioma, filtro_detalhe, filtro_foco, modo_analise]
+    common_inputs = [article_id, model_choice, filtro_publico, filtro_tom, filtro_idioma, filtro_detalhe, filtro_foco]
 
     def make_fn(build_fn, label):
         def fn(aid, mdl, pub, tom, idi, det, foc):
@@ -1044,11 +1014,10 @@ def gradio_ui():
         return fn
 
     def make_fn_with_history(build_fn, label):
-        def fn(aid, mdl, pub, tom, idi, det, foc, modo, history):
+        def fn(aid, mdl, pub, tom, idi, det, foc, history):
             result = summariser_with_label(
                 aid, mdl, build_fn, label,
-                pub or "", tom or "", idi or "", det or "", foc or "",
-                modo or "Rápido"
+                pub or "", tom or "", idi or "", det or "", foc or ""
             )
             new_history, new_display = update_history(aid, history)
             return result, new_history, new_display
