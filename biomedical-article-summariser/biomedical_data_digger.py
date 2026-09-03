@@ -195,11 +195,11 @@ def make_page_geral():
 
             with gr.Accordion("Personalização (opcional)", open=False):
               gr.Markdown("<small>Filtros opcionais — sem seleção, cada botão usa seu padrão.</small>")
-              filtro_publico = gr.Radio(choices=["Médico / Especialista", "Residente / Interno", "Estudante", "Pesquisador", "Leigo / Paciente"], value=None, label="Público-alvo")
+              filtro_publico = gr.Radio(choices=["Pesquisador / Acadêmico", "Profissional da área", "Estudante", "Público geral"], value=None, label="Público-alvo")
               filtro_tom     = gr.Radio(choices=["Formal e Técnico", "Direto e Objetivo", "Didático"], value=None, label="Tom")
               filtro_idioma  = gr.Radio(choices=["Português (BR)", "English", "Español"], value=None, label="Idioma")
               filtro_detalhe = gr.Radio(choices=["Resumido", "Completo", "Ultra-detalhado"], value=None, label="Detalhe")
-              filtro_foco    = gr.Radio(choices=["Farmacologia", "Estatística", "Segurança", "Metodologia", "Clínico/Prático"], value=None, label="Foco")
+              filtro_foco    = gr.Radio(choices=["Síntese geral", "Metodologia", "Resultados e evidências", "Aplicações práticas", "Contexto brasileiro"], value=None, label="Foco")
               btn_limpar     = gr.Button("↺  Limpar filtros", size="sm", variant="secondary")
 
             with gr.Accordion("Visão Geral", open=True):

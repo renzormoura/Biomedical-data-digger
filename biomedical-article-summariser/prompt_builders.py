@@ -514,6 +514,10 @@ def build_dynamic_sys_prompt(
     extras = []
 
     PUBLICO_MAP = {
+        "Pesquisador / Acadêmico": "Dirija a resposta a um pesquisador ou acadêmico: priorize precisão, contexto científico e detalhes relevantes para análise crítica.",
+        "Profissional da área":    "Dirija a resposta a um profissional da área do artigo, usando terminologia técnica adequada e explicando conceitos que dependam de contexto.",
+        "Estudante":               "Dirija a resposta a um estudante: use linguagem didática, explique termos técnicos e contextualize os achados.",
+        "Público geral":            "Dirija a resposta ao público geral: use linguagem simples, evite jargões e explique conceitos especializados de forma acessível.",
         "Médico / Especialista":  "Dirija a resposta a um médico ou especialista clínico com pleno domínio da linguagem técnica médica.",
         "Residente / Interno":    "Dirija a resposta a um médico residente ou interno: use linguagem técnica, mas explique brevemente conceitos avançados quando necessário.",
         "Estudante de Medicina":  "Dirija a resposta a um estudante de medicina: use linguagem didática, explique termos técnicos e contextualize os achados.",
@@ -536,11 +540,15 @@ def build_dynamic_sys_prompt(
         "Ultra-detalhado": "Seja extremamente detalhado: explore cada ponto em profundidade, incluindo nuances e informações secundárias.",
     }
     FOCO_MAP = {
+        "Síntese geral":          "Priorize uma visão equilibrada do artigo, cobrindo contexto, objetivo, método, resultados e conclusão.",
         "Farmacologia":    "Dê ênfase especial a informações farmacológicas: doses, mecanismos, interações e efeitos adversos.",
         "Estatística":     "Dê ênfase especial aos dados estatísticos: métricas de efeito, intervalos de confiança, NNT e significância clínica.",
         "Segurança":       "Dê ênfase especial à segurança do paciente: contraindicações, alertas, efeitos adversos e monitoramento.",
         "Metodologia":     "Dê ênfase especial à qualidade metodológica: desenho do estudo, vieses e nível de evidência.",
         "Clínico/Prático": "Dê ênfase especial à aplicabilidade clínica direta: o que muda na conduta, como e quando aplicar.",
+        "Resultados e evidências": "Dê ênfase aos resultados, dados quantitativos, força das evidências e limitações das conclusões.",
+        "Aplicações práticas":      "Dê ênfase às aplicações práticas, consequências e possíveis usos dos achados no mundo real.",
+        "Contexto brasileiro":      "Dê ênfase à relevância, limitações e possíveis aplicações dos achados no contexto brasileiro.",
     }
 
     if publico and publico in PUBLICO_MAP:
