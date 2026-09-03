@@ -1125,85 +1125,475 @@ Avalie cada dimensão e indique impacto na confiabilidade (alto/médio/baixo):
 # INTERFACE GRADIO
 # ===========================================================================
 
+# ===========================================================================
+# TEMA VISUAL CUSTOMIZADO
+# ===========================================================================
+
+CUSTOM_CSS = """
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ── Variáveis de tema ─────────────────────────────────────────────────── */
+:root {
+    --bg-primary:    #0a0e1a;
+    --bg-secondary:  #111827;
+    --bg-card:       #1a2236;
+    --bg-input:      #151e2e;
+    --accent:        #3b82f6;
+    --accent-hover:  #2563eb;
+    --accent-glow:   rgba(59,130,246,0.18);
+    --accent-dim:    rgba(59,130,246,0.10);
+    --text-primary:  #e2e8f0;
+    --text-muted:    #94a3b8;
+    --text-dim:      #64748b;
+    --border:        rgba(59,130,246,0.18);
+    --border-hover:  rgba(59,130,246,0.45);
+    --radius:        10px;
+    --radius-lg:     14px;
+    --font-main:     'Inter', system-ui, sans-serif;
+    --font-mono:     'JetBrains Mono', monospace;
+    --shadow:        0 4px 24px rgba(0,0,0,0.45);
+    --shadow-glow:   0 0 20px rgba(59,130,246,0.12);
+}
+
+/* Tema claro */
+.light-theme {
+    --bg-primary:    #f0f4ff;
+    --bg-secondary:  #e8edf8;
+    --bg-card:       #ffffff;
+    --bg-input:      #f8faff;
+    --accent:        #2563eb;
+    --accent-hover:  #1d4ed8;
+    --accent-glow:   rgba(37,99,235,0.12);
+    --accent-dim:    rgba(37,99,235,0.07);
+    --text-primary:  #0f172a;
+    --text-muted:    #475569;
+    --text-dim:      #94a3b8;
+    --border:        rgba(37,99,235,0.18);
+    --border-hover:  rgba(37,99,235,0.40);
+    --shadow:        0 4px 24px rgba(0,0,0,0.10);
+    --shadow-glow:   0 0 20px rgba(37,99,235,0.08);
+}
+
+/* ── Base ──────────────────────────────────────────────────────────────── */
+body, .gradio-container {
+    background: var(--bg-primary) !important;
+    font-family: var(--font-main) !important;
+    color: var(--text-primary) !important;
+}
+
+.gradio-container {
+    max-width: 1400px !important;
+    margin: 0 auto !important;
+    padding: 24px !important;
+}
+
+/* ── Header ────────────────────────────────────────────────────────────── */
+.app-header {
+    text-align: center;
+    padding: 32px 0 20px 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 28px;
+}
+
+.app-header h1 {
+    font-family: var(--font-main) !important;
+    font-size: 2rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.5px !important;
+    color: var(--text-primary) !important;
+    margin: 0 0 6px 0 !important;
+}
+
+.app-header .accent { color: var(--accent) !important; }
+
+.app-subtitle {
+    color: var(--text-muted) !important;
+    font-size: 0.9rem !important;
+    font-weight: 400 !important;
+    margin: 0 !important;
+}
+
+/* ── Painel de controles ───────────────────────────────────────────────── */
+.control-panel {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-lg) !important;
+    padding: 20px !important;
+    box-shadow: var(--shadow) !important;
+}
+
+/* ── Input / Textbox ───────────────────────────────────────────────────── */
+input[type="text"], textarea, .gr-text-input, .gr-textbox textarea {
+    background: var(--bg-input) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    color: var(--text-primary) !important;
+    font-family: var(--font-mono) !important;
+    font-size: 0.95rem !important;
+    padding: 12px 16px !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+
+input[type="text"]:focus, textarea:focus {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 3px var(--accent-dim) !important;
+    outline: none !important;
+}
+
+/* ── Labels ────────────────────────────────────────────────────────────── */
+label, .gr-form label, span.svelte-1gfkn6j {
+    font-family: var(--font-main) !important;
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+    color: var(--text-muted) !important;
+}
+
+/* ── Dropdown ──────────────────────────────────────────────────────────── */
+.gr-dropdown select, select {
+    background: var(--bg-input) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    color: var(--text-primary) !important;
+    font-family: var(--font-main) !important;
+    padding: 10px 14px !important;
+}
+
+/* ── Botões secundários ────────────────────────────────────────────────── */
+button.secondary, .gr-button-secondary, button[variant="secondary"] {
+    background: var(--bg-input) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    color: var(--text-primary) !important;
+    font-family: var(--font-main) !important;
+    font-size: 0.82rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.02em !important;
+    padding: 10px 14px !important;
+    transition: all 0.2s !important;
+    cursor: pointer !important;
+}
+
+button.secondary:hover, .gr-button-secondary:hover {
+    background: var(--accent-dim) !important;
+    border-color: var(--accent) !important;
+    color: var(--accent) !important;
+    box-shadow: var(--shadow-glow) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ── Botão primário (Confiabilidade) ───────────────────────────────────── */
+button.primary, .gr-button-primary, button[variant="primary"] {
+    background: var(--accent) !important;
+    border: none !important;
+    border-radius: var(--radius) !important;
+    color: #fff !important;
+    font-family: var(--font-main) !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.04em !important;
+    padding: 12px 18px !important;
+    transition: all 0.2s !important;
+    box-shadow: 0 0 16px var(--accent-glow) !important;
+    cursor: pointer !important;
+}
+
+button.primary:hover, .gr-button-primary:hover {
+    background: var(--accent-hover) !important;
+    box-shadow: 0 0 24px rgba(59,130,246,0.35) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ── Accordion ─────────────────────────────────────────────────────────── */
+.gr-accordion, details {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    margin-bottom: 8px !important;
+    overflow: hidden !important;
+    transition: border-color 0.2s !important;
+}
+
+.gr-accordion:hover, details:hover {
+    border-color: var(--border-hover) !important;
+}
+
+.gr-accordion summary, details summary {
+    font-family: var(--font-main) !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.07em !important;
+    color: var(--text-muted) !important;
+    padding: 14px 18px !important;
+    cursor: pointer !important;
+    transition: color 0.2s !important;
+    user-select: none !important;
+}
+
+.gr-accordion summary:hover, details summary:hover {
+    color: var(--accent) !important;
+}
+
+/* ── Output box ────────────────────────────────────────────────────────── */
+.output-panel {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-lg) !important;
+    padding: 24px !important;
+    min-height: 400px !important;
+    box-shadow: var(--shadow) !important;
+    font-family: var(--font-main) !important;
+    font-size: 0.95rem !important;
+    line-height: 1.75 !important;
+    color: var(--text-primary) !important;
+}
+
+.output-panel h2 {
+    font-size: 1.15rem !important;
+    font-weight: 700 !important;
+    color: var(--accent) !important;
+    border-bottom: 1px solid var(--border) !important;
+    padding-bottom: 10px !important;
+    margin-bottom: 16px !important;
+}
+
+.output-panel h3 {
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    color: var(--text-muted) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    margin-bottom: 12px !important;
+}
+
+.output-panel ul, .output-panel ol {
+    padding-left: 20px !important;
+}
+
+.output-panel li {
+    margin-bottom: 6px !important;
+    color: var(--text-primary) !important;
+}
+
+.output-panel strong {
+    color: var(--text-primary) !important;
+    font-weight: 600 !important;
+}
+
+.output-panel blockquote, .output-panel > blockquote {
+    border-left: 3px solid var(--accent) !important;
+    background: var(--accent-dim) !important;
+    padding: 10px 16px !important;
+    border-radius: 0 var(--radius) var(--radius) 0 !important;
+    margin: 12px 0 !important;
+    color: var(--text-muted) !important;
+    font-size: 0.85rem !important;
+}
+
+/* ── Radio buttons ─────────────────────────────────────────────────────── */
+.gr-radio input[type="radio"] + label,
+.gr-form .gr-radio span {
+    font-family: var(--font-main) !important;
+    font-size: 0.85rem !important;
+    color: var(--text-muted) !important;
+}
+
+/* ── Dataframe / Tabela ────────────────────────────────────────────────── */
+.gr-dataframe table, table {
+    background: var(--bg-input) !important;
+    border-radius: var(--radius) !important;
+    font-family: var(--font-mono) !important;
+    font-size: 0.8rem !important;
+}
+
+.gr-dataframe th {
+    background: var(--bg-card) !important;
+    color: var(--text-muted) !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    padding: 10px 14px !important;
+}
+
+.gr-dataframe td {
+    color: var(--text-primary) !important;
+    padding: 8px 14px !important;
+    border-color: var(--border) !important;
+}
+
+/* ── Toggle de tema ────────────────────────────────────────────────────── */
+.theme-toggle {
+    position: fixed !important;
+    top: 16px !important;
+    right: 16px !important;
+    z-index: 9999 !important;
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 20px !important;
+    padding: 6px 14px !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    color: var(--text-muted) !important;
+    transition: all 0.2s !important;
+    letter-spacing: 0.04em !important;
+}
+
+.theme-toggle:hover {
+    border-color: var(--accent) !important;
+    color: var(--accent) !important;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* ── Progress bar ──────────────────────────────────────────────────────── */
+.progress-bar { background: var(--accent) !important; height: 2px !important; }
+"""
+
+THEME_TOGGLE_JS = """
+function() {
+    const container = document.querySelector('.gradio-container');
+    if (container) {
+        container.classList.toggle('light-theme');
+        const btn = document.getElementById('theme-toggle-btn');
+        if (btn) {
+            btn.textContent = container.classList.contains('light-theme') ? '🌙 Escuro' : '☀️ Claro';
+        }
+    }
+}
+"""
+
+
 def gradio_ui():
-  with gr.Blocks(theme=gr.themes.Soft()) as demo:
-    gr.Markdown(f"## Biomedical Data Digger\n{INTRO_TXT}")
-    gr.Markdown(INST_TXT)
+  with gr.Blocks(
+      theme=gr.themes.Base(
+          primary_hue=gr.themes.colors.blue,
+          neutral_hue=gr.themes.colors.slate,
+          font=[gr.themes.GoogleFont("Inter"), "system-ui", "sans-serif"],
+          font_mono=[gr.themes.GoogleFont("JetBrains Mono"), "monospace"],
+      ),
+      css=CUSTOM_CSS,
+      title="Biomedical Data Digger",
+  ) as demo:
+
+    # ── Header ──────────────────────────────────────────────────────────
+    gr.HTML("""
+    <div class="app-header">
+      <h1><span class="accent">Biomedical</span> Data Digger</h1>
+      <p class="app-subtitle">Análise inteligente de artigos científicos · Europe PMC · Groq AI</p>
+    </div>
+    <button class="theme-toggle" id="theme-toggle-btn"
+      onclick="(function(){
+        const c=document.querySelector('.gradio-container');
+        c.classList.toggle('light-theme');
+        this.textContent=c.classList.contains('light-theme')?'🌙 Escuro':'☀️ Claro';
+      }).call(this)">☀️ Claro</button>
+    """)
+
+    gr.Markdown(
+        f"> {INST_TXT}",
+        elem_classes=["app-subtitle"]
+    )
 
     session_history = gr.State([])
 
-    with gr.Row():
-      with gr.Column(scale=1):
-        article_id = gr.Textbox(label="PMCID ou PMID do artigo", placeholder="ex: PMC1234567 ou 12345678")
-        model_choice = gr.Dropdown(
-            choices=["GPT-OSS 20B (Groq)", "GPT-OSS 120B (Groq)", "Qwen 3.6 27B (Groq)", "Qwen 3.8 27B (Groq)", "Llama (local)"],
-            value="GPT-OSS 20B (Groq)",
-            label="Modelo"
-        )
+    with gr.Row(equal_height=False):
 
-        with gr.Accordion("Histórico da sessão", open=False):
-          history_display = gr.Dataframe(headers=["ID", "Título"], datatype=["str", "str"], interactive=False, label=None, wrap=True)
+      # ── Coluna esquerda: controles ───────────────────────────────────
+      with gr.Column(scale=1, min_width=320):
+
+        with gr.Group():
+          article_id = gr.Textbox(
+              label="PMCID ou PMID",
+              placeholder="ex: PMC1234567 ou 33970586",
+              show_label=True,
+          )
+          model_choice = gr.Dropdown(
+              choices=["GPT-OSS 20B (Groq)", "GPT-OSS 120B (Groq)", "Qwen 3.6 27B (Groq)", "Qwen 3.8 27B (Groq)", "Llama (local)"],
+              value="GPT-OSS 20B (Groq)",
+              label="Modelo de linguagem",
+              show_label=True,
+          )
+
+        with gr.Accordion("📋 Histórico da sessão", open=False):
+          history_display = gr.Dataframe(
+              headers=["ID", "Título"],
+              datatype=["str", "str"],
+              interactive=False,
+              label=None,
+              wrap=True,
+          )
           btn_usar_historico = gr.Button("Usar ID selecionado", size="sm", visible=False)
 
-        with gr.Accordion("Personalização (opcional)", open=False):
-          gr.Markdown("Selecione os filtros desejados. Sem seleção, o comportamento é o padrão de cada botão.")
-          filtro_publico  = gr.Radio(choices=["Médico / Especialista", "Residente / Interno", "Estudante de Medicina", "Paciente / Leigo", "Enfermagem / Farmácia"], value=None, label="Público-alvo", interactive=True)
-          filtro_tom      = gr.Radio(choices=["Formal e Técnico", "Direto e Objetivo", "Didático"], value=None, label="Tom da resposta", interactive=True)
-          filtro_idioma   = gr.Radio(choices=["Português (BR)", "English", "Español"], value=None, label="Idioma", interactive=True)
-          filtro_detalhe  = gr.Radio(choices=["Resumido", "Completo", "Ultra-detalhado"], value=None, label="Nível de detalhe", interactive=True)
-          filtro_foco     = gr.Radio(choices=["Farmacologia", "Estatística", "Segurança", "Metodologia", "Clínico/Prático"], value=None, label="Foco temático", interactive=True)
-          btn_limpar_filtros = gr.Button("Limpar filtros", size="sm")
+        with gr.Accordion("🎛️ Personalização", open=False):
+          gr.Markdown("<small>Filtros opcionais — sem seleção, cada botão usa seu padrão.</small>")
+          filtro_publico  = gr.Radio(choices=["Médico / Especialista", "Residente / Interno", "Estudante de Medicina", "Paciente / Leigo", "Enfermagem / Farmácia"], value=None, label="Público-alvo")
+          filtro_tom      = gr.Radio(choices=["Formal e Técnico", "Direto e Objetivo", "Didático"], value=None, label="Tom")
+          filtro_idioma   = gr.Radio(choices=["Português (BR)", "English", "Español"], value=None, label="Idioma")
+          filtro_detalhe  = gr.Radio(choices=["Resumido", "Completo", "Ultra-detalhado"], value=None, label="Detalhe")
+          filtro_foco     = gr.Radio(choices=["Farmacologia", "Estatística", "Segurança", "Metodologia", "Clínico/Prático"], value=None, label="Foco")
+          btn_limpar_filtros = gr.Button("↺  Limpar filtros", size="sm", variant="secondary")
 
-        with gr.Accordion("Visão Geral", open=True):
+        with gr.Accordion("◈  Visão Geral", open=True):
           with gr.Row():
             btn_sumario      = gr.Button("Sumário",      variant="secondary")
             btn_resumo       = gr.Button("Resumo",       variant="secondary")
           with gr.Row():
             btn_pontos_chave = gr.Button("Pontos-Chave", variant="secondary")
 
-        with gr.Accordion("Clínico / Pronto-Socorro", open=False):
+        with gr.Accordion("⚕  Clínico / Pronto-Socorro", open=False):
           with gr.Row():
-            btn_clinico          = gr.Button("Resumo Clínico",             variant="secondary")
-            btn_medicamentos     = gr.Button("Medicamentos / Protocolos",  variant="secondary")
+            btn_clinico          = gr.Button("Resumo Clínico",            variant="secondary")
+            btn_medicamentos     = gr.Button("Medicamentos",               variant="secondary")
           with gr.Row():
-            btn_alertas          = gr.Button("Alertas e Contraindicações", variant="secondary")
-            btn_checklist        = gr.Button("Checklist Pré-Conduta",      variant="secondary")
+            btn_alertas          = gr.Button("Alertas",                    variant="secondary")
+            btn_checklist        = gr.Button("Checklist",                  variant="secondary")
           with gr.Row():
             btn_conduta_urgencia = gr.Button("Conduta em Urgência",        variant="secondary")
             btn_pop_especiais    = gr.Button("Populações Especiais",       variant="secondary")
 
-        with gr.Accordion("Acadêmico / Pesquisa", open=False):
+        with gr.Accordion("◎  Acadêmico / Pesquisa", open=False):
           with gr.Row():
-            btn_academico     = gr.Button("Resumo Acadêmico",          variant="secondary")
-            btn_critica       = gr.Button("Crítica Metodológica",      variant="secondary")
+            btn_academico     = gr.Button("Resumo Acadêmico",     variant="secondary")
+            btn_critica       = gr.Button("Crítica Metodológica", variant="secondary")
           with gr.Row():
-            btn_estatisticas  = gr.Button("Dados Estatísticos",        variant="secondary")
-            btn_pico          = gr.Button("Pergunta PICO",             variant="secondary")
+            btn_estatisticas  = gr.Button("Dados Estatísticos",   variant="secondary")
+            btn_pico          = gr.Button("PICO",                 variant="secondary")
           with gr.Row():
-            btn_lacunas       = gr.Button("Lacunas de Pesquisa",       variant="secondary")
-            btn_comparacao    = gr.Button("Comparação com Literatura", variant="secondary")
+            btn_lacunas       = gr.Button("Lacunas de Pesquisa",  variant="secondary")
+            btn_comparacao    = gr.Button("Comparação Literatura", variant="secondary")
 
-        with gr.Accordion("Contexto Brasileiro", open=False):
+        with gr.Accordion("🇧🇷  Contexto Brasileiro", open=False):
           with gr.Row():
-            btn_aplicabilidade = gr.Button("Aplicabilidade Brasileira", variant="secondary")
-            btn_sus            = gr.Button("Disponibilidade no SUS",    variant="secondary")
+            btn_aplicabilidade = gr.Button("Aplicabilidade BR",    variant="secondary")
+            btn_sus            = gr.Button("Disponib. SUS",        variant="secondary")
           with gr.Row():
-            btn_anvisa         = gr.Button("Vigilância Sanitária",      variant="secondary")
+            btn_anvisa         = gr.Button("Vigilância Sanitária", variant="secondary")
 
-        with gr.Accordion("Educacional", open=False):
+        with gr.Accordion("◑  Educacional", open=False):
           with gr.Row():
-            btn_paciente  = gr.Button("Resumo para Paciente",    variant="secondary")
-            btn_estudante = gr.Button("Resumo para Estudante",   variant="secondary")
+            btn_paciente  = gr.Button("Para Paciente",  variant="secondary")
+            btn_estudante = gr.Button("Para Estudante", variant="secondary")
           with gr.Row():
             btn_questoes  = gr.Button("Questões para Discussão", variant="secondary")
 
-        with gr.Accordion("Avaliação do Artigo", open=False):
-          with gr.Row():
-            btn_confiabilidade = gr.Button("Confiabilidade do Artigo", variant="primary")
+        with gr.Accordion("◆  Avaliação do Artigo", open=False):
+          btn_confiabilidade = gr.Button("⬡  Confiabilidade do Artigo", variant="primary")
 
-      with gr.Column(scale=1):
-        output_box = gr.Markdown(value="*O resumo aparecerá aqui...*")
+      # ── Coluna direita: output ───────────────────────────────────────
+      with gr.Column(scale=2, min_width=480):
+        output_box = gr.Markdown(
+            value="*Selecione um tipo de análise e clique em um botão para começar.*",
+            elem_classes=["output-panel"],
+        )
 
+    # ── Lógica ──────────────────────────────────────────────────────────
     def update_history(article_id_val, history):
         aid = article_id_val.strip() if article_id_val else ""
         if not aid:
