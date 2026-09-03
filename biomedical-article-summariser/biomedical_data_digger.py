@@ -826,15 +826,7 @@ def generate_response(messages: List[Dict[str, str]], model: str) -> str:
 @catch_request_error
 @logger.catch
 def get_abstract_from_pmid(pmid: str) -> Tuple[str, str]:
-    """
-    Busca o título e abstract de um artigo pelo PMID via endpoint de busca do Europe PMC.
-
-    Args:
-        pmid (str): O PMID numérico do artigo.
-
-    Returns:
-        Tuple(article_title (str), abstract_text (str)): Título e abstract do artigo.
-    """
+    """Busca título e abstract via Europe PMC por PMID."""
     url = f"https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=EXT_ID:{pmid}&resultType=core&format=json"
     response = requests.get(url)
     response.raise_for_status()
@@ -848,37 +840,224 @@ def get_abstract_from_pmid(pmid: str) -> Tuple[str, str]:
     return title, abstract
 
 
+# ---------------------------------------------------------------------------
+# Sistema universal de detecção e busca de artigos
+# ---------------------------------------------------------------------------
+
+def detect_input_type(raw: str) -> Tuple[str, str]:
+    """
+    Detecta o tipo de identificador ou URL fornecido pelo usuário.
+    Retorna (tipo, valor_normalizado).
+    """
+    s = raw.strip()
+
+    url_patterns = [
+        (r"pubmed\.ncbi\.nlm\.nih\.gov/(\d+)", "pmid"),
+        (r"ncbi\.nlm\.nih\.gov/pubmed/(\d+)", "pmid"),
+        (r"pmc\.ncbi\.nlm\.nih\.gov/articles/(PMC\d+)", "pmcid"),
+        (r"ncbi\.nlm\.nih\.gov/pmc/articles/(PMC\d+)", "pmcid"),
+        (r"europepmc\.org/article/MED/(\d+)", "pmid"),
+        (r"europepmc\.org/articles/(PMC\d+)", "pmcid"),
+        (r"arxiv\.org/(?:abs|pdf)/(\d{4}\.\d{4,5}(?:v\d+)?)", "arxiv"),
+        (r"arxiv\.org/(?:abs|pdf)/([a-z\-]+/\d+)", "arxiv"),
+        (r"doi\.org/(10\.\d{4,}/\S+)", "doi"),
+        (r"openalex\.org/(W\d+)", "openalex"),
+        (r"semanticscholar\.org/paper/[^/]+/([a-f0-9]{40})", "semantic_scholar"),
+    ]
+
+    for pattern, id_type in url_patterns:
+        m = re.search(pattern, s, re.IGNORECASE)
+        if m:
+            return id_type, m.group(1)
+
+    if re.match(r"^PMC\d{4,}$", s, re.IGNORECASE):
+        return "pmcid", s.upper()
+    if re.match(r"^\d{6,9}$", s):
+        return "pmid", s
+    if re.match(r"^10\.\d{4,}/\S+$", s):
+        return "doi", s
+    if re.match(r"^\d{4}\.\d{4,5}(v\d+)?$", s):
+        return "arxiv", s
+    if re.match(r"^[a-z\-]+/\d{7}$", s, re.IGNORECASE):
+        return "arxiv", s
+    if re.match(r"^W\d{6,}$", s, re.IGNORECASE):
+        return "openalex", s.upper()
+    if re.match(r"^[a-f0-9]{40}$", s):
+        return "semantic_scholar", s
+
+    return "unknown", s
+
+
+def fetch_by_doi(doi: str) -> Tuple[str, str]:
+    """Busca abstract via Semantic Scholar por DOI."""
+    url = f"https://api.semanticscholar.org/graph/v1/paper/DOI:{doi}?fields=title,abstract"
+    try:
+        r = requests.get(url, timeout=10)
+        if r.status_code == 200:
+            data = r.json()
+            title = data.get("title", "")
+            abstract = clean_text(data.get("abstract") or "")
+            if title and abstract:
+                return title, abstract
+    except Exception:
+        pass
+
+    url2 = f"https://api.crossref.org/works/{doi}"
+    try:
+        r2 = requests.get(url2, timeout=10,
+                          headers={"User-Agent": "BiomedicalDataDigger/1.0"})
+        if r2.status_code == 200:
+            item = r2.json().get("message", {})
+            title_raw = item.get("title", [""])
+            title = title_raw[0] if title_raw else "Título não encontrado"
+            abstract_raw = item.get("abstract", "")
+            abstract = clean_text(re.sub(r"<[^>]+>", " ", abstract_raw))
+            if title and abstract:
+                return title, abstract
+            if title:
+                return title, ""
+    except Exception:
+        pass
+
+    return "Artigo não encontrado via DOI", ""
+
+
+def fetch_by_arxiv(arxiv_id: str) -> Tuple[str, str]:
+    """Busca abstract via arXiv API."""
+    clean_id = re.sub(r"v\d+$", "", arxiv_id)
+    url = f"https://export.arxiv.org/api/query?id_list={clean_id}"
+    try:
+        r = requests.get(url, timeout=10)
+        r.raise_for_status()
+        soup = bs(r.content, "lxml-xml")
+        entry = soup.find("entry")
+        if not entry:
+            return "Artigo não encontrado no arXiv", ""
+        title_tag = entry.find("title")
+        summary_tag = entry.find("summary")
+        t = clean_text(title_tag.get_text()) if title_tag else "Título não encontrado"
+        a = clean_text(summary_tag.get_text()) if summary_tag else ""
+        return t, a
+    except Exception as e:
+        return f"Erro ao buscar no arXiv: {e}", ""
+
+
+def fetch_by_openalex(openalex_id: str) -> Tuple[str, str]:
+    """Busca abstract via OpenAlex por ID (Wxxxxxxx)."""
+    url = f"https://api.openalex.org/works/{openalex_id}"
+    try:
+        r = requests.get(url, timeout=10,
+                         headers={"User-Agent": "BiomedicalDataDigger/1.0"})
+        r.raise_for_status()
+        data = r.json()
+        title = data.get("title", "Título não encontrado")
+        inv_index = data.get("abstract_inverted_index")
+        if inv_index:
+            max_pos = max(pos for positions in inv_index.values() for pos in positions)
+            words = [""] * (max_pos + 1)
+            for word, positions in inv_index.items():
+                for pos in positions:
+                    words[pos] = word
+            abstract = clean_text(" ".join(words))
+        else:
+            abstract = ""
+        return title, abstract
+    except Exception as e:
+        return f"Erro ao buscar no OpenAlex: {e}", ""
+
+
+def fetch_by_semantic_scholar(s2_id: str) -> Tuple[str, str]:
+    """Busca abstract via Semantic Scholar por ID de 40 chars."""
+    url = f"https://api.semanticscholar.org/graph/v1/paper/{s2_id}?fields=title,abstract"
+    try:
+        r = requests.get(url, timeout=10)
+        r.raise_for_status()
+        data = r.json()
+        title = data.get("title", "Título não encontrado")
+        abstract = clean_text(data.get("abstract") or "")
+        return title, abstract
+    except Exception as e:
+        return f"Erro ao buscar no Semantic Scholar: {e}", ""
+
+
+def resolve_article(raw_input: str) -> Tuple[str, str, str]:
+    """
+    Ponto de entrada universal. Aceita qualquer ID ou URL.
+    Retorna (article_title, abstract_text, fonte_descricao).
+    """
+    id_type, value = detect_input_type(raw_input.strip())
+
+    if id_type == "pmcid":
+        url = f"https://www.ebi.ac.uk/europepmc/webservices/rest/{value}/fullTextXML"
+        soup = get_xml_from_url(url)
+        title, abstract = fetch_article_abstract(soup)
+        return title, abstract, "Europe PMC (PMCID)"
+
+    if id_type == "pmid":
+        title, abstract = get_abstract_from_pmid(value)
+        return title, abstract, "PubMed / Europe PMC (PMID)"
+
+    if id_type == "doi":
+        title, abstract = fetch_by_doi(value)
+        return title, abstract, "DOI via Semantic Scholar / CrossRef"
+
+    if id_type == "arxiv":
+        title, abstract = fetch_by_arxiv(value)
+        return title, abstract, "arXiv"
+
+    if id_type == "openalex":
+        title, abstract = fetch_by_openalex(value)
+        return title, abstract, "OpenAlex"
+
+    if id_type == "semantic_scholar":
+        title, abstract = fetch_by_semantic_scholar(value)
+        return title, abstract, "Semantic Scholar"
+
+    if value.isdigit():
+        title, abstract = get_abstract_from_pmid(value)
+        return title, abstract, "PubMed (PMID)"
+
+    raise gr.Error(
+        "Não foi possível identificar o formato do ID ou URL.\n\n"
+        "Formatos aceitos:\n"
+        "• PMID: 33984217\n"
+        "• PMCID: PMC8234567\n"
+        "• DOI: 10.1038/nature12373\n"
+        "• arXiv: 2301.00001\n"
+        "• OpenAlex: W2741809807\n"
+        "• URL completa de qualquer uma dessas fontes"
+    )
+
+
 def summariser(article_id: str, model: str, build_fn,
                publico: str = "", tom: str = "", idioma: str = "",
                detalhe: str = "", foco: str = "") -> str:
     if not article_id or not article_id.strip():
-        raise gr.Error("Por favor, digite um PMCID ou PMID antes de gerar o resumo.")
-
-    article_id = article_id.strip()
-
-    if not re.match(r"^(PMC\d{5,8}|\d{5,9})$", article_id):
-        raise gr.Error("Formato de ID inválido. Use um PMCID (ex: 'PMC1234567') ou um PMID numérico (ex: '12345678').")
+        raise gr.Error("Por favor, cole um ID ou URL de artigo antes de gerar a análise.")
 
     if not USE_GROQ:
         raise gr.Error("Nenhum backend de LLM disponível. Configure a variável GROQ_API_KEY.")
 
-    cached = get_cached_article(article_id)
+    cache_key = article_id.strip()
+    cached = get_cached_article(cache_key)
     if cached:
         article_title, abstract_text = cached
     else:
         try:
-            if re.match(r"^\d+$", article_id):
-                article_title, abstract_text = get_abstract_from_pmid(article_id)
-            else:
-                url = f"https://www.ebi.ac.uk/europepmc/webservices/rest/{article_id}/fullTextXML"
-                soup = get_xml_from_url(url)
-                article_title, abstract_text = fetch_article_abstract(soup)
-            set_cached_article(article_id, article_title, abstract_text)
+            article_title, abstract_text, fonte = resolve_article(article_id)
+            if article_title and abstract_text:
+                set_cached_article(cache_key, article_title, abstract_text)
+        except gr.Error:
+            raise
         except Exception as e:
             raise gr.Error(f"Erro ao buscar artigo: {str(e)}")
 
     if not abstract_text:
-        raise gr.Error(f"Nenhum abstract encontrado para: {article_title}")
+        raise gr.Error(
+            f"Nenhum abstract encontrado para: {article_title}\n\n"
+            "O artigo pode ser de acesso restrito (paywall). "
+            "Tente buscar pelo DOI em outra fonte ou use um PMCID de artigo Open Access."
+        )
 
     dynamic_prompt = build_dynamic_sys_prompt(publico, tom, idioma, detalhe, foco)
 
@@ -900,8 +1079,8 @@ def summariser_with_label(article_id: str, model: str, build_fn, label: str,
     return f"---\n> **{label}**  ·  Filtros: *{filtros_str}*\n\n---\n{result}"
 
 
-INTRO_TXT = "Sumarizador de artigos biomédicos. Aceita PMCID ou PMID para buscar artigos do Europe PMC."
-INST_TXT = "Digite um **PMCID** (ex: `PMC1234567`) ou **PMID** numérico (ex: `33970586`) e selecione um modelo para gerar um resumo estruturado"
+INTRO_TXT = "Análise inteligente de artigos científicos. Cole qualquer ID ou URL de artigo."
+INST_TXT = "Cole um **PMID**, **PMCID**, **DOI**, **arXiv ID**, **OpenAlex ID** ou a **URL completa** do artigo"
 
 
 # ===========================================================================
@@ -1511,7 +1690,7 @@ def gradio_ui():
         with gr.Group():
           article_id = gr.Textbox(
               label="PMCID ou PMID",
-              placeholder="ex: PMC1234567 ou 33970586",
+              placeholder="ex: 33984217 · PMC8234567 · 10.1038/nature · arxiv.org/abs/2301.00001",
               show_label=True,
           )
           model_choice = gr.Dropdown(
@@ -1520,6 +1699,45 @@ def gradio_ui():
               label="Modelo de linguagem",
               show_label=True,
           )
+
+        with gr.Accordion("Como encontrar o ID ou URL do artigo?", open=False):
+          gr.Markdown("""
+**Cole qualquer um destes formatos — o sistema detecta automaticamente:**
+
+---
+
+**PubMed (PMID)**
+Acesse [pubmed.ncbi.nlm.nih.gov](https://pubmed.ncbi.nlm.nih.gov), pesquise o artigo e copie o número da URL ou cole a URL inteira.
+`33984217` ou `https://pubmed.ncbi.nlm.nih.gov/33984217/`
+
+---
+
+**PubMed Central (PMCID)**
+Acesse [pmc.ncbi.nlm.nih.gov](https://pmc.ncbi.nlm.nih.gov), abra o artigo e copie o ID da URL.
+`PMC8234567` ou `https://pmc.ncbi.nlm.nih.gov/articles/PMC8234567/`
+
+---
+
+**DOI (qualquer área)**
+O DOI aparece na página do artigo ou no próprio PDF (geralmente no topo ou rodapé). Funciona para artigos de qualquer revista — Nature, Lancet, NEJM, etc.
+`10.1038/s41586-021-03819-2` ou `https://doi.org/10.1038/s41586-021-03819-2`
+
+---
+
+**arXiv (física, matemática, computação, biologia)**
+Acesse [arxiv.org](https://arxiv.org), pesquise o artigo e copie o ID ou a URL.
+`2301.00001` ou `https://arxiv.org/abs/2301.00001`
+
+---
+
+**OpenAlex**
+Acesse [openalex.org](https://openalex.org), pesquise e copie o ID da URL (começa com W).
+`W2741809807` ou `https://openalex.org/W2741809807`
+
+---
+
+💡 **Dica rápida:** Se estiver lendo um artigo no celular, basta copiar a URL da barra do navegador e colar aqui.
+          """)
 
         with gr.Accordion("📋 Histórico da sessão", open=False):
           history_display = gr.Dataframe(
