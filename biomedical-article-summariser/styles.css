@@ -323,6 +323,21 @@ button.primary:hover, .gr-button-primary:hover {
 /* ── Progress bar ──────────────────────────────────────────────────────── */
 .progress-bar { background: var(--accent) !important; height: 2px !important; }
 
+/* Navegacao principal: Geral laranja e Medicina azul hospitalar. */
+[role="tab"]:nth-child(1)[aria-selected="true"] {
+    color: #f97316 !important;
+    border-color: #f97316 !important;
+}
+
+[role="tab"]:nth-child(2)[aria-selected="true"] {
+    color: #0ea5e9 !important;
+    border-color: #0ea5e9 !important;
+}
+
+[role="tab"]:nth-child(2):hover {
+    color: #0ea5e9 !important;
+}
+
 
 /* === MEDICAL_OVERRIDES === */
 #medical-page {
