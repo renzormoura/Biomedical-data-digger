@@ -223,20 +223,20 @@ def make_page_geral():
               with gr.Row():
                 btn_implicacoes = gr.Button("Implicações Práticas", variant="secondary")
               with gr.Row():
-                btn_confiab    = gr.Button("Confiabilidade do Artigo", variant="primary")
+                btn_confiab    = gr.Button("Avaliação Crítica",         variant="primary")
 
             with gr.Accordion("Educacional", open=False):
               with gr.Row():
-                btn_leigo    = gr.Button("Para Leigo / Paciente",  variant="secondary")
-                btn_estudante = gr.Button("Para Estudante",        variant="secondary")
+                btn_leigo    = gr.Button("Explicação para Iniciantes", variant="secondary")
+                btn_estudante = gr.Button("Guia para Estudantes",       variant="secondary")
               with gr.Row():
-                btn_questoes  = gr.Button("Questões para Discussão",variant="secondary")
-                btn_glossario = gr.Button("Glossário de Termos",   variant="secondary")
+                btn_questoes  = gr.Button("Questões de Discussão",      variant="secondary")
+                btn_glossario = gr.Button("Glossário de Termos",        variant="secondary")
 
-            with gr.Accordion("Contexto Brasileiro", open=False):
+            with gr.Accordion("Aplicações e Impacto", open=False):
               with gr.Row():
-                btn_impacto_br = gr.Button("Impacto no Brasil",    variant="secondary")
-                btn_aplicab    = gr.Button("Aplicabilidade BR",    variant="secondary")
+                btn_impacto_br = gr.Button("Impacto na Sociedade",   variant="secondary")
+                btn_aplicab    = gr.Button("Aplicações no Mundo Real", variant="secondary")
 
           with gr.Column(scale=2, min_width=480):
             output_box = gr.Markdown(
@@ -280,13 +280,13 @@ def make_page_geral():
         btn_lacunas.click(fn=mfh(build_message_lacunas_pesquisa,"Lacunas de Pesquisa"), inputs=ai, outputs=ao, show_progress="full")
         btn_comparacao.click(fn=mfh(build_message_comparacao_literatura,"Comparação com Literatura"), inputs=ai, outputs=ao, show_progress="full")
         btn_implicacoes.click(fn=mfh(build_message_implicacoes_praticas,"Implicações Práticas"), inputs=ai, outputs=ao, show_progress="full")
-        btn_confiab.click(fn=mfh(build_message_confiabilidade,"Confiabilidade do Artigo"), inputs=ai, outputs=ao, show_progress="full")
-        btn_leigo.click(fn=mfh(build_message_resumo_paciente,"Para Leigo / Paciente"), inputs=ai, outputs=ao, show_progress="full")
-        btn_estudante.click(fn=mfh(build_message_resumo_estudante,"Para Estudante"), inputs=ai, outputs=ao, show_progress="full")
-        btn_questoes.click(fn=mfh(build_message_questoes_discussao,"Questões para Discussão"), inputs=ai, outputs=ao, show_progress="full")
+        btn_confiab.click(fn=mfh(build_message_critica_metodologica,"Avaliação Crítica"), inputs=ai, outputs=ao, show_progress="full")
+        btn_leigo.click(fn=mfh(build_message_resumo_introdutorio,"Explicação para Iniciantes"), inputs=ai, outputs=ao, show_progress="full")
+        btn_estudante.click(fn=mfh(build_message_resumo_estudante,"Guia para Estudantes"), inputs=ai, outputs=ao, show_progress="full")
+        btn_questoes.click(fn=mfh(build_message_lacunas_pesquisa,"Questões de Discussão"), inputs=ai, outputs=ao, show_progress="full")
         btn_glossario.click(fn=mfh(build_message_glossario,"Glossário de Termos"), inputs=ai, outputs=ao, show_progress="full")
-        btn_impacto_br.click(fn=mfh(build_message_impacto_brasil,"Impacto no Brasil"), inputs=ai, outputs=ao, show_progress="full")
-        btn_aplicab.click(fn=mfh(build_message_aplicabilidade_br,"Aplicabilidade Brasileira"), inputs=ai, outputs=ao, show_progress="full")
+        btn_impacto_br.click(fn=mfh(build_message_implicacoes_praticas,"Impacto na Sociedade"), inputs=ai, outputs=ao, show_progress="full")
+        btn_aplicab.click(fn=mfh(build_message_implicacoes_praticas,"Aplicações no Mundo Real"), inputs=ai, outputs=ao, show_progress="full")
 
     return page
 
