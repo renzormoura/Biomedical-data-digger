@@ -11,6 +11,7 @@ from prompt_builders import (
     build_message_aplicabilidade_br,
     build_message_auditoria_resposta,
     build_message_comparacao_literatura,
+    build_message_comparacao_artigos,
     build_message_checklist,
     build_message_confiabilidade,
     build_message_conduta_urgencia,
@@ -132,6 +133,44 @@ def audit_last_response(article_id: str, model: str, response_text: str) -> str:
     return f"---\n> **Auditoria da Resposta**\n\n---\n{audit}"
 
 
+def compare_articles(article_id_a: str, article_id_b: str, model: str) -> str:
+    if not article_id_a or not article_id_a.strip() or not article_id_b or not article_id_b.strip():
+        raise gr.Error("Informe os dois IDs ou URLs para comparar os artigos.")
+    if not USE_GROQ:
+        raise gr.Error("Nenhum backend de LLM disponível. Configure a variável GROQ_API_KEY.")
+
+    articles = []
+    for article_id in (article_id_a, article_id_b):
+        cache_key = article_id.strip()
+        cached = get_cached_article(cache_key)
+        if cached:
+            article_title, abstract_text = cached
+        else:
+            try:
+                article_title, abstract_text, _ = article_services.resolve_article(cache_key)
+                if article_title and abstract_text:
+                    set_cached_article(cache_key, article_title, abstract_text)
+            except Exception as error:
+                raise gr.Error(f"Erro ao buscar um dos artigos: {error}")
+        if not abstract_text:
+            raise gr.Error(f"Nenhum resumo encontrado para: {article_title}")
+        articles.append((article_title, abstract_text))
+
+    (title_a, abstract_a), (title_b, abstract_b) = articles
+    source_title_a = f"<<<SOURCE_A_TITLE_START>>>\n{title_a}\n<<<SOURCE_A_TITLE_END>>>"
+    source_abstract_a = f"<<<SOURCE_A_ABSTRACT_START>>>\n{abstract_a}\n<<<SOURCE_A_ABSTRACT_END>>>"
+    source_title_b = f"<<<SOURCE_B_TITLE_START>>>\n{title_b}\n<<<SOURCE_B_TITLE_END>>>"
+    source_abstract_b = f"<<<SOURCE_B_ABSTRACT_START>>>\n{abstract_b}\n<<<SOURCE_B_ABSTRACT_END>>>"
+    messages = build_message_comparacao_artigos(
+        source_title_a, source_abstract_a, source_title_b, source_abstract_b
+    )
+    try:
+        comparison = llm_service.generate_response(messages, model)
+    except Exception as error:
+        raise gr.Error(f"Erro ao comparar os artigos: {error}")
+    return f"---\n> **Comparação entre Artigos**\n\n---\n{comparison}"
+
+
 INTRO_TXT = "Análise inteligente de artigos científicos. Cole qualquer ID ou URL de artigo."
 INST_TXT = "Cole um **PMID**, **PMCID**, **DOI**, **arXiv ID**, **OpenAlex ID** ou a **URL completa** do artigo"
 
@@ -202,6 +241,17 @@ def make_page_geral():
                   value="GPT-OSS 20B (Groq)",
                   label="Modelo de linguagem",
               )
+
+            with gr.Accordion("Comparar dois artigos", open=False):
+              article_id_a = gr.Textbox(
+                  label="Artigo A — ID ou URL",
+                  placeholder="PMID, PMCID, DOI, arXiv, OpenAlex ou URL",
+              )
+              article_id_b = gr.Textbox(
+                  label="Artigo B — ID ou URL",
+                  placeholder="PMID, PMCID, DOI, arXiv, OpenAlex ou URL",
+              )
+              btn_comparar_artigos = gr.Button("Comparar Artigos", variant="primary")
 
             with gr.Accordion("Como encontrar o ID ou URL?", open=False):
               gr.Markdown("""
@@ -308,6 +358,12 @@ def make_page_geral():
           inputs=[article_id, model_choice, last_response],
           outputs=output_box,
           show_progress="full",
+        )
+        btn_comparar_artigos.click(
+            fn=compare_articles,
+            inputs=[article_id_a, article_id_b, model_choice],
+            outputs=output_box,
+            show_progress="full",
         )
 
         btn_sumario.click(fn=mfh(build_message_sumario,"Sumário"), inputs=ai, outputs=ao, show_progress="full")

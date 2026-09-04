@@ -608,6 +608,40 @@ Retorne exclusivamente estes títulos em negrito e listas:
 Se não houver afirmações problemáticas, escreva explicitamente: "Nenhuma afirmação problemática encontrada no resumo disponível."""
     return [{"role": "system", "content": SYS_PROMPT.strip()}, {"role": "user", "content": user_prompt}]
 
+def build_message_comparacao_artigos(
+    title_a: str,
+    abstract_a: str,
+    title_b: str,
+    abstract_b: str,
+    sys_prompt: str = SYS_PROMPT,
+) -> List[Dict[str, str]]:
+    user_prompt = f"""Compare os dois resumos científicos abaixo. Mantenha as fontes separadas e não trate diferenças de descrição como diferenças reais quando os dados necessários não estiverem disponíveis.
+
+**ARTIGO A — FONTE DO ESTUDO**
+Título:
+{title_a}
+Resumo:
+{abstract_a}
+
+**ARTIGO B — FONTE DO ESTUDO**
+Título:
+{title_b}
+Resumo:
+{abstract_b}
+
+Compare somente informações explicitamente presentes nos respectivos resumos. Não use conhecimento externo, não invente valores e não conclua que um artigo é superior quando a comparação não for sustentada pelos dados disponíveis. Para qualquer item ausente, escreva "Não descrito no resumo correspondente".
+
+Use exclusivamente estes títulos em negrito e listas:
+1. **Objetivo e Pergunta de Pesquisa** — objetivo de cada artigo e semelhanças/diferenças explícitas;
+2. **População e Contexto** — participantes, amostra, local e critérios reportados;
+3. **Métodos** — desenho, intervenção/exposição, comparador e medidas utilizadas;
+4. **Resultados** — resultados principais e números exatamente como reportados;
+5. **Convergências** — achados que os dois resumos sustentam;
+6. **Divergências** — resultados ou métodos diferentes, sem tentar explicá-los com informação externa;
+7. **Limitações da Comparação** — dados ausentes, diferenças de escopo e fato de a comparação usar somente os resumos disponíveis;
+8. **Síntese** — resumo equilibrado do que pode e do que não pode ser comparado."""
+    return [{"role": "system", "content": sys_prompt.strip()}, {"role": "user", "content": user_prompt}]
+
 def build_message_pontos_chave(article_title, abstract_text, sys_prompt=SYS_PROMPT):
     user_prompt = f"""Você é um especialista em síntese científica. Leia o resumo a seguir e extraia até 5 achados importantes, apresentados como frases curtas e diretas.
 
