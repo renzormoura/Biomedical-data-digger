@@ -613,9 +613,25 @@ def build_message_comparacao_artigos(
     abstract_a: str,
     title_b: str,
     abstract_b: str,
+    analysis_type: str = "Comparação de resultados",
     sys_prompt: str = SYS_PROMPT,
 ) -> List[Dict[str, str]]:
-    user_prompt = f"""Compare os dois resumos científicos abaixo. Mantenha as fontes separadas e não trate diferenças de descrição como diferenças reais quando os dados necessários não estiverem disponíveis.
+    analysis_instructions = {
+        "Comparação de resultados": "Compare os principais achados, desfechos e valores reportados.",
+        "Comparação metodológica": "Compare desenho, amostra, métodos, intervenções, comparadores e medidas.",
+        "Concordâncias e contradições": "Identifique o que converge e diverge, sem explicar diferenças com conhecimento externo.",
+        "Comparação de populações": "Compare participantes, critérios, contexto, local e características demográficas reportadas.",
+        "Eficácia": "Compare resultados de eficácia somente quando os desfechos e métricas forem comparáveis.",
+        "Segurança": "Compare eventos adversos, riscos e limitações de segurança explicitamente reportados.",
+        "Qualidade e limitações": "Compare limitações, dados ausentes, vieses discutidos e força descritiva das informações.",
+        "Comparação estatística": "Compare métricas estatísticas somente quando forem do mesmo tipo e reproduza os valores exatamente.",
+        "Aplicabilidade prática": "Compare contextos de aplicação e implicações práticas somente quando explicitamente sustentados.",
+        "Evolução do conhecimento": "Avalie se um resumo confirma, atualiza ou contesta o outro, somente quando os textos permitirem essa conclusão.",
+    }
+    focus = analysis_instructions.get(analysis_type, analysis_instructions["Comparação de resultados"])
+    user_prompt = f"""Compare os dois resumos científicos abaixo. Modalidade selecionada: **{analysis_type}**. {focus}
+
+Mantenha as fontes separadas e não trate diferenças de descrição como diferenças reais quando os dados necessários não estiverem disponíveis.
 
 **ARTIGO A — FONTE DO ESTUDO**
 Título:
@@ -632,14 +648,15 @@ Resumo:
 Compare somente informações explicitamente presentes nos respectivos resumos. Não use conhecimento externo, não invente valores e não conclua que um artigo é superior quando a comparação não for sustentada pelos dados disponíveis. Para qualquer item ausente, escreva "Não descrito no resumo correspondente".
 
 Use exclusivamente estes títulos em negrito e listas:
-1. **Objetivo e Pergunta de Pesquisa** — objetivo de cada artigo e semelhanças/diferenças explícitas;
-2. **População e Contexto** — participantes, amostra, local e critérios reportados;
-3. **Métodos** — desenho, intervenção/exposição, comparador e medidas utilizadas;
-4. **Resultados** — resultados principais e números exatamente como reportados;
-5. **Convergências** — achados que os dois resumos sustentam;
-6. **Divergências** — resultados ou métodos diferentes, sem tentar explicá-los com informação externa;
-7. **Limitações da Comparação** — dados ausentes, diferenças de escopo e fato de a comparação usar somente os resumos disponíveis;
-8. **Síntese** — resumo equilibrado do que pode e do que não pode ser comparado."""
+1. **Foco da Análise** — responda primeiro à modalidade selecionada;
+2. **Artigo A** — informações relevantes encontradas no resumo A;
+3. **Artigo B** — informações relevantes encontradas no resumo B;
+4. **Comparação Direta** — semelhanças e diferenças sustentadas pelos dois resumos;
+5. **Dados Não Comparáveis** — métricas, populações ou informações que não podem ser comparadas;
+6. **Limitações da Comparação** — dados ausentes, diferenças de escopo e uso somente dos resumos disponíveis;
+7. **Síntese** — conclusão equilibrada sobre o que pode e o que não pode ser concluído.
+
+Para modalidades de eficácia, segurança ou estatística, não declare que um artigo é superior se os desenhos, populações, métricas ou contextos não forem comparáveis."""
     return [{"role": "system", "content": sys_prompt.strip()}, {"role": "user", "content": user_prompt}]
 
 def build_message_pontos_chave(article_title, abstract_text, sys_prompt=SYS_PROMPT):

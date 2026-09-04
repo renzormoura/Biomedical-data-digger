@@ -133,7 +133,7 @@ def audit_last_response(article_id: str, model: str, response_text: str) -> str:
     return f"---\n> **Auditoria da Resposta**\n\n---\n{audit}"
 
 
-def compare_articles(article_id_a: str, article_id_b: str, model: str) -> str:
+def compare_articles(article_id_a: str, article_id_b: str, analysis_type: str, model: str) -> str:
     if not article_id_a or not article_id_a.strip() or not article_id_b or not article_id_b.strip():
         raise gr.Error("Informe os dois IDs ou URLs para comparar os artigos.")
     if not USE_GROQ:
@@ -162,7 +162,11 @@ def compare_articles(article_id_a: str, article_id_b: str, model: str) -> str:
     source_title_b = f"<<<SOURCE_B_TITLE_START>>>\n{title_b}\n<<<SOURCE_B_TITLE_END>>>"
     source_abstract_b = f"<<<SOURCE_B_ABSTRACT_START>>>\n{abstract_b}\n<<<SOURCE_B_ABSTRACT_END>>>"
     messages = build_message_comparacao_artigos(
-        source_title_a, source_abstract_a, source_title_b, source_abstract_b
+      source_title_a,
+      source_abstract_a,
+      source_title_b,
+      source_abstract_b,
+      analysis_type=analysis_type,
     )
     try:
         comparison = llm_service.generate_response(messages, model)
@@ -250,6 +254,22 @@ def make_page_geral():
               article_id_b = gr.Textbox(
                   label="Artigo B — ID ou URL",
                   placeholder="PMID, PMCID, DOI, arXiv, OpenAlex ou URL",
+              )
+              comparison_type = gr.Dropdown(
+                  choices=[
+                      "Comparação de resultados",
+                      "Comparação metodológica",
+                      "Concordâncias e contradições",
+                      "Comparação de populações",
+                      "Eficácia",
+                      "Segurança",
+                      "Qualidade e limitações",
+                      "Comparação estatística",
+                      "Aplicabilidade prática",
+                      "Evolução do conhecimento",
+                  ],
+                  value="Comparação de resultados",
+                  label="Tipo de análise",
               )
               btn_comparar_artigos = gr.Button("Comparar Artigos", variant="primary")
 
@@ -361,7 +381,7 @@ def make_page_geral():
         )
         btn_comparar_artigos.click(
             fn=compare_articles,
-            inputs=[article_id_a, article_id_b, model_choice],
+          inputs=[article_id_a, article_id_b, comparison_type, model_choice],
             outputs=output_box,
             show_progress="full",
         )
