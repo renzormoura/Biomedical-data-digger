@@ -9,6 +9,7 @@ from prompt_builders import (
     build_dynamic_sys_prompt,
     build_message_alertas,
     build_message_aplicabilidade_br,
+    build_message_auditoria_resposta,
     build_message_comparacao_literatura,
     build_message_checklist,
     build_message_confiabilidade,
@@ -83,7 +84,9 @@ def summariser(article_id: str, model: str, build_fn,
     dynamic_prompt = build_dynamic_sys_prompt(publico, tom, idioma, detalhe, foco)
 
     try:
-        messages = build_fn(article_title, abstract_text, sys_prompt=dynamic_prompt)
+        source_title = f"<<<SOURCE_TITLE_START>>>\n{article_title}\n<<<SOURCE_TITLE_END>>>"
+        source_abstract = f"<<<SOURCE_ABSTRACT_START>>>\n{abstract_text}\n<<<SOURCE_ABSTRACT_END>>>"
+        messages = build_fn(source_title, source_abstract, sys_prompt=dynamic_prompt)
         summary = llm_service.generate_response(messages, model)
     except Exception as e:
         raise gr.Error(f"Erro ao gerar resumo com a LLM: {str(e)}")
@@ -98,6 +101,35 @@ def summariser_with_label(article_id: str, model: str, build_fn, label: str,
     filtros_ativos = [f for f in [publico, tom, idioma, detalhe, foco] if f]
     filtros_str = "  |  ".join(filtros_ativos) if filtros_ativos else "Padrão"
     return f"---\n> **{label}**  ·  Filtros: *{filtros_str}*\n\n---\n{result}"
+
+
+def audit_last_response(article_id: str, model: str, response_text: str) -> str:
+    if not response_text:
+        raise gr.Error("Gere uma análise antes de executar a auditoria.")
+    if not USE_GROQ:
+        raise gr.Error("Nenhum backend de LLM disponível. Configure a variável GROQ_API_KEY.")
+
+    cache_key = article_id.strip() if article_id else ""
+    cached = get_cached_article(cache_key)
+    if cached:
+        article_title, abstract_text = cached
+    else:
+        try:
+            article_title, abstract_text, _ = article_services.resolve_article(cache_key)
+        except Exception as error:
+            raise gr.Error(f"Erro ao buscar o resumo para auditoria: {error}")
+
+    if not abstract_text:
+      raise gr.Error("Não foi possível recuperar o resumo original para auditoria.")
+
+    source_title = f"<<<SOURCE_TITLE_START>>>\n{article_title}\n<<<SOURCE_TITLE_END>>>"
+    source_abstract = f"<<<SOURCE_ABSTRACT_START>>>\n{abstract_text}\n<<<SOURCE_ABSTRACT_END>>>"
+    messages = build_message_auditoria_resposta(source_title, source_abstract, response_text)
+    try:
+        audit = llm_service.generate_response(messages, model)
+    except Exception as error:
+        raise gr.Error(f"Erro ao auditar a resposta: {error}")
+    return f"---\n> **Auditoria da Resposta**\n\n---\n{audit}"
 
 
 INTRO_TXT = "Análise inteligente de artigos científicos. Cole qualquer ID ou URL de artigo."
@@ -155,6 +187,7 @@ def make_page_geral():
         """)
 
         session_history = gr.State([])
+        last_response = gr.State("")
 
         with gr.Row(equal_height=False):
           with gr.Column(scale=1, min_width=320):
@@ -224,6 +257,7 @@ def make_page_geral():
                 btn_implicacoes = gr.Button("Implicações Práticas", variant="secondary")
               with gr.Row():
                 btn_confiab    = gr.Button("Avaliação Crítica",         variant="primary")
+                btn_auditoria  = gr.Button("Auditoria da Resposta",     variant="primary")
 
             with gr.Accordion("Educacional", open=False):
               with gr.Row():
@@ -260,14 +294,21 @@ def make_page_geral():
 
         ci = [article_id, model_choice, filtro_publico, filtro_tom, filtro_idioma, filtro_detalhe, filtro_foco]
         ai = ci + [session_history]
-        ao = [output_box, session_history, history_display]
+        ao = [output_box, session_history, history_display, last_response]
 
         def mfh(build_fn, label):
             def fn(aid, mdl, pub, tom, idi, det, foc, hist):
                 result = summariser_with_label(aid, mdl, build_fn, label, pub or "", tom or "", idi or "", det or "", foc or "")
                 nh, nd = update_history(aid, hist)
-                return result, nh, nd
+                return result, nh, nd, result
             return fn
+
+        btn_auditoria.click(
+          fn=audit_last_response,
+          inputs=[article_id, model_choice, last_response],
+          outputs=output_box,
+          show_progress="full",
+        )
 
         btn_sumario.click(fn=mfh(build_message_sumario,"Sumário"), inputs=ai, outputs=ao, show_progress="full")
         btn_resumo.click(fn=mfh(build_message_resumo,"Resumo"), inputs=ai, outputs=ao, show_progress="full")

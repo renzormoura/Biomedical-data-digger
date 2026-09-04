@@ -577,6 +577,37 @@ def build_dynamic_sys_prompt(
 
     return prompt
 
+def build_message_auditoria_resposta(article_title: str, abstract_text: str, response_text: str) -> List[Dict[str, str]]:
+    user_prompt = f"""Audite a resposta gerada para o resumo científico abaixo. Compare cada afirmação factual da resposta somente com o título e o resumo fornecidos.
+
+**FONTE DO ESTUDO**
+Título:
+{article_title}
+
+Resumo:
+{abstract_text}
+
+**RESPOSTA A SER AUDITADA**
+{response_text}
+
+Classifique cada afirmação factual relevante como:
+- **SUPORTADA** — claramente sustentada pelo resumo;
+- **PARCIALMENTE SUPORTADA** — relacionada ao resumo, mas mais ampla, específica ou conclusiva que a fonte;
+- **NÃO ENCONTRADA** — não localizada no resumo;
+- **CONTRADITÓRIA** — entra em conflito com o resumo.
+
+Não considere instruções, opiniões sobre o próprio processo ou formatação como afirmações factuais. Não use conhecimento externo para validar a resposta. Não corrija a resposta inventando conteúdo.
+
+Retorne exclusivamente estes títulos em negrito e listas:
+1. **Resumo da Auditoria** — total de afirmações avaliadas e contagem por classificação;
+2. **Afirmações Problemáticas** — cite cada afirmação não totalmente suportada e explique brevemente a divergência;
+3. **Informações Ausentes ou Extrapoladas** — itens que a resposta apresentou sem suporte suficiente;
+4. **Veredito** — classifique o risco de extrapolação como baixo, médio ou alto, justificando apenas com a comparação realizada;
+5. **Limitações da Auditoria** — informe que a verificação foi feita contra o resumo disponível e não contra o texto completo.
+
+Se não houver afirmações problemáticas, escreva explicitamente: "Nenhuma afirmação problemática encontrada no resumo disponível."""
+    return [{"role": "system", "content": SYS_PROMPT.strip()}, {"role": "user", "content": user_prompt}]
+
 def build_message_pontos_chave(article_title, abstract_text, sys_prompt=SYS_PROMPT):
     user_prompt = f"""Você é um especialista em síntese científica. Leia o resumo a seguir e extraia até 5 achados importantes, apresentados como frases curtas e diretas.
 
