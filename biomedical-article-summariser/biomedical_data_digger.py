@@ -1,3 +1,4 @@
+import hashlib
 import os
 from typing import List, Dict
 
@@ -48,8 +49,43 @@ MEDICAL_CSS = CUSTOM_CSS + MEDICAL_OVERRIDES
 get_cached_article = article_services.get_cached_article
 set_cached_article = article_services.set_cached_article
 
+USER_ACCOUNTS: dict[str, str] = {}
 
 
+def _hash_password(password: str) -> str:
+    return hashlib.sha256(password.strip().encode("utf-8")).hexdigest()
+
+
+def create_account(email: str, password: str) -> str:
+    if not email or not email.strip():
+        raise gr.Error("Informe um e-mail válido.")
+    if not password or not password.strip():
+        raise gr.Error("Informe uma senha.")
+
+    normalized_email = email.strip().lower()
+    if normalized_email in USER_ACCOUNTS:
+        raise gr.Error("Este e-mail já está cadastrado.")
+
+    USER_ACCOUNTS[normalized_email] = _hash_password(password)
+    return f"Conta criada com sucesso para {normalized_email}."
+
+
+def login_account(email: str, password: str, current_user: str = "") -> tuple[str, str]:
+    if not email or not email.strip():
+        raise gr.Error("Informe um e-mail.")
+    if not password or not password.strip():
+        raise gr.Error("Informe a senha.")
+
+    normalized_email = email.strip().lower()
+    stored_hash = USER_ACCOUNTS.get(normalized_email)
+    if not stored_hash or stored_hash != _hash_password(password):
+        raise gr.Error("E-mail ou senha inválidos.")
+
+    return f"Usuário logado: {normalized_email}", normalized_email
+
+
+def logout_account(_: str = "") -> tuple[str, str]:
+    return "*Nenhum usuário logado.*", ""
 
 
 def summariser(article_id: str, model: str, build_fn,
@@ -684,13 +720,93 @@ def make_page_pesquisa():
     return page
 
 
+def make_page_contas():
+    """Página para criação e login de contas."""
+    with gr.Blocks(
+        theme=gr.themes.Base(
+            primary_hue=gr.themes.colors.blue,
+            neutral_hue=gr.themes.colors.slate,
+            font=[gr.themes.GoogleFont("Inter"), "system-ui", "sans-serif"],
+            font_mono=[gr.themes.GoogleFont("JetBrains Mono"), "monospace"],
+        ),
+        css=CUSTOM_CSS,
+    ) as page:
+        gr.HTML("""
+        <div class="app-header">
+          <h1><span class="accent">Biomedical</span> Data Digger</h1>
+          <p class="app-subtitle">Contas e acesso do usuário</p>
+        </div>
+        """)
+
+        logged_user = gr.State("")
+        status_box = gr.Markdown(value="*Nenhum usuário logado.*")
+
+        with gr.Row(equal_height=False):
+            with gr.Column(scale=1, min_width=320):
+                account_email = gr.Textbox(label="E-mail", placeholder="seuemail@exemplo.com")
+                account_password = gr.Password(label="Senha", placeholder="Digite sua senha")
+                with gr.Row():
+                    btn_criar_conta = gr.Button("Criar conta", variant="primary")
+                    btn_entrar = gr.Button("Entrar", variant="secondary")
+                btn_sair = gr.Button("Sair da conta", variant="stop")
+
+            with gr.Column(scale=2, min_width=480):
+                account_info = gr.Markdown(
+                    value="""
+                    ## Conta
+                    Cadastre-se para guardar sua sessão local do app.
+                    """
+                )
+
+        def handle_create(email: str, password: str):
+            message = create_account(email, password)
+            return message, status_box
+
+        def handle_login(email: str, password: str, current_user: str):
+            message, user = login_account(email, password, current_user)
+            return message, user
+
+        def handle_logout(_: str):
+            return logout_account(_)
+
+        btn_criar_conta.click(
+            fn=lambda email, password: (create_account(email, password), "*Nenhum usuário logado.*"),
+            inputs=[account_email, account_password],
+            outputs=[account_info, status_box],
+            show_progress="full",
+        )
+
+        btn_entrar.click(
+            fn=handle_login,
+            inputs=[account_email, account_password, logged_user],
+            outputs=[account_info, logged_user],
+            show_progress="full",
+        )
+
+        btn_sair.click(
+            fn=handle_logout,
+            inputs=[logged_user],
+            outputs=[account_info, logged_user],
+            show_progress="full",
+        )
+
+        gr.Markdown("""
+        <small>
+        Esta conta é salva em memória durante a execução do app. Para uso em produção, recomendamos integrar com banco de dados e autenticação real.
+        </small>
+        """)
+
+    return page
+
+
 def gradio_ui():
     page_geral = make_page_geral()
     page_medicina = make_page_medicina()
     page_pesquisa = make_page_pesquisa()
+    page_contas = make_page_contas()
     app = gr.TabbedInterface(
-        [page_geral, page_medicina, page_pesquisa],
-        tab_names=["☰  Geral", "⚕  Medicina", "🔎  Pesquisa por palavra-chave"],
+        [page_geral, page_medicina, page_pesquisa, page_contas],
+        tab_names=["☰  Geral", "⚕  Medicina", "🔎  Pesquisa por palavra-chave", "👤  Contas"],
         title="Biomedical Data Digger",
     )
     return app
