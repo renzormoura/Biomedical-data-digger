@@ -671,8 +671,8 @@ def make_page_pesquisa():
 
             with gr.Column(scale=2, min_width=480):
                 search_results = gr.Dataframe(
-                    headers=["Título", "Revista", "Ano", "PMID", "Confiabilidade"],
-                    datatype=["str", "str", "str", "str", "str"],
+                    headers=["Título", "Revista", "Ano", "PMID", "Fonte", "Confiabilidade"],
+                    datatype=["str", "str", "str", "str", "str", "str"],
                     interactive=False,
                     wrap=True,
                     label="Artigos recomendados",
@@ -693,6 +693,7 @@ def make_page_pesquisa():
                     item["journal"],
                     str(item["year"]),
                     item["pmid"],
+                    item["source"],
                     f"{item['reliability']} · score {item['reliability_score']:.2f}",
                 ]
                 for item in results

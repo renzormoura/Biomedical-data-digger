@@ -58,6 +58,23 @@ class SearchReliableArticlesTest(unittest.TestCase):
         self.assertIn("reliability_score", results[0])
         self.assertIn("PubMed / Europe PMC", results[0]["reliability"])
 
+    def test_search_combines_supported_sources(self):
+        with patch.object(article_services, "_search_europe_pmc", return_value=[
+            {"title": "Europe PMC article", "pmid": "10000001", "journalTitle": "Journal", "pubYear": 2024, "citedByCount": 10, "source": "MED"},
+        ]), patch.object(article_services, "_search_openalex", return_value=[
+            {"id": "https://openalex.org/W1", "title": "OpenAlex article", "publication_year": 2023, "doi": "https://doi.org/10.1000/openalex", "cited_by_count": 20, "primary_location": {"source": {"display_name": "OpenAlex Journal"}}},
+        ]), patch.object(article_services, "_search_semantic_scholar", return_value=[
+            {"paperId": "semantic-1", "title": "Semantic Scholar article", "year": 2022, "venue": "Semantic Journal", "externalIds": {}, "citationCount": 30},
+        ]), patch.object(article_services, "_search_crossref", return_value=[
+            {"title": ["Crossref article"], "DOI": "10.1000/crossref", "published": {"date-parts": [[2021]]}, "container-title": ["Crossref Journal"], "is-referenced-by-count": 40},
+        ]), patch.object(article_services, "_search_arxiv", return_value=[
+            article_services.bs("<entry><id>https://arxiv.org/abs/2401.00001</id><title>arXiv article</title><published>2020-01-01</published></entry>", "lxml-xml").find("entry"),
+        ]):
+            results = article_services.search_reliable_articles("diabetes", limit=10)
+
+        self.assertEqual({item["source"] for item in results}, {"MED", "OPENALEX", "SEMANTIC_SCHOLAR", "CROSSREF", "ARXIV"})
+        self.assertEqual(len(results), 5)
+
 
 if __name__ == "__main__":
     unittest.main()

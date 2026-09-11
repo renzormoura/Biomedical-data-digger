@@ -2,6 +2,7 @@
 
 import re
 import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import wraps
 from typing import Tuple
 
@@ -275,55 +276,207 @@ def _reliability_label_for_item(item: dict) -> tuple[str, float]:
         score += min(citations / 1000, 0.15)
 
     score = min(score, 0.99)
+    source_labels = {
+        "MED": "PubMed / Europe PMC",
+        "PMC": "PubMed / Europe PMC",
+        "OPENALEX": "OpenAlex",
+        "SEMANTIC_SCHOLAR": "Semantic Scholar",
+        "CROSSREF": "Crossref",
+        "ARXIV": "arXiv",
+    }
+    source_label = source_labels.get(source, source or "Fonte externa")
     if score >= 0.90:
-        return "Alta confiabilidade · PubMed / Europe PMC", round(score, 2)
+        return f"Alta confiabilidade · {source_label}", round(score, 2)
     if score >= 0.75:
-        return "Boa confiabilidade · PubMed / Europe PMC", round(score, 2)
-    return "Confiabilidade moderada · PubMed / Europe PMC", round(score, 2)
+        return f"Boa confiabilidade · {source_label}", round(score, 2)
+    return f"Confiabilidade moderada · {source_label}", round(score, 2)
+
+
+def _search_europe_pmc(keyword: str, page_size: int) -> list[dict]:
+    response = requests.get(
+        "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
+        params={"query": keyword, "resultType": "core", "format": "json", "pageSize": page_size},
+        timeout=15,
+    )
+    response.raise_for_status()
+    return response.json().get("resultList", {}).get("result", [])
+
+
+def _search_openalex(keyword: str, page_size: int) -> list[dict]:
+    response = requests.get(
+        "https://api.openalex.org/works",
+        params={
+            "search": keyword,
+            "per-page": page_size,
+        },
+        headers={"User-Agent": "BiomedicalDataDigger/1.0"},
+        timeout=15,
+    )
+    response.raise_for_status()
+    return response.json().get("results", [])
+
+
+def _search_semantic_scholar(keyword: str, page_size: int) -> list[dict]:
+    response = requests.get(
+        "https://api.semanticscholar.org/graph/v1/paper/search",
+        params={
+            "query": keyword,
+            "limit": page_size,
+            "fields": "title,year,venue,externalIds,citationCount,paperId",
+        },
+        timeout=15,
+    )
+    response.raise_for_status()
+    return response.json().get("data", [])
+
+
+def _search_crossref(keyword: str, page_size: int) -> list[dict]:
+    response = requests.get(
+        "https://api.crossref.org/works",
+        params={
+            "query": keyword,
+            "rows": page_size,
+        },
+        headers={"User-Agent": "BiomedicalDataDigger/1.0"},
+        timeout=15,
+    )
+    response.raise_for_status()
+    return response.json().get("message", {}).get("items", [])
+
+
+def _search_arxiv(keyword: str, page_size: int) -> list[dict]:
+    response = requests.get(
+        "https://export.arxiv.org/api/query",
+        params={"search_query": f'all:"{keyword}"', "max_results": page_size},
+        timeout=15,
+    )
+    response.raise_for_status()
+    feed = bs(response.content, "lxml-xml")
+    return feed.find_all("entry")
+
+
+def _year_from_crossref(item: dict) -> str:
+    date_parts = item.get("published", {}).get("date-parts", [[]])
+    return str(date_parts[0][0]) if date_parts and date_parts[0] else "—"
+
+
+def _normalize_search_result(item: dict, source: str) -> dict:
+    if source == "MED":
+        return {
+            "title": item.get("title") or "Título não informado",
+            "pmid": str(item.get("pmid") or ""),
+            "journal": item.get("journalTitle") or "Revista não informada",
+            "year": item.get("pubYear") or "—",
+            "doi": item.get("doi") or "",
+            "source": source,
+            "cited_by": int(item.get("citedByCount") or 0),
+            "url": f"https://pubmed.ncbi.nlm.nih.gov/{item.get('pmid')}/" if item.get("pmid") else "",
+        }
+    if source == "OPENALEX":
+        location = item.get("primary_location") or {}
+        return {
+            "title": item.get("title") or "Título não informado",
+            "pmid": "",
+            "journal": (location.get("source") or {}).get("display_name") or "Revista não informada",
+            "year": item.get("publication_year") or "—",
+            "doi": (item.get("doi") or "").replace("https://doi.org/", ""),
+            "source": source,
+            "cited_by": int(item.get("cited_by_count") or 0),
+            "url": item.get("doi") or item.get("id") or "",
+        }
+    if source == "SEMANTIC_SCHOLAR":
+        external_ids = item.get("externalIds") or {}
+        return {
+            "title": item.get("title") or "Título não informado",
+            "pmid": str(external_ids.get("PubMed") or ""),
+            "journal": item.get("venue") or "Revista não informada",
+            "year": item.get("year") or "—",
+            "doi": external_ids.get("DOI") or "",
+            "source": source,
+            "cited_by": int(item.get("citationCount") or 0),
+            "url": f"https://www.semanticscholar.org/paper/{item.get('paperId')}" if item.get("paperId") else "",
+        }
+    if source == "CROSSREF":
+        titles = item.get("title") or []
+        journals = item.get("container-title") or []
+        return {
+            "title": titles[0] if titles else "Título não informado",
+            "pmid": "",
+            "journal": journals[0] if journals else "Revista não informada",
+            "year": _year_from_crossref(item),
+            "doi": item.get("DOI") or "",
+            "source": source,
+            "cited_by": int(item.get("is-referenced-by-count") or 0),
+            "url": item.get("URL") or (f"https://doi.org/{item.get('DOI')}" if item.get("DOI") else ""),
+        }
+    title = clean_text(item.find("title").get_text()) if item.find("title") else "Título não informado"
+    arxiv_url = item.find("id").get_text(strip=True) if item.find("id") else ""
+    published = item.find("published")
+    year = published.get_text(strip=True)[:4] if published else "—"
+    return {
+        "title": title,
+        "pmid": "",
+        "journal": "arXiv",
+        "year": year,
+        "doi": "",
+        "source": source,
+        "cited_by": 0,
+        "url": arxiv_url,
+    }
+
+
+def _deduplicate_articles(articles: list[dict]) -> list[dict]:
+    unique = {}
+    for article in articles:
+        key = (article["doi"] or article["pmid"] or re.sub(r"\W+", " ", article["title"]).strip().lower())
+        if key and key not in unique:
+            unique[key] = article
+    return list(unique.values())
 
 
 def search_reliable_articles(keyword: str, limit: int = 5, area: str = "Todas") -> list[dict]:
-    """Busca artigos relevantes, ordenados por visibilidade, área e confiabilidade."""
+    """Busca artigos em todas as fontes suportadas e ordena os resultados."""
     if not keyword or not keyword.strip():
         return []
 
-    safe_keyword = requests.utils.quote(keyword.strip())
     page_size = max(1, min(int(limit or 5), 10))
-    url = (
-        "https://www.ebi.ac.uk/europepmc/webservices/rest/search?"
-        f"query={safe_keyword}&resultType=core&format=json&pageSize={page_size}&sort=CITED"
-    )
-    response = requests.get(url, timeout=15)
-    response.raise_for_status()
-    results = response.json().get("resultList", {}).get("result", [])
+    source_searchers = {
+        "MED": _search_europe_pmc,
+        "OPENALEX": _search_openalex,
+        "SEMANTIC_SCHOLAR": _search_semantic_scholar,
+        "CROSSREF": _search_crossref,
+        "ARXIV": _search_arxiv,
+    }
+    fetch_size = min(max(page_size * 2, 10), 25)
+    raw_results = []
+    failures = []
+    with ThreadPoolExecutor(max_workers=len(source_searchers)) as executor:
+        pending = {
+            executor.submit(searcher, keyword.strip(), fetch_size): source
+            for source, searcher in source_searchers.items()
+        }
+        for future in as_completed(pending):
+            source = pending[future]
+            try:
+                raw_results.extend(
+                    _normalize_search_result(item, source)
+                    for item in future.result()
+                )
+            except Exception as error:
+                failures.append(f"{source}: {error}")
+
+    if not raw_results and failures:
+        raise RuntimeError("Nenhuma fonte de artigos respondeu. " + " | ".join(failures))
 
     ranked = []
-    for item in results:
-        title = item.get("title") or "Título não informado"
-        pmid = item.get("pmid") or ""
-        journal = item.get("journalTitle") or "Revista não informada"
-        year = item.get("pubYear") or "—"
-        doi = item.get("doi") or ""
-        citations = int(item.get("citedByCount") or 0)
-        source = item.get("source") or "MED"
-
-        if not _area_matches(title, journal, area):
+    for item in _deduplicate_articles(raw_results):
+        if not _area_matches(item["title"], item["journal"], area):
             continue
 
         reliability_label, reliability_score = _reliability_label_for_item(item)
-        article = {
-            "title": title,
-            "pmid": str(pmid),
-            "journal": journal,
-            "year": year,
-            "doi": doi,
-            "source": source,
-            "cited_by": citations,
-            "reliability": reliability_label,
-            "reliability_score": reliability_score,
-            "url": f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/" if pmid else (f"https://doi.org/{doi}" if doi else ""),
-        }
-        ranked.append(article)
+        item["reliability"] = reliability_label
+        item["reliability_score"] = reliability_score
+        ranked.append(item)
 
     ranked.sort(key=lambda item: (item["reliability_score"], item["cited_by"]), reverse=True)
     return ranked[:page_size]
