@@ -744,7 +744,11 @@ def make_page_contas():
         with gr.Row(equal_height=False):
             with gr.Column(scale=1, min_width=320):
                 account_email = gr.Textbox(label="E-mail", placeholder="seuemail@exemplo.com")
-                account_password = gr.Password(label="Senha", placeholder="Digite sua senha")
+                account_password = gr.Textbox(
+                    label="Senha",
+                    placeholder="Digite sua senha",
+                    type="password",
+                )
                 with gr.Row():
                     btn_criar_conta = gr.Button("Criar conta", variant="primary")
                     btn_entrar = gr.Button("Entrar", variant="secondary")
