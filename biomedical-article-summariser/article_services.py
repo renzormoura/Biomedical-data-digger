@@ -248,6 +248,20 @@ AREA_KEYWORDS = {
     "Imunologia": ["immune", "immun", "inflammation", "autoimmun", "cytokine", "allergy"],
     "Nefrologia": ["kidney", "renal", "dialysis", "glomerul", "nephro"],
     "Pediatria": ["pediatric", "child", "newborn", "infant", "adolescent"],
+    "Tecnologia e Computacao": ["computer", "computing", "software", "hardware", "technology", "artificial intelligence", "machine learning", "deep learning", "data science", "cybersecurity", "internet", "algorithm"],
+    "Engenharia Civil": ["civil engineering", "construction", "building", "concrete", "structural", "geotechnical", "pavement", "transportation", "infrastructure"],
+    "Engenharia Eletrica": ["electrical engineering", "electric", "power system", "energy", "circuit", "electronics", "robotics", "telecommunication", "signal processing"],
+    "Engenharia Quimica": ["chemical engineering", "process engineering", "catalysis", "polymer", "reactor", "thermodynamic", "separation", "bioprocess"],
+    "Quimica": ["chemistry", "chemical", "molecule", "compound", "synthesis", "spectroscopy", "analytical chemistry", "organic chemistry", "inorganic chemistry"],
+    "Fisica": ["physics", "quantum", "particle", "astrophysics", "relativity", "mechanics", "thermodynamics", "condensed matter"],
+    "Matematica e Estatistica": ["mathematics", "mathematical", "statistics", "statistical", "probability", "regression", "optimization", "theorem"],
+    "Ciencias Sociais e Sociologia": ["sociology", "social science", "social behavior", "society", "inequality", "community", "demographic", "migration", "social policy"],
+    "Psicologia": ["psychology", "psychological", "mental health", "behavior", "cognition", "emotion", "therapy", "personality"],
+    "Economia e Negocios": ["economics", "economic", "business", "finance", "management", "market", "entrepreneurship", "organization", "commerce"],
+    "Educacao": ["education", "teaching", "learning", "school", "student", "curriculum", "pedagogy", "university", "academic"],
+    "Direito e Politicas Publicas": ["law", "legal", "justice", "policy", "public policy", "governance", "regulation", "human rights"],
+    "Meio Ambiente e Sustentabilidade": ["environment", "environmental", "sustainability", "climate", "ecology", "pollution", "biodiversity", "renewable", "conservation"],
+    "Agricultura e Alimentos": ["agriculture", "crop", "food", "soil", "plant science", "livestock", "irrigation", "nutrition"],
 }
 
 

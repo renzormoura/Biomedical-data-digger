@@ -75,6 +75,23 @@ class SearchReliableArticlesTest(unittest.TestCase):
         self.assertEqual({item["source"] for item in results}, {"MED", "OPENALEX", "SEMANTIC_SCHOLAR", "CROSSREF", "ARXIV"})
         self.assertEqual(len(results), 5)
 
+    def test_general_areas_match_article_metadata(self):
+        self.assertTrue(article_services._area_matches(
+            "Machine learning for structural concrete inspection",
+            "Journal of Civil Engineering",
+            "Engenharia Civil",
+        ))
+        self.assertTrue(article_services._area_matches(
+            "The role of social behavior in mental health",
+            "Journal of Psychology and Sociology",
+            "Psicologia",
+        ))
+        self.assertTrue(article_services._area_matches(
+            "Renewable energy and climate policy",
+            "Environmental Sustainability Review",
+            "Meio Ambiente e Sustentabilidade",
+        ))
+
 
 if __name__ == "__main__":
     unittest.main()
