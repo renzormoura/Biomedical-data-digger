@@ -614,6 +614,7 @@ def build_message_comparacao_artigos(
     title_b: str,
     abstract_b: str,
     analysis_type: str = "Comparação de resultados",
+    medical_context: bool = False,
     sys_prompt: str = SYS_PROMPT,
 ) -> List[Dict[str, str]]:
     analysis_instructions = {
@@ -629,7 +630,11 @@ def build_message_comparacao_artigos(
         "Evolução do conhecimento": "Avalie se um resumo confirma, atualiza ou contesta o outro, somente quando os textos permitirem essa conclusão.",
     }
     focus = analysis_instructions.get(analysis_type, analysis_instructions["Comparação de resultados"])
-    user_prompt = f"""Compare os dois resumos científicos abaixo. Modalidade selecionada: **{analysis_type}**. {focus}
+    domain_instruction = (
+        " Dê prioridade a população clínica, intervenção, comparador, desfechos, eficácia, segurança e aplicabilidade clínica, quando esses dados estiverem no resumo."
+        if medical_context else ""
+    )
+    user_prompt = f"""Compare os dois resumos científicos abaixo. Modalidade selecionada: **{analysis_type}**. {focus}{domain_instruction}
 
 Mantenha as fontes separadas e não trate diferenças de descrição como diferenças reais quando os dados necessários não estiverem disponíveis.
 

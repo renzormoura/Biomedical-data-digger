@@ -236,6 +236,99 @@ def fetch_by_semantic_scholar(s2_id: str) -> Article:
         return f"Erro ao buscar no Semantic Scholar: {error}", ""
 
 
+AREA_KEYWORDS = {
+    "Todas": [],
+    "Cardiologia": ["cardio", "heart", "coronary", "myocard", "arrhythmia", "hypertension", "vascular"],
+    "Oncologia": ["cancer", "tumor", "oncology", "neoplasia", "carcinoma", "chemotherapy", "radiotherapy"],
+    "Endocrinologia": ["diabetes", "insulin", "endocr", "metabolic", "thyroid", "glucose", "hormone"],
+    "Infectologia": ["infection", "sepsis", "virus", "bacteria", "infectious", "covid", "antibiotic"],
+    "Neurologia": ["neuro", "brain", "stroke", "parkinson", "alzheim", "epilepsy", "cognitive"],
+    "Pulmologia": ["lung", "pulmonary", "asthma", "copd", "respiratory"],
+    "Imunologia": ["immune", "immun", "inflammation", "autoimmun", "cytokine", "allergy"],
+    "Nefrologia": ["kidney", "renal", "dialysis", "glomerul", "nephro"],
+    "Pediatria": ["pediatric", "child", "newborn", "infant", "adolescent"],
+}
+
+
+def _area_matches(title: str, journal: str, area: str) -> bool:
+    if not area or area == "Todas":
+        return True
+    haystack = f"{title} {journal}".lower()
+    keywords = AREA_KEYWORDS.get(area, [])
+    return any(keyword in haystack for keyword in keywords)
+
+
+def _reliability_label_for_item(item: dict) -> tuple[str, float]:
+    journal = (item.get("journalTitle") or "").lower()
+    source = (item.get("source") or "").upper()
+    is_open = bool(item.get("isOpenAccess"))
+    citations = int(item.get("citedByCount") or 0)
+
+    score = 0.60
+    if source in {"MED", "PMC"}:
+        score += 0.20
+    if any(name in journal for name in ["nejm", "nature", "lancet", "jama", "bmj", "cell", "science"]):
+        score += 0.15
+    if is_open:
+        score += 0.05
+    if citations > 0:
+        score += min(citations / 1000, 0.15)
+
+    score = min(score, 0.99)
+    if score >= 0.90:
+        return "Alta confiabilidade · PubMed / Europe PMC", round(score, 2)
+    if score >= 0.75:
+        return "Boa confiabilidade · PubMed / Europe PMC", round(score, 2)
+    return "Confiabilidade moderada · PubMed / Europe PMC", round(score, 2)
+
+
+def search_reliable_articles(keyword: str, limit: int = 5, area: str = "Todas") -> list[dict]:
+    """Busca artigos relevantes, ordenados por visibilidade, área e confiabilidade."""
+    if not keyword or not keyword.strip():
+        return []
+
+    safe_keyword = requests.utils.quote(keyword.strip())
+    page_size = max(1, min(int(limit or 5), 10))
+    url = (
+        "https://www.ebi.ac.uk/europepmc/webservices/rest/search?"
+        f"query={safe_keyword}&resultType=core&format=json&pageSize={page_size}&sort=CITED"
+    )
+    response = requests.get(url, timeout=15)
+    response.raise_for_status()
+    results = response.json().get("resultList", {}).get("result", [])
+
+    ranked = []
+    for item in results:
+        title = item.get("title") or "Título não informado"
+        pmid = item.get("pmid") or ""
+        journal = item.get("journalTitle") or "Revista não informada"
+        year = item.get("pubYear") or "—"
+        doi = item.get("doi") or ""
+        citations = int(item.get("citedByCount") or 0)
+        source = item.get("source") or "MED"
+
+        if not _area_matches(title, journal, area):
+            continue
+
+        reliability_label, reliability_score = _reliability_label_for_item(item)
+        article = {
+            "title": title,
+            "pmid": str(pmid),
+            "journal": journal,
+            "year": year,
+            "doi": doi,
+            "source": source,
+            "cited_by": citations,
+            "reliability": reliability_label,
+            "reliability_score": reliability_score,
+            "url": f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/" if pmid else (f"https://doi.org/{doi}" if doi else ""),
+        }
+        ranked.append(article)
+
+    ranked.sort(key=lambda item: (item["reliability_score"], item["cited_by"]), reverse=True)
+    return ranked[:page_size]
+
+
 def resolve_article(raw_input: str) -> Tuple[str, str, str]:
     input_type, value = detect_input_type(raw_input.strip())
     if input_type == "pmcid":

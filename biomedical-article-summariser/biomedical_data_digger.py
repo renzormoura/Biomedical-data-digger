@@ -133,7 +133,13 @@ def audit_last_response(article_id: str, model: str, response_text: str) -> str:
     return f"---\n> **Auditoria da Resposta**\n\n---\n{audit}"
 
 
-def compare_articles(article_id_a: str, article_id_b: str, analysis_type: str, model: str) -> str:
+def compare_articles(
+  article_id_a: str,
+  article_id_b: str,
+  analysis_type: str,
+  model: str,
+  medical_context: bool = False,
+) -> str:
     if not article_id_a or not article_id_a.strip() or not article_id_b or not article_id_b.strip():
         raise gr.Error("Informe os dois IDs ou URLs para comparar os artigos.")
     if not USE_GROQ:
@@ -167,6 +173,7 @@ def compare_articles(article_id_a: str, article_id_b: str, analysis_type: str, m
       source_title_b,
       source_abstract_b,
       analysis_type=analysis_type,
+      medical_context=medical_context,
     )
     try:
         comparison = llm_service.generate_response(messages, model)
@@ -504,6 +511,33 @@ def make_page_medicina():
               with gr.Row():
                 btn_aplicab = gr.Button("Aplicabilidade BR", variant="secondary")
 
+            with gr.Accordion("Comparar dois artigos clínicos", open=False):
+              article_id_a_med = gr.Textbox(
+                  label="Artigo A — ID ou URL",
+                  placeholder="PMID, PMCID, DOI ou URL do artigo clínico",
+              )
+              article_id_b_med = gr.Textbox(
+                  label="Artigo B — ID ou URL",
+                  placeholder="PMID, PMCID, DOI ou URL do artigo clínico",
+              )
+              comparison_type_med = gr.Dropdown(
+                  choices=[
+                      "Comparação de resultados",
+                      "Comparação metodológica",
+                      "Concordâncias e contradições",
+                      "Comparação de populações",
+                      "Eficácia",
+                      "Segurança",
+                      "Qualidade e limitações",
+                      "Comparação estatística",
+                      "Aplicabilidade prática",
+                      "Evolução do conhecimento",
+                  ],
+                  value="Comparação de resultados",
+                  label="Tipo de análise clínica",
+              )
+              btn_comparar_artigos_med = gr.Button("Comparar Artigos Clínicos", variant="primary")
+
           with gr.Column(scale=2, min_width=480):
             output_box = gr.Markdown(
                 value="*Selecione um tipo de análise e clique em um botão para começar.*",
@@ -546,6 +580,106 @@ def make_page_medicina():
         btn_sus.click(fn=mfh(build_message_disponibilidade_sus,"Disponibilidade no SUS"), inputs=ai, outputs=ao, show_progress="full")
         btn_anvisa.click(fn=mfh(build_message_vigilancia_sanitaria,"Vigilância Sanitária"), inputs=ai, outputs=ao, show_progress="full")
         btn_aplicab.click(fn=mfh(build_message_aplicabilidade_br,"Aplicabilidade Brasileira"), inputs=ai, outputs=ao, show_progress="full")
+        btn_comparar_artigos_med.click(
+          fn=lambda article_a, article_b, analysis, model: compare_articles(
+            article_a, article_b, analysis, model, medical_context=True
+          ),
+          inputs=[article_id_a_med, article_id_b_med, comparison_type_med, model_choice],
+          outputs=output_box,
+          show_progress="full",
+        )
+
+    return page
+
+
+def make_page_pesquisa():
+    """Cria a aba de pesquisa por palavras-chave com recomendações de artigos."""
+    with gr.Blocks(
+        theme=gr.themes.Base(
+            primary_hue=gr.themes.colors.blue,
+            neutral_hue=gr.themes.colors.slate,
+            font=[gr.themes.GoogleFont("Inter"), "system-ui", "sans-serif"],
+            font_mono=[gr.themes.GoogleFont("JetBrains Mono"), "monospace"],
+        ),
+        css=CUSTOM_CSS,
+    ) as page:
+        gr.HTML("""
+        <div class="app-header">
+          <h1><span class="accent">Biomedical</span> Data Digger</h1>
+          <p class="app-subtitle">Busca por palavra-chave · artigos prioritários e confiáveis</p>
+        </div>
+        """)
+
+        with gr.Row(equal_height=False):
+            with gr.Column(scale=1, min_width=320):
+                keyword = gr.Textbox(
+                    label="Palavra-chave ou tema de pesquisa",
+                    placeholder="ex: diabetes mellitus, machine learning, sepsis, immunotherapy",
+                )
+                area = gr.Dropdown(
+                    choices=["Todas", "Cardiologia", "Oncologia", "Endocrinologia", "Infectologia", "Neurologia", "Pulmologia", "Imunologia", "Nefrologia", "Pediatria"],
+                    value="Todas",
+                    label="Área de foco",
+                )
+                limit = gr.Dropdown(
+                    choices=["3", "5", "8"],
+                    value="5",
+                    label="Quantidade de recomendações",
+                )
+                btn_buscar = gr.Button("Buscar artigos confiáveis", variant="primary")
+                gr.Markdown("""
+                <small>
+                A busca prioriza artigos publicados em periódicos de grande reputação, com boa visibilidade e presença em bases indexadas como PubMed / Europe PMC.
+                </small>
+                """)
+
+            with gr.Column(scale=2, min_width=480):
+                search_results = gr.Dataframe(
+                    headers=["Título", "Revista", "Ano", "PMID", "Confiabilidade"],
+                    datatype=["str", "str", "str", "str", "str"],
+                    interactive=False,
+                    wrap=True,
+                    label="Artigos recomendados",
+                )
+                search_summary = gr.Markdown(value="*Aguardando pesquisa.*")
+
+        def run_keyword_search(query: str, selected_area: str, page_size: str):
+            if not query or not query.strip():
+                raise gr.Error("Informe uma palavra-chave ou tema para buscar artigos relevantes.")
+
+            results = article_services.search_reliable_articles(query, limit=int(page_size or 5), area=selected_area or "Todas")
+            if not results:
+                raise gr.Error("Nenhum artigo foi encontrado para esta busca com o filtro selecionado. Tente outra palavra-chave ou área.")
+
+            rows = [
+                [
+                    item["title"],
+                    item["journal"],
+                    str(item["year"]),
+                    item["pmid"],
+                    f"{item['reliability']} · score {item['reliability_score']:.2f}",
+                ]
+                for item in results
+            ]
+
+            summary = "\n\n".join(
+                (
+                    f"### {('🟢' if item['reliability_score'] >= 0.90 else '🟡' if item['reliability_score'] >= 0.75 else '🟠')} {idx}. "
+                    f"[{item['title']}]({item['url']})\n"
+                    f"- Revista: {item['journal']} ({item['year']})\n"
+                    f"- PMID: [{item['pmid']}]({item['url']})\n"
+                    f"- Confiabilidade: {item['reliability']} (score {item['reliability_score']:.2f})"
+                )
+                for idx, item in enumerate(results, start=1)
+            )
+            return rows, summary
+
+        btn_buscar.click(
+            fn=run_keyword_search,
+            inputs=[keyword, area, limit],
+            outputs=[search_results, search_summary],
+            show_progress="full",
+        )
 
     return page
 
@@ -553,9 +687,10 @@ def make_page_medicina():
 def gradio_ui():
     page_geral = make_page_geral()
     page_medicina = make_page_medicina()
+    page_pesquisa = make_page_pesquisa()
     app = gr.TabbedInterface(
-        [page_geral, page_medicina],
-        tab_names=["☰  Geral", "⚕  Medicina"],
+        [page_geral, page_medicina, page_pesquisa],
+        tab_names=["☰  Geral", "⚕  Medicina", "🔎  Pesquisa por palavra-chave"],
         title="Biomedical Data Digger",
     )
     return app
