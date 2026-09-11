@@ -1,16 +1,30 @@
 # CHANGELOG
 
+## 2026-09 — Busca e documentação
+
+### Adicionado
+- Busca por palavras-chave agregada em Europe PMC, OpenAlex, Semantic Scholar, Crossref e arXiv.
+- Filtros de pesquisa para tecnologia, engenharias, química, física, matemática, ciências sociais, psicologia, economia, educação, direito, sustentabilidade e agricultura.
+- Índice de Relevância Bibliográfica com impacto por ano, atualidade, completude dos metadados e cobertura da fonte.
+- Documentação específica da busca em `docs/features/busca-artigos.md`.
+- Testes automatizados para busca multi-fonte, filtros gerais e cálculo do índice.
+
+### Alterado
+- README atualizado para refletir Groq, Ollama, Render, testes e fontes atuais.
+- A interface passou a exibir "Relevância bibliográfica" em vez de apresentar o indicador como confiabilidade científica.
+- A normalização passou a usar corretamente citações e metadados de cada fonte.
+
 ## 2026-09 — Sessão atual
 
 ### Adicionado
 - 6 novos tipos de análise: Crítica Metodológica, Dados Estatísticos, Pergunta PICO, Alertas e Contraindicações, Checklist Pré-Conduta, Aplicabilidade Brasileira
 - Sistema de filtros de personalização (público-alvo, tom, idioma, nível de detalhe, foco temático)
-- Cache de artigos em memória (evita chamadas duplicadas à Europe PMC)
+- Cache de artigos em memória (evita chamadas duplicadas às fontes externas)
 - Histórico de sessão (últimas 10 consultas)
 - Função `fetch_full_text()` para extrair texto completo do XML da Europe PMC (implementada, não exposta na UI)
 - Documentação técnica completa (docs/)
 - 11 novos botões organizados em 6 seções com accordions: Visão Geral, Clínico/PS, Acadêmico/Pesquisa, Contexto Brasileiro, Educacional, Avaliação do Artigo
-- Botão "Confiabilidade do Artigo" com score percentual — único que emite opinião fundamentada
+- Botão "Confiabilidade do Artigo" para análise crítica baseada no conteúdo do artigo
 - Redesign visual completo: tema escuro/claro com toggle ☀️/🌙, CSS customizado, fontes Inter + JetBrains Mono, botões com hover e glow azul
 - **Sistema universal de busca de artigos:** suporte a PMID, PMCID, DOI, arXiv ID, OpenAlex ID, Semantic Scholar ID e URLs completas
   - `detect_input_type()` — detecção automática do tipo de ID

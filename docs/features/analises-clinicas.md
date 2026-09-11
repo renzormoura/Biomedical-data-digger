@@ -29,7 +29,7 @@ Oferecer 11 tipos de análise estruturada de artigos biomédicos, cada um com pr
 - Esses prompts são usados em contexto real de pronto-socorro — NÃO alterar sem validação clínica
 
 ## Fluxo
-1. Usuário digita PMID/PMCID
+1. Usuário digita um identificador ou URL aceito
 2. Clica em um botão
 3. `summariser_with_label()` → `summariser()` → busca artigo (cache ou API) → monta prompt → chama LLM → retorna resultado
 4. Output exibe label do tipo de análise + filtros ativos + texto
@@ -47,6 +47,6 @@ Categorias:
 Sem seleção: comportamento padrão de cada botão, sem alteração.
 
 ## Dependências
-- Europe PMC REST API (busca de artigos)
+- Europe PMC, OpenAlex, Semantic Scholar, Crossref e arXiv (busca de artigos)
 - Groq API (geração de texto)
 - Gradio (interface)

@@ -92,6 +92,25 @@ class SearchReliableArticlesTest(unittest.TestCase):
             "Meio Ambiente e Sustentabilidade",
         ))
 
+    def test_relevance_uses_normalized_fields_for_non_medical_sources(self):
+        recent = {
+            "title": "Recent OpenAlex study",
+            "journal": "Technology Journal",
+            "year": 2026,
+            "doi": "10.1000/recent",
+            "url": "https://openalex.org/W1",
+            "source": "OPENALEX",
+            "cited_by": 40,
+        }
+        older = {**recent, "year": 2016, "cited_by": 0}
+
+        recent_label, recent_score = article_services._bibliographic_relevance_for_item(recent)
+        older_label, older_score = article_services._bibliographic_relevance_for_item(older)
+
+        self.assertIn("OpenAlex", recent_label)
+        self.assertGreater(recent_score, older_score)
+        self.assertGreater(recent_score, 0.50)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -8,7 +8,7 @@
 
 **Público-alvo:** Médicos, residentes, estudantes de medicina, enfermeiros, farmacêuticos e profissionais da área da saúde em geral. Uso principal em pronto-socorro (PS) e UPA.
 
-**Contexto de utilização:** O usuário insere um PMCID (ex: `PMC1234567`) ou PMID numérico (ex: `33984217`) de um artigo do Europe PMC. A aplicação busca o abstract via API, monta um prompt especializado e gera análises estruturadas usando LLM (Groq API em produção, Ollama local em desenvolvimento).
+**Contexto de utilização:** O usuário pode inserir PMID, PMCID, DOI, arXiv ID, OpenAlex ID, Semantic Scholar ID ou URL. A aplicação busca o abstract na fonte correspondente, monta um prompt especializado e gera análises estruturadas usando LLM (Groq API em produção, Ollama local em desenvolvimento).
 
 ---
 
@@ -19,7 +19,10 @@ STATUS: 🟢 Desenvolvimento ativo — Em produção no Render
 
 CONCLUÍDO:
 - Interface Gradio funcional
-- Busca de artigos via Europe PMC (PMCID e PMID)
+- Busca direta por PMID, PMCID, DOI, arXiv, OpenAlex, Semantic Scholar e URLs
+- Busca por palavras-chave agregando Europe PMC, OpenAlex, Semantic Scholar, Crossref e arXiv
+- Índice de Relevância Bibliográfica com fórmula documentada e campos normalizados por fonte
+- Filtros de pesquisa médicos e gerais: tecnologia, engenharias, química, física, matemática, ciências sociais, psicologia, economia, educação, direito, sustentabilidade e agricultura
 - 11 tipos de análise com prompts especializados
 - Sistema de filtros de personalização (público, tom, idioma, detalhe, foco)
 - Cache de artigos em memória (até 20 artigos por sessão)
@@ -34,17 +37,15 @@ EM DESENVOLVIMENTO:
 
 PENDENTE / PLANEJADO:
 - Integração com texto completo dos artigos (atualmente usa apenas o abstract)
-- Busca por palavras-chave (atualmente exige PMID/PMCID)
 - Export PDF/Word do resultado
 - Streaming de resposta (implementado e revertido — ver ADR-003)
 
 PROBLEMAS CONHECIDOS:
 - Render free tier hiberna após 15 min sem uso (primeira requisição lenta)
 - Streaming foi revertido por causar lentidão no free tier do Render
-- README.md está desatualizado (descreve versão antiga com Ollama)
 
 PRÓXIMO PASSO:
-- Atualizar README.md para refletir o estado atual do projeto
+- Melhorar a avaliação metodológica sem confundir esse recurso com o índice bibliográfico
 ```
 
 ---
@@ -62,7 +63,7 @@ PRÓXIMO PASSO:
 | LLM local (dev) | Ollama | (instalação local) |
 | Variáveis de ambiente | python-dotenv | 1.0.1 |
 | Hospedagem | Render (free tier) | — |
-| Dados de artigos | Europe PMC REST API | — |
+| Dados de artigos | Europe PMC, OpenAlex, Semantic Scholar, Crossref e arXiv | — |
 | Controle de versão | Git + GitHub | — |
 | Runtime (Render) | Python 3.11.9 via runtime.txt | — |
 
@@ -80,11 +81,11 @@ PRÓXIMO PASSO:
 
 **Fluxo principal:**
 ```
-Usuário digita PMID/PMCID
+Usuário digita identificador, URL ou palavra-chave
         ↓
-[Cache] → artigo já buscado? → usa cache
-        ↓ não
-Europe PMC REST API → busca abstract
+[Busca direta ou agregada] → fontes externas em paralelo
+        ↓
+Normalização + deduplicação + índice de relevância
         ↓
 Cache armazena resultado
         ↓
@@ -118,7 +119,7 @@ Biomedical_data_digger/
 │   ├── biomedical_data_digger.ipynb ← notebook de demonstração (legado)
 │   ├── requirements.txt             ← dependências pinadas
 │   ├── runtime.txt                  ← força Python 3.11.9 no Render
-│   ├── README.md                    ← DESATUALIZADO — descreve versão antiga
+│   ├── README.md                    ← documentação de execução e arquitetura
 │   └── .env                         ← secrets locais (não commitado)
 ├── docs/                            ← documentação técnica (criada agora)
 │   ├── PROJECT-CONTEXT.md
@@ -187,6 +188,31 @@ A única credencial é a `GROQ_API_KEY`, armazenada como variável de ambiente e
 - **PMID (abstract):** `https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=EXT_ID:{pmid}&resultType=core&format=json`
 - Autenticação: nenhuma (API pública)
 
+### Busca agregada de artigos
+- **Europe PMC:** pesquisa bibliográfica e abstracts biomédicos.
+- **OpenAlex:** obras, DOI, ano, revista e citações.
+- **Semantic Scholar:** artigos, DOI, venue e citações.
+- **Crossref:** DOI, título, revista, ano e referências recebidas.
+- **arXiv:** preprints, título, ano e URL.
+- As fontes são consultadas em paralelo; uma fonte indisponível não impede resultados das demais.
+
+## 10. Índice de Relevância Bibliográfica
+
+O índice é uma heurística de ordenação para descoberta bibliográfica. Ele não é
+uma avaliação de qualidade metodológica, validade clínica ou risco de viés.
+
+```text
+40% impacto por ano: citações / idade do artigo, limitado a 20 citações por ano
+25% atualidade: queda linear ao longo de 15 anos
+20% metadados: título, revista, ano, DOI/PMID e URL presentes
+15% cobertura da fonte: peso técnico da fonte consultada
+```
+
+O resultado é limitado ao intervalo `0.00`–`0.99` e classificado como alta
+relevância (`>= 0.90`), boa relevância (`>= 0.75`) ou relevância moderada.
+As APIs usam campos diferentes para citações; a camada de normalização converte
+esses campos para `cited_by` antes do cálculo.
+
 ### Groq API
 - SDK: `groq==0.28.0`
 - Autenticação: `GROQ_API_KEY` via variável de ambiente
@@ -202,7 +228,7 @@ A única credencial é a `GROQ_API_KEY`, armazenada como variável de ambiente e
 
 ---
 
-## 10. Configurações (variáveis de ambiente)
+## 11. Configurações (variáveis de ambiente)
 
 ```
 GROQ_API_KEY=          ← obrigatória em produção
@@ -214,13 +240,13 @@ Arquivo `.env` local (não commitado) contém `GROQ_API_KEY` para desenvolviment
 
 ---
 
-## 11. Regras que NÃO devem ser quebradas
+## 12. Regras que NÃO devem ser quebradas
 
 - **NÃO commitar o arquivo `.env`** — o `.gitignore` já o protege
 - **NÃO expor `GROQ_API_KEY` em código, logs ou documentação**
 - **NÃO remover o `runtime.txt`** — sem ele o Render usa Python 3.14 e o build falha
 - **NÃO remover a variável `PYTHON_VERSION=3.11.9`** do painel do Render
-- **NÃO remover o cache de artigos** — ele evita chamadas redundantes à Europe PMC API
+- **NÃO remover o cache de artigos** — ele evita chamadas redundantes às fontes externas
 - **NÃO usar streaming no Render free tier** — causa lentidão por CPU limitada (ver ADR-003)
 - **NÃO subir a pasta `venv/`** para o GitHub — já está no `.gitignore`
 - **NÃO alterar os prompts especializados** sem validação clínica — são usados em contexto de pronto-socorro real
@@ -229,17 +255,17 @@ Arquivo `.env` local (não commitado) contém `GROQ_API_KEY` para desenvolviment
 
 ---
 
-## 12. Banco de Dados / Migrations
+## 13. Banco de Dados / Migrations
 
 Não aplicável.
 
 ---
 
-## 13. Testes
+## 14. Testes
 
-Não há testes automatizados implementados.
-
-Validação atual: manual, via interface Gradio com PMIDs/PMCIDs reais.
+Há testes automatizados em `tests/test_keyword_search.py` para busca e normalização,
+combinação das cinco fontes, deduplicação, filtros de áreas gerais e cálculo do
+Índice de Relevância Bibliográfica com campos normalizados.
 
 PMIDs usados para teste durante o desenvolvimento:
 - `33984217`
@@ -247,7 +273,7 @@ PMIDs usados para teste durante o desenvolvimento:
 
 ---
 
-## 14. Comandos Importantes
+## 15. Comandos Importantes
 
 ```bash
 # Instalar dependências (com venv ativado)
@@ -264,6 +290,9 @@ git push
 
 # Verificar sintaxe Python
 python -c "import ast; ast.parse(open('biomedical_data_digger.py', encoding='utf-8').read()); print('OK')"
+
+# Executar testes
+python -m unittest discover -s tests -v
 ```
 
 **Configuração do Render:**
@@ -275,6 +304,7 @@ python -c "import ast; ast.parse(open('biomedical_data_digger.py', encoding='utf
 
 ---
 
-## 15. Próximo Passo
+## 16. Referências funcionais
 
-Atualizar o `README.md` para refletir o estado atual do projeto (versão Groq + Gradio hospedado no Render), substituindo as instruções antigas de Ollama local.
+- `docs/features/busca-artigos.md`: fontes, normalização, filtros e fórmula do índice.
+- `docs/features/analises-clinicas.md`: análises especializadas e regras dos prompts clínicos.

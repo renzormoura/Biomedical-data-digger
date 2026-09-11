@@ -52,6 +52,14 @@ Se não quiser usar a Groq API, instale o Ollama (https://ollama.com) e não def
 ## Verificar sintaxe do código
 ```bash
 python -c "import ast; ast.parse(open('biomedical_data_digger.py', encoding='utf-8').read()); print('OK')"
+
+## Executar testes
+
+Na raiz do projeto:
+
+```bash
+python -m unittest discover -s tests -v
+```
 ```
 
 ## Deploy para produção (Render)

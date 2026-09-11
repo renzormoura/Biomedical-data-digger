@@ -2,7 +2,10 @@
 
 ## ✅ Concluído
 
-- Busca de artigos via Europe PMC (PMCID e PMID)
+- Busca direta por PMID, PMCID, DOI, arXiv, OpenAlex, Semantic Scholar e URLs
+- Busca por palavras-chave em Europe PMC, OpenAlex, Semantic Scholar, Crossref e arXiv
+- Índice de Relevância Bibliográfica com fórmula explicável
+- Filtros por áreas médicas e gerais
 - Interface Gradio com tema visual
 - 11 tipos de análise com prompts especializados
 - Sistema de filtros de personalização (público, tom, idioma, detalhe, foco)
@@ -18,12 +21,12 @@ Nenhum item ativo.
 
 ## 📋 Próximo
 
-- **Atualizar README.md** — refletir estado atual (Groq + Render)
+- **Validar fontes em produção** — monitorar disponibilidade de arXiv, Crossref, OpenAlex e Semantic Scholar
+- **Avaliação metodológica estruturada** — recurso separado do índice bibliográfico
 
 ## 🔮 Futuro
 
 - **Texto completo** — integrar endpoint de full-text da Europe PMC (artigos Open Access)
-- **Busca por palavras-chave** — dispensar necessidade de PMID/PMCID
 - **Export PDF/Word** — download do resultado formatado
 - **Streaming** — reativar quando migrar para plano pago do Render (mais CPU)
 - **Testes automatizados** — cobertura mínima das funções principais

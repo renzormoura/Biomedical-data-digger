@@ -687,16 +687,16 @@ def make_page_pesquisa():
                     value="5",
                     label="Quantidade de recomendações",
                 )
-                btn_buscar = gr.Button("Buscar artigos confiáveis", variant="primary")
+                btn_buscar = gr.Button("Buscar artigos relevantes", variant="primary")
                 gr.Markdown("""
                 <small>
-                A busca prioriza artigos publicados em periódicos de grande reputação, com boa visibilidade e presença em bases indexadas como PubMed / Europe PMC.
+                A busca combina impacto bibliográfico, atualidade, completude dos metadados e cobertura das fontes consultadas.
                 </small>
                 """)
 
             with gr.Column(scale=2, min_width=480):
                 search_results = gr.Dataframe(
-                    headers=["Título", "Revista", "Ano", "PMID", "Fonte", "Confiabilidade"],
+                    headers=["Título", "Revista", "Ano", "PMID", "Fonte", "Relevância bibliográfica"],
                     datatype=["str", "str", "str", "str", "str", "str"],
                     interactive=False,
                     wrap=True,
@@ -730,7 +730,7 @@ def make_page_pesquisa():
                     f"[{item['title']}]({item['url']})\n"
                     f"- Revista: {item['journal']} ({item['year']})\n"
                     f"- PMID: [{item['pmid']}]({item['url']})\n"
-                    f"- Confiabilidade: {item['reliability']} (score {item['reliability_score']:.2f})"
+                    f"- Relevância bibliográfica: {item['reliability']} (score {item['reliability_score']:.2f})"
                 )
                 for idx, item in enumerate(results, start=1)
             )

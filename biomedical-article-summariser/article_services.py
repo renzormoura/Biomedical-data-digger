@@ -3,6 +3,7 @@
 import re
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime
 from functools import wraps
 from typing import Tuple
 
@@ -273,23 +274,51 @@ def _area_matches(title: str, journal: str, area: str) -> bool:
     return any(keyword in haystack for keyword in keywords)
 
 
-def _reliability_label_for_item(item: dict) -> tuple[str, float]:
-    journal = (item.get("journalTitle") or "").lower()
+def _bibliographic_relevance_for_item(item: dict) -> tuple[str, float]:
+    """Calcula um indicador transparente de relevancia para descoberta bibliografica.
+
+    O indicador nao avalia a qualidade metodologica do estudo. Ele combina impacto
+    de citacoes ajustado pela idade, atualidade, completude dos metadados e cobertura
+    da fonte, todos normalizados para o intervalo de 0 a 1.
+    """
+    journal = (item.get("journal") or item.get("journalTitle") or "").lower()
     source = (item.get("source") or "").upper()
-    is_open = bool(item.get("isOpenAccess"))
-    citations = int(item.get("citedByCount") or 0)
+    citations = int(item.get("cited_by") or item.get("citedByCount") or 0)
+    year_value = item.get("year") or item.get("pubYear")
+    try:
+        publication_year = int(str(year_value)[:4])
+    except (TypeError, ValueError):
+        publication_year = None
 
-    score = 0.60
-    if source in {"MED", "PMC"}:
-        score += 0.20
-    if any(name in journal for name in ["nejm", "nature", "lancet", "jama", "bmj", "cell", "science"]):
-        score += 0.15
-    if is_open:
-        score += 0.05
-    if citations > 0:
-        score += min(citations / 1000, 0.15)
+    current_year = datetime.now().year
+    age = max(1, current_year - publication_year) if publication_year else 10
+    citation_rate = citations / age
+    impact_score = min(citation_rate / 20, 1.0)
+    recency_score = max(0.0, 1.0 - (age / 15)) if publication_year else 0.0
+    metadata_fields = [
+        item.get("title"),
+        journal,
+        publication_year,
+        item.get("doi") or item.get("pmid"),
+        item.get("url"),
+    ]
+    metadata_score = sum(bool(field) for field in metadata_fields) / len(metadata_fields)
+    source_score = {
+        "MED": 1.0,
+        "PMC": 1.0,
+        "OPENALEX": 0.95,
+        "SEMANTIC_SCHOLAR": 0.90,
+        "CROSSREF": 0.85,
+        "ARXIV": 0.80,
+    }.get(source, 0.70)
 
-    score = min(score, 0.99)
+    score = (
+        impact_score * 0.40
+        + recency_score * 0.25
+        + metadata_score * 0.20
+        + source_score * 0.15
+    )
+    score = round(min(max(score, 0.0), 0.99), 2)
     source_labels = {
         "MED": "PubMed / Europe PMC",
         "PMC": "PubMed / Europe PMC",
@@ -300,10 +329,10 @@ def _reliability_label_for_item(item: dict) -> tuple[str, float]:
     }
     source_label = source_labels.get(source, source or "Fonte externa")
     if score >= 0.90:
-        return f"Alta confiabilidade · {source_label}", round(score, 2)
+        return f"Alta relevância bibliográfica · {source_label}", score
     if score >= 0.75:
-        return f"Boa confiabilidade · {source_label}", round(score, 2)
-    return f"Confiabilidade moderada · {source_label}", round(score, 2)
+        return f"Boa relevância bibliográfica · {source_label}", score
+    return f"Relevância bibliográfica moderada · {source_label}", score
 
 
 def _search_europe_pmc(keyword: str, page_size: int) -> list[dict]:
@@ -487,9 +516,9 @@ def search_reliable_articles(keyword: str, limit: int = 5, area: str = "Todas") 
         if not _area_matches(item["title"], item["journal"], area):
             continue
 
-        reliability_label, reliability_score = _reliability_label_for_item(item)
-        item["reliability"] = reliability_label
-        item["reliability_score"] = reliability_score
+        relevance_label, relevance_score = _bibliographic_relevance_for_item(item)
+        item["reliability"] = relevance_label
+        item["reliability_score"] = relevance_score
         ranked.append(item)
 
     ranked.sort(key=lambda item: (item["reliability_score"], item["cited_by"]), reverse=True)
