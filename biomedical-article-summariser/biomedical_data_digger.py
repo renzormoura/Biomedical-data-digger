@@ -1,10 +1,10 @@
-import hashlib
 import os
 from typing import List, Dict
 
 import gradio as gr
 
 import article_services
+from account_store import AccountStoreError, account_store
 import llm_service
 from prompt_builders import (
     build_dynamic_sys_prompt,
@@ -49,24 +49,21 @@ MEDICAL_CSS = CUSTOM_CSS + MEDICAL_OVERRIDES
 get_cached_article = article_services.get_cached_article
 set_cached_article = article_services.set_cached_article
 
-USER_ACCOUNTS: dict[str, str] = {}
-
-
-def _hash_password(password: str) -> str:
-    return hashlib.sha256(password.strip().encode("utf-8")).hexdigest()
-
-
 def create_account(email: str, password: str) -> str:
     if not email or not email.strip():
         raise gr.Error("Informe um e-mail válido.")
     if not password or not password.strip():
         raise gr.Error("Informe uma senha.")
+    if len(password.strip()) < 8:
+        raise gr.Error("A senha deve ter pelo menos 8 caracteres.")
 
     normalized_email = email.strip().lower()
-    if normalized_email in USER_ACCOUNTS:
+    try:
+        created = account_store.create_user(normalized_email, password.strip())
+    except AccountStoreError as error:
+        raise gr.Error(str(error)) from error
+    if not created:
         raise gr.Error("Este e-mail já está cadastrado.")
-
-    USER_ACCOUNTS[normalized_email] = _hash_password(password)
     return f"Conta criada com sucesso para {normalized_email}."
 
 
@@ -77,8 +74,11 @@ def login_account(email: str, password: str, current_user: str = "") -> tuple[st
         raise gr.Error("Informe a senha.")
 
     normalized_email = email.strip().lower()
-    stored_hash = USER_ACCOUNTS.get(normalized_email)
-    if not stored_hash or stored_hash != _hash_password(password):
+    try:
+        authenticated = account_store.authenticate(normalized_email, password.strip())
+    except AccountStoreError as error:
+        raise gr.Error(str(error)) from error
+    if not authenticated:
         raise gr.Error("E-mail ou senha inválidos.")
 
     return f"Usuário logado: {normalized_email}", normalized_email
@@ -752,6 +752,7 @@ def make_page_contas():
                 with gr.Row():
                     btn_criar_conta = gr.Button("Criar conta", variant="primary")
                     btn_entrar = gr.Button("Entrar", variant="secondary")
+                btn_visitante = gr.Button("Entrar como visitante", variant="secondary")
                 btn_sair = gr.Button("Sair da conta", variant="stop")
 
             with gr.Column(scale=2, min_width=480):
@@ -773,6 +774,9 @@ def make_page_contas():
         def handle_logout(_: str):
             return logout_account(_)
 
+        def handle_guest():
+            return "Acesso como visitante ativo. Nenhuma conta foi criada.", "visitor"
+
         btn_criar_conta.click(
             fn=lambda email, password: (create_account(email, password), "*Nenhum usuário logado.*"),
             inputs=[account_email, account_password],
@@ -787,6 +791,12 @@ def make_page_contas():
             show_progress="full",
         )
 
+        btn_visitante.click(
+            fn=handle_guest,
+            inputs=[],
+            outputs=[account_info, logged_user],
+        )
+
         btn_sair.click(
             fn=handle_logout,
             inputs=[logged_user],
@@ -796,7 +806,7 @@ def make_page_contas():
 
         gr.Markdown("""
         <small>
-        Esta conta é salva em memória durante a execução do app. Para uso em produção, recomendamos integrar com banco de dados e autenticação real.
+        O cadastro usa armazenamento persistente quando o banco de produção está configurado. O acesso como visitante não cria conta.
         </small>
         """)
 

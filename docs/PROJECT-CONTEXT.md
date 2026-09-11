@@ -134,7 +134,12 @@ Biomedical_data_digger/
 
 ## 6. Banco de Dados
 
-Não utilizado. O projeto não possui banco de dados.
+Contas são persistidas pelo `account_store.py`. Em produção, o serviço usa
+PostgreSQL por meio da variável `DATABASE_URL`; a tabela `users` é criada
+automaticamente na inicialização. Em desenvolvimento local, SQLite é usado
+como fallback em `accounts.sqlite3`. O Render Free usa disco efêmero, então
+PostgreSQL é obrigatório em produção para que contas sobrevivam a hibernações,
+reinícios e novos deploys.
 
 Cache de artigos: implementado em memória Python (`dict` com lock de thread), válido apenas durante a sessão ativa do servidor. Limite de 20 entradas.
 
@@ -142,7 +147,9 @@ Cache de artigos: implementado em memória Python (`dict` com lock de thread), v
 
 ## 7. Autenticação e Autorização
 
-Não implementado. A aplicação é pública e sem controle de acesso.
+O cadastro e login usam e-mail normalizado e senha derivada com PBKDF2-HMAC-SHA256,
+com salt aleatório por usuário. A sessão ainda é mantida no estado da interface
+Gradio; não há autorização por função ou controle de acesso a dados de artigos.
 
 A única credencial é a `GROQ_API_KEY`, armazenada como variável de ambiente e nunca exposta na UI ou no código commitado.
 

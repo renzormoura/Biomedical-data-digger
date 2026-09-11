@@ -33,6 +33,7 @@ pip install -r biomedical-article-summariser/requirements.txt
 Criar arquivo `biomedical-article-summariser/.env`:
 ```
 GROQ_API_KEY=sua_chave_aqui
+DATABASE_PATH=accounts.sqlite3
 ```
 
 A chave é obtida em: https://console.groq.com/keys
@@ -69,5 +70,19 @@ O Render detecta o push e faz redeploy automaticamente.
 | Start Command | `python biomedical_data_digger.py` |
 | Environment: GROQ_API_KEY | (sua chave) |
 | Environment: PYTHON_VERSION | `3.11.9` |
+| Environment: DATABASE_URL | URL privada do PostgreSQL |
+| Environment: APP_ENV | `production` |
 
 **CRÍTICO:** A variável `PYTHON_VERSION=3.11.9` deve estar definida no painel do Render. Sem ela o Render usa Python 3.14 e o build falha.
+
+### Banco de contas
+
+As contas são armazenadas na tabela `users`. Em produção, crie um PostgreSQL
+persistente e configure sua URL privada na variável `DATABASE_URL` do serviço
+web. No Render, use a Internal Database URL do banco quando o banco estiver no
+mesmo ambiente. O serviço não inicia em produção sem essa variável, evitando
+que contas sejam gravadas acidentalmente no disco efêmero do plano Free.
+
+Para desenvolvimento local, a ausência de `DATABASE_URL` usa SQLite em
+`biomedical-article-summariser/accounts.sqlite3`. Esse arquivo é apenas um
+fallback local e não deve ser usado para persistência no Render.
