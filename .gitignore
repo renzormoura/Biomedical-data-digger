@@ -1,5 +1,6 @@
 venv/
 .gradio/
+.freebuff/
 __pycache__/
 *.pyc
 .env
