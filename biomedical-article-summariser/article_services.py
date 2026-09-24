@@ -343,8 +343,89 @@ def _abstract_from_inverted_index(inverted: dict | None) -> str:
         return ""
 
 
+def _query_from_slug(url: str) -> str:
+    """Converte o slug final de uma URL em texto pesquisavel (ex.: /article/titulo-longo)."""
+    path = urlparse(url if "//" in url else f"https://{url}").path
+    slug = [segment for segment in path.split("/") if segment][-1] if path.strip("/") else ""
+    words = re.split(r"[-_]+", slug)
+    meaningful = [w for w in words if len(w) > 2 and not re.fullmatch(r"[A-Z]?\d+", w)]
+    if len(meaningful) < 4:
+        return ""
+    return " ".join(meaningful)
+
+
+def _extract_identifier_from_url(url: str) -> tuple[str, str]:
+    """Extrai (tipo, id) de URLs de editoras sem depender de acessar a pagina.
+
+    Suporta PII da Elsevier/ScienceDirect (resolvido depois no Crossref),
+    DOI embutido no caminho e Springer article IDs.
+    """
+    doi_match = re.search(r"(10\.\d{4,9}/[^\s?#&]+)", url)
+    if doi_match:
+        return "doi", doi_match.group(1).rstrip(".,;)")
+    pii_match = re.search(r"/pii/([A-Z0-9]{16,20})", url, re.IGNORECASE)
+    if pii_match:
+        return "pii", pii_match.group(1).upper()
+    springer_match = re.search(r"/(?:article|chapter)/(10\d{3,4}/\d+)", url, re.IGNORECASE)
+    if springer_match:
+        return "doi", springer_match.group(1)
+    return "", ""
+
+
+def _pii_to_doi(pii: str) -> str:
+    """Deriva o DOI no formato antigo da Elsevier a partir do PII (heuristica).
+
+    PII: S + ISSN(8) + ano(2) + item(5) + check(1) -> 10.1016/s0378-7788(01)00137-2
+    Nem todo artigo segue esse padrao, entao o resultado e sempre validado.
+    """
+    if len(pii) != 17 or not pii.startswith("S"):
+        return ""
+    issn, year, item, check = pii[1:9], pii[9:11], pii[11:16], pii[16]
+    if not (issn + item + check).isdigit():
+        return ""
+    return f"10.1016/{pii[0]}{issn[:4]}-{issn[4:]}({year}){item}-{check}".lower()
+
+
+def _fetch_by_crossref_alternative_id(alternative_id: str) -> Article:
+    """Localiza o artigo no Crossref por alternative-id (ex.: PII da Elsevier)."""
+    try:
+        response = requests.get(
+            "https://api.crossref.org/works",
+            params={"filter": f"alternative-id:{alternative_id}", "rows": 1},
+            headers={"User-Agent": "BiomedicalDataDigger/1.0"},
+            timeout=15,
+        )
+        response.raise_for_status()
+        items = response.json().get("message", {}).get("items", [])
+        if not items:
+            return "", ""
+        item = items[0]
+        titles = item.get("title") or []
+        title = titles[0] if titles else ""
+        abstract = clean_text(re.sub(r"<[^>]+>", " ", item.get("abstract", "")))
+        return title, abstract
+    except Exception:
+        return "", ""
+
+
 def fetch_from_generic_url(url: str) -> Article:
     """Extrai titulo e resumo de qualquer pagina de artigo usando meta tags."""
+    # Identificador na propria URL resolve sem precisar acessar a pagina
+    id_type, identifier = _extract_identifier_from_url(url)
+    if id_type == "doi":
+        doi_title, doi_abstract = fetch_by_doi(identifier)
+        if doi_abstract:
+            return doi_title, doi_abstract
+    elif id_type == "pii":
+        crossref_title, crossref_abstract = _fetch_by_crossref_alternative_id(identifier)
+        if crossref_title and crossref_abstract:
+            return crossref_title, crossref_abstract
+        derived_doi = _pii_to_doi(identifier)
+        if derived_doi:
+            doi_title, doi_abstract = fetch_by_doi(derived_doi)
+            if doi_abstract:
+                return doi_title, doi_abstract
+
     try:
         response = requests.get(url, headers=BROWSER_HEADERS, timeout=15)
         response.raise_for_status()
@@ -377,12 +458,40 @@ def fetch_from_generic_url(url: str) -> Article:
             if doi_abstract:
                 return doi_title, doi_abstract
 
+        # Identificador extraido da URL como plano B (PII no Crossref)
+        if id_type == "pii":
+            crossref_title, crossref_abstract = _fetch_by_crossref_alternative_id(identifier)
+            if crossref_title:
+                return crossref_title, crossref_abstract
+
         # Ultimo recurso: usar as primeiras linhas de texto visivel da pagina
         body_text = clean_text(soup.body.get_text(" ", strip=True)) if soup.body else ""
         if body_text and len(body_text) > 200:
             return title, body_text[:4000]
         return title, abstract
     except Exception as error:
+        # Pagina bloqueada (403 etc.): tentar ainda o identificador da URL
+        if id_type == "pii":
+            crossref_title, crossref_abstract = _fetch_by_crossref_alternative_id(identifier)
+            if crossref_title:
+                return crossref_title, crossref_abstract
+            derived_doi = _pii_to_doi(identifier)
+            if derived_doi:
+                doi_title, doi_abstract = fetch_by_doi(derived_doi)
+                if doi_title and doi_title != "Artigo nao encontrado via DOI":
+                    return doi_title, doi_abstract
+        if id_type == "doi":
+            doi_title, doi_abstract = fetch_by_doi(identifier)
+            if doi_title and doi_title != "Artigo nao encontrado via DOI":
+                return doi_title, doi_abstract
+        # Ultimo recurso: buscar o artigo pelas APIs abertas usando a slug da URL
+        slug_text = _query_from_slug(url)
+        if slug_text:
+            lookup_title, lookup_abstract = _title_lookup(slug_text)
+            if lookup_abstract:
+                return lookup_title, lookup_abstract
+            if lookup_title and not str(lookup_title).startswith("Nenhum resultado"):
+                return lookup_title, ""
         return f"Erro ao acessar a pagina: {error}", ""
 
 

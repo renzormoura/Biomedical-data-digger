@@ -182,7 +182,67 @@ class GenericUrlResolutionTest(unittest.TestCase):
         self.assertEqual(abstract, "DOI abstract")
 
 
-class TitleLookupTest(unittest.TestCase):
+class BlockedPageFallbackTest(unittest.TestCase):
+    def test_extract_identifier_from_science_direct_pii(self):
+        id_type, identifier = article_services._extract_identifier_from_url(
+            "https://www.sciencedirect.com/science/article/pii/S0378778801001372"
+        )
+        self.assertEqual(id_type, "pii")
+        self.assertEqual(identifier, "S0378778801001372")
+
+    def test_extract_doi_from_url_path(self):
+        id_type, identifier = article_services._extract_identifier_from_url(
+            "https://link.springer.com/article/10.1007/s00125-020-05232-5"
+        )
+        self.assertEqual(id_type, "doi")
+        self.assertEqual(identifier, "10.1007/s00125-020-05232-5")
+
+    @patch("article_services.requests.get")
+    @patch.object(article_services, "fetch_by_doi", return_value=("Artigo nao encontrado via DOI", ""))
+    def test_blocked_page_resolves_via_crossref_alternative_id(self, mock_doi, mock_get):
+        # 1a chamada: Crossref pre-check (titulo sem abstract) -> continua para a pagina
+        # 2a chamada: pagina bloqueada com 403 -> fallback final usa o Crossref
+        crossref_precheck = MagicMock()
+        crossref_precheck.raise_for_status.return_value = None
+        crossref_precheck.json.return_value = {
+            "message": {"items": [{"title": ["On the energy consumption in residential buildings"], "abstract": ""}]}
+        }
+        blocked = MagicMock()
+        blocked.raise_for_status.side_effect = Exception("403 Client Error: Forbidden")
+        crossref_fallback = MagicMock()
+        crossref_fallback.raise_for_status.return_value = None
+        crossref_fallback.json.return_value = {
+            "message": {
+                "items": [
+                    {
+                        "title": ["On the energy consumption in residential buildings"],
+                        "abstract": "This is the abstract text.",
+                    }
+                ]
+            }
+        }
+        mock_get.side_effect = [crossref_precheck, blocked, crossref_fallback]
+
+        title, abstract = article_services.fetch_from_generic_url(
+            "https://www.sciencedirect.com/science/article/pii/S0378778801001372"
+        )
+
+        self.assertEqual(title, "On the energy consumption in residential buildings")
+        self.assertEqual(abstract, "This is the abstract text.")
+
+    @patch("article_services.requests.get")
+    def test_doi_in_url_tries_doi_pipeline_first(self, mock_get):
+        # Sem requests reais: se o DOI resolver logo no inicio, nao acessa a pagina
+        with patch.object(article_services, "fetch_by_doi", return_value=("DOI title", "DOI abstract")) as mock_doi:
+            title, abstract = article_services.fetch_from_generic_url(
+                "https://link.springer.com/article/10.1007/s00125-020-05232-5"
+            )
+        self.assertEqual(title, "DOI title")
+        mock_doi.assert_called_once_with("10.1007/s00125-020-05232-5")
+
+
+if __name__ == "__main__":
+    unittest.main()
     @patch("article_services._search_openalex")
     @patch("article_services._search_semantic_scholar")
     @patch("article_services._search_europe_pmc")
@@ -217,3 +277,4 @@ class TitleLookupTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
