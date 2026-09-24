@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from functools import wraps
 from typing import Tuple
+from urllib.parse import parse_qs, urlparse
 
 import requests
 from bs4 import BeautifulSoup as bs
@@ -121,6 +122,22 @@ def get_abstract_from_pmid(pmid: str) -> Article:
     return article.get("title", "Titulo nao encontrado"), clean_text(article.get("abstractText", ""))
 
 
+GOOGLE_SCHOLAR_HOSTS = ("scholar.google.com", "scholar.google")
+
+
+def _looks_like_url(value: str) -> bool:
+    if value.startswith(("http://", "https://")):
+        return True
+    domain_pattern = r"^[\w-]+(\.[\w-]+)+(/|\?|$|#|:)"
+    return bool(re.match(domain_pattern, value, re.IGNORECASE)) and " " not in value
+
+
+def _normalize_url(value: str) -> str:
+    if value.startswith(("http://", "https://")):
+        return value
+    return f"https://{value}"
+
+
 def detect_input_type(raw: str) -> Tuple[str, str]:
     value = raw.strip()
     url_patterns = [
@@ -140,6 +157,13 @@ def detect_input_type(raw: str) -> Tuple[str, str]:
         match = re.search(pattern, value, re.IGNORECASE)
         if match:
             return input_type, match.group(1)
+
+    # DOI embutido em qualquer URL (ex.: pagina da editora, scholar com query doi)
+    doi_in_url = re.search(r"(10\.\d{4,9}/\S+?)(?=$|[\s])", value)
+    if doi_in_url:
+        doi = doi_in_url.group(1).rstrip(".,;)")
+        return "doi", doi
+
     checks = [
         (r"^PMC\d{4,}$", "pmcid", str.upper),
         (r"^\d{6,9}$", "pmid", lambda item: item),
@@ -152,6 +176,15 @@ def detect_input_type(raw: str) -> Tuple[str, str]:
     for pattern, input_type, normalizer in checks:
         if re.match(pattern, value, re.IGNORECASE):
             return input_type, normalizer(value)
+
+    # Google Academico: cluster, links= e paginas de resultado viram busca por titulo
+    if any(host in value.lower() for host in GOOGLE_SCHOLAR_HOSTS):
+        return "google_scholar", _normalize_url(value)
+
+    # Qualquer outro link: tratar como pagina de artigo generica
+    if _looks_like_url(value):
+        return "generic_url", _normalize_url(value)
+
     return "unknown", value
 
 
@@ -236,6 +269,168 @@ def fetch_by_semantic_scholar(s2_id: str) -> Article:
         return data.get("title", "Titulo nao encontrado"), clean_text(data.get("abstract") or "")
     except Exception as error:
         return f"Erro ao buscar no Semantic Scholar: {error}", ""
+
+
+BROWSER_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/126.0 Safari/537.36"
+    ),
+    "Accept-Language": "en-US,en;q=0.9,pt-BR;q=0.8,pt;q=0.7",
+}
+
+
+def _meta_content(soup: bs, *names: str) -> str:
+    for name in names:
+        for attr in ("name", "property"):
+            tag = soup.find("meta", attrs={attr: name})
+            if tag and tag.get("content", "").strip():
+                return tag["content"].strip()
+    return ""
+
+
+def _title_lookup(query: str) -> Article:
+    """Busca o artigo mais relevante por titulo/palavra-chave nas APIs abertas."""
+    searchers = (
+        (
+            "Europe PMC",
+            lambda: _search_europe_pmc(query, 3),
+            lambda item: (
+                item.get("title", ""),
+                clean_text(item.get("abstractText", "")),
+            ),
+        ),
+        (
+            "Semantic Scholar",
+            lambda: _search_semantic_scholar(query, 3),
+            lambda item: (
+                item.get("title", ""),
+                "",
+            ),
+        ),
+        (
+            "OpenAlex",
+            lambda: _search_openalex(query, 3),
+            lambda item: (
+                item.get("title", ""),
+                _abstract_from_inverted_index(item.get("abstract_inverted_index")),
+            ),
+        ),
+    )
+    for source_name, searcher, extractor in searchers:
+        try:
+            for item in searcher():
+                title, abstract = extractor(item)
+                if title and abstract:
+                    return title, abstract
+                if title:
+                    last_title_only = title
+        except Exception:
+            continue
+    return last_title_only or f"Nenhum resultado encontrado para: {query}", ""
+
+
+def _abstract_from_inverted_index(inverted: dict | None) -> str:
+    if not inverted:
+        return ""
+    try:
+        words = [""] * (max(position for positions in inverted.values() for position in positions) + 1)
+        for word, positions in inverted.items():
+            for position in positions:
+                words[position] = word
+        return clean_text(" ".join(words))
+    except Exception:
+        return ""
+
+
+def fetch_from_generic_url(url: str) -> Article:
+    """Extrai titulo e resumo de qualquer pagina de artigo usando meta tags."""
+    try:
+        response = requests.get(url, headers=BROWSER_HEADERS, timeout=15)
+        response.raise_for_status()
+        soup = bs(response.content, "lxml")
+
+        title = (
+            _meta_content(soup, "citation_title", "citation_journal_title")
+            or _meta_content(soup, "og:title", "twitter:title")
+            or (soup.title.get_text(strip=True) if soup.title else "")
+            or "Titulo nao encontrado"
+        )
+        abstract = _meta_content(
+            soup,
+            "citation_abstract",
+            "description",
+            "og:description",
+            "twitter:description",
+        )
+        abstract = clean_text(re.sub(r"<[^>]+>", " ", abstract))
+        if title and abstract:
+            return title, abstract
+
+        # Sem meta tags uteis: tentar localizar um DOI na pagina e buscar nas APIs
+        doi = _meta_content(soup, "citation_doi", "dc.doi") or ""
+        if not doi:
+            doi_match = re.search(r"10\.\d{4,9}/\S+", soup.get_text(" ", strip=True)[:20000])
+            doi = doi_match.group(0).rstrip(".,;)") if doi_match else ""
+        if doi:
+            doi_title, doi_abstract = fetch_by_doi(doi)
+            if doi_abstract:
+                return doi_title, doi_abstract
+
+        # Ultimo recurso: usar as primeiras linhas de texto visivel da pagina
+        body_text = clean_text(soup.body.get_text(" ", strip=True)) if soup.body else ""
+        if body_text and len(body_text) > 200:
+            return title, body_text[:4000]
+        return title, abstract
+    except Exception as error:
+        return f"Erro ao acessar a pagina: {error}", ""
+
+
+def fetch_from_google_scholar(scholar_url: str) -> Article:
+    """Resolve links do Google Academico (cluster, resultado, busca ou redirecionamento)."""
+    parsed = urlparse(scholar_url if "//" in scholar_url else f"https://{scholar_url}")
+    params = parse_qs(parsed.query)
+
+    # Link copiado de um resultado (scholar_url?url=...) aponta para o artigo real
+    target = params.get("url", [""])[0]
+    if target:
+        return fetch_from_generic_url(target)
+
+    # Pagina de cluster: um artigo especifico agrupado
+    if params.get("cluster"):
+        try:
+            response = requests.get(
+                f"https://scholar.google.com/scholar?cluster={params['cluster'][0]}&hl=en",
+                headers=BROWSER_HEADERS,
+                timeout=15,
+            )
+            response.raise_for_status()
+            soup = bs(response.content, "lxml")
+            first_title = soup.select_one("h3.gs_rt")
+            if first_title:
+                title_text = first_title.get_text(strip=True)
+                title, abstract = _title_lookup(title_text)
+                if abstract:
+                    return title, abstract
+                return fetch_from_generic_url(_first_result_link(soup)) if _first_result_link(soup) else (title_text, "")
+        except Exception:
+            pass
+
+    # Pagina de busca: usar a consulta q= para encontrar o artigo nas APIs abertas
+    query = params.get("q", [""])[0] or params.get("as_q", [""])[0]
+    if query:
+        return _title_lookup(query)
+
+    # Qualquer outra pagina do Academico: extrair o que der da propria pagina
+    return fetch_from_generic_url(scholar_url)
+
+
+def _first_result_link(soup: bs) -> str:
+    for anchor in soup.select("h3.gs_rt a[href]"):
+        href = anchor.get("href", "")
+        if href.startswith("http"):
+            return href
+    return ""
 
 
 AREA_KEYWORDS = {
@@ -537,9 +732,15 @@ def resolve_article(raw_input: str) -> Tuple[str, str, str]:
         "arxiv": (fetch_by_arxiv, "arXiv"),
         "openalex": (fetch_by_openalex, "OpenAlex"),
         "semantic_scholar": (fetch_by_semantic_scholar, "Semantic Scholar"),
+        "google_scholar": (fetch_from_google_scholar, "Google Academico"),
+        "generic_url": (fetch_from_generic_url, "Pagina do artigo"),
     }
     if input_type in fetchers:
         fetcher, source = fetchers[input_type]
         title, abstract = fetcher(value)
         return title, abstract, source
+    # Ultimo recurso: parece uma URL mesmo sem formato reconhecido
+    if _looks_like_url(value):
+        title, abstract = fetch_from_generic_url(_normalize_url(value))
+        return title, abstract, "Pagina do artigo"
     raise ValueError("Nao foi possivel identificar o formato do ID ou URL.")

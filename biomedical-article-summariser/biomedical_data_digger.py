@@ -219,7 +219,7 @@ def compare_articles(
 
 
 INTRO_TXT = "Análise inteligente de artigos científicos. Cole qualquer ID ou URL de artigo."
-INST_TXT = "Cole um **PMID**, **PMCID**, **DOI**, **arXiv ID**, **OpenAlex ID** ou a **URL completa** do artigo"
+INST_TXT = "Cole um **PMID**, **PMCID**, **DOI**, **arXiv ID**, **OpenAlex ID**, a **URL completa** do artigo ou qualquer link (incluindo Google Acadêmico)"
 
 
 # ===========================================================================
@@ -281,7 +281,7 @@ def make_page_geral():
             with gr.Group():
               article_id = gr.Textbox(
                   label="ID ou URL do artigo",
-                  placeholder="ex: 33984217 · PMC8234567 · 10.1038/nature · arxiv.org/abs/2301.00001",
+                  placeholder="ex: 33984217 · PMC8234567 · 10.1038/nature · arxiv.org/abs/2301.00001 · qualquer URL (Google Acadêmico, editora, etc.)",
               )
               model_choice = gr.Dropdown(
                   choices=["GPT-OSS 20B (Groq)", "GPT-OSS 120B (Groq)", "Qwen 3.6 27B (Groq)", "Qwen 3.8 27B (Groq)", "Llama (local)"],
@@ -329,6 +329,10 @@ def make_page_geral():
 **arXiv:** `2301.00001` ou `https://arxiv.org/abs/2301.00001`
 
 **OpenAlex:** `W2741809807` ou `https://openalex.org/W2741809807`
+
+**Google Acadêmico:** cole o link da busca, de um cluster ou de um resultado — o sistema encontra o artigo automaticamente
+
+**Qualquer outro link:** páginas de editoras (Springer, Elsevier, Wiley...), repositoriós e periódicos funcionam — o sistema extrai o que estiver disponível
 
 💡 **Dica:** Copie a URL da barra do navegador e cole aqui diretamente.
               """)
@@ -485,7 +489,7 @@ def make_page_medicina():
             with gr.Group():
               article_id = gr.Textbox(
                   label="ID ou URL do artigo",
-                  placeholder="ex: 33984217 · PMC8234567 · 10.1038/nature12373",
+                  placeholder="ex: 33984217 · PMC8234567 · 10.1038/nature12373 · qualquer URL (Google Acadêmico, editora, etc.)",
               )
               model_choice = gr.Dropdown(
                   choices=["GPT-OSS 20B (Groq)", "GPT-OSS 120B (Groq)", "Qwen 3.6 27B (Groq)", "Qwen 3.8 27B (Groq)", "Llama (local)"],
@@ -502,6 +506,10 @@ def make_page_medicina():
 **PubMed Central (PMCID):** `PMC8234567` ou `https://pmc.ncbi.nlm.nih.gov/articles/PMC8234567/`
 
 **DOI:** `10.1038/s41586-021-03819-2` ou `https://doi.org/10.1038/s41586-021-03819-2`
+
+**Google Acadêmico:** cole o link da busca, de um cluster ou de um resultado — o sistema encontra o artigo automaticamente
+
+**Qualquer outro link:** páginas de editoras (Springer, Elsevier, Wiley...), repositoriós e periódicos funcionam — o sistema extrai o que estiver disponível
 
 💡 **Dica:** Copie a URL da barra do navegador e cole aqui diretamente.
               """)
