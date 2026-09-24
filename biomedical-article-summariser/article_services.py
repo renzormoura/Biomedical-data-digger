@@ -386,8 +386,12 @@ def _pii_to_doi(pii: str) -> str:
     return f"10.1016/{pii[0]}{issn[:4]}-{issn[4:]}({year}){item}-{check}".lower()
 
 
-def _fetch_by_crossref_alternative_id(alternative_id: str) -> Article:
-    """Localiza o artigo no Crossref por alternative-id (ex.: PII da Elsevier)."""
+def _lookup_by_crossref_alternative_id(alternative_id: str) -> tuple[str, str, str]:
+    """Localiza o artigo no Crossref por alternative-id (ex.: PII da Elsevier).
+
+    Retorna (titulo, abstract, doi). O abstract do Crossref costuma vir vazio;
+    o DOI real permite encadear Semantic Scholar/OpenAlex, que o tem indexado.
+    """
     try:
         response = requests.get(
             "https://api.crossref.org/works",
@@ -398,14 +402,26 @@ def _fetch_by_crossref_alternative_id(alternative_id: str) -> Article:
         response.raise_for_status()
         items = response.json().get("message", {}).get("items", [])
         if not items:
-            return "", ""
+            return "", "", ""
         item = items[0]
         titles = item.get("title") or []
         title = titles[0] if titles else ""
         abstract = clean_text(re.sub(r"<[^>]+>", " ", item.get("abstract", "")))
-        return title, abstract
+        return title, abstract, item.get("DOI", "")
     except Exception:
-        return "", ""
+        return "", "", ""
+
+
+def _fetch_by_crossref_alternative_id(alternative_id: str) -> Article:
+    """Titulo + abstract via Crossref, com fallback para o DOI real nas APIs abertas."""
+    title, abstract, doi = _lookup_by_crossref_alternative_id(alternative_id)
+    if title and abstract:
+        return title, abstract
+    if doi:
+        doi_title, doi_abstract = fetch_by_doi(doi)
+        if doi_abstract:
+            return doi_title or title, doi_abstract
+    return title, abstract
 
 
 def fetch_from_generic_url(url: str) -> Article:
