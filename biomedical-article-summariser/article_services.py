@@ -154,6 +154,15 @@ DOI_PATH_SUFFIXES = frozenset(
 
 
 def _normalize_doi(doi: str) -> str:
+    """Aplica a limpeza ate estabilizar (uma passada pode expor nova pontuacao a remover)."""
+    previous = None
+    while doi != previous:
+        previous = doi
+        doi = _normalize_doi_once(doi)
+    return doi
+
+
+def _normalize_doi_once(doi: str) -> str:
     """Remove sufixos de URL que nao fazem parte do DOI real.
 
     Ex.: 10.3389/fimmu.2021.650095/full -> 10.3389/fimmu.2021.650095
