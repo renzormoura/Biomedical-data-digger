@@ -112,7 +112,7 @@ def test_ollama_maps_options_and_truncation(monkeypatch):
 
 
 # ------------------------------------------------------------------ servico
-def make(gen=None, policy=GenerationPolicy(), **kwargs):
+def make(gen=None, policy=GenerationPolicy(min_answer_chars=0), **kwargs):
     gen = gen or FakeGenerator(usage=(1000, 300))
     service = AnalysisService(ArticleRepository(CountingResolver()), gen, SlidingWindowLimiter(100, 60),
                               policy=policy, **kwargs)
@@ -209,7 +209,8 @@ def client_and_gen(tmp_path, monkeypatch):
     store.initialize()
     repository = ArticleRepository(lambda raw: ("Titulo", "Em 1200 pacientes a mortalidade caiu de 12,5% para 8,1%.", "F"))
     generator = WebFakeGenerator()
-    service = AnalysisService(repository, generator, SlidingWindowLimiter(100, 60), policy=GenerationPolicy())
+    service = AnalysisService(repository, generator, SlidingWindowLimiter(100, 60),
+                              policy=GenerationPolicy(min_answer_chars=0))
     app = create_app(service, repository, Settings(session_secret="k" * 40),
                      account_store_factory=lambda: store, search_fn=lambda *a, **k: [])
     return TestClient(app), generator

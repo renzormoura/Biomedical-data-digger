@@ -14,12 +14,15 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from typing import Optional, Protocol
 
+from loguru import logger
+
 import article_services
 import citations
 from cache import SingleFlight, TTLCache
 from domain import Article, ArticleNotFoundError, Completion, DiggerError, RateLimitedError, is_failure_title
 from generation import GenerationOptions, GenerationPolicy
 from grounding import check_numeric_grounding
+from injection import neutralize
 from prompt_builders import (
     build_dynamic_sys_prompt,
     build_message_auditoria_resposta,
@@ -61,6 +64,28 @@ def canonical_key(raw: str) -> str:
     return f"{input_type}:{value}"
 
 
+_BOILERPLATE = re.compile(
+    r"(?:©|\(c\)\s*\d{4}|copyright\s*(?:©|\(c\))?\s*\d{4}|all rights reserved|"
+    r"published by elsevier|this is an open access article|licensee|crown copyright)",
+    re.IGNORECASE,
+)
+
+
+def strip_boilerplate(abstract: str) -> str:
+    """Remove avisos de copyright/licenca no FIM do abstract (ruido que gasta token).
+
+    So corta quando o aviso aparece depois de 60% do texto, para nunca apagar conteudo.
+    """
+    text = re.sub(r"^\s*abstract\s*[:.\-]?\s*", "", abstract, flags=re.IGNORECASE).strip()
+    matches = [m.start() for m in _BOILERPLATE.finditer(text)]
+    if matches and matches[0] == 0 and len(text) < 120:
+        return ""  # o "abstract" e apenas um aviso de copyright
+    if matches and matches[0] >= 0.6 * len(text):
+        cut = text[: matches[0]].rstrip().rstrip(".;:-—· ")
+        return cut + "." if cut else cut
+    return text
+
+
 def wrap_source(tag: str, text: str) -> str:
     """Delimita texto nao confiavel; remove marcadores que permitiriam escapar do bloco."""
     cleaned = re.sub(r"<{3,}|>{3,}", " ", text)[:MAX_SOURCE_CHARS]
@@ -94,9 +119,41 @@ class ArticleRepository:
             raise DiggerError(f"Erro ao buscar artigo: {error}") from error
         if not abstract or not abstract.strip():
             raise ArticleNotFoundError(_not_found_message(title))
-        article = Article(identifier=raw.strip(), title=title, abstract=abstract, source=source)
+        cleaned, removed = neutralize(strip_boilerplate(abstract))
+        if not cleaned:
+            raise ArticleNotFoundError(_not_found_message(title))
+        warnings = (
+            (
+                f"o texto-fonte continha {removed} trecho(s) que pareciam instruções ao modelo; "
+                "eles foram removidos antes da análise.",
+            )
+            if removed
+            else ()
+        )
+        article = Article(identifier=raw.strip(), title=title, abstract=cleaned, source=source, warnings=warnings)
         self._cache.set(key, article)
         return article
+
+
+PROVIDER_RATE_LIMIT_MESSAGE = (
+    "O provedor de IA atingiu o limite de uso agora. Tente novamente em alguns minutos "
+    "ou escolha outro modelo de linguagem."
+)
+
+
+def _provider_error(prefix: str, error: Exception) -> DiggerError:
+    """Converte falhas do provedor em erro seguro: o texto cru pode trazer IDs internos.
+
+    429 vira `RateLimitedError` com mensagem amigavel; erros HTTP exibem so o codigo; os
+    detalhes completos vao para o log do servidor.
+    """
+    status = getattr(error, "status_code", None)
+    logger.warning("Falha do provedor de LLM (status={}): {}", status, error)
+    if status == 429:
+        return RateLimitedError(PROVIDER_RATE_LIMIT_MESSAGE)
+    if isinstance(status, int):
+        return DiggerError(f"{prefix} (provedor respondeu HTTP {status}). Tente novamente em instantes.")
+    return DiggerError(f"{prefix}: {error}")
 
 
 def _not_found_message(title: str) -> str:
@@ -222,7 +279,7 @@ class AnalysisService:
         except DiggerError:
             raise
         except Exception as error:
-            raise DiggerError(f"{error_prefix}: {error}") from error
+            raise _provider_error(error_prefix, error) from error
         tokens = self._record_usage(usage_key, model, client_id, messages, completion, started)
         if self._quota is not None:
             self._quota.charge(client_id, tokens)
@@ -231,6 +288,11 @@ class AnalysisService:
                 "O modelo não devolveu texto"
                 + (" (atingiu o limite de tamanho)" if completion.truncated else "")
                 + ". Tente novamente."
+            )
+        if self._policy is not None and len(completion.text.strip()) < self._policy.min_answer_chars:
+            raise DiggerError(
+                "A resposta do modelo veio curta demais para ser uma análise válida e foi descartada. "
+                "Tente novamente."
             )
         return completion, tokens
 
@@ -346,6 +408,8 @@ class AnalysisService:
                 body += CLINICAL_DISCLAIMER
             if completion.truncated:
                 body += TRUNCATION_NOTICE
+            for warning in article.warnings:
+                body += f"\n\n> 🛡️ **Aviso de segurança:** {warning}"
             return _Outcome(
                 f"---\n> **{label}**  ·  Filtros: *{filters.describe()}*\n\n---\n{body}{footer}",
                 tokens, cacheable=not completion.truncated,

@@ -80,6 +80,7 @@ class Article:
     title: str
     abstract: str
     source: str = ""
+    warnings: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if not self.abstract.strip():

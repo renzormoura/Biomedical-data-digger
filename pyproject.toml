@@ -64,6 +64,7 @@ files = [
     "biomedical-article-summariser/usage.py",
     "biomedical-article-summariser/quota.py",
     "biomedical-article-summariser/generation.py",
+    "biomedical-article-summariser/injection.py",
 ]
 follow_imports = "silent"
 strict_optional = true

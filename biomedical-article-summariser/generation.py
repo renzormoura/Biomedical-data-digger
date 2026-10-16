@@ -17,6 +17,9 @@ DEFAULT_MAX_TOKENS_BY_DETAIL: dict[str, int] = {
     "Ultra-detalhado": 4500,
 }
 DEFAULT_MAX_TOKENS = 2200
+# Todas as analises do app sao respostas estruturadas; uma resposta de poucas palavras
+# indica sequestro por instrucao escondida no texto-fonte ou falha do modelo.
+DEFAULT_MIN_ANSWER_CHARS = 120
 
 
 @dataclass(frozen=True)
@@ -31,6 +34,7 @@ class GenerationPolicy:
     temperature: float | None = 0.2
     reasoning_effort: str | None = None
     default_max_tokens: int = DEFAULT_MAX_TOKENS
+    min_answer_chars: int = DEFAULT_MIN_ANSWER_CHARS
     max_tokens_by_detail: dict[str, int] = field(default_factory=lambda: dict(DEFAULT_MAX_TOKENS_BY_DETAIL))
 
     def __post_init__(self) -> None:
