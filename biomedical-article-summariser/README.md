@@ -1,6 +1,15 @@
 # Biomedical Data Digger
 
-Aplicação web (FastAPI + frontend próprio, preto e laranja) para buscar artigos científicos, gerar resumos e executar análises especializadas com Groq ou Ollama.
+Navegador de artigos científicos (FastAPI + frontend próprio, preto e laranja): busca com filtros, página do artigo com seções originais, números com a frase de origem e citações, biblioteca pessoal com etiquetas, listas de leitura com link público e exportação (BibTeX, RIS, ABNT, APA, Vancouver). As análises com IA (Groq ou Ollama) continuam disponíveis como camada opcional em `/ia`.
+
+## Telas
+
+| Rota | O que é |
+|---|---|
+| `/` | Navegador: início, busca, artigo, biblioteca, listas (`#/lista/TOKEN` é pública e somente leitura) |
+| `/ia` | Laboratório de IA com as abas e botões descritos abaixo; "Analisar com IA" no artigo abre aqui com o campo preenchido |
+
+Fonte padrão: Europe PMC (sem chave). OpenAlex é opcional e exige uma chave gratuita criada por você em `OPENALEX_API_KEY` (mais `OPENALEX_MAILTO` opcional). `DISCOVERY_CALLS_PER_MINUTE` (30) limita buscas por cliente. A biblioteca usa o mesmo banco das contas (SQLite local, PostgreSQL em produção; o caminho PostgreSQL ainda não foi exercitado em instância real).
 
 ## Funcionalidades
 

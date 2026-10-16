@@ -1,5 +1,22 @@
 # CHANGELOG
 
+## 2026-10 — Navegador de artigos (pivô do produto)
+
+### Adicionado
+- `/` passa a ser um navegador de artigos: busca com filtros (ano, tipo de estudo oficial, acesso aberto, idioma, ordenação, fonte) e paginação, página do artigo, artigos semelhantes, citações ABNT/APA/Vancouver.
+- Biblioteca por conta com etiquetas, listas de leitura, link público revogável (sem expor o e-mail do dono) e exportação BibTeX/RIS/ABNT/APA/Vancouver.
+- Fontes: Europe PMC (padrão) e OpenAlex (opcional, com `OPENALEX_API_KEY`). Variável `DISCOVERY_CALLS_PER_MINUTE`.
+- Testes de lógica do frontend em Node (`tests/js`) e etapa no CI.
+
+### Alterado
+- A interface de IA anterior foi para `/ia`; "Analisar com IA" no artigo abre `/ia?artigo=...` preenchido.
+
+### Corrigido
+- `markdown_lite`: byte NUL no texto forjava marcador interno e causava `IndexError`.
+
+### Limitações conhecidas
+- Caminho PostgreSQL da biblioteca testado apenas com SQLite; OpenAlex testado só com respostas simuladas e verificação sem chave.
+
 ## 2026-10 — Fase 3: camada sem IA e botões clínicos extrativos
 
 ### Adicionado
