@@ -5,11 +5,13 @@ from __future__ import annotations
 import hashlib
 import hmac
 import os
+import re
 import secrets
 import sqlite3
+from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import datetime, timezone
-from typing import Iterator
+from functools import lru_cache
 
 from dotenv import load_dotenv
 
@@ -19,8 +21,39 @@ _PASSWORD_ITERATIONS = 600_000
 _DEFAULT_SQLITE_PATH = os.path.join(os.path.dirname(__file__), "accounts.sqlite3")
 
 
+_EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+_MAX_EMAIL_LENGTH = 320
+_MIN_PASSWORD_LENGTH = 8
+_MAX_PASSWORD_LENGTH = 128  # evita DoS por PBKDF2 sobre entradas gigantes
+_COMMON_PASSWORDS = frozenset(
+    {"12345678", "123456789", "1234567890", "password", "password1", "qwerty123", "11111111", "senha123", "abcd1234"}
+)
+_DUMMY_SALT = bytes(32)
+
+
 class AccountStoreError(RuntimeError):
     """Erro operacional do armazenamento de contas."""
+
+
+class InvalidCredentialsFormat(ValueError):
+    """E-mail ou senha fora da politica aceita."""
+
+
+def validate_credentials(email: str, password: str) -> tuple[str, str]:
+    """Normaliza e valida e-mail/senha; retorna o par normalizado."""
+    normalized_email = (email or "").strip().lower()
+    if len(normalized_email) > _MAX_EMAIL_LENGTH or not _EMAIL_PATTERN.match(normalized_email):
+        raise InvalidCredentialsFormat("Informe um e-mail válido.")
+    if not password or not password.strip():
+        raise InvalidCredentialsFormat("Informe uma senha.")
+    password = password.strip()
+    if len(password) < _MIN_PASSWORD_LENGTH:
+        raise InvalidCredentialsFormat(f"A senha deve ter pelo menos {_MIN_PASSWORD_LENGTH} caracteres.")
+    if len(password) > _MAX_PASSWORD_LENGTH:
+        raise InvalidCredentialsFormat(f"A senha deve ter no máximo {_MAX_PASSWORD_LENGTH} caracteres.")
+    if password.lower() in _COMMON_PASSWORDS or password.lower() == normalized_email:
+        raise InvalidCredentialsFormat("Senha muito comum. Escolha outra.")
+    return normalized_email, password
 
 
 class AccountStore:
@@ -138,6 +171,8 @@ class AccountStore:
                 ).fetchone()
 
         if not row:
+            # Gasta o mesmo custo de PBKDF2 para nao revelar, pelo tempo, se o e-mail existe.
+            self._password_digest(password, _DUMMY_SALT)
             return False
         stored_hash, stored_salt = row
         calculated_hash = self._password_digest(password, bytes.fromhex(stored_salt))
@@ -150,5 +185,9 @@ class AccountStore:
         return getattr(error, "sqlstate", None) == "23505"
 
 
-account_store = AccountStore()
-account_store.initialize()
+@lru_cache(maxsize=1)
+def get_account_store() -> AccountStore:
+    """Instancia unica, criada sob demanda (importar o modulo nao toca o banco)."""
+    store = AccountStore()
+    store.initialize()
+    return store
