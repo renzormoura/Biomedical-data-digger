@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+  <title>Navegador de artigos — maquete</title>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <a class="skip-link" href="#app">Pular para o conteúdo</a>
+
+  <div class="banner" role="note">
+    <strong>MAQUETE</strong> · todos os artigos são <strong>fictícios</strong> e nenhuma IA é chamada. Serve para testar a ideia, não para pesquisar de verdade.
+  </div>
+
+  <header class="topbar">
+    <a class="brand" href="#/" aria-label="Navegador de artigos — início">
+      <svg class="brand-mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true" focusable="false">
+        <rect width="32" height="32" rx="7" fill="currentColor"></rect>
+        <path d="M8 22V10l8 8 8-8v12" fill="none" stroke="var(--bg)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+      <span class="brand-name"><span class="accent">Navegador</span> de artigos</span>
+    </a>
+    <nav class="mainnav" aria-label="Principal" id="mainnav"></nav>
+    <button type="button" class="btn btn-ghost" id="theme-toggle" aria-label="Alternar tema claro/escuro">☀️ Claro</button>
+  </header>
+
+  <main id="app" tabindex="-1"></main>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="data.js"></script>
+  <script src="lib.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
