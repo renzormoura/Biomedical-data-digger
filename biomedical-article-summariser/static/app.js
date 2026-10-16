@@ -162,6 +162,7 @@
 
   function showError(panel, message) {
     const output = $('[data-role="output"]', panel);
+    $('[data-role="output-meta"]', panel).textContent = "";
     output.replaceChildren();
     const box = document.createElement("div");
     box.className = "error-box";
@@ -172,11 +173,22 @@
     output.append(box);
   }
 
+  function describeMeta(meta) {
+    if (!meta) return "";
+    const parts = [];
+    parts.push(meta.cached ? "⚡ resultado em cache (sem custo)" : meta.tokens ? `≈ ${meta.tokens.toLocaleString("pt-BR")} tokens` : "");
+    if (meta.quota_remaining !== null && meta.quota_remaining !== undefined) {
+      parts.push(`cota restante hoje: ${meta.quota_remaining.toLocaleString("pt-BR")}`);
+    }
+    return parts.filter(Boolean).join(" · ");
+  }
+
   function showResult(panel, label, data) {
     const output = $('[data-role="output"]', panel);
     output.innerHTML = data.html; // sanitizado no servidor (markdown_lite)
     panel.dataset.lastMarkdown = data.markdown;
     $('[data-role="output-title"]', panel).textContent = label;
+    $('[data-role="output-meta"]', panel).textContent = describeMeta(data.meta);
     $$('[data-action="copy"], [data-action="print"]', panel).forEach((b) => { b.disabled = false; });
     output.scrollIntoView({ behavior: "smooth", block: "nearest" });
     if (data.title) remember(data.article_id, data.title);

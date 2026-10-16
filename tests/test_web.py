@@ -182,9 +182,11 @@ def test_unexpected_errors_do_not_leak_details(env):
 
 def test_rate_limit_returns_429_per_identity(env):
     env.service._limiter = SlidingWindowLimiter(2, 60)
-    codes = [env.client.post("/api/analyze", json=analyze_payload()).status_code for _ in range(3)]
+    buttons = ("sumario", "resumo", "pontos-chave")  # botoes diferentes: cada um e uma chamada paga
+    codes = [env.client.post("/api/analyze", json=analyze_payload(button=b)).status_code for b in buttons]
     assert codes == [200, 200, 429]
-    other = env.client.post("/api/analyze", json=analyze_payload(), headers={"x-forwarded-for": "9.9.9.9"})
+    other = env.client.post("/api/analyze", json=analyze_payload(button="pontos-chave"),
+                            headers={"x-forwarded-for": "9.9.9.9"})
     assert other.status_code == 200
 
 
@@ -279,7 +281,7 @@ def test_logged_in_users_are_limited_by_account_not_by_ip(env):
     # mesmo IP, mas outra identidade (visitante) tem a propria cota
     guest = TestClient(env.client.app)
     assert guest.post("/api/analyze", json=analyze_payload()).status_code == 200
-    assert env.client.post("/api/analyze", json=analyze_payload()).status_code == 429
+    assert env.client.post("/api/analyze", json=analyze_payload(button="resumo")).status_code == 429
 
 
 # ---------------------------------------------------------------- CSRF

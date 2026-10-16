@@ -62,6 +62,7 @@ files = [
     "biomedical-article-summariser/citations.py",
     "biomedical-article-summariser/web.py",
     "biomedical-article-summariser/usage.py",
+    "biomedical-article-summariser/quota.py",
 ]
 follow_imports = "silent"
 strict_optional = true

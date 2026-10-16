@@ -27,6 +27,8 @@ class Settings:
     production: bool = False
     session_secret: str = field(default="", repr=False)
     admin_token: str = field(default="", repr=False)
+    daily_token_budget_guest: int = 60_000
+    daily_token_budget_user: int = 200_000
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -41,6 +43,8 @@ class Settings:
             production=production,
             session_secret=secret,
             admin_token=admin_token,
+            daily_token_budget_guest=_int_env("DAILY_TOKEN_BUDGET_GUEST", 60_000, minimum=0),
+            daily_token_budget_user=_int_env("DAILY_TOKEN_BUDGET_USER", 200_000, minimum=0),
             llm_calls_per_minute=_int_env("RATE_LIMIT_PER_MINUTE", 8, minimum=1),
             login_attempts_per_minute=_int_env("LOGIN_ATTEMPTS_PER_MINUTE", 5, minimum=1),
             trusted_proxy_hops=_int_env("TRUSTED_PROXY_HOPS", 1, minimum=0),

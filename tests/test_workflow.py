@@ -154,11 +154,12 @@ def test_backend_unavailable_fails_before_any_network_resolution():
 
 def test_rate_limit_is_enforced_per_client():
     service, *_ = make_service(limit=2)
-    for _ in range(2):
-        service.analyze("33984217", "m", build_message_sumario, "S", client_id="1.1.1.1")
+    # rotulos diferentes = analises diferentes (repeticoes identicas vem do cache e nao contam)
+    service.analyze("33984217", "m", build_message_sumario, "S1", client_id="1.1.1.1")
+    service.analyze("33984217", "m", build_message_sumario, "S2", client_id="1.1.1.1")
     with pytest.raises(DiggerError, match="Limite de requisicoes"):
-        service.analyze("33984217", "m", build_message_sumario, "S", client_id="1.1.1.1")
-    service.analyze("33984217", "m", build_message_sumario, "S", client_id="2.2.2.2")
+        service.analyze("33984217", "m", build_message_sumario, "S3", client_id="1.1.1.1")
+    service.analyze("33984217", "m", build_message_sumario, "S3", client_id="2.2.2.2")
 
 
 def test_llm_failure_is_wrapped():

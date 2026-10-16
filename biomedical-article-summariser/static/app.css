@@ -238,6 +238,7 @@ input:focus, select:focus {
   background: var(--surface-2);
 }
 .output-title { font-weight: 700; }
+.output-meta { color: var(--muted); font-size: 0.82rem; flex: 1; text-align: right; padding: 0 8px; }
 .output-actions { display: flex; gap: 6px; }
 .output-body { padding: 20px 24px 28px; }
 .output-body[aria-busy="true"] { opacity: 0.85; }

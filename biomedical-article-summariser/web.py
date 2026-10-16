@@ -41,7 +41,7 @@ from presentation import UNVERIFIABLE_FALLBACK, verification_annex_md
 from ratelimit import RateLimitExceeded, SlidingWindowLimiter, client_key
 from sessions import SessionSigner
 from usage import UsageLog
-from workflow import AnalysisService, ArticleRepository, Filters
+from workflow import AnalysisService, ArticleRepository, Filters, Reply
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SESSION_COOKIE = "bdd_session"
@@ -276,8 +276,14 @@ def create_app(
         return response
 
     # -- analises ----------------------------------------------------------------
-    def result(markdown: str, article_id: str = "") -> dict[str, Any]:
+    def result(markdown: str, article_id: str = "", reply: Reply | None = None) -> dict[str, Any]:
         payload: dict[str, Any] = {"markdown": markdown, "html": markdown_lite.render(markdown)}
+        if reply is not None:
+            payload["meta"] = {
+                "cached": reply.cached,
+                "tokens": reply.tokens,
+                "quota_remaining": reply.quota_remaining,
+            }
         if article_id.strip():
             article = repository.peek(article_id)
             if article is not None:
@@ -291,7 +297,7 @@ def create_app(
         button = next((b for b in spec.buttons() if b.id == body.button), None) if spec else None
         if spec is None or button is None:
             raise ArticleNotFoundError("Análise desconhecida.")
-        markdown = service.analyze(
+        reply = service.analyze(
             body.article_id,
             validated_model(body.model),
             button.builder,
@@ -302,32 +308,33 @@ def create_app(
             check_numbers=button.check_numbers,
             usage_key=f"{spec.key}/{button.id}",
         )
+        markdown = str(reply)
         if button.sources:
             try:
                 markdown += verification_annex_md(button.sources)
             except Exception:
                 logger.warning("Verificacao de fontes indisponivel para {}", button.id)
                 markdown += UNVERIFIABLE_FALLBACK
-        return result(markdown, body.article_id)
+        return result(markdown, body.article_id, reply)
 
     @app.post("/api/audit")
     def audit(body: AuditIn, request: Request) -> dict[str, Any]:
-        markdown = service.audit(
+        reply = service.audit(
             body.article_id, validated_model(body.model), body.previous, client_id=identity(request),
             usage_key=f"{body.page}/audit" if body.page else "audit",
         )
-        return result(markdown)
+        return result(str(reply), reply=reply)
 
     @app.post("/api/compare")
     def compare(body: CompareIn, request: Request) -> dict[str, Any]:
         if body.analysis not in pages.COMPARISON_TYPES:
             raise DiggerError("Tipo de comparação inválido.")
-        markdown = service.compare(
+        reply = service.compare(
             body.article_a, body.article_b, body.analysis, validated_model(body.model),
             medical_context=body.clinical, client_id=identity(request),
             usage_key=f"{body.page}/compare" if body.page else "compare",
         )
-        return result(markdown)
+        return result(str(reply), reply=reply)
 
     @app.get("/api/admin/usage")
     def admin_usage(request: Request) -> JSONResponse:

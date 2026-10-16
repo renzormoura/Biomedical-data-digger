@@ -8,6 +8,7 @@ import uvicorn
 
 from config import Settings
 from llm_service import get_router
+from quota import QuotaManager
 from ratelimit import SlidingWindowLimiter
 from usage import UsageLog
 from web import create_app as create_web_app
@@ -23,6 +24,7 @@ def create_app():  # type: ignore[no-untyped-def]
         generator=get_router(),
         limiter=SlidingWindowLimiter(settings.llm_calls_per_minute, window=60.0),
         usage_log=usage_log,
+        quota=QuotaManager(settings.daily_token_budget_guest, settings.daily_token_budget_user),
     )
     return create_web_app(service, repository, settings, usage_log=usage_log)
 
