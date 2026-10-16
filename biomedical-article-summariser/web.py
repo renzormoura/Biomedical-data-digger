@@ -226,9 +226,17 @@ def create_app(
     # -- paginas ---------------------------------------------------------------
     @app.get("/")
     def index(request: Request):  # type: ignore[no-untyped-def]
+        """Navegador de artigos: busca, leitura, biblioteca e listas."""
+        return templates.TemplateResponse(
+            request, "browse.html", {"user": current_user(request), "asset_version": asset_version}
+        )
+
+    @app.get("/ia")
+    def ia_lab(request: Request):  # type: ignore[no-untyped-def]
+        """Laboratorio de IA: resumos e analises opcionais (extracao sem IA e analises geradas)."""
         return templates.TemplateResponse(
             request,
-            "index.html",
+            "ia.html",
             {
                 "pages": active_pages,
                 "help_html": help_html,

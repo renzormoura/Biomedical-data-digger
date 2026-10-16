@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
   <meta name="description" content="Análise de artigos científicos com IA, fiel ao texto-fonte, para estudantes e profissionais.">
-  <title>Biomedical Data Digger</title>
+  <title>Laboratório de IA — Biomedical Data Digger</title>
   <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/static/app.css?v={{ asset_version }}">
   <script src="/static/app.js?v={{ asset_version }}" defer></script>
@@ -22,6 +22,7 @@
       <span class="brand-name"><span class="accent">Biomedical</span> Data Digger</span>
     </a>
     <div class="topbar-actions">
+      <a class="btn btn-ghost" href="/">← Navegador de artigos</a>
       <button type="button" class="btn btn-ghost" id="theme-toggle" aria-label="Alternar tema claro/escuro">☀️ Claro</button>
       <button type="button" class="btn btn-ghost" id="account-button" data-user="{{ user or '' }}">
         {% if user %}👤 {{ user }}{% else %}👤 Entrar{% endif %}

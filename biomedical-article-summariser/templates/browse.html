@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <meta name="description" content="Encontre, entenda e organize artigos científicos: busca com filtros, versão aberta, citações e listas de leitura.">
+  <title>Biomedical Data Digger — navegador de artigos</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/browse.css?v={{ asset_version }}">
+  <script src="/static/browse-lib.js?v={{ asset_version }}" defer></script>
+  <script src="/static/browse.js?v={{ asset_version }}" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#app">Pular para o conteúdo</a>
+
+  <header class="topbar">
+    <a class="brand" href="#/" aria-label="Biomedical Data Digger — início">
+      <svg class="brand-mark" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true" focusable="false">
+        <rect width="32" height="32" rx="7" fill="currentColor"></rect>
+        <path d="M8 22V10l8 8 8-8v12" fill="none" stroke="var(--bg)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+      <span class="brand-name"><span class="accent">Biomedical</span> Data Digger</span>
+    </a>
+    <nav class="mainnav" id="mainnav" aria-label="Principal"></nav>
+    <div class="topbar-actions">
+      <button type="button" class="btn btn-ghost" id="theme-toggle" aria-label="Alternar tema claro/escuro">☀️ Claro</button>
+      <button type="button" class="btn btn-ghost" id="account-button" data-user="{{ user or '' }}">
+        {% if user %}👤 {{ user }}{% else %}👤 Entrar{% endif %}
+      </button>
+    </div>
+  </header>
+
+  <main id="app" tabindex="-1" aria-live="polite"></main>
+
+  <dialog id="auth-dialog" aria-labelledby="auth-title">
+    <form method="dialog" id="auth-form" class="auth-card">
+      <h2 id="auth-title">Conta</h2>
+      <p class="hint" id="auth-hint">Entre para salvar artigos, criar listas e exportar. Buscar e ler não exige conta.</p>
+      <div class="field"><label for="auth-email">E-mail</label>
+        <input type="email" id="auth-email" autocomplete="email" maxlength="320" required></div>
+      <div class="field"><label for="auth-password">Senha</label>
+        <input type="password" id="auth-password" autocomplete="current-password" minlength="8" maxlength="128" required></div>
+      <p class="auth-error" id="auth-error" role="alert" hidden></p>
+      <div class="row">
+        <button type="button" class="btn btn-primary" data-auth="login">Entrar</button>
+        <button type="button" class="btn btn-secondary" data-auth="register">Criar conta</button>
+        <button type="button" class="btn btn-ghost" data-auth="cancel">Cancelar</button>
+      </div>
+      <button type="button" class="btn btn-outline" id="logout-button" hidden>Sair da conta</button>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

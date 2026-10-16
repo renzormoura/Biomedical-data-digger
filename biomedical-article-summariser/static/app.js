@@ -97,6 +97,10 @@
   selectTab(location.hash.slice(1));
   window.addEventListener("hashchange", () => selectTab(location.hash.slice(1)));
 
+  // Vindo do navegador de artigos: /ia?artigo=REF preenche o campo de artigo de todas as abas.
+  const presetArticle = new URLSearchParams(location.search).get("artigo");
+  if (presetArticle) $$('[data-role="article"]').forEach((input) => { input.value = presetArticle.slice(0, 2000); });
+
   // ---------- histórico (local ao navegador) ----------
   function loadHistory() { return store.get(HISTORY_KEY, []).filter((x) => x && x.id); }
   function renderHistory() {

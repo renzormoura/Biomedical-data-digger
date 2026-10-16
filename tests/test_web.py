@@ -70,7 +70,7 @@ def analyze_payload(**overrides):
 
 # ---------------------------------------------------------------- paginas
 def test_index_renders_every_tab_and_button(env):
-    html = env.client.get("/").text
+    html = env.client.get("/ia").text
     for page in pages.ALL_PAGES:
         assert f'id="panel-{page.key}"' in html and page.title in html
         for button in page.buttons():
@@ -81,7 +81,7 @@ def test_index_renders_every_tab_and_button(env):
 def test_index_has_no_inline_script_or_style_and_no_external_resources(env):
     import re
 
-    html = env.client.get("/").text
+    html = env.client.get("/ia").text
     assert not re.findall(r"<script(?![^>]*\bsrc=)", html), "script inline viola a CSP"
     assert not re.search(r"\sstyle\s*=", html) and "<style" not in html
     assert not re.search(r'(?:src|href|action)="https?://', html), "recurso externo em tempo de execucao"
@@ -235,7 +235,7 @@ def test_register_login_logout_flow_and_cookie_flags(env):
     cookie = registered.headers["set-cookie"].lower()
     assert "httponly" in cookie and "samesite=lax" in cookie
     assert env.client.get("/api/auth/me").json() == {"user": "ana@exemplo.com"}
-    assert "ana@exemplo.com" in env.client.get("/").text
+    assert "ana@exemplo.com" in env.client.get("/ia").text
 
     env.client.post("/api/auth/logout")
     assert env.client.get("/api/auth/me").json() == {"user": None}
@@ -301,6 +301,6 @@ def test_form_encoded_posts_are_rejected(env):
 def test_assets_are_versioned_in_the_url(env):
     import re
 
-    html = env.client.get("/").text
+    html = env.client.get("/ia").text
     assert re.search(r'/static/app\.css\?v=[0-9a-f]+"', html) and re.search(r'/static/app\.js\?v=[0-9a-f]+"', html)
     assert env.client.get("/static/app.js?v=abc").status_code == 200

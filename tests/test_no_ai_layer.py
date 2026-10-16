@@ -295,9 +295,9 @@ def test_api_blocks_ai_analysis_when_abstract_lacks_the_topic_without_tokens(tmp
 
 def test_index_renders_extract_buttons_and_flag_changes_the_medicine_buttons(tmp_path, monkeypatch):
     default_client, _ = make_client(tmp_path, monkeypatch)
-    html = default_client.get("/").text
+    html = default_client.get("/ia").text
     assert html.count('data-action="extract"') >= 7 + 4  # um "Extrair" por aba + 4 trechos clinicos
     assert 'data-button="doses-e-protocolos-trechos"' in html and 'data-button="medicamentos-protocolos"' not in html
     generative_client, _ = make_client(tmp_path, monkeypatch, generative=True)
-    html = generative_client.get("/").text
+    html = generative_client.get("/ia").text
     assert 'data-button="medicamentos-protocolos"' in html and 'data-button="doses-e-protocolos-trechos"' not in html

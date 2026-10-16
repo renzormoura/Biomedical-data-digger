@@ -267,3 +267,41 @@ def test_export_of_a_list_and_error_cases(env):
     assert client.get("/api/library/export", params={"list_id": "nao-existe"}).status_code == 404
     other = env.login(env.build(), "bia@exemplo.com")
     assert other.get("/api/library/export", params={"list_id": list_id}).status_code == 404
+
+
+# ------------------------------------------------------------------ paginas
+def test_root_serves_the_browser_shell_without_inline_code_or_external_resources(env):
+    import re
+
+    html = env.client.get("/").text
+    assert 'id="app"' in html and 'id="mainnav"' in html and 'id="auth-dialog"' in html
+    assert re.search(r'/static/browse\.js\?v=[0-9a-f]+"', html) and re.search(r'/static/browse-lib\.js\?v=[0-9a-f]+"', html)
+    assert re.search(r'/static/browse\.css\?v=[0-9a-f]+"', html)
+    assert not re.findall(r"<script(?![^>]*\bsrc=)", html) and "<style" not in html
+    assert not re.search(r"\sstyle\s*=", html) and not re.search(r"\son[a-z]+\s*=", html)
+    assert not re.search(r'(?:src|href|action)="https?://', html)
+    assert "default-src 'self'" in env.client.get("/").headers["content-security-policy"]
+
+
+def test_root_shows_the_logged_in_account(env):
+    client = env.login(env.build(), "ana@exemplo.com")
+    assert "ana@exemplo.com" in client.get("/").text
+    assert "Entrar" in env.client.get("/").text
+
+
+def test_ia_lab_lives_at_ia_and_links_back_to_the_browser(env):
+    html = env.client.get("/ia").text
+    assert "Laboratório de IA" in html and 'href="/"' in html and "Navegador de artigos" in html
+    assert 'data-role="article"' in html and "/static/app.js" in html
+
+
+def test_ia_query_parameter_is_never_reflected_by_the_server(env):
+    response = env.client.get("/ia", params={"artigo": "<script>alert(1)</script>"})
+    assert response.status_code == 200 and "alert(1)" not in response.text
+
+
+@pytest.mark.parametrize("asset,kind", [("browse.js", "javascript"), ("browse-lib.js", "javascript"), ("browse.css", "css")])
+def test_browser_assets_are_served_with_cache_headers(env, asset, kind):
+    response = env.client.get(f"/static/{asset}")
+    assert response.status_code == 200 and kind in response.headers["content-type"]
+    assert "max-age" in response.headers["cache-control"]
