@@ -1,6 +1,7 @@
 """Prompts e montadores de mensagens enviados aos backends de LLM."""
 
-from typing import Dict, List
+
+import contexto_brasil
 
 SYS_PROMPT = """
 You are an expert in scientific text mining and information extraction. You excel at breaking down research abstracts into digestible contents for students, researchers, and professionals.
@@ -34,7 +35,7 @@ The tone should be professional and clear.
 
 """
 
-def build_message_resumo_academico(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
+def build_message_resumo_academico(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> list[dict[str, str]]:
     user_prompt = f"""Você é um pesquisador sênior com experiência em revisão de periódicos científicos nas áreas da saúde e ciências da vida. Analise o artigo a seguir e forneça um resumo técnico de alto nível para acadêmicos, pesquisadores e estudantes de pós-graduação.
 
 Título: {article_title}
@@ -52,7 +53,7 @@ Estruture a resposta com os tópicos:
 **Restrição absoluta:** Somente informações do artigo."""
     return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
 
-def build_message_resumo_clinico(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
+def build_message_resumo_clinico(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> list[dict[str, str]]:
     """
     Constructs the payload for a Clinical Summary (Practical application for physicians).
     """
@@ -70,14 +71,16 @@ Instruções de Estrutura:
   2. Intervenção ou Fator Estudado vs. Controle
   3. Desfechos Clínicos Principais (Primary Endpoints) e Segurança/Efeitos Adversos
   4. Implicações Práticas para a Conduta Médica
-  5. Recado para a Prática (em um parágrafo conciso ao final)"""
+  5. Recado para a Prática (em um parágrafo conciso ao final)
+
+**Restrição absoluta:** Somente informações presentes no título e no resumo fornecidos. Para qualquer campo ausente, escreva "Não descrito no resumo fornecido"."""
 
     return [
         {"role": "system", "content": sys_prompt},
         {"role": "user", "content": user_prompt}
     ]
 
-def build_message_resumo(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
+def build_message_resumo(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> list[dict[str, str]]:
     user_prompt = f"""Analise o artigo científico a seguir e produza um resumo equilibrado. O artigo pode ser de qualquer área científica — adapte a linguagem ao contexto do texto, priorizando clareza para profissionais da área da saúde e ciências correlatas.
 
 Título: {article_title}
@@ -95,7 +98,7 @@ Estruture a resposta com os tópicos:
 **Restrição absoluta:** Somente informações do artigo."""
     return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
 
-def build_message_sumario(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
+def build_message_sumario(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> list[dict[str, str]]:
     user_prompt = f"""Analise o artigo científico a seguir e produza um sumário direto e objetivo, adequado para profissionais e pesquisadores da área da saúde e ciências da vida.
 
 Título: {article_title}
@@ -108,7 +111,7 @@ Comece com uma frase de até 2 linhas que sintetize o tema principal. Em seguida
 **Restrição absoluta:** Somente informações presentes no artigo."""
     return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
 
-def build_message_medicamentos(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
+def build_message_medicamentos(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> list[dict[str, str]]:
     """
     Constructs the payload for a Pharmacology / Protocols summary (clinical use in emergency settings).
     """
@@ -182,7 +185,7 @@ Para cada medicamento ou intervenção terapêutica identificado no artigo, apre
         {"role": "user", "content": user_prompt}
     ]
 
-def build_message_critica_metodologica(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
+def build_message_critica_metodologica(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> list[dict[str, str]]:
     """
     Constructs the payload for a Methodological Critique.
     """
@@ -238,7 +241,7 @@ Estruture a análise com os seguintes tópicos:
         {"role": "user", "content": user_prompt}
     ]
 
-def build_message_estatisticas(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
+def build_message_estatisticas(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> list[dict[str, str]]:
     """
     Constructs the payload for a Statistical Data extraction and explanation.
     """
@@ -290,7 +293,7 @@ Estruture a resposta com os seguintes tópicos:
         {"role": "user", "content": user_prompt}
     ]
 
-def build_message_pico(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
+def build_message_pico(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> list[dict[str, str]]:
     """
     Constructs the payload for a PICO framework analysis.
     """
@@ -345,7 +348,7 @@ Estruture a resposta com os seguintes tópicos:
         {"role": "user", "content": user_prompt}
     ]
 
-def build_message_alertas(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
+def build_message_alertas(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> list[dict[str, str]]:
     """
     Constructs the payload for a Safety Alerts and Contraindications summary.
     """
@@ -398,7 +401,7 @@ Estruture a resposta com os seguintes tópicos:
         {"role": "user", "content": user_prompt}
     ]
 
-def build_message_checklist(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
+def build_message_checklist(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> list[dict[str, str]]:
     """
     Constructs the payload for a Pre-Conduct Checklist for bedside use.
     """
@@ -450,18 +453,22 @@ Estruture o checklist com os seguintes tópicos:
         {"role": "user", "content": user_prompt}
     ]
 
-def build_message_aplicabilidade_br(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
+def build_message_aplicabilidade_br(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> list[dict[str, str]]:
     """
     Constructs the payload for a Brazilian applicability analysis.
     """
+    contexto_extra = contexto_brasil.bloco_contexto(f"{article_title} {abstract_text}")
     user_prompt = f"""Você é um analista de implementação e políticas de saúde no Brasil, com experiência em avaliação crítica de evidências. Analise o resumo a seguir sob a perspectiva da aplicabilidade ao contexto brasileiro.
 
 Título: {article_title}
 Abstract:
 {abstract_text}
 
+{contexto_extra}
+
 **REGRA DE EVIDÊNCIA E FONTES:** Separe rigorosamente os achados do resumo dos dados externos sobre o Brasil.
 - Se uma afirmação vier do resumo, marque-a como **[DO RESUMO]**.
+- Se uma afirmação vier do bloco CONTEXTO CURADO acima, marque-a como **[CONTEXTO CURADO]** e repita a fonte indicada nele.
 - Se uma afirmação vier de fonte externa, marque-a como **[FONTE EXTERNA]** e informe instituição/autor, título ou documento, ano/data e URL ou identificador verificável.
 - Para disponibilidade, políticas públicas, SUS, RENAME, ANVISA, custos, epidemiologia, infraestrutura e regulação, use somente fontes oficiais, diretrizes institucionais, documentos regulatórios, revisões sistemáticas ou estudos primários reconhecidos.
 - Não invente fontes, URLs, números, datas ou citações. Não use memória como se fosse uma fonte consultada.
@@ -577,7 +584,7 @@ def build_dynamic_sys_prompt(
 
     return prompt
 
-def build_message_auditoria_resposta(article_title: str, abstract_text: str, response_text: str) -> List[Dict[str, str]]:
+def build_message_auditoria_resposta(article_title: str, abstract_text: str, response_text: str) -> list[dict[str, str]]:
     user_prompt = f"""Audite a resposta gerada para o resumo científico abaixo. Compare cada afirmação factual da resposta somente com o título e o resumo fornecidos.
 
 **FONTE DO ESTUDO**
@@ -616,7 +623,7 @@ def build_message_comparacao_artigos(
     analysis_type: str = "Comparação de resultados",
     medical_context: bool = False,
     sys_prompt: str = SYS_PROMPT,
-) -> List[Dict[str, str]]:
+) -> list[dict[str, str]]:
     analysis_instructions = {
         "Comparação de resultados": "Compare os principais achados, desfechos e valores reportados.",
         "Comparação metodológica": "Compare desenho, amostra, métodos, intervenções, comparadores e medidas.",
@@ -749,31 +756,47 @@ Abstract:
     return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
 
 def build_message_disponibilidade_sus(article_title, abstract_text, sys_prompt=SYS_PROMPT):
+    contexto_extra = contexto_brasil.bloco_contexto(f"{article_title} {abstract_text}")
     user_prompt = f"""Você é um médico com experiência no sistema público de saúde brasileiro. Avalie a disponibilidade das intervenções descritas no artigo no contexto do SUS.
 
 Título: {article_title}
 Abstract:
 {abstract_text}
 
-**FORMATO OBRIGATÓRIO:** Bullet points. Use somente o resumo fornecido; para dados ausentes, indique "Não descrito no resumo fornecido".
+{contexto_extra}
+
+**REGRA DE CONFIABILIDADE (obrigatória):**
+- A seção "Disponibilidade no SUS" só pode afirmar algo se (a) o resumo informar expressamente o uso no SUS/Brasil, ou (b) o CONTEXTO CURADO acima trouxer a informação com fonte indicada. Qualquer outro caso deve dizer: "Não verificável com as fontes acessíveis".
+- Nunca use memória externa nem suposição para afirmar disponibilidade, cobertura, financiamento, preço ou inclusão em protocolo.
+- Separe sempre: **[DO RESUMO]**, **[CONTEXTO CURADO]** (com a fonte citada) ou **[NÃO VERIFICADO]**.
+- Se o bloco de contexto curado estiver vazio para este tema, responda "Não verificável com as fontes acessíveis" em vez de inferir.
+
+**FORMATO OBRIGATÓRIO:** Bullet points. Use somente o resumo fornecido e o contexto curado; para dados ausentes, indique "Não descrito no resumo fornecido".
 
 1. **Intervenções Descritas no Artigo** *(do artigo)*
-2. **Disponibilidade no SUS** — somente se descrita no resumo
+2. **Disponibilidade no SUS** — somente se descrita no resumo ou no contexto curado, com marcação de origem
 3. **Alternativas Disponíveis no SUS** — somente se descritas no resumo
 4. **Impacto para o Médico do SUS** — o que pode ou não aplicar com base neste artigo"""
     return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
 
 def build_message_vigilancia_sanitaria(article_title, abstract_text, sys_prompt=SYS_PROMPT):
+    contexto_extra = contexto_brasil.bloco_contexto(f"{article_title} {abstract_text}")
     user_prompt = f"""Você é um médico com conhecimento em regulação sanitária brasileira. Analise o artigo sob perspectiva regulatória para o contexto brasileiro.
 
 Título: {article_title}
 Abstract:
 {abstract_text}
 
-**FORMATO OBRIGATÓRIO:** Bullet points. Use somente o resumo fornecido; para dados ausentes, indique "Não descrito no resumo fornecido".
+{contexto_extra}
+
+**REGRA DE CONFIABILIDADE (obrigatória):**
+- "Situação Regulatória no Brasil" só pode ser afirmada se o resumo informar ou se o CONTEXTO CURADO acima indicar, com a fonte citada. Caso contrário: "Não verificável com as fontes acessíveis".
+- Nunca afirme registro, restrição, bula, portaria ou vigilância ativa com base em memória. Marque cada afirmação como **[DO RESUMO]**, **[CONTEXTO CURADO]** ou **[NÃO VERIFICADO]**.
+
+**FORMATO OBRIGATÓRIO:** Bullet points. Use somente o resumo fornecido e o contexto curado; para dados ausentes, indique "Não descrito no resumo fornecido".
 
 1. **Intervenções Estudadas** *(do artigo)*
-2. **Situação Regulatória no Brasil** — somente se descrita no resumo
+2. **Situação Regulatória no Brasil** — somente se descrita no resumo ou no contexto curado, com marcação de origem
 3. **Considerações para Prescrição** — somente se descritas no resumo
 4. **Riscos Regulatórios** — o que o médico deve considerar legalmente ao aplicar os achados no Brasil"""
     return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
@@ -855,7 +878,7 @@ Para cada dimensão, descreva o que está explícito e indique "Não avaliável 
 
 # ===========================================================================
 
-def build_message_implicacoes_praticas(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
+def build_message_implicacoes_praticas(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> list[dict[str, str]]:
     """Universal: what this research changes in the real world."""
     user_prompt = f"""Analise o artigo a seguir e extraia exclusivamente as implicações práticas dos achados — o que este estudo muda ou pode mudar no mundo real, na prática profissional ou na sociedade.
 
@@ -873,7 +896,7 @@ Estruture em:
 **Restrição absoluta:** Somente informações do artigo. Se o artigo não mencionar implicações práticas, indique explicitamente."""
     return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
 
-def build_message_glossario(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
+def build_message_glossario(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> list[dict[str, str]]:
     """Universal: extract and explain technical terms from the article."""
     user_prompt = f"""Analise o artigo a seguir e extraia todos os termos técnicos, siglas, metodologias e jargões especializados presentes no texto, explicando cada um de forma clara e concisa.
 
@@ -892,7 +915,7 @@ Ordene do mais ao menos técnico. Priorize termos que um leitor sem formação n
 **Restrição absoluta:** Liste somente termos presentes no resumo. Defina um termo apenas se o próprio resumo o explicar; caso contrário, indique "Não explicado no resumo fornecido". Não use conhecimento externo."""
     return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
 
-def build_message_impacto_brasil(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
+def build_message_impacto_brasil(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> list[dict[str, str]]:
     """Universal Brazilian context - not health-specific."""
     user_prompt = f"""Analise o artigo a seguir e avalie sua relevância e aplicabilidade ao contexto brasileiro, considerando aspectos sociais, econômicos, regulatórios e práticos — independentemente da área do artigo.
 
@@ -912,7 +935,7 @@ Estruture em:
 **Restrição absoluta:** Não use conhecimento geral sobre o Brasil, SUS, regulação, custo, cultura ou infraestrutura. Não inferir aplicabilidade geográfica."""
     return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
 
-def build_message_resumo_introdutorio(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> List[Dict[str, str]]:
+def build_message_resumo_introdutorio(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> list[dict[str, str]]:
     """For someone starting to learn about the topic."""
     user_prompt = f"""Você é um professor com habilidade em introduzir tópicos complexos para iniciantes. Explique este artigo para alguém que está começando a estudar a área — com contexto suficiente para entender a importância do estudo.
 
