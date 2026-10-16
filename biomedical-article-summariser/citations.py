@@ -216,7 +216,7 @@ def _get_json(url: str, **kwargs: Any) -> dict[str, Any]:
     try:
         response = requests.get(url, timeout=HTTP_TIMEOUT, headers=USER_AGENT, **kwargs)
         response.raise_for_status()
-        return response.json()  # type: ignore[no-any-return]
+        return response.json()
     except (requests.RequestException, ValueError) as error:
         raise DiggerError(f"Não foi possível consultar a fonte de metadados: {error}") from error
 

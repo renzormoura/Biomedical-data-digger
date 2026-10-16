@@ -15,7 +15,7 @@ from typing import Optional, Protocol
 import article_services
 import citations
 from cache import TTLCache
-from domain import Article, ArticleNotFoundError, DiggerError, is_failure_title
+from domain import Article, ArticleNotFoundError, DiggerError, RateLimitedError, is_failure_title
 from grounding import check_numeric_grounding
 from prompt_builders import (
     build_dynamic_sys_prompt,
@@ -135,7 +135,7 @@ class AnalysisService:
         try:
             self._limiter.check(client_id)
         except RateLimitExceeded as error:
-            raise DiggerError(str(error)) from error
+            raise RateLimitedError(str(error)) from error
         try:
             return self._generator.generate(messages, model)
         except DiggerError:
@@ -219,7 +219,7 @@ class AnalysisService:
         try:
             self._limiter.check(client_id)
         except RateLimitExceeded as error:
-            raise DiggerError(str(error)) from error
+            raise RateLimitedError(str(error)) from error
         meta = self._citation_fetcher(article_id)
         reference = citations.format_citation(meta, style)
         return (

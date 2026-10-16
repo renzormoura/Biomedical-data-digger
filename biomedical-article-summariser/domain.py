@@ -44,6 +44,10 @@ class DiggerError(Exception):
         self.user_message = user_message
 
 
+class RateLimitedError(DiggerError):
+    """O cliente excedeu o limite de uso (HTTP 429)."""
+
+
 class BackendUnavailableError(DiggerError):
     """Nenhum backend de LLM apto a atender o modelo pedido."""
 
