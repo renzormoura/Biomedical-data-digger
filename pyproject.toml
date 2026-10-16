@@ -70,6 +70,7 @@ files = [
     "biomedical-article-summariser/europepmc.py",
     "biomedical-article-summariser/catalog.py",
     "biomedical-article-summariser/europepmc_catalog.py",
+    "biomedical-article-summariser/openalex_catalog.py",
 ]
 follow_imports = "silent"
 strict_optional = true
