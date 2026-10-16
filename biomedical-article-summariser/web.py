@@ -30,13 +30,20 @@ from account_store import (
     get_account_store,
     validate_credentials,
 )
+from browse_api import register_browse_routes
 from config import Settings
+from discovery import DiscoveryService
 from domain import (
     ArticleNotFoundError,
+    AuthRequiredError,
     BackendUnavailableError,
     DiggerError,
+    LimitReachedError,
+    NotFoundError,
     RateLimitedError,
+    SourceUnavailableError,
 )
+from library_store import LibraryStore
 from presentation import UNVERIFIABLE_FALLBACK, verification_annex_md
 from ratelimit import RateLimitExceeded, SlidingWindowLimiter, client_key
 from sessions import SessionSigner
@@ -123,6 +130,8 @@ def create_app(
     account_store_factory: Callable[[], AccountStore] = get_account_store,
     search_fn: Callable[..., list[dict]] = article_services.search_reliable_articles,
     usage_log: UsageLog | None = None,
+    discovery: DiscoveryService | None = None,
+    library: LibraryStore | None = None,
 ) -> FastAPI:
     app = FastAPI(title="Biomedical Data Digger", docs_url=None, redoc_url=None, openapi_url=None)
     signer = SessionSigner(settings.session_secret or SessionSigner.generate_secret())
@@ -170,10 +179,14 @@ def create_app(
         status = 400
         if isinstance(error, RateLimitedError):
             status = 429
-        elif isinstance(error, BackendUnavailableError):
-            status = 503
-        elif isinstance(error, ArticleNotFoundError):
+        elif isinstance(error, AuthRequiredError):
+            status = 401
+        elif isinstance(error, NotFoundError):
             status = 404
+        elif isinstance(error, LimitReachedError):
+            status = 409
+        elif isinstance(error, (BackendUnavailableError, SourceUnavailableError)):
+            status = 503
         return JSONResponse({"error": error.user_message}, status_code=status)
 
     @app.exception_handler(Exception)
@@ -403,5 +416,8 @@ def create_app(
                 for item in items
             ]
         }
+
+    if discovery is not None and library is not None:
+        register_browse_routes(app, discovery=discovery, library=library, current_user=current_user, identity=identity)
 
     return app

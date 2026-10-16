@@ -42,6 +42,9 @@ class Settings:
     admin_token: str = field(default="", repr=False)
     llm_temperature: float = 0.2
     generative_clinical: bool = False
+    discovery_calls_per_minute: int = 30
+    openalex_api_key: str = field(default="", repr=False)
+    openalex_mailto: str = ""
     daily_token_budget_guest: int = 60_000
     daily_token_budget_user: int = 200_000
 
@@ -58,6 +61,9 @@ class Settings:
             production=production,
             session_secret=secret,
             admin_token=admin_token,
+            discovery_calls_per_minute=_int_env("DISCOVERY_CALLS_PER_MINUTE", 30, minimum=1),
+            openalex_api_key=os.environ.get("OPENALEX_API_KEY", "").strip(),
+            openalex_mailto=os.environ.get("OPENALEX_MAILTO", "").strip(),
             generative_clinical=os.environ.get("ENABLE_GENERATIVE_CLINICAL", "").strip().lower()
             in ("1", "true", "yes", "on"),
             llm_temperature=_float_env("LLM_TEMPERATURE", 0.2, minimum=0.0, maximum=2.0),

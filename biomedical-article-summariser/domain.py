@@ -72,6 +72,10 @@ class BackendUnavailableError(DiggerError):
     """Nenhum backend de LLM apto a atender o modelo pedido."""
 
 
+class AuthRequiredError(DiggerError):
+    """E preciso entrar na conta para esta acao (HTTP 401)."""
+
+
 class NotFoundError(DiggerError):
     """O recurso pedido nao existe (HTTP 404)."""
 

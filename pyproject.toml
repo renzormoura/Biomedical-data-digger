@@ -72,6 +72,7 @@ files = [
     "biomedical-article-summariser/europepmc_catalog.py",
     "biomedical-article-summariser/openalex_catalog.py",
     "biomedical-article-summariser/discovery.py",
+    "biomedical-article-summariser/browse_api.py",
     "biomedical-article-summariser/db.py",
     "biomedical-article-summariser/library_store.py",
     "biomedical-article-summariser/exports.py",
