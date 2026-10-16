@@ -72,7 +72,15 @@ class BackendUnavailableError(DiggerError):
     """Nenhum backend de LLM apto a atender o modelo pedido."""
 
 
-class ArticleNotFoundError(DiggerError):
+class NotFoundError(DiggerError):
+    """O recurso pedido nao existe (HTTP 404)."""
+
+
+class LimitReachedError(DiggerError):
+    """Um limite de uso (itens, listas...) foi atingido (HTTP 409)."""
+
+
+class ArticleNotFoundError(NotFoundError):
     """Nenhum abstract utilizavel foi encontrado para a entrada."""
 
 
