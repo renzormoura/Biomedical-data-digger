@@ -27,7 +27,7 @@ jobs:
       - name: Install
         run: pip install -r requirements-dev.txt
       - name: Lint (ruff)
-        run: ruff check biomedical-article-summariser tests evals
+        run: ruff check biomedical-article-summariser tests evals scripts
       - name: Types (mypy)
         run: mypy
       - name: Tests + coverage

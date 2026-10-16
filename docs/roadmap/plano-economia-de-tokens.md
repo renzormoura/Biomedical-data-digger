@@ -1,6 +1,6 @@
 # Plano: economizar tokens e usar IA só quando necessária
 
-**Status:** Fases 0 e 1 **implementadas** · Fases 2 a 5 pendentes · 2026-10 · **Decisão vigente:** o produto lê **apenas título + resumo** (sem texto completo).
+**Status:** Fases 0 e 1 **implementadas** · Fase 2 **parcialmente implementada** (ver abaixo) · Fases 3 a 5 pendentes · 2026-10 · **Decisão vigente:** o produto lê **apenas título + resumo** (sem texto completo).
 
 ### Medição real (Fase 0), um artigo, GPT-OSS 20B no Groq
 
@@ -50,7 +50,23 @@ Reduzir o custo de LLM por uso, sem perder fidelidade ao texto-fonte, deixando a
 - **Implementado:** `UsageLog` + `GET /api/admin/usage` (requer `ADMIN_TOKEN`); cache de resultados (6 h, até 512 entradas, chave canônica do artigo + botão + rótulo + filtros + modelo + flags); `SingleFlight` para análises idênticas simultâneas; `QuotaManager` por dia UTC (visitante 60.000 e conta 200.000 tokens por padrão; 0 = sem limite); a interface mostra "em cache", tokens da chamada e cota restante. Acertos de cache não consomem limite por minuto nem cota, e funcionam mesmo com o provedor fora do ar. Auditoria não usa cache.
 - **Limites conhecidos:** cache e cotas ficam em memória (reiniciam com o processo e valem por instância); o cache é compartilhado entre usuários (artigos são públicos).
 
-### Fase 2 — Gastar menos por chamada
+### Resultado da Fase 2 (medido com o Groq real, GPT-OSS 20B)
+
+| Medida | Resultado |
+|---|---|
+| Raciocínio `low` | Saída ~1.223 → ~564 tokens (−54%), total −27%, texto visível do mesmo tamanho. **Adotado só em 13 botões de baixo risco e nunca nas abas clínicas**, porque nas leituras o modo `low` fez algumas inferências a mais (ex.: inventou "avaliados via registros clínicos") e a amostra era pequena demais para provar equivalência. |
+| Temperatura 0,2 e teto de saída por nível de detalhe | Aplicados. O teto é proteção (em modelo de raciocínio, o raciocínio conta como saída); resposta cortada ganha aviso e não é cacheada. |
+| Enxugar o prompt de sistema | **Ganho desprezível e sem benefício comprovado.** A versão mais curta (~574 tokens estimados contra ~782) falhou mais no teste de injeção em 5 execuções, mas o prompt original também falha 3 em 10; a amostra não distingue as versões. Mantida a estrutura original com as regras condensadas e duas regras novas (proibir percentuais derivados; proibir variantes de "Não descrito"): ~739 tokens, economia ~5%. |
+| Limpar boilerplate do abstract | Implementado (copyright/licença no fim do texto). Ganho pequeno. |
+
+**Achados importantes desta fase**
+
+1. **Injeção de prompt:** só o prompt não basta. O modelo cru cede à instrução escondida em ~20 a 40% das tentativas (prompt original: 14 de 17 resistências). Adicionadas defesas em código (`injection.py`: remove frases que parecem ordens ao modelo e avisa o usuário; descarte de respostas com menos de 120 caracteres). Nos evals, a proteção ponta a ponta barrou 100% das tentativas.
+2. **O modelo calcula valores que o prompt proíbe** (ex.: "18%" a partir de HR 0,82). A verificação automática de números os sinaliza ao usuário; as regras novas no prompt reduziram os casos de 13 para 6 nas amostras.
+3. **Limite do provedor:** o Groq impõe **200.000 tokens/dia por modelo** no plano gratuito (`on_demand`). Isso é ~100 análises por dia no total, para todos os usuários. As cotas por conta (60.000/200.000) devem ser calibradas por esse teto, e **testes ao vivo consomem a mesma cota da produção**.
+4. **Mensagens de erro:** o erro 429 cru do provedor incluía o ID da organização. Agora vira mensagem amigável sem detalhes internos (`_provider_error`).
+
+### Fase 2 — Gastar menos por chamada (parcial)
 - **Enxugar o prompt de sistema** (~780) e as instruções dos botões: remover regras repetidas (a restrição "somente a fonte" aparece no sistema **e** em cada botão), preferir instruções em inglês com resposta em português.
 - **`max_tokens` por botão** e limites de formato nas instruções ("no máximo N tópicos").
 - **Temperatura baixa (0 a 0,2)**: hoje não é definida (ganho de fidelidade, não de custo).

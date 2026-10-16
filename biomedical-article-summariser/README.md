@@ -94,16 +94,19 @@ A suíte combina testes unitários com dublês de rede, testes de contrato de to
 testes baseados em propriedades (Hypothesis) e um smoke test que monta a interface completa.
 O CI (`.github/workflows/ci.yml`) roda tudo em Python 3.10 e 3.11.
 
-Avaliação de fidelidade com LLM real (opcional, consome cota):
+Avaliação de fidelidade com LLM real (opcional; **consome a cota diária da sua chave do Groq, a mesma da produção**, que no plano gratuito é de 200.000 tokens por modelo):
 
 ```powershell
 $env:RUN_LIVE_EVALS = "1"; $env:GROQ_API_KEY = "..."; pytest evals -m live
 ```
 
 Em produção é obrigatório definir `SESSION_SECRET` (mín. 32 caracteres; o `render.yaml` gera um valor automaticamente).
+`LLM_TEMPERATURE` (padrão 0.2, entre 0 e 2) controla a aleatoriedade das respostas.
 Variáveis de custo: `DAILY_TOKEN_BUDGET_GUEST` (60000) e `DAILY_TOKEN_BUDGET_USER` (200000) definem a cota diária de tokens (0 = sem limite); `ADMIN_TOKEN` (mín. 24 caracteres) ativa `GET /api/admin/usage` (cabeçalho `Authorization: Bearer ...`), com o consumo por botão.
 Variáveis opcionais: `RATE_LIMIT_PER_MINUTE` (padrão 8 chamadas de LLM/min por cliente),
 `LOGIN_ATTEMPTS_PER_MINUTE` (5), `TRUSTED_PROXY_HOPS` (1, para ler o IP real atrás do proxy do Render).
+
+Para medir o consumo real por botão (também consome cota): `python scripts/measure_tokens.py --variants baseline,low --reps 2`.
 
 ## Deploy no Render
 

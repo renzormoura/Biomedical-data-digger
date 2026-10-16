@@ -1,5 +1,26 @@
 # CHANGELOG
 
+## 2026-10 — Fase 2: custo por chamada, injeção e erros do provedor
+
+### Adicionado
+- **Opções de geração** (`generation.py`): temperatura 0,2, teto de saída por nível de detalhe e esforço de raciocínio. O raciocínio reduzido (`low`) só vale para 13 botões de baixo risco e **nunca nas abas clínicas** (medido: −54% de saída, −27% do total nesses botões).
+- **Resposta cortada** (`finish_reason=length`) recebe aviso e não vai para o cache; resposta vazia vira erro claro.
+- **Defesas contra injeção de prompt em código** (`injection.py`): frases do texto-fonte que parecem ordens ao modelo são removidas antes da análise e o usuário é avisado; respostas com menos de 120 caracteres são descartadas. Padrões estreitos para não apagar frases científicas legítimas.
+- **Limpeza de boilerplate** de copyright/licença no fim do abstract.
+- `scripts/measure_tokens.py` (mede tokens reais por botão e variante) e novos evals ao vivo (resistência do modelo cru e proteção ponta a ponta).
+
+### Alterado
+- Prompt de sistema: regras condensadas, mais duas regras (sem percentuais derivados; sem variantes de "Não descrito"); estrutura original preservada.
+- **Erros do provedor** viram mensagens seguras: 429 amigável sem expor ID de organização; outros erros HTTP mostram só o código.
+- Eval de dosagem passou a aceitar qualquer redação equivalente de "não descrito".
+
+### Achados (ver `docs/roadmap/plano-economia-de-tokens.md`)
+- Só o prompt não basta contra injeção: o modelo cru cede em ~20 a 40% das tentativas, inclusive com o prompt original.
+- O Groq limita o plano gratuito a 200.000 tokens/dia por modelo; testes ao vivo consomem a cota da produção.
+
+### Testes
+- De 667 para 733 (opções, truncamento, injeção, limpeza, erros do provedor).
+
 ## 2026-10 — Economia de tokens: medição, cache e cotas (Fases 0 e 1)
 
 ### Adicionado
