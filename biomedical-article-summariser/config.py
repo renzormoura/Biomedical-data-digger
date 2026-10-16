@@ -41,6 +41,7 @@ class Settings:
     session_secret: str = field(default="", repr=False)
     admin_token: str = field(default="", repr=False)
     llm_temperature: float = 0.2
+    generative_clinical: bool = False
     daily_token_budget_guest: int = 60_000
     daily_token_budget_user: int = 200_000
 
@@ -57,6 +58,8 @@ class Settings:
             production=production,
             session_secret=secret,
             admin_token=admin_token,
+            generative_clinical=os.environ.get("ENABLE_GENERATIVE_CLINICAL", "").strip().lower()
+            in ("1", "true", "yes", "on"),
             llm_temperature=_float_env("LLM_TEMPERATURE", 0.2, minimum=0.0, maximum=2.0),
             daily_token_budget_guest=_int_env("DAILY_TOKEN_BUDGET_GUEST", 60_000, minimum=0),
             daily_token_budget_user=_int_env("DAILY_TOKEN_BUDGET_USER", 200_000, minimum=0),

@@ -90,6 +90,12 @@ class CompareIn(BaseModel):
     page: str = Field("", max_length=40)
 
 
+class ExtractIn(BaseModel):
+    page: str = Field(max_length=40)
+    button: str = Field(max_length=80)
+    article_id: str = Field(max_length=MAX_ARTICLE_ID)
+
+
 class CiteIn(BaseModel):
     article_id: str = Field(max_length=MAX_ARTICLE_ID)
     style: str = Field(max_length=20)
@@ -130,11 +136,12 @@ def create_app(
         "x",
     )
 
-    page_by_key = {spec.key: spec for spec in pages.ALL_PAGES}
+    active_pages = pages.pages_for(settings.generative_clinical)
+    page_by_key = {spec.key: spec for spec in active_pages}
     # Seguro: markdown_lite escapa todo texto antes de aplicar marcacao.
     help_html = {
         spec.key: Markup(markdown_lite.render(spec.help_markdown))  # noqa: S704
-        for spec in pages.ALL_PAGES
+        for spec in active_pages
     }
 
     # -- infraestrutura ----------------------------------------------------
@@ -210,7 +217,7 @@ def create_app(
             request,
             "index.html",
             {
-                "pages": pages.ALL_PAGES,
+                "pages": active_pages,
                 "help_html": help_html,
                 "models": pages.MODEL_CHOICES,
                 "default_model": pages.DEFAULT_MODEL,
@@ -308,6 +315,7 @@ def create_app(
             check_numbers=button.check_numbers,
             usage_key=f"{spec.key}/{button.id}",
             reasoning_effort=None if spec.clinical else button.reasoning_effort,
+            requires=button.requires,
         )
         markdown = str(reply)
         if button.sources:
@@ -347,6 +355,18 @@ def create_app(
         if not hmac.compare_digest(supplied.encode(), f"Bearer {settings.admin_token}".encode()):
             return JSONResponse({"error": "Não autorizado."}, status_code=401)
         return JSONResponse(usage_log.snapshot())
+
+    @app.post("/api/extract")
+    def extract(body: ExtractIn, request: Request) -> dict[str, Any]:
+        """Extracao SEM IA: nenhum token e gasto e nenhum texto e gerado."""
+        spec = page_by_key.get(body.page)
+        button = next((b for b in spec.extract_buttons() if b.id == body.button), None) if spec else None
+        if spec is None or button is None:
+            raise ArticleNotFoundError("Extração desconhecida.")
+        reply = service.extract(
+            body.article_id, button.kind, label=button.label, client_id=identity(request), clinical=spec.clinical
+        )
+        return result(str(reply), body.article_id, reply)
 
     @app.post("/api/cite")
     def cite(body: CiteIn, request: Request) -> dict[str, Any]:

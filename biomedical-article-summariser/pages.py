@@ -69,6 +69,9 @@ class AnalysisButton:
     # Esforco de raciocinio do modelo (low/medium/high). None = padrao do provedor. So e
     # reduzido em botoes que apenas reformulam o texto; nunca em abas clinicas (ver web.py).
     reasoning_effort: str | None = None
+    # Tema (extraction.CUE_KINDS) que o abstract precisa trazer. Sem ele a analise e bloqueada
+    # sem chamar o modelo, em vez de a IA preencher a lacuna.
+    requires: str | None = None
 
     @property
     def heading(self) -> str:
@@ -94,7 +97,20 @@ class CitationButton:
         return slugify(self.style)
 
 
-AnyButton = Union[AnalysisButton, CitationButton]
+@dataclass(frozen=True)
+class ExtractButton:
+    """Botao SEM IA: copia trechos do abstract (`overview`, `dose`, `conduta`, `interacoes`, `reacoes`)."""
+
+    label: str
+    kind: str = "overview"
+    variant: str = "secondary"
+
+    @property
+    def id(self) -> str:
+        return slugify(self.label)
+
+
+AnyButton = Union[AnalysisButton, CitationButton, ExtractButton]
 
 
 @dataclass(frozen=True)
@@ -135,6 +151,15 @@ class PageSpec:
             for row in section.rows
             for button in row
             if isinstance(button, AnalysisButton)
+        ]
+
+    def extract_buttons(self) -> list[ExtractButton]:
+        return [
+            button
+            for section in self.sections
+            for row in section.rows
+            for button in row
+            if isinstance(button, ExtractButton)
         ]
 
     def citation_buttons(self) -> list[CitationButton]:
@@ -203,6 +228,14 @@ completo nem a sua autoria no trabalho.
 """
 )
 
+def _no_ai_section() -> Section:
+    return Section(
+        "Direto do artigo (sem IA)",
+        ((ExtractButton("Extrair do artigo", "overview", variant="primary"),),),
+        is_open=True,
+    )
+
+
 _GENERIC_PLACEHOLDER = "ex: 33984217 · PMC8234567 · 10.1038/nature · arxiv.org/abs/2301.00001 · qualquer URL"
 
 GENERAL_PAGE = PageSpec(
@@ -210,6 +243,7 @@ GENERAL_PAGE = PageSpec(
     tab_name="☰  Geral",
     subtitle="Análise científica universal · Europe PMC · arXiv · DOI · OpenAlex",
     sections=(
+        _no_ai_section(),
         Section("Visão Geral", (
             (_b("Sumário", pb.build_message_sumario), _b("Resumo", pb.build_message_resumo)),
             (_b("Pontos-Chave", pb.build_message_pontos_chave), _b("Resumo Introdutório", pb.build_message_resumo_introdutorio)),
@@ -236,6 +270,7 @@ ACADEMIC_PAGE = PageSpec(
     tab_name="🎓  Acadêmico",
     subtitle="Estudar · Escrever · Referenciar · Apresentar — para estudantes de qualquer curso",
     sections=(
+        _no_ai_section(),
         Section("Entender o artigo", (
             (_b("Sumário", pb.build_message_sumario), _b("Pontos-Chave", pb.build_message_pontos_chave)),
             (_b("Explicação para Iniciantes", pb.build_message_resumo_paciente), _b("Guia para Estudantes", pb.build_message_resumo_estudante)),
@@ -266,51 +301,73 @@ ACADEMIC_PAGE = PageSpec(
     title_suffix=_suffix("Acadêmico"),
 )
 
-MEDICAL_PAGE = PageSpec(
-    key="medicina",
-    tab_name="⚕  Medicina",
-    subtitle="Pronto-Socorro · Farmacologia · Segurança do Paciente · Contexto Brasileiro",
-    sections=(
-        Section("Resumos Clínicos", (
-            (_b("Resumo Clínico", pb.build_message_resumo_clinico), _b("Resumo Médico", pb.build_message_resumo_academico)),
-            (_b("PICO", pb.build_message_pico, "Pergunta PICO"),),
-        ), is_open=True),
-        Section("Farmacologia e Protocolos", (
-            (_b("Medicamentos / Protocolos", pb.build_message_medicamentos), _b("Populações Especiais", pb.build_message_populacoes_especiais)),
-            (_b("Conduta em Urgência", pb.build_message_conduta_urgencia),),
-            (_b("Interações Medicamentosas", pb.build_message_interacoes_medicamentosas), _b("Reações Adversas", pb.build_message_reacoes_adversas)),
-        )),
-        Section("Evidência e Segurança", (
-            (_b("Crítica Metodológica", pb.build_message_critica_metodologica), _b("Dados Estatísticos", pb.build_message_estatisticas)),
-            (_b("Alertas e Contraindicações", pb.build_message_alertas), _b("Checklist Pré-Conduta", pb.build_message_checklist)),
-            (_b("Confiabilidade do Artigo", pb.build_message_confiabilidade, variant="primary"),),
-        ), audit_button=True),
-        Section("Contexto BR — Saúde", (
-            (
-                _b("Disponib. SUS", pb.build_message_disponibilidade_sus, "Disponibilidade no SUS", sources=("bvs", "minsaude"), check_numbers=False),
-                _b("Vigilância Sanitária", pb.build_message_vigilancia_sanitaria, sources=("anvisa", "minsaude"), check_numbers=False),
-            ),
-            (_b("Aplicabilidade BR", pb.build_message_aplicabilidade_br, "Aplicabilidade Brasileira", sources=("minsaude", "anvisa", "bvs"), check_numbers=False),),
-        )),
-    ),
-    audience_choices=("Médico / Especialista", "Residente / Interno", "Estudante de Medicina", "Enfermagem / Farmácia"),
-    focus_choices=("Farmacologia", "Estatística", "Segurança", "Metodologia", "Clínico/Prático"),
-    placeholder="ex: 33984217 · PMC8234567 · 10.1038/nature12373 · qualquer URL (Google Acadêmico, editora, etc.)",
-    help_markdown=MEDICAL_HELP,
-    compare_title="Comparar dois artigos clínicos",
-    compare_placeholder="PMID, PMCID, DOI ou URL do artigo clínico",
-    compare_type_label="Tipo de análise clínica",
-    compare_button="Comparar Artigos Clínicos",
-    clinical=True,
-    elem_id="medical-page",
-    title_suffix=_suffix("Medicina"),
-)
+def _medical_page(generative_clinical: bool) -> PageSpec:
+    """Aba Medicina. Por padrao, dose, conduta, interacoes e reacoes adversas sao EXTRATIVAS (trechos
+    copiados do resumo, sem IA). `generative_clinical=True` restaura as versoes geradas por IA, cada
+    uma bloqueada quando o resumo nao traz o tema; so deve ser ligado apos validacao por especialista."""
+    if generative_clinical:
+        pharmacology = Section("Farmacologia e Protocolos", (
+            (_b("Medicamentos / Protocolos", pb.build_message_medicamentos, requires="dose"),
+             _b("Populações Especiais", pb.build_message_populacoes_especiais, requires="populacoes")),
+            (_b("Conduta em Urgência", pb.build_message_conduta_urgencia, requires="conduta"),),
+            (_b("Interações Medicamentosas", pb.build_message_interacoes_medicamentosas, requires="interacoes"),
+             _b("Reações Adversas", pb.build_message_reacoes_adversas, requires="reacoes")),
+        ))
+    else:
+        pharmacology = Section("Farmacologia e Protocolos", (
+            (ExtractButton("Doses e protocolos (trechos)", "dose"),
+             _b("Populações Especiais", pb.build_message_populacoes_especiais, requires="populacoes")),
+            (ExtractButton("Condutas e recomendações (trechos)", "conduta"),),
+            (ExtractButton("Interações medicamentosas (trechos)", "interacoes"),
+             ExtractButton("Reações adversas (trechos)", "reacoes")),
+        ))
+    return PageSpec(
+        key="medicina",
+        tab_name="⚕  Medicina",
+        subtitle="Pronto-Socorro · Farmacologia · Segurança do Paciente · Contexto Brasileiro",
+        sections=(
+            _no_ai_section(),
+            Section("Resumos Clínicos", (
+                (_b("Resumo Clínico", pb.build_message_resumo_clinico), _b("Resumo Médico", pb.build_message_resumo_academico)),
+                (_b("PICO", pb.build_message_pico, "Pergunta PICO"),),
+            ), is_open=True),
+            pharmacology,
+            Section("Evidência e Segurança", (
+                (_b("Crítica Metodológica", pb.build_message_critica_metodologica), _b("Dados Estatísticos", pb.build_message_estatisticas)),
+                (_b("Alertas e Contraindicações", pb.build_message_alertas, requires="alertas"), _b("Checklist Pré-Conduta", pb.build_message_checklist)),
+                (_b("Confiabilidade do Artigo", pb.build_message_confiabilidade, variant="primary"),),
+            ), audit_button=True),
+            Section("Contexto BR — Saúde", (
+                (
+                    _b("Disponib. SUS", pb.build_message_disponibilidade_sus, "Disponibilidade no SUS", sources=("bvs", "minsaude"), check_numbers=False),
+                    _b("Vigilância Sanitária", pb.build_message_vigilancia_sanitaria, sources=("anvisa", "minsaude"), check_numbers=False),
+                ),
+                (_b("Aplicabilidade BR", pb.build_message_aplicabilidade_br, "Aplicabilidade Brasileira", sources=("minsaude", "anvisa", "bvs"), check_numbers=False),),
+            )),
+        ),
+        audience_choices=("Médico / Especialista", "Residente / Interno", "Estudante de Medicina", "Enfermagem / Farmácia"),
+        focus_choices=("Farmacologia", "Estatística", "Segurança", "Metodologia", "Clínico/Prático"),
+        placeholder="ex: 33984217 · PMC8234567 · 10.1038/nature12373 · qualquer URL (Google Acadêmico, editora, etc.)",
+        help_markdown=MEDICAL_HELP,
+        compare_title="Comparar dois artigos clínicos",
+        compare_placeholder="PMID, PMCID, DOI ou URL do artigo clínico",
+        compare_type_label="Tipo de análise clínica",
+        compare_button="Comparar Artigos Clínicos",
+        clinical=True,
+        elem_id="medical-page",
+        title_suffix=_suffix("Medicina"),
+    )
+
+
+MEDICAL_PAGE = _medical_page(generative_clinical=False)
+MEDICAL_PAGE_GENERATIVE = _medical_page(generative_clinical=True)
 
 ENVIRONMENTAL_PAGE = PageSpec(
     key="ambiental",
     tab_name="🌱  Ambiental",
     subtitle="Impacto ambiental · Poluentes · Mitigação · Contexto regulatório brasileiro",
     sections=(
+        _no_ai_section(),
         Section("Visão Geral", (
             (_b("Sumário", pb.build_message_sumario), _b("Pontos-Chave", pb.build_message_pontos_chave)),
         ), is_open=True),
@@ -339,6 +396,7 @@ PUBLIC_HEALTH_PAGE = PageSpec(
     tab_name="🏥  Saúde Pública",
     subtitle="Epidemiologia · Vigilância · SUS · Políticas de saúde",
     sections=(
+        _no_ai_section(),
         Section("Visão Geral", (
             (_b("Sumário", pb.build_message_sumario), _b("Pontos-Chave", pb.build_message_pontos_chave)),
         ), is_open=True),
@@ -375,6 +433,7 @@ TECHNOLOGY_PAGE = PageSpec(
     tab_name="💻  Tecnologia e IA",
     subtitle="Computação · Inteligência Artificial · Dados · Reprodutibilidade",
     sections=(
+        _no_ai_section(),
         Section("Visão Geral", (
             (_b("Sumário", pb.build_message_sumario), _b("Pontos-Chave", pb.build_message_pontos_chave)),
         ), is_open=True),
@@ -402,6 +461,7 @@ ENGINEERING_PAGE = PageSpec(
     tab_name="⚙  Engenharias",
     subtitle="Civil · Elétrica · Química · Projeto, desempenho e normas",
     sections=(
+        _no_ai_section(),
         Section("Visão Geral", (
             (_b("Sumário", pb.build_message_sumario), _b("Pontos-Chave", pb.build_message_pontos_chave)),
         ), is_open=True),
@@ -425,13 +485,17 @@ ENGINEERING_PAGE = PageSpec(
     title_suffix=_suffix("Engenharias"),
 )
 
-# Ordem das abas na interface.
-ALL_PAGES: tuple[PageSpec, ...] = (
-    GENERAL_PAGE,
-    ACADEMIC_PAGE,
-    MEDICAL_PAGE,
-    ENVIRONMENTAL_PAGE,
-    PUBLIC_HEALTH_PAGE,
-    TECHNOLOGY_PAGE,
-    ENGINEERING_PAGE,
-)
+def pages_for(generative_clinical: bool = False) -> tuple[PageSpec, ...]:
+    """Abas na ordem da interface. `generative_clinical` liga os botoes de dose/conduta gerados por IA."""
+    return (
+        GENERAL_PAGE,
+        ACADEMIC_PAGE,
+        MEDICAL_PAGE_GENERATIVE if generative_clinical else MEDICAL_PAGE,
+        ENVIRONMENTAL_PAGE,
+        PUBLIC_HEALTH_PAGE,
+        TECHNOLOGY_PAGE,
+        ENGINEERING_PAGE,
+    )
+
+
+ALL_PAGES: tuple[PageSpec, ...] = pages_for(False)

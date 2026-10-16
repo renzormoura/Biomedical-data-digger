@@ -72,7 +72,10 @@
                 {% for row in section.rows %}
                 <div class="btn-row">
                   {% for b in row %}
-                    {% if b.__class__.__name__ == 'CitationButton' %}
+                    {% if b.__class__.__name__ == 'ExtractButton' %}
+                    <button type="button" class="btn {{ 'btn-primary' if b.variant == 'primary' else 'btn-secondary' }}"
+                            data-action="extract" data-button="{{ b.id }}">{{ b.label }}</button>
+                    {% elif b.__class__.__name__ == 'CitationButton' %}
                     <button type="button" class="btn btn-secondary" data-action="cite" data-style="{{ b.style }}">{{ b.label }}</button>
                     {% else %}
                     <button type="button" class="btn {{ 'btn-primary' if b.variant == 'primary' else 'btn-secondary' }}"

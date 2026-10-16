@@ -18,8 +18,17 @@ from loguru import logger
 
 import article_services
 import citations
+import europepmc
 from cache import SingleFlight, TTLCache
 from domain import Article, ArticleNotFoundError, Completion, DiggerError, RateLimitedError, is_failure_title
+from europepmc import EuropePmcRecord
+from extraction import has_cues
+from extraction_view import (
+    PASSAGE_KINDS,
+    blocked_markdown,
+    overview_markdown,
+    passages_markdown,
+)
 from generation import GenerationOptions, GenerationPolicy
 from grounding import check_numeric_grounding
 from injection import neutralize
@@ -41,6 +50,13 @@ CLINICAL_DISCLAIMER = (
     "\n\n---\n> ⚕️ **Apoio à leitura, não à decisão.** Conteúdo gerado por IA a partir apenas do "
     "título e do resumo do artigo. Não substitui bula, diretriz institucional, o texto completo "
     "nem o julgamento clínico. Confirme doses e condutas na fonte primária."
+)
+
+
+CLINICAL_EXTRACT_DISCLAIMER = (
+    "\n\n---\n> ⚕️ **Apoio à leitura, não à decisão.** Trechos copiados apenas do título e do resumo do "
+    "artigo, sem interpretação. Não substituem bula, diretriz institucional, o texto completo nem o "
+    "julgamento clínico. Confirme doses e condutas na fonte primária."
 )
 
 
@@ -235,6 +251,7 @@ class AnalysisService:
         result_cache: TTLCache[str] | None = None,
         cache_results: bool = True,
         policy: GenerationPolicy | None = None,
+        metadata_fetcher: Callable[[str], EuropePmcRecord | None] = europepmc.fetch_record,
     ) -> None:
         self._repository = repository
         self._generator = generator
@@ -243,6 +260,8 @@ class AnalysisService:
         self._usage_log = usage_log
         self._quota = quota
         self._policy = policy
+        self._metadata_fetcher = metadata_fetcher
+        self._records: TTLCache[tuple[EuropePmcRecord | None]] = TTLCache(RESULT_CACHE_SIZE, RESULT_CACHE_TTL)
         self._cache_results = cache_results
         self._results: TTLCache[str] = (
             result_cache if result_cache is not None else TTLCache(RESULT_CACHE_SIZE, RESULT_CACHE_TTL)
@@ -377,17 +396,26 @@ class AnalysisService:
         footer: str = "",
         usage_key: str = "",
         reasoning_effort: str | None = None,
+        requires: str | None = None,
     ) -> Reply:
+        """`requires`: tema (ver extraction.CUE_KINDS) que o abstract precisa trazer; sem ele a analise e
+        bloqueada sem chamar o modelo (zero token), em vez de deixar a IA preencher a lacuna."""
         filters = filters or Filters()
         key = _digest(
             "analyze", canonical_key(article_id), f"{build_fn.__module__}.{build_fn.__qualname__}", label,
             clinical, check_numbers, footer, filters.publico, filters.tom, filters.idioma, filters.detalhe,
-            filters.foco, model, reasoning_effort, self._policy,
+            filters.foco, model, reasoning_effort, self._policy, requires,
         )
 
         def compute() -> _Outcome:
-            self._generator.ensure_available(model)
-            article = self._repository.get(article_id)
+            if requires is None:
+                self._generator.ensure_available(model)
+                article = self._repository.get(article_id)
+            else:
+                article = self._repository.get(article_id)
+                if not has_cues(article.abstract, requires):
+                    return _Outcome(blocked_markdown(label, requires, article.title), tokens=0)
+                self._generator.ensure_available(model)
             messages = build_fn(
                 wrap_source("SOURCE_TITLE", article.title),
                 wrap_source("SOURCE_ABSTRACT", article.abstract),
@@ -479,6 +507,46 @@ class AnalysisService:
             )
 
         return self._serve(key, client_id=client_id, model=model, usage_key=usage_key, compute=compute)
+
+    def _record_for(self, article_id: str) -> EuropePmcRecord | None:
+        key = canonical_key(article_id)
+        cached = self._records.get(key)
+        if cached is not None:
+            return cached[0]
+        record = self._metadata_fetcher(article_id)
+        if record is not None:  # falhas nao sao cacheadas: a proxima tentativa pode funcionar
+            self._records.set(key, (record,))
+        return record
+
+    def extract(
+        self,
+        article_id: str,
+        kind: str = "overview",
+        *,
+        label: str = "",
+        client_id: str = "local",
+        clinical: bool = False,
+    ) -> Reply:
+        """Extracao sem IA (zero token): resumo organizado, numeros com a frase de origem e metadados
+        (`overview`) ou trechos copiados do abstract sobre um tema (`dose`, `conduta`, ...)."""
+        if kind != "overview" and kind not in PASSAGE_KINDS:
+            raise DiggerError("Tipo de extração inválido.")
+        if not (article_id or "").strip():
+            raise DiggerError("Cole um ID ou URL de artigo antes de extrair.")
+        try:
+            self._limiter.check(client_id)
+        except RateLimitExceeded as error:
+            raise RateLimitedError(str(error)) from error
+        article = self._repository.get(article_id)
+        if kind == "overview":
+            markdown = overview_markdown(article.title, article.abstract, self._record_for(article_id))
+        else:
+            markdown = passages_markdown(label or kind, kind, article.title, article.abstract)
+        if clinical:
+            markdown += CLINICAL_EXTRACT_DISCLAIMER
+        for warning in article.warnings:
+            markdown += f"\n\n> 🛡️ **Aviso de segurança:** {warning}"
+        return Reply(markdown, tokens=0, quota_remaining=self._remaining(client_id))
 
     def cite(self, article_id: str, style: str, *, client_id: str = "local") -> str:
         """Referencia formatada (ABNT/APA/Vancouver) a partir de registros oficiais, sem LLM."""

@@ -33,7 +33,9 @@ def test_slugify_strips_accents_and_symbols():
 
 
 def test_every_prompt_builder_is_reachable_from_some_page():
-    used = {b.builder for page in PAGES for b in page.buttons()}
+    # considera os dois modos da aba Medicina (extrativo e generativo): os prompts clinicos
+    # geradores continuam disponiveis atras da flag ENABLE_GENERATIVE_CLINICAL
+    used = {b.builder for flag in (False, True) for page in pages.pages_for(flag) for b in page.buttons()}
     internal = {
         prompt_builders.build_message_auditoria_resposta,
         prompt_builders.build_message_comparacao_artigos,

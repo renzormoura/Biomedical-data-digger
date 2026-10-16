@@ -235,6 +235,11 @@
         page, button: button.dataset.button,
         article_id: value(panel, "article"), model: value(panel, "model"), filters: filters(panel),
       });
+    } else if (action === "extract") {
+      if (!requireArticle(panel)) return;
+      run(panel, button.textContent.trim(), "/api/extract", {
+        page, button: button.dataset.button, article_id: value(panel, "article"),
+      });
     } else if (action === "cite") {
       if (!requireArticle(panel)) return;
       run(panel, `Referência ${button.dataset.style}`, "/api/cite", {
