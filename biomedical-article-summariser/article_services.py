@@ -1,34 +1,21 @@
 """Busca, normalizacao e cache de artigos cientificos."""
 
 import re
-import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from functools import wraps
-from typing import Tuple
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, urlencode, urlparse
 
 import requests
 from bs4 import BeautifulSoup as bs
 from loguru import logger
 
+from security import safe_get
 
-Article = Tuple[str, str]
-_article_cache: dict[str, Article] = {}
-_cache_lock = threading.Lock()
-
-
-def get_cached_article(article_id: str) -> Article | None:
-    with _cache_lock:
-        return _article_cache.get(article_id)
-
-
-def set_cached_article(article_id: str, title: str, abstract: str) -> None:
-    with _cache_lock:
-        if len(_article_cache) >= 20:
-            oldest = next(iter(_article_cache))
-            del _article_cache[oldest]
-        _article_cache[article_id] = (title, abstract)
+Article = tuple[str, str]
+# Abaixo disso o "resumo" e apenas navegacao/lixo do cabecalho, nao um abstract.
+MIN_ABSTRACT_CHARS = 200
+HTTP_TIMEOUT = 15
 
 
 def catch_request_error(func):
@@ -37,7 +24,7 @@ def catch_request_error(func):
         try:
             return func(*args, **kwargs)
         except requests.RequestException as error:
-            print(f"Request error in {func.__name__}: {error}")
+            logger.warning("Request error in {}: {}", func.__name__, error)
             return None
 
     return wrapper
@@ -53,7 +40,7 @@ def clean_text(text: str) -> str:
 @catch_request_error
 @logger.catch
 def get_xml_from_url(url: str) -> bs:
-    response = requests.get(url)
+    response = requests.get(url, timeout=HTTP_TIMEOUT)
     response.raise_for_status()
     return bs(response.content, "lxml-xml")
 
@@ -113,7 +100,7 @@ def fetch_full_text(soup: bs) -> Article:
 
 def get_abstract_from_pmid(pmid: str) -> Article:
     url = f"https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=EXT_ID:{pmid}&resultType=core&format=json"
-    response = requests.get(url)
+    response = requests.get(url, timeout=HTTP_TIMEOUT)
     response.raise_for_status()
     results = response.json().get("resultList", {}).get("result", [])
     if not results:
@@ -138,7 +125,61 @@ def _normalize_url(value: str) -> str:
     return f"https://{value}"
 
 
-def detect_input_type(raw: str) -> Tuple[str, str]:
+DOI_PATH_SUFFIXES = frozenset(
+    {
+        "full",
+        "fulltext",
+        "full-text",
+        "abstract",
+        "summary",
+        "pdf",
+        "epub",
+        "html",
+        "xml",
+        "view",
+        "article",
+        "chapter",
+        "figures",
+        "tables",
+        "metrics",
+        "references",
+        "info",
+        "about",
+        "landing",
+        "short",
+        "reader",
+        "print",
+    }
+)
+
+
+def _normalize_doi(doi: str) -> str:
+    """Remove sufixos de URL que nao fazem parte do DOI real.
+
+    Ex.: 10.3389/fimmu.2021.650095/full -> 10.3389/fimmu.2021.650095
+         10.1101/2020.03.04.20031120v1 -> 10.1101/2020.03.04.20031120
+    """
+    cleaned = doi.split("?", 1)[0].split("#", 1)[0]
+    previous = None
+    while cleaned != previous:  # ponto fixo: garante idempotencia
+        previous = cleaned
+        cleaned = cleaned.strip().rstrip(".,;)]}>\"'")
+    parts = [part for part in cleaned.split("/") if part]
+    while len(parts) > 2 and parts[-1].lower().strip(".:-") in DOI_PATH_SUFFIXES:
+        parts.pop()
+    cleaned = "/".join(parts)
+    # Numero de versao de pre-print (medRxiv/bioRxiv/arXiv) nao faz parte do DOI.
+    if cleaned.startswith(("10.1101/", "10.48550/")):
+        cleaned = re.sub(r"v\d+$", "", cleaned)
+    return cleaned
+
+
+_PII_WITH_PARENTHESES = re.compile(
+    r"(?:^|[^A-Za-z])(?:PII)?S?(\d{4})-(\d{4})\((\d{2})\)(\d{4,5})-(\d)"
+)
+
+
+def detect_input_type(raw: str) -> tuple[str, str]:
     value = raw.strip()
     url_patterns = [
         (r"pubmed\.ncbi\.nlm\.nih\.gov/(\d+)", "pmid"),
@@ -156,18 +197,18 @@ def detect_input_type(raw: str) -> Tuple[str, str]:
     for pattern, input_type in url_patterns:
         match = re.search(pattern, value, re.IGNORECASE)
         if match:
-            return input_type, match.group(1)
+            identifier = match.group(1)
+            return (input_type, _normalize_doi(identifier)) if input_type == "doi" else (input_type, identifier)
 
     # DOI embutido em qualquer URL (ex.: pagina da editora, scholar com query doi)
     doi_in_url = re.search(r"(10\.\d{4,9}/\S+?)(?=$|[\s])", value)
     if doi_in_url:
-        doi = doi_in_url.group(1).rstrip(".,;)")
-        return "doi", doi
+        return "doi", _normalize_doi(doi_in_url.group(1))
 
     checks = [
         (r"^PMC\d{4,}$", "pmcid", str.upper),
         (r"^\d{6,9}$", "pmid", lambda item: item),
-        (r"^10\.\d{4,}/\S+$", "doi", lambda item: item),
+        (r"^10\.\d{4,}/\S+$", "doi", _normalize_doi),
         (r"^\d{4}\.\d{4,5}(v\d+)?$", "arxiv", lambda item: item),
         (r"^[a-z\-]+/\d{7}$", "arxiv", lambda item: item),
         (r"^W\d{6,}$", "openalex", str.upper),
@@ -199,8 +240,8 @@ def fetch_by_doi(doi: str) -> Article:
             title, abstract = data.get("title", ""), clean_text(data.get("abstract") or "")
             if title and abstract:
                 return title, abstract
-    except Exception:
-        pass
+    except Exception as error:
+        logger.debug("Fonte de DOI indisponivel: {}", error)
     try:
         response = requests.get(
             f"https://api.crossref.org/works/{doi}", timeout=10,
@@ -213,8 +254,8 @@ def fetch_by_doi(doi: str) -> Article:
             abstract = clean_text(re.sub(r"<[^>]+>", " ", item.get("abstract", "")))
             if title:
                 return title, abstract
-    except Exception:
-        pass
+    except Exception as error:
+        logger.debug("Fonte de DOI indisponivel: {}", error)
     return "Artigo nao encontrado via DOI", ""
 
 
@@ -289,6 +330,34 @@ def _meta_content(soup: bs, *names: str) -> str:
     return ""
 
 
+def _same_article(title_a: str, title_b: str, min_similarity: float = 0.5) -> bool:
+    """Confirma que dois titulos descrevem o mesmo artigo antes de usar um resumo.
+
+    A busca por titulo e ambigua (comentarios, editorias e titulos curtos costumam
+    cair em outro artigo). Compara apenas palavras significativas, em caixa baixa.
+    """
+    if not title_a or not title_b:
+        return False
+    stop_words = {
+        "with", "from", "that", "this", "these", "those", "into", "onto",
+        "and", "the", "for", "are", "was", "were", "been", "being", "have",
+        "has", "had", "not", "but", "its", "our", "your", "their", "can",
+        "may", "than", "then", "when", "what", "which", "how", "why",
+    }
+
+    def words(text: str) -> set:
+        return {
+            re.sub(r"[^a-z0-9]", "", word)
+            for word in text.lower().split()
+            if len(word) > 3 and re.sub(r"[^a-z0-9]", "", word) and word.lower() not in stop_words
+        }
+
+    words_a, words_b = words(title_a), words(title_b)
+    if not words_a or not words_b:
+        return False
+    return len(words_a & words_b) / len(words_a) >= min_similarity
+
+
 def _title_lookup(query: str) -> Article:
     """Busca o artigo mais relevante por titulo/palavra-chave nas APIs abertas."""
     searchers = (
@@ -317,6 +386,7 @@ def _title_lookup(query: str) -> Article:
             ),
         ),
     )
+    last_title_only = ""
     for source_name, searcher, extractor in searchers:
         try:
             for item in searcher():
@@ -325,7 +395,8 @@ def _title_lookup(query: str) -> Article:
                     return title, abstract
                 if title:
                     last_title_only = title
-        except Exception:
+        except Exception as error:
+            logger.debug("Busca por titulo falhou em {}: {}", source_name, error)
             continue
     return last_title_only or f"Nenhum resultado encontrado para: {query}", ""
 
@@ -358,17 +429,31 @@ def _extract_identifier_from_url(url: str) -> tuple[str, str]:
     """Extrai (tipo, id) de URLs de editoras sem depender de acessar a pagina.
 
     Suporta PII da Elsevier/ScienceDirect (resolvido depois no Crossref),
-    DOI embutido no caminho e Springer article IDs.
+    PII com parenteses (Lancet/Cell/JID), DOI embutido no caminho e
+    Springer article IDs.
     """
     doi_match = re.search(r"(10\.\d{4,9}/[^\s?#&]+)", url)
     if doi_match:
-        return "doi", doi_match.group(1).rstrip(".,;)")
+        return "doi", _normalize_doi(doi_match.group(1))
+    # PII da Elsevier no formato com parenteses (Lancet/Cell/JID).
+    paren_pii = _PII_WITH_PARENTHESES.search(url)
+    if paren_pii:
+        g1, g2, g3, g4, g5 = paren_pii.groups()
+        return "pii", f"S{g1}{g2}{g3}{g4}{g5}".upper()
     pii_match = re.search(r"/pii/([A-Z0-9]{16,20})", url, re.IGNORECASE)
     if pii_match:
         return "pii", pii_match.group(1).upper()
+    # PII compacto como segmento proprio (ex.: /article/S0140673626019793/fulltext)
+    bare_pii = re.search(r"/(S\d{16})(?:/|$|\?|#)", url, re.IGNORECASE)
+    if bare_pii:
+        return "pii", bare_pii.group(1).upper()
     springer_match = re.search(r"/(?:article|chapter)/(10\d{3,4}/\d+)", url, re.IGNORECASE)
     if springer_match:
         return "doi", springer_match.group(1)
+    # BMJ: o sufixo de /content/{volume}/{sufixo} e o suffixo do DOI 10.1136/.
+    bmj_match = re.search(r"bmj\.com/content/[^/]+/([a-z]{2,10}-\d{4}-[\w.]+)", url, re.IGNORECASE)
+    if bmj_match:
+        return "doi", f"10.1136/{bmj_match.group(1)}"
     return "", ""
 
 
@@ -424,11 +509,15 @@ def _fetch_by_crossref_alternative_id(alternative_id: str) -> Article:
     return title, abstract
 
 
-def fetch_from_generic_url(url: str) -> Article:
-    """Extrai titulo e resumo de qualquer pagina de artigo usando meta tags."""
+def fetch_from_generic_url(url: str, resolve_doi: bool = True) -> Article:
+    """Extrai titulo e resumo de qualquer pagina de artigo usando meta tags.
+
+    resolve_doi=False pula a consulta ao DOI no inicio (usado quando o chamador
+    ja tentou o DOI e so quer a pagina da editora).
+    """
     # Identificador na propria URL resolve sem precisar acessar a pagina
     id_type, identifier = _extract_identifier_from_url(url)
-    if id_type == "doi":
+    if id_type == "doi" and resolve_doi:
         doi_title, doi_abstract = fetch_by_doi(identifier)
         if doi_abstract:
             return doi_title, doi_abstract
@@ -443,7 +532,7 @@ def fetch_from_generic_url(url: str) -> Article:
                 return doi_title, doi_abstract
 
     try:
-        response = requests.get(url, headers=BROWSER_HEADERS, timeout=15)
+        response = safe_get(url, headers=BROWSER_HEADERS, timeout=HTTP_TIMEOUT)
         response.raise_for_status()
         soup = bs(response.content, "lxml")
 
@@ -461,8 +550,21 @@ def fetch_from_generic_url(url: str) -> Article:
             "twitter:description",
         )
         abstract = clean_text(re.sub(r"<[^>]+>", " ", abstract))
-        if title and abstract:
+        # Metas curtos ("Diabetologia -") nao sao um resumo: procurar no corpo.
+        if title and len(abstract) >= MIN_ABSTRACT_CHARS:
             return title, abstract
+
+        # Resumo no corpo da pagina (Springer, BMJ, Frontiers, etc.)
+        if not abstract:
+            section = soup.select_one(
+                "#Abs1-content, .c-article-section__content, section#Abs1, "
+                ".Abstract, .abstract, #abstract, [data-title='Abstract'], "
+                ".c-article-section__content--core"
+            )
+            if section:
+                abstract = clean_text(section.get_text(" ", strip=True))
+            if len(abstract) >= MIN_ABSTRACT_CHARS:
+                return title, abstract
 
         # Sem meta tags uteis: tentar localizar um DOI na pagina e buscar nas APIs
         doi = _meta_content(soup, "citation_doi", "dc.doi") or ""
@@ -484,6 +586,14 @@ def fetch_from_generic_url(url: str) -> Article:
         body_text = clean_text(soup.body.get_text(" ", strip=True)) if soup.body else ""
         if body_text and len(body_text) > 200:
             return title, body_text[:4000]
+        if abstract:
+            return title, abstract
+        # Pagina carregou mas sem resumo util: tentar as APIs abertas pelo titulo
+        if title and title != "Titulo nao encontrado":
+            lookup_title, lookup_abstract = _title_lookup(title)
+            # Só aceita se for o MESMO artigo (senão devolve resumo de outro).
+            if lookup_abstract and _same_article(title, lookup_title):
+                return title, lookup_abstract
         return title, abstract
     except Exception as error:
         # Pagina bloqueada (403 etc.): tentar ainda o identificador da URL
@@ -496,7 +606,7 @@ def fetch_from_generic_url(url: str) -> Article:
                 doi_title, doi_abstract = fetch_by_doi(derived_doi)
                 if doi_title and doi_title != "Artigo nao encontrado via DOI":
                     return doi_title, doi_abstract
-        if id_type == "doi":
+        if id_type == "doi" and resolve_doi:
             doi_title, doi_abstract = fetch_by_doi(identifier)
             if doi_title and doi_title != "Artigo nao encontrado via DOI":
                 return doi_title, doi_abstract
@@ -508,7 +618,10 @@ def fetch_from_generic_url(url: str) -> Article:
                 return lookup_title, lookup_abstract
             if lookup_title and not str(lookup_title).startswith("Nenhum resultado"):
                 return lookup_title, ""
-        return f"Erro ao acessar a pagina: {error}", ""
+        return (
+            f"Nao foi possivel ler a pagina da editora (bloqueio automatico: {error}). "
+            "Tente colar o DOI (10.xxxx/...), o PMID ou o titulo do artigo."
+        ), ""
 
 
 def fetch_from_google_scholar(scholar_url: str) -> Article:
@@ -524,10 +637,11 @@ def fetch_from_google_scholar(scholar_url: str) -> Article:
     # Pagina de cluster: um artigo especifico agrupado
     if params.get("cluster"):
         try:
-            response = requests.get(
-                f"https://scholar.google.com/scholar?cluster={params['cluster'][0]}&hl=en",
+            response = safe_get(
+                "https://scholar.google.com/scholar?"
+                + urlencode({"cluster": params["cluster"][0], "hl": "en"}),
                 headers=BROWSER_HEADERS,
-                timeout=15,
+                timeout=HTTP_TIMEOUT,
             )
             response.raise_for_status()
             soup = bs(response.content, "lxml")
@@ -538,8 +652,8 @@ def fetch_from_google_scholar(scholar_url: str) -> Article:
                 if abstract:
                     return title, abstract
                 return fetch_from_generic_url(_first_result_link(soup)) if _first_result_link(soup) else (title_text, "")
-        except Exception:
-            pass
+        except Exception as error:
+            logger.debug("Cluster do Google Academico nao resolvido: {}", error)
 
     # Pagina de busca: usar a consulta q= para encontrar o artigo nas APIs abertas
     query = params.get("q", [""])[0] or params.get("as_q", [""])[0]
@@ -591,7 +705,8 @@ def _area_matches(title: str, journal: str, area: str) -> bool:
         return True
     haystack = f"{title} {journal}".lower()
     keywords = AREA_KEYWORDS.get(area, [])
-    return any(keyword in haystack for keyword in keywords)
+    # Casa no inicio de palavra: "law" nao deve casar com "flaw".
+    return any(re.search(r"\b" + re.escape(keyword), haystack) for keyword in keywords)
 
 
 def _bibliographic_relevance_for_item(item: dict) -> tuple[str, float]:
@@ -845,7 +960,7 @@ def search_reliable_articles(keyword: str, limit: int = 5, area: str = "Todas") 
     return ranked[:page_size]
 
 
-def resolve_article(raw_input: str) -> Tuple[str, str, str]:
+def resolve_article(raw_input: str) -> tuple[str, str, str]:
     input_type, value = detect_input_type(raw_input.strip())
     if input_type == "pmcid":
         soup = get_xml_from_url(f"https://www.ebi.ac.uk/europepmc/webservices/rest/{value}/fullTextXML")
@@ -863,6 +978,13 @@ def resolve_article(raw_input: str) -> Tuple[str, str, str]:
     if input_type in fetchers:
         fetcher, source = fetchers[input_type]
         title, abstract = fetcher(value)
+        # DOI sem abstract nas APIs abertas: a pagina do DOI costuma ter o resumo.
+        if input_type == "doi" and not abstract:
+            page_title, page_abstract = fetch_from_generic_url(
+                f"https://doi.org/{value}", resolve_doi=False
+            )
+            if page_abstract:
+                return page_title or title, page_abstract, source
         return title, abstract, source
     # Ultimo recurso: parece uma URL mesmo sem formato reconhecido
     if _looks_like_url(value):

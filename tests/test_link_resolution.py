@@ -3,6 +3,8 @@ import sys
 import unittest
 from unittest.mock import MagicMock, patch
 
+from conftest import make_response
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "biomedical-article-summariser"))
 
 import article_services
@@ -120,14 +122,11 @@ class GoogleScholarResolutionTest(unittest.TestCase):
 
     @patch("article_services.requests.get")
     def test_scholar_cluster_page_uses_first_result(self, mock_get):
-        scholar_page = MagicMock()
-        scholar_page.content = (
+        mock_get.return_value = make_response(
             b"<html><body>"
             b"<h3 class='gs_rt'><a href='https://example.com/paper'>Clustered article</a></h3>"
             b"</body></html>"
         )
-        scholar_page.status_code = 200
-        mock_get.return_value = scholar_page
 
         with patch.object(article_services, "_title_lookup", return_value=("Clustered article", "")), \
              patch.object(article_services, "fetch_from_generic_url", return_value=("Clustered article", "Clustered abstract")) as mock_fetch:
@@ -144,15 +143,12 @@ class GoogleScholarResolutionTest(unittest.TestCase):
 class GenericUrlResolutionTest(unittest.TestCase):
     @patch("article_services.requests.get")
     def test_generic_url_extracts_meta_tags(self, mock_get):
-        page = MagicMock()
-        page.content = (
+        mock_get.return_value = make_response(
             b"<html><head>"
             b"<meta name='citation_title' content='Meta title'>"
             b"<meta name='citation_abstract' content='Meta abstract text.'>"
             b"</head><body><p>Body text.</p></body></html>"
         )
-        page.status_code = 200
-        mock_get.return_value = page
 
         title, abstract, source = article_services.resolve_article(
             "https://www.example-journal.com/article/123"
@@ -164,14 +160,11 @@ class GenericUrlResolutionTest(unittest.TestCase):
 
     @patch("article_services.requests.get")
     def test_generic_url_falls_back_to_doi_in_page(self, mock_get):
-        page = MagicMock()
-        page.content = (
+        mock_get.return_value = make_response(
             b"<html><head>"
             b"<meta name='citation_doi' content='10.1000/fallback-doi'>"
             b"</head><body><p>Body text.</p></body></html>"
         )
-        page.status_code = 200
-        mock_get.return_value = page
 
         with patch.object(article_services, "fetch_by_doi", return_value=("DOI title", "DOI abstract")):
             title, abstract, _ = article_services.resolve_article(
@@ -190,6 +183,71 @@ class BlockedPageFallbackTest(unittest.TestCase):
         self.assertEqual(id_type, "pii")
         self.assertEqual(identifier, "S0378778801001372")
 
+    def test_doi_suffix_from_publisher_page_is_stripped(self):
+        # /full e /fulltext sao vistas de pagina, nao parte do DOI
+        cases = {
+            "https://www.frontiersin.org/articles/10.3389/fimmu.2021.650095/full":
+                "10.3389/fimmu.2021.650095",
+            "https://doi.org/10.3389/fimmu.2021.650095/full":
+                "10.3389/fimmu.2021.650095",
+            "https://link.springer.com/article/10.1007/s00125-020-05232-5":
+                "10.1007/s00125-020-05232-5",
+        }
+        for url, expected in cases.items():
+            with self.subTest(url=url):
+                input_type, value = article_services.detect_input_type(url)
+                self.assertEqual(input_type, "doi")
+                self.assertEqual(value, expected)
+                id_type, identifier = article_services._extract_identifier_from_url(url)
+                self.assertEqual((id_type, identifier), ("doi", expected))
+
+    def test_preprint_version_suffix_is_stripped(self):
+        input_type, value = article_services.detect_input_type(
+            "https://www.medrxiv.org/content/10.1101/2020.03.04.20031120v1"
+        )
+        self.assertEqual(input_type, "doi")
+        self.assertEqual(value, "10.1101/2020.03.04.20031120")
+
+    def test_doi_with_query_string_is_stripped(self):
+        input_type, value = article_services.detect_input_type(
+            "https://doi.org/10.1038/s41586-021-03819-2?utm_source=twitter"
+        )
+        self.assertEqual(input_type, "doi")
+        self.assertEqual(value, "10.1038/s41586-021-03819-2")
+
+    def test_elsevier_pii_with_parentheses_is_extracted(self):
+        cases = {
+            "https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(20)30183-5/fulltext":
+                "S0140673620301835",
+            "https://www.cell.com/cell/fulltext/S0092-8674(20)30183-5":
+                "S0092867420301835",
+        }
+        for url, expected in cases.items():
+            with self.subTest(url=url):
+                id_type, identifier = article_services._extract_identifier_from_url(url)
+                self.assertEqual(id_type, "pii")
+                self.assertEqual(identifier, expected)
+
+    def test_bare_pii_outside_pii_path_is_extracted(self):
+        id_type, identifier = article_services._extract_identifier_from_url(
+            "https://www.cell.com/cell/fulltext/S0092867426009335"
+        )
+        self.assertEqual(id_type, "pii")
+        self.assertEqual(identifier, "S0092867426009335")
+
+    def test_bmj_article_url_derives_doi(self):
+        id_type, identifier = article_services._extract_identifier_from_url(
+            "https://www.bmj.com/content/374/bmj-2026-100739"
+        )
+        self.assertEqual(id_type, "doi")
+        self.assertEqual(identifier, "10.1136/bmj-2026-100739")
+
+    def test_short_meta_description_is_not_used_as_abstract(self):
+        # "Diabetologia -" (14 chars) nao e um resumo
+        self.assertFalse(
+            len("Diabetologia -") >= article_services.MIN_ABSTRACT_CHARS
+        )
+
     def test_extract_doi_from_url_path(self):
         id_type, identifier = article_services._extract_identifier_from_url(
             "https://link.springer.com/article/10.1007/s00125-020-05232-5"
@@ -207,8 +265,7 @@ class BlockedPageFallbackTest(unittest.TestCase):
         crossref_precheck.json.return_value = {
             "message": {"items": [{"title": ["On the energy consumption in residential buildings"], "abstract": ""}]}
         }
-        blocked = MagicMock()
-        blocked.raise_for_status.side_effect = Exception("403 Client Error: Forbidden")
+        blocked = make_response(b"", status=403)
         crossref_fallback = MagicMock()
         crossref_fallback.raise_for_status.return_value = None
         crossref_fallback.json.return_value = {
@@ -241,8 +298,41 @@ class BlockedPageFallbackTest(unittest.TestCase):
         mock_doi.assert_called_once_with("10.1007/s00125-020-05232-5")
 
 
-if __name__ == "__main__":
-    unittest.main()
+class SameArticleTest(unittest.TestCase):
+    def test_rejects_abstract_from_a_different_article(self):
+        self.assertFalse(
+            article_services._same_article(
+                "Offline: Can time be tamed?",
+                "Emotional violence by teachers toward students",
+            )
+        )
+        self.assertFalse(
+            article_services._same_article(
+                "Comment to: Grassi G, Dell'oro R, Quarti-Trevano F et al (2005)",
+                "Waist Circumference as a potential indicator",
+            )
+        )
+
+    def test_accepts_same_article_with_minor_title_variation(self):
+        self.assertTrue(
+            article_services._same_article(
+                "Highly accurate protein structure prediction with AlphaFold",
+                "Highly accurate protein structure prediction with AlphaFold",
+            )
+        )
+        self.assertTrue(
+            article_services._same_article(
+                "Quadrivalent human papillomavirus vaccination",
+                "Effectiveness of quadrivalent human papillomavirus vaccination",
+            )
+        )
+
+    def test_empty_titles_never_match(self):
+        self.assertFalse(article_services._same_article("", "Any title here"))
+        self.assertFalse(article_services._same_article("Any title here", ""))
+
+
+class TitleLookupFallbackTest(unittest.TestCase):
     @patch("article_services._search_openalex")
     @patch("article_services._search_semantic_scholar")
     @patch("article_services._search_europe_pmc")
