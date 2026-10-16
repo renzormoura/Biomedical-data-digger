@@ -1,4 +1,6 @@
 venv/
+.venv/
+.venv_local/
 .gradio/
 .freebuff/
 __pycache__/
@@ -6,3 +8,12 @@ __pycache__/
 .env
 biomedical-article-summariser/accounts.sqlite3
 *.pem
+
+# Ferramentas
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.coverage
+coverage.xml
+htmlcov/

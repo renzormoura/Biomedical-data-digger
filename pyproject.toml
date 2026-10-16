@@ -1,0 +1,65 @@
+[project]
+name = "biomedical-data-digger"
+version = "0.3.0"
+description = "Analise de artigos cientificos com LLMs, com verificacao de fidelidade a fonte."
+requires-python = ">=3.10"
+readme = "biomedical-article-summariser/README.md"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["biomedical-article-summariser", "tests"]
+addopts = "-ra --strict-markers"
+markers = ["live: chama servicos externos reais (LLM); desativado por padrao"]
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.coverage.run]
+source = ["biomedical-article-summariser"]
+omit = ["*/biomedical_data_digger.py"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+fail_under = 80
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+src = ["biomedical-article-summariser", "tests"]
+extend-exclude = ["*.ipynb", ".venv_local", "biomedical-article_summarizer", "tools"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "C4", "RET", "PIE", "S"]
+ignore = [
+    "E501",    # texto de prompt e UI em portugues e naturalmente longo
+    "S101",    # assert em testes
+    "UP007",   # manter compatibilidade de estilo com Optional
+    "UP045",
+    "S113",    # timeouts ja sao verificados por revisao/testes
+    "RET505",
+    "SIM108",
+    "B904",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S", "B", "SIM"]
+"evals/*" = ["S"]
+
+[tool.mypy]
+python_version = "3.10"
+mypy_path = "biomedical-article-summariser"
+files = [
+    "biomedical-article-summariser/security.py",
+    "biomedical-article-summariser/ratelimit.py",
+    "biomedical-article-summariser/cache.py",
+    "biomedical-article-summariser/domain.py",
+    "biomedical-article-summariser/grounding.py",
+    "biomedical-article-summariser/config.py",
+    "biomedical-article-summariser/llm_service.py",
+    "biomedical-article-summariser/workflow.py",
+]
+follow_imports = "silent"
+strict_optional = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+disallow_untyped_defs = true
+ignore_missing_imports = true

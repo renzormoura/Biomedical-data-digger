@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: |
+            requirements-dev.txt
+            biomedical-article-summariser/requirements.txt
+      - name: Install
+        run: pip install -r requirements-dev.txt
+      - name: Lint (ruff)
+        run: ruff check biomedical-article-summariser tests evals
+      - name: Types (mypy)
+        run: mypy
+      - name: Tests + coverage
+        run: pytest --cov --cov-report=term-missing --cov-report=xml
+      - name: Dependency audit
+        run: pip install pip-audit && pip-audit -r biomedical-article-summariser/requirements.txt
+        continue-on-error: true
