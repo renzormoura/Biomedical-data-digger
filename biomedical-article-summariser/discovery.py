@@ -6,8 +6,10 @@ Busca e obras ficam em cache; cada identidade tem limite por minuto.
 
 from __future__ import annotations
 
+import re
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass, replace
 
 from loguru import logger
 
@@ -24,6 +26,9 @@ SEARCH_CACHE_TTL = 600
 WORK_CACHE_TTL = 3600
 CACHE_SIZE = 512
 SIMILAR_LIMIT = 4
+ALL_SOURCES = "all"
+ALL_SOURCES_NAME = "Todas as fontes"
+_NON_WORD = re.compile(r"\W+")
 Fallback = Callable[[str], Work | None]
 
 
@@ -62,6 +67,47 @@ def default_fallback(ref: str) -> Work | None:
     return Work(ref=ref, title=title, abstract=abstract, source=source)
 
 
+def _identity_keys(work: Work) -> set[str]:
+    keys = {f"doi:{work.doi.lower()}"} if work.doi else set()
+    if work.pmid:
+        keys.add(f"pmid:{work.pmid}")
+    title = _NON_WORD.sub("", work.title.lower())
+    if len(title) >= 25:  # titulo longo igual = mesma obra (inclui preprint e versao publicada)
+        keys.add(f"title:{title}")
+    return keys
+
+
+def _richer(first: Work, second: Work) -> Work:
+    """Entre dois registros do mesmo artigo, o que traz resumo e tipo de estudo oficial."""
+    def score(work: Work) -> tuple[bool, bool]:
+        return bool(work.abstract), bool(work.study_types)
+    return second if score(second) > score(first) else first
+
+
+def _merge(results: Sequence[SearchResult], query: SearchQuery) -> tuple[Work, ...]:
+    """Junta resultados de varias fontes: intercala (relevancia) ou ordena (mais citados, mais recentes)."""
+    interleaved: list[Work] = []
+    for position in range(max(len(r.works) for r in results)):
+        interleaved.extend(r.works[position] for r in results if position < len(r.works))
+    unique: list[Work] = []
+    seen: dict[str, int] = {}
+    for work in interleaved:
+        keys = _identity_keys(work)
+        index = next((seen[k] for k in keys if k in seen), None)
+        if index is None:
+            index = len(unique)
+            unique.append(work)
+        else:
+            unique[index] = _richer(unique[index], work)
+        for k in keys:
+            seen[k] = index
+    if query.sort == "cited":
+        unique.sort(key=lambda w: w.cited_by, reverse=True)
+    elif query.sort == "recent":
+        unique.sort(key=lambda w: w.year or 0, reverse=True)
+    return tuple(unique)
+
+
 class DiscoveryService:
     def __init__(
         self,
@@ -84,10 +130,14 @@ class DiscoveryService:
         return self._default
 
     def sources(self) -> list[dict[str, object]]:
-        return [
+        listed: list[dict[str, object]] = [
             {"id": c.id, "name": c.name, "studyTypes": list(c.study_types()), "default": c.id == self._default}
             for c in self._catalogs.values()
         ]
+        if len(self._catalogs) > 1:
+            union = list(dict.fromkeys(t for c in self._catalogs.values() for t in c.study_types()))
+            listed.insert(0, {"id": ALL_SOURCES, "name": ALL_SOURCES_NAME, "studyTypes": union, "default": False})
+        return listed
 
     def _catalog(self, source: str | None) -> Catalog:
         catalog = self._catalogs.get(source or self._default)
@@ -103,13 +153,19 @@ class DiscoveryService:
 
     # -- busca --------------------------------------------------------------
     def search(self, query: SearchQuery, *, source: str | None = None, client_id: str = "local") -> SearchResult:
-        catalog = self._catalog(source)
         query = query.normalized()
+        if source == ALL_SOURCES and len(self._catalogs) > 1:
+            return self._search_all(query, client_id)
+        catalog = self._catalog(source)
+        if self._searches.get(repr((catalog.id, query))) is None:  # acertos de cache nao gastam o limite
+            self._check(client_id)
+        return self._search_one(catalog, query)
+
+    def _search_one(self, catalog: Catalog, query: SearchQuery) -> SearchResult:
         key = repr((catalog.id, query))
         cached = self._searches.get(key)
-        if cached is not None:  # acertos de cache nao gastam o limite
+        if cached is not None:
             return cached
-        self._check(client_id)
         try:
             result = catalog.search(query)
         except CatalogError as error:
@@ -119,8 +175,56 @@ class DiscoveryService:
             self._works.set(f"{catalog.id}:{work.ref}", work)
         return result
 
+    def _search_all(self, query: SearchQuery, client_id: str) -> SearchResult:
+        """Consulta todas as fontes em paralelo e junta: sem repetidos, intercalando por relevancia.
+
+        O total e a soma dos totais de cada fonte (aproximado: o mesmo artigo pode estar em varias).
+        Fonte que falha ou que nao oferece o filtro escolhido vira aviso; so falha se todas falharem.
+        """
+        key = repr((ALL_SOURCES, query))
+        cached = self._searches.get(key)
+        if cached is not None:
+            return cached
+        self._check(client_id)
+        notes: list[str] = []
+        runnable: list[tuple[Catalog, SearchQuery]] = []
+        for catalog in self._catalogs.values():
+            supported = set(catalog.study_types())
+            wanted = tuple(t for t in query.study_types if t in supported)
+            if query.study_types and not wanted:
+                notes.append(f"{catalog.name.split(' (')[0]} não foi consultada: não oferece os tipos de estudo escolhidos.")
+                continue
+            runnable.append((catalog, replace(query, study_types=wanted)))
+        if not runnable:
+            raise SourceUnavailableError("Nenhuma fonte oferece os tipos de estudo escolhidos. Ajuste os filtros.")
+
+        def run(item: tuple[Catalog, SearchQuery]) -> tuple[Catalog, SearchResult | None]:
+            try:
+                return item[0], self._search_one(item[0], item[1])
+            except DiggerError as error:
+                logger.debug("Fonte {} falhou na busca combinada: {}", item[0].id, error)
+                return item[0], None
+
+        with ThreadPoolExecutor(max_workers=len(runnable)) as pool:
+            outcomes = list(pool.map(run, runnable))
+        results: list[SearchResult] = []
+        for catalog, result in outcomes:
+            if result is None:
+                notes.append(f"{catalog.name.split(' (')[0]} não respondeu; os resultados abaixo vêm das outras fontes.")
+            else:
+                results.append(result)
+        if not results:
+            raise SourceUnavailableError("Nenhuma fonte de artigos respondeu agora. Tente novamente em instantes.")
+        merged = SearchResult(
+            works=_merge(results, query), total=sum(r.total for r in results), page=query.page,
+            per_page=query.per_page, source=ALL_SOURCES, notes=tuple(notes),
+        )
+        self._searches.set(key, merged)
+        return merged
+
     # -- obra -----------------------------------------------------------------
     def _find(self, ref: str, source: str | None) -> Work | None:
+        source = None if source == ALL_SOURCES else source
         ordered = [self._catalog(source)] if source else list(self._catalogs.values())
         errors = 0
         for catalog in ordered:

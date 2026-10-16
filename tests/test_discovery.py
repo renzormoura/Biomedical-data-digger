@@ -88,7 +88,8 @@ def test_catalog_failure_becomes_a_source_unavailable_error_and_is_not_cached():
 def test_sources_listing_and_unknown_source():
     svc = service(FakeCatalog(), FakeCatalog(id="openalex", name="OpenAlex (todas as áreas)"))
     listing = svc.sources()
-    assert [s["id"] for s in listing] == ["europepmc", "openalex"] and listing[0]["default"] is True
+    assert [s["id"] for s in listing] == ["all", "europepmc", "openalex"]
+    assert listing[0]["name"] == "Todas as fontes" and listing[0]["default"] is False and listing[1]["default"] is True
     assert svc.default_source == "europepmc"
     with pytest.raises(DiggerError, match="desconhecida"):
         svc.search(SearchQuery(q="x"), source="google")
@@ -189,3 +190,71 @@ def test_work_from_dict_tolerates_garbage():
     assert work.ref == "" and work.title == "Título não informado" and work.authors == (Author("A", ""),)
     assert work.year is None and work.cited_by == 0 and work.keywords == () and work.open_access is False
     assert Work.from_dict({}).title == "Título não informado"
+
+
+# ------------------------------------------------------------------ todas as fontes
+def two_sources(epmc_works, alex_works, **kw):
+    epmc = FakeCatalog(works=epmc_works, **kw.get("epmc", {}))
+    alex = FakeCatalog(id="openalex", name="OpenAlex (todas as áreas)", works=alex_works, **kw.get("alex", {}))
+    return epmc, alex, service(epmc, alex)
+
+
+def test_single_source_has_no_all_option():
+    assert [s["id"] for s in service(FakeCatalog()).sources()] == ["europepmc"]
+
+
+def test_all_sources_merges_dedupes_by_doi_and_interleaves():
+    shared_epmc = make_work("1", doi="10.1/shared", abstract="")
+    shared_alex = make_work("W9", doi="10.1/SHARED", pmid="", source="OpenAlex")
+    epmc, alex, svc = two_sources([shared_epmc, make_work("2")], [shared_alex, make_work("W3", doi="10.1/w3", pmid="")])
+    result = svc.search(SearchQuery(q="x"), source="all")
+    assert result.source == "all" and result.total == 4
+    assert len(result.works) == 3  # o repetido (mesmo DOI, caixa diferente) aparece uma vez
+    kept = next(w for w in result.works if w.doi.lower() == "10.1/shared")
+    assert kept.abstract  # fica o registro mais completo
+    assert len(epmc.search_calls) == 1 and len(alex.search_calls) == 1
+
+
+def test_all_sources_sorts_by_citations_and_recency():
+    epmc, alex, svc = two_sources([make_work("1", cited_by=5, year=2010)], [make_work("W2", doi="10.1/b", pmid="", cited_by=50, year=2024)])
+    assert [w.ref for w in svc.search(SearchQuery(q="x", sort="cited"), source="all").works] == ["W2", "1"]
+    assert [w.ref for w in svc.search(SearchQuery(q="x", sort="recent"), source="all").works] == ["W2", "1"]
+
+
+def test_all_sources_survives_one_failure_with_a_note():
+    epmc, alex, svc = two_sources([make_work("1")], [], alex={"fail": True})
+    result = svc.search(SearchQuery(q="x"), source="all")
+    assert [w.ref for w in result.works] == ["1"]
+    assert any("OpenAlex não respondeu" in n for n in result.notes)
+
+
+def test_all_sources_fails_only_when_every_source_fails():
+    _, _, svc = two_sources([], [], epmc={"fail": True}, alex={"fail": True})
+    with pytest.raises(SourceUnavailableError):
+        svc.search(SearchQuery(q="x"), source="all")
+
+
+def test_all_sources_skips_sources_without_the_chosen_study_type():
+    epmc, alex, svc = two_sources([make_work("1")], [make_work("W2", doi="10.1/b", pmid="")])
+    result = svc.search(SearchQuery(q="x", study_types=("Revisão",)), source="all")
+    assert len(epmc.search_calls) == 1 and len(alex.search_calls) == 1  # ambas oferecem "Revisão"
+    class NoTypes(FakeCatalog):
+        def study_types(self):
+            return ()
+    svc2 = service(FakeCatalog(works=[make_work("1")]), NoTypes(id="openalex", name="OpenAlex (x)"))
+    result = svc2.search(SearchQuery(q="x", study_types=("Revisão",)), source="all")
+    assert any("OpenAlex não foi consultada" in n for n in result.notes)
+    with pytest.raises(SourceUnavailableError, match="Nenhuma fonte oferece"):
+        service(NoTypes(), NoTypes(id="b", name="B")).search(SearchQuery(q="x", study_types=("Revisão",)), source="all")
+
+
+def test_all_sources_spends_the_limit_once_and_caches():
+    epmc, alex, svc = two_sources([make_work("1")], [make_work("W2", doi="10.1/b", pmid="")])
+    svc = DiscoveryService([epmc, alex], SlidingWindowLimiter(1, 60), fallback=None)
+    first = svc.search(SearchQuery(q="x"), source="all")
+    assert svc.search(SearchQuery(q="x"), source="all") is first
+
+
+def test_work_lookup_accepts_the_all_source():
+    _, _, svc = two_sources([make_work("1")], [])
+    assert svc.work("1", source="all").ref == "1"

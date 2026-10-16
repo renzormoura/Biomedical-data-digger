@@ -136,7 +136,7 @@ def register_browse_routes(
         return {
             "works": [work_card(w, None if saved is None else w.ref in saved) for w in result.works],
             "total": result.total, "page": result.page, "pages": result.pages, "perPage": result.per_page,
-            "source": result.source,
+            "source": result.source, "notes": list(result.notes),
         }
 
     @app.get("/api/discover/work")

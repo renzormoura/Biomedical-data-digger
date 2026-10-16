@@ -127,6 +127,7 @@ class SearchResult:
     page: int = 1
     per_page: int = 10
     source: str = ""
+    notes: tuple[str, ...] = ()  # avisos para o usuario (ex.: fonte que nao respondeu)
 
     @property
     def pages(self) -> int:

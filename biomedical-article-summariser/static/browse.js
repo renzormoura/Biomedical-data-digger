@@ -285,6 +285,7 @@
           h("div", { class: "results-head" },
             h("strong", {}, `${Lib.formatCount(data.total)} ${data.total === 1 ? "resultado" : "resultados"}`),
             h("span", { class: "muted" }, activeSource().name)),
+          (data.notes || []).map((note) => h("p", { class: "note" }, note)),
           data.works.length
             ? h("ol", { class: "results" }, data.works.map((work) => h("li", { class: "result" },
               h("h3", {}, h("a", { href: articleHref(work) }, highlighted(work.title, st.q))),
