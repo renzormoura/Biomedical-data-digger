@@ -187,6 +187,7 @@ STUDY_TYPE_LABELS: dict[str, str] = {
     "meta-analysis": "Meta-análise",
     "systematic review": "Revisão sistemática",
     "review": "Revisão",
+    "review-article": "Revisão",
     "case reports": "Relato de caso",
     "observational study": "Estudo observacional",
     "comparative study": "Estudo comparativo",
@@ -198,7 +199,9 @@ STUDY_TYPE_LABELS: dict[str, str] = {
     "editorial": "Editorial",
     "comment": "Comentário",
 }
-_GENERIC_TYPES = {"journal article", "research support, non-u.s. gov't", "research-article", "article"}
+_GENERIC_TYPES = {
+    "journal article", "research support, non-u.s. gov't", "research-article", "article", "english abstract", "other",
+}
 
 
 def study_type_labels(pub_types: list[str]) -> list[str]:

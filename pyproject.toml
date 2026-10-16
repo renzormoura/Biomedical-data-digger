@@ -68,6 +68,8 @@ files = [
     "biomedical-article-summariser/extraction.py",
     "biomedical-article-summariser/extraction_view.py",
     "biomedical-article-summariser/europepmc.py",
+    "biomedical-article-summariser/catalog.py",
+    "biomedical-article-summariser/europepmc_catalog.py",
 ]
 follow_imports = "silent"
 strict_optional = true
