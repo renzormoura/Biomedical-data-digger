@@ -66,7 +66,7 @@ def test_equivalent_article_ids_share_one_cache_entry():
 
 def test_failures_are_not_cached():
     class Flaky(FakeGenerator):
-        def complete(self, messages, model):
+        def complete(self, messages, model, options=None):
             self.calls.append(1)
             if len(self.calls) == 1:
                 raise RuntimeError("503")
@@ -137,7 +137,7 @@ def test_simultaneous_identical_requests_call_the_model_once():
     started, release = threading.Event(), threading.Event()
 
     class Slow(FakeGenerator):
-        def complete(self, messages, model):
+        def complete(self, messages, model, options=None):
             self.calls.append(1)
             started.set()
             release.wait(5)

@@ -307,6 +307,7 @@ def create_app(
             clinical=spec.clinical,
             check_numbers=button.check_numbers,
             usage_key=f"{spec.key}/{button.id}",
+            reasoning_effort=None if spec.clinical else button.reasoning_effort,
         )
         markdown = str(reply)
         if button.sources:

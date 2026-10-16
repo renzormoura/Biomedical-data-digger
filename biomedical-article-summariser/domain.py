@@ -43,6 +43,7 @@ class Completion:
     text: str
     prompt_tokens: int | None = None
     completion_tokens: int | None = None
+    truncated: bool = False  # o provedor cortou a resposta por atingir o teto de saida
 
     @property
     def total_tokens(self) -> int | None:

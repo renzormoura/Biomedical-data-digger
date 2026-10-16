@@ -16,14 +16,15 @@ ABSTRACT = "Em 1200 pacientes a mortalidade caiu de 12,5% para 8,1% com a interv
 
 class FakeGenerator:
     def __init__(self, reply="Mortalidade caiu de 12,5% para 8,1%.", available=True):
-        self.reply, self.available, self.calls = reply, available, []
+        self.reply, self.available, self.calls, self.options = reply, available, [], []
 
     def ensure_available(self, model):
         if not self.available:
             raise BackendUnavailableError("Nenhum backend de LLM disponivel.")
 
-    def complete(self, messages, model):
+    def complete(self, messages, model, options=None):
         self.calls.append((messages, model))
+        self.options.append(options)
         return Completion(self.reply, 120, 80)
 
 

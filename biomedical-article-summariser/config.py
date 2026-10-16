@@ -19,6 +19,19 @@ def _int_env(name: str, default: int, minimum: int = 0) -> int:
     return value
 
 
+def _float_env(name: str, default: float, minimum: float, maximum: float) -> float:
+    raw = os.environ.get(name, "").strip()
+    if not raw:
+        return default
+    try:
+        value = float(raw)
+    except ValueError as error:
+        raise ValueError(f"{name} deve ser um numero, recebido: {raw!r}") from error
+    if not minimum <= value <= maximum:
+        raise ValueError(f"{name} deve estar entre {minimum} e {maximum}, recebido: {value}")
+    return value
+
+
 @dataclass(frozen=True)
 class Settings:
     llm_calls_per_minute: int = 8
@@ -27,6 +40,7 @@ class Settings:
     production: bool = False
     session_secret: str = field(default="", repr=False)
     admin_token: str = field(default="", repr=False)
+    llm_temperature: float = 0.2
     daily_token_budget_guest: int = 60_000
     daily_token_budget_user: int = 200_000
 
@@ -43,6 +57,7 @@ class Settings:
             production=production,
             session_secret=secret,
             admin_token=admin_token,
+            llm_temperature=_float_env("LLM_TEMPERATURE", 0.2, minimum=0.0, maximum=2.0),
             daily_token_budget_guest=_int_env("DAILY_TOKEN_BUDGET_GUEST", 60_000, minimum=0),
             daily_token_budget_user=_int_env("DAILY_TOKEN_BUDGET_USER", 200_000, minimum=0),
             llm_calls_per_minute=_int_env("RATE_LIMIT_PER_MINUTE", 8, minimum=1),

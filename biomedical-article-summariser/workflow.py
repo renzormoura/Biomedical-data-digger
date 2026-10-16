@@ -18,6 +18,7 @@ import article_services
 import citations
 from cache import SingleFlight, TTLCache
 from domain import Article, ArticleNotFoundError, Completion, DiggerError, RateLimitedError, is_failure_title
+from generation import GenerationOptions, GenerationPolicy
 from grounding import check_numeric_grounding
 from prompt_builders import (
     build_dynamic_sys_prompt,
@@ -47,7 +48,9 @@ class Resolver(Protocol):
 class TextGenerator(Protocol):
     def ensure_available(self, model: str) -> None: ...
 
-    def complete(self, messages: Sequence[Message], model: str) -> Completion: ...
+    def complete(
+        self, messages: Sequence[Message], model: str, options: GenerationOptions | None = None
+    ) -> Completion: ...
 
 
 def canonical_key(raw: str) -> str:
@@ -142,6 +145,19 @@ class Reply(str):
         return obj
 
 
+TRUNCATION_NOTICE = (
+    "\n\n---\n> ✂️ **Resposta cortada:** o modelo atingiu o limite de tamanho antes de terminar. "
+    "Tente o detalhe \"Resumido\" ou repita a análise."
+)
+
+
+@dataclass(frozen=True)
+class _Outcome:
+    text: str
+    tokens: int | None
+    cacheable: bool = True  # respostas cortadas nao entram no cache
+
+
 RESULT_CACHE_SIZE = 512
 RESULT_CACHE_TTL = 6 * 3600
 
@@ -161,6 +177,7 @@ class AnalysisService:
         quota: QuotaManager | None = None,
         result_cache: TTLCache[str] | None = None,
         cache_results: bool = True,
+        policy: GenerationPolicy | None = None,
     ) -> None:
         self._repository = repository
         self._generator = generator
@@ -168,15 +185,25 @@ class AnalysisService:
         self._citation_fetcher = citation_fetcher
         self._usage_log = usage_log
         self._quota = quota
+        self._policy = policy
         self._cache_results = cache_results
         self._results: TTLCache[str] = (
             result_cache if result_cache is not None else TTLCache(RESULT_CACHE_SIZE, RESULT_CACHE_TTL)
         )
-        self._flight: SingleFlight[tuple[str, int | None]] = SingleFlight()
+        self._flight: SingleFlight[_Outcome] = SingleFlight()
 
     # -- geracao ----------------------------------------------------------
+    def _options(self, detail: str = "", reasoning_effort: str | None = None) -> GenerationOptions | None:
+        return self._policy.for_detail(detail, reasoning_effort) if self._policy is not None else None
+
     def _run(
-        self, messages: Sequence[Message], model: str, client_id: str, error_prefix: str, usage_key: str
+        self,
+        messages: Sequence[Message],
+        model: str,
+        client_id: str,
+        error_prefix: str,
+        usage_key: str,
+        options: GenerationOptions | None = None,
     ) -> tuple[Completion, int]:
         """Chama o modelo respeitando limite por minuto e cota diaria; devolve (resposta, tokens)."""
         self._generator.ensure_available(model)
@@ -191,7 +218,7 @@ class AnalysisService:
             raise RateLimitedError(str(error)) from error
         started = time.monotonic()
         try:
-            completion = self._generator.complete(messages, model)
+            completion = self._generator.complete(messages, model, options)
         except DiggerError:
             raise
         except Exception as error:
@@ -199,6 +226,12 @@ class AnalysisService:
         tokens = self._record_usage(usage_key, model, client_id, messages, completion, started)
         if self._quota is not None:
             self._quota.charge(client_id, tokens)
+        if not completion.text.strip():
+            raise DiggerError(
+                "O modelo não devolveu texto"
+                + (" (atingiu o limite de tamanho)" if completion.truncated else "")
+                + ". Tente novamente."
+            )
         return completion, tokens
 
     def _record_usage(
@@ -243,7 +276,7 @@ class AnalysisService:
         client_id: str,
         model: str,
         usage_key: str,
-        compute: Callable[[], tuple[str, int | None]],
+        compute: Callable[[], _Outcome],
     ) -> Reply:
         """Cache de resultados + execucao unica por chave. Acertos nao gastam token nem cota."""
         if self._cache_results:
@@ -252,20 +285,20 @@ class AnalysisService:
                 self._record_hit(usage_key, model, client_id)
                 return Reply(hit, cached=True, tokens=0, quota_remaining=self._remaining(client_id))
 
-        def compute_and_store() -> tuple[str, int | None]:
-            text, tokens = compute()
-            if self._cache_results:
-                self._results.set(key, text)
-            return text, tokens
+        def compute_and_store() -> _Outcome:
+            outcome = compute()
+            if self._cache_results and outcome.cacheable:
+                self._results.set(key, outcome.text)
+            return outcome
 
         try:
-            (text, tokens), leader = self._flight.do(key, compute_and_store)
+            outcome, leader = self._flight.do(key, compute_and_store)
         except TimeoutError as error:
             raise DiggerError("Uma análise idêntica está demorando demais. Tente novamente.") from error
         if leader:
-            return Reply(text, tokens=tokens, quota_remaining=self._remaining(client_id))
+            return Reply(outcome.text, tokens=outcome.tokens, quota_remaining=self._remaining(client_id))
         self._record_hit(usage_key, model, client_id)
-        return Reply(text, cached=True, tokens=0, quota_remaining=self._remaining(client_id))
+        return Reply(outcome.text, cached=True, tokens=0, quota_remaining=self._remaining(client_id))
 
     # -- casos de uso ----------------------------------------------------------
     def analyze(
@@ -281,15 +314,16 @@ class AnalysisService:
         check_numbers: bool = True,
         footer: str = "",
         usage_key: str = "",
+        reasoning_effort: str | None = None,
     ) -> Reply:
         filters = filters or Filters()
         key = _digest(
             "analyze", canonical_key(article_id), f"{build_fn.__module__}.{build_fn.__qualname__}", label,
             clinical, check_numbers, footer, filters.publico, filters.tom, filters.idioma, filters.detalhe,
-            filters.foco, model,
+            filters.foco, model, reasoning_effort, self._policy,
         )
 
-        def compute() -> tuple[str, int | None]:
+        def compute() -> _Outcome:
             self._generator.ensure_available(model)
             article = self._repository.get(article_id)
             messages = build_fn(
@@ -300,7 +334,8 @@ class AnalysisService:
                 ),
             )
             completion, tokens = self._run(
-                messages, model, client_id, "Erro ao gerar resumo com a LLM", usage_key or label
+                messages, model, client_id, "Erro ao gerar resumo com a LLM", usage_key or label,
+                self._options(filters.detalhe, reasoning_effort),
             )
             body = f"## Título do Artigo: {article.title}\n\n### Resumo:\n{completion.text}"
             if check_numbers:
@@ -309,7 +344,12 @@ class AnalysisService:
                 ).to_markdown()
             if clinical:
                 body += CLINICAL_DISCLAIMER
-            return f"---\n> **{label}**  ·  Filtros: *{filters.describe()}*\n\n---\n{body}{footer}", tokens
+            if completion.truncated:
+                body += TRUNCATION_NOTICE
+            return _Outcome(
+                f"---\n> **{label}**  ·  Filtros: *{filters.describe()}*\n\n---\n{body}{footer}",
+                tokens, cacheable=not completion.truncated,
+            )
 
         return self._serve(key, client_id=client_id, model=model, usage_key=usage_key or label, compute=compute)
 
@@ -325,9 +365,12 @@ class AnalysisService:
             wrap_source("SOURCE_ABSTRACT", article.abstract),
             response_text,
         )
-        completion, tokens = self._run(messages, model, client_id, "Erro ao auditar a resposta", usage_key)
+        completion, tokens = self._run(
+            messages, model, client_id, "Erro ao auditar a resposta", usage_key, self._options()
+        )
+        notice = TRUNCATION_NOTICE if completion.truncated else ""
         return Reply(
-            f"---\n> **Auditoria da Resposta**\n\n---\n{completion.text}",
+            f"---\n> **Auditoria da Resposta**\n\n---\n{completion.text}{notice}",
             tokens=tokens, quota_remaining=self._remaining(client_id),
         )
 
@@ -345,10 +388,11 @@ class AnalysisService:
         if not (article_id_a or "").strip() or not (article_id_b or "").strip():
             raise DiggerError("Informe os dois IDs ou URLs para comparar os artigos.")
         key = _digest(
-            "compare", canonical_key(article_id_a), canonical_key(article_id_b), analysis_type, model, medical_context
+            "compare", canonical_key(article_id_a), canonical_key(article_id_b), analysis_type, model, medical_context,
+            self._policy,
         )
 
-        def compute() -> tuple[str, int | None]:
+        def compute() -> _Outcome:
             a = self._repository.get(article_id_a)
             b = self._repository.get(article_id_b)
             messages = build_message_comparacao_artigos(
@@ -359,9 +403,16 @@ class AnalysisService:
                 analysis_type=analysis_type,
                 medical_context=medical_context,
             )
-            completion, tokens = self._run(messages, model, client_id, "Erro ao comparar os artigos", usage_key)
-            suffix = CLINICAL_DISCLAIMER if medical_context else ""
-            return f"---\n> **Comparação entre Artigos**\n\n---\n{completion.text}{suffix}", tokens
+            completion, tokens = self._run(
+                messages, model, client_id, "Erro ao comparar os artigos", usage_key, self._options()
+            )
+            suffix = (CLINICAL_DISCLAIMER if medical_context else "") + (
+                TRUNCATION_NOTICE if completion.truncated else ""
+            )
+            return _Outcome(
+                f"---\n> **Comparação entre Artigos**\n\n---\n{completion.text}{suffix}",
+                tokens, cacheable=not completion.truncated,
+            )
 
         return self._serve(key, client_id=client_id, model=model, usage_key=usage_key, compute=compute)
 

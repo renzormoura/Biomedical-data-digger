@@ -14,6 +14,7 @@ from typing import Any, Optional, Protocol
 from dotenv import load_dotenv
 
 from domain import BackendUnavailableError, Completion
+from generation import GenerationOptions
 
 load_dotenv()
 
@@ -52,7 +53,9 @@ class LLMBackend(Protocol):
 
     def is_available(self) -> bool: ...
 
-    def complete(self, messages: Sequence[Message], model: str) -> Completion: ...
+    def complete(
+        self, messages: Sequence[Message], model: str, options: GenerationOptions | None = None
+    ) -> Completion: ...
 
     def generate(self, messages: Sequence[Message], model: str) -> str: ...
 
@@ -83,18 +86,38 @@ class GroqBackend:
     def _model_id(model: str) -> str:
         return GROQ_MODEL_MAP.get(model, DEFAULT_GROQ_MODEL)
 
-    def complete(self, messages: Sequence[Message], model: str) -> Completion:
+    def complete(
+        self, messages: Sequence[Message], model: str, options: GenerationOptions | None = None
+    ) -> Completion:
+        model_id = self._model_id(model)
         response = self._get_client().chat.completions.create(
-            model=self._model_id(model),
+            model=model_id,
             messages=list(messages),
             timeout=REQUEST_TIMEOUT_SECONDS,
+            **self._request_options(model_id, options),
         )
         usage = getattr(response, "usage", None)
+        choice = response.choices[0]
         return Completion(
-            text=response.choices[0].message.content or "",
+            text=choice.message.content or "",
             prompt_tokens=_as_int(getattr(usage, "prompt_tokens", None)),
             completion_tokens=_as_int(getattr(usage, "completion_tokens", None)),
+            truncated=getattr(choice, "finish_reason", None) == "length",
         )
+
+    @staticmethod
+    def _request_options(model_id: str, options: GenerationOptions | None) -> dict[str, Any]:
+        """Traduz `GenerationOptions` para parametros do Groq, so os que o modelo aceita."""
+        if options is None:
+            return {}
+        params: dict[str, Any] = {}
+        if options.temperature is not None:
+            params["temperature"] = options.temperature
+        if options.max_output_tokens is not None:
+            params["max_completion_tokens"] = options.max_output_tokens
+        if options.reasoning_effort and model_id.startswith("openai/gpt-oss"):
+            params["reasoning_effort"] = options.reasoning_effort
+        return params
 
     def generate(self, messages: Sequence[Message], model: str) -> str:
         return self.complete(messages, model).text
@@ -141,15 +164,27 @@ class OllamaBackend:
     def _model_id(model: str) -> str:
         return LOCAL_MODEL_MAP.get(model, model)
 
-    def complete(self, messages: Sequence[Message], model: str) -> Completion:
+    def complete(
+        self, messages: Sequence[Message], model: str, options: GenerationOptions | None = None
+    ) -> Completion:
         client = self._get_module()
         model_id = self._model_id(model)
         client.pull(model_id)
-        response = client.chat(model=model_id, messages=list(messages))
+        extra: dict[str, Any] = {}
+        if options is not None:
+            local: dict[str, Any] = {}
+            if options.temperature is not None:
+                local["temperature"] = options.temperature
+            if options.max_output_tokens is not None:
+                local["num_predict"] = options.max_output_tokens
+            if local:
+                extra["options"] = local
+        response = client.chat(model=model_id, messages=list(messages), **extra)
         return Completion(
             text=response["message"]["content"],
             prompt_tokens=_as_int(_field(response, "prompt_eval_count")),
             completion_tokens=_as_int(_field(response, "eval_count")),
+            truncated=_field(response, "done_reason") == "length",
         )
 
     def generate(self, messages: Sequence[Message], model: str) -> str:
@@ -194,8 +229,10 @@ class LLMRouter:
     def has_any_backend(self) -> bool:
         return any(backend.is_available() for backend in self._backends)
 
-    def complete(self, messages: Sequence[Message], model: str) -> Completion:
-        return self._backend_for(model).complete(messages, model)
+    def complete(
+        self, messages: Sequence[Message], model: str, options: GenerationOptions | None = None
+    ) -> Completion:
+        return self._backend_for(model).complete(messages, model, options)
 
     def generate(self, messages: Sequence[Message], model: str) -> str:
         return self.complete(messages, model).text

@@ -21,13 +21,15 @@ class FakeGenerator:
         self.available = available
         self.usage = usage
         self.calls = []
+        self.options = []
 
     def ensure_available(self, model):
         if not self.available:
             raise BackendUnavailableError("sem backend")
 
-    def complete(self, messages, model):
+    def complete(self, messages, model, options=None):
         self.calls.append((messages, model))
+        self.options.append(options)
         return Completion(self.reply, *self.usage)
 
 
@@ -164,7 +166,7 @@ def test_rate_limit_is_enforced_per_client():
 
 def test_llm_failure_is_wrapped():
     class Boom(FakeGenerator):
-        def complete(self, messages, model):
+        def complete(self, messages, model, options=None):
             raise RuntimeError("503 upstream")
 
     service, *_ = make_service(generator=Boom())

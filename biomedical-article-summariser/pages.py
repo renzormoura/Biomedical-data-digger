@@ -33,6 +33,25 @@ LANGUAGE_CHOICES = ("Português (BR)", "English", "Español")
 DETAIL_CHOICES = ("Resumido", "Completo", "Ultra-detalhado")
 
 
+# Botoes de baixo risco (reformulam o texto sem julgar nem extrair dados clinicos): raciocinio
+# reduzido corta ~50% dos tokens de saida. Medicao real: scripts/measure_tokens.py.
+LOW_REASONING: dict[Callable, str] = {
+    pb.build_message_sumario: "low",
+    pb.build_message_pontos_chave: "low",
+    pb.build_message_resumo: "low",
+    pb.build_message_resumo_introdutorio: "low",
+    pb.build_message_resumo_paciente: "low",
+    pb.build_message_resumo_estudante: "low",
+    pb.build_message_glossario: "low",
+    pb.build_message_questoes_discussao: "low",
+    pb.build_message_flashcards: "low",
+    pb.build_message_mapa_conceitos: "low",
+    pb.build_message_roteiro_seminario: "low",
+    pb.build_message_pergunta_pesquisa: "low",
+    pb.build_message_estrategia_busca: "low",
+}
+
+
 def slugify(text: str) -> str:
     """Identificador estavel e ASCII para uso em URLs e atributos HTML."""
     ascii_text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode()
@@ -47,6 +66,9 @@ class AnalysisButton:
     variant: str = "secondary"
     sources: tuple[str, ...] = ()
     check_numbers: bool = True
+    # Esforco de raciocinio do modelo (low/medium/high). None = padrao do provedor. So e
+    # reduzido em botoes que apenas reformulam o texto; nunca em abas clinicas (ver web.py).
+    reasoning_effort: str | None = None
 
     @property
     def heading(self) -> str:
@@ -126,6 +148,7 @@ class PageSpec:
 
 
 def _b(label: str, builder: Callable, output_label: str = "", **kwargs) -> AnalysisButton:
+    kwargs.setdefault("reasoning_effort", LOW_REASONING.get(builder))
     return AnalysisButton(label, builder, output_label, **kwargs)
 
 

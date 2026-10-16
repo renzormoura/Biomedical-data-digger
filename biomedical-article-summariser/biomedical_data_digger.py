@@ -7,6 +7,7 @@ import os
 import uvicorn
 
 from config import Settings
+from generation import GenerationPolicy
 from llm_service import get_router
 from quota import QuotaManager
 from ratelimit import SlidingWindowLimiter
@@ -25,6 +26,7 @@ def create_app():  # type: ignore[no-untyped-def]
         limiter=SlidingWindowLimiter(settings.llm_calls_per_minute, window=60.0),
         usage_log=usage_log,
         quota=QuotaManager(settings.daily_token_budget_guest, settings.daily_token_budget_user),
+        policy=GenerationPolicy(temperature=settings.llm_temperature),
     )
     return create_web_app(service, repository, settings, usage_log=usage_log)
 

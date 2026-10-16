@@ -17,7 +17,7 @@ class FakeBackend:
     def is_available(self):
         return self._available
 
-    def complete(self, messages, model):
+    def complete(self, messages, model, options=None):
         self.calls.append((list(messages), model))
         return Completion(f"{self.name}:{model}", 7, 3)
 

@@ -97,7 +97,7 @@ def test_audit_and_compare_are_recorded_under_their_own_keys():
 
 def test_failed_generation_is_not_recorded():
     class Boom(FakeGenerator):
-        def complete(self, messages, model):
+        def complete(self, messages, model, options=None):
             raise RuntimeError("503")
 
     service, log = _service_with_log(Boom())
