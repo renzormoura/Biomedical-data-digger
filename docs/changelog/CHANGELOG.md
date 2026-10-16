@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 2026-10 — Novas abas de área
+
+### Adicionado
+- **Sete abas de análise** (antes 2): Geral, **Acadêmico**, Medicina, **Ambiental**, **Saúde Pública**, **Tecnologia e IA**, **Engenharias**, além de Pesquisa e Contas.
+- **33 prompts novos**, gerados por `prompt_builders.make_builder` a partir de `prompt_specs.py` (dados). A fábrica anexa sempre a restrição "somente a fonte", então nenhum prompt novo pode omiti-la.
+- **Referências ABNT, APA e Vancouver sem IA** (`citations.py`): metadados do Crossref (DOI) ou Europe PMC (PMID/PMCID), formatados por código. Campos ausentes são omitidos, nunca inventados.
+- Fontes oficiais ambientais no anexo de verificação (MMA, IBAMA, CONAMA, ODS), marcadas como "pendente de revisão" até validação por especialista.
+- Novos públicos-alvo e focos por aba, aplicados ao prompt de sistema.
+- Medicina ganhou PICO, Crítica Metodológica, Dados Estatísticos, Interações Medicamentosas e Reações Adversas.
+
+### Alterado
+- Seção "Educacional" saiu da aba Geral e vive somente em Acadêmico.
+- Especificação das abas movida para `pages.py` (dados); `ui.py` ficou com a mecânica de montagem.
+- Abas de saúde (Medicina e Saúde Pública) exibem o aviso clínico persistente.
+- Testes: de 293 para 548 (invariantes de todas as abas, fábrica de prompts, citações).
+
 ## 2026-10 — Refatoração arquitetural, segurança e qualidade
 
 ### Segurança

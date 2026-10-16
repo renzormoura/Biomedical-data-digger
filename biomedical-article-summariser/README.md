@@ -13,6 +13,23 @@ Aplicação web em Gradio para buscar artigos científicos, gerar resumos e exec
 - Cache em memória dos últimos 20 artigos e histórico das últimas 10 consultas.
 - Cadastro e login com SQLite local ou PostgreSQL em produção.
 
+## Abas
+
+| Aba | Foco |
+|---|---|
+| Geral | Análise científica universal de qualquer área |
+| Acadêmico | Estudar, escrever (fichamento, resenha), referências ABNT/APA/Vancouver (sem IA) e roteiro de seminário |
+| Medicina | Resumo clínico, farmacologia, interações, reações adversas, segurança e contexto SUS/ANVISA |
+| Ambiental | Impacto, poluentes, mitigação, indicadores/ODS e contexto regulatório (CONAMA/IBAMA/MMA) |
+| Saúde Pública | Desenho epidemiológico, medidas de associação, vieses, SUS e vigilância |
+| Tecnologia e IA | Problema, dados, métricas, reprodutibilidade, validade e riscos éticos |
+| Engenharias | Metodologia, parâmetros, desempenho, incertezas, normas e viabilidade |
+| Pesquisa / Contas | Busca por palavra-chave em 5 fontes e cadastro de usuários |
+
+Para criar uma nova aba: adicione um `PageSpec` em `pages.py` (e, se precisar de prompts novos, um
+`PromptSpec` em `prompt_specs.py` mais a linha `make_builder` em `prompt_builders.py`). Os testes
+validam que cada botão tem prompt próprio, que nenhum prompt fica sem uso e que filtros e fontes existem.
+
 ## Índice de Relevância Bibliográfica
 
 O indicador ajuda a ordenar resultados para descoberta bibliográfica. Ele **não é uma avaliação da qualidade metodológica, da validade clínica ou do risco de viés** do artigo.
@@ -107,11 +124,11 @@ Camadas (dependências apontam para baixo; ver `docs/adrs/ADR-004-arquitetura-em
 | Camada | Módulos |
 |---|---|
 | Entrada | `biomedical_data_digger.py` (composição das dependências e `launch`) |
-| Apresentação | `ui.py` (páginas declarativas `PageSpec` + fábrica Gradio) |
+| Apresentação | `pages.py` (abas declarativas `PageSpec`) e `ui.py` (fábrica Gradio) |
 | Casos de uso | `workflow.py` (`ArticleRepository`, `AnalysisService`; sem Gradio) |
 | Domínio | `domain.py` (`Article`, erros tipados), `grounding.py` (checagem numérica) |
 | Infraestrutura | `article_services.py` (fontes externas), `llm_service.py` (`LLMBackend`/`LLMRouter`), `account_store.py`, `cache.py`, `ratelimit.py`, `security.py` (anti-SSRF), `config.py` |
-| Conteúdo | `prompt_builders.py`, `contexto_brasil.py`, `styles.css` |
+| Conteúdo | `prompt_builders.py` + `prompt_specs.py`, `citations.py`, `contexto_brasil.py`, `styles.css` |
 
 ## Limitações
 
