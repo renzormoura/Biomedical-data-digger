@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 2026-10 — Fase 3: camada sem IA e botões clínicos extrativos
+
+### Adicionado
+- **"Extrair do artigo (sem IA)"** em todas as abas: resumo organizado em seções com o texto original, números com a frase de origem, tipo de estudo do registro oficial (Europe PMC) e metadados. Zero token, nada gerado.
+- **Botões de dose, conduta, interações e reações adversas passam a ser extrativos** (trechos copiados do resumo ou "Nada encontrado"). As versões geradas por IA ficam atrás de `ENABLE_GENERATIVE_CLINICAL=1`, cada uma bloqueada se o resumo não traz o tema.
+- **Pré-condição `requires`:** Populações Especiais e Alertas e Contraindicações só chamam o modelo se o resumo trouxer o tema; caso contrário respondem sem gastar token.
+- `POST /api/extract`; reconhecimento de rótulos em inglês, português e espanhol (com dois-pontos ou ponto) e de termos em espanhol.
+- Aviso clínico próprio para conteúdo extraído (não afirma "gerado por IA").
+
+### Testes
+- De 733 para 792 (extração, Europe PMC, serviço sem IA, bloqueio, flag, API, XSS). Validado com um artigo real da Europe PMC, sem nenhuma chamada ao Groq.
+
 ## 2026-10 — Fase 2: custo por chamada, injeção e erros do provedor
 
 ### Adicionado

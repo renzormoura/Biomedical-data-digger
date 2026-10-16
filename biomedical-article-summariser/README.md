@@ -19,7 +19,7 @@ Aplicação web (FastAPI + frontend próprio, preto e laranja) para buscar artig
 |---|---|
 | Geral | Análise científica universal de qualquer área |
 | Acadêmico | Estudar, escrever (fichamento, resenha), referências ABNT/APA/Vancouver (sem IA) e roteiro de seminário |
-| Medicina | Resumo clínico, farmacologia, interações, reações adversas, segurança e contexto SUS/ANVISA |
+| Medicina | Resumo clínico; dose, conduta, interações e reações adversas **como trechos copiados do resumo (sem IA)**; segurança e contexto SUS/ANVISA |
 | Ambiental | Impacto, poluentes, mitigação, indicadores/ODS e contexto regulatório (CONAMA/IBAMA/MMA) |
 | Saúde Pública | Desenho epidemiológico, medidas de associação, vieses, SUS e vigilância |
 | Tecnologia e IA | Problema, dados, métricas, reprodutibilidade, validade e riscos éticos |
@@ -101,7 +101,7 @@ $env:RUN_LIVE_EVALS = "1"; $env:GROQ_API_KEY = "..."; pytest evals -m live
 ```
 
 Em produção é obrigatório definir `SESSION_SECRET` (mín. 32 caracteres; o `render.yaml` gera um valor automaticamente).
-`LLM_TEMPERATURE` (padrão 0.2, entre 0 e 2) controla a aleatoriedade das respostas.
+`LLM_TEMPERATURE` (padrão 0.2, entre 0 e 2) controla a aleatoriedade das respostas. `ENABLE_GENERATIVE_CLINICAL=1` restaura os botões de dose, conduta, interações e reações adversas gerados por IA na aba Medicina (desligado por padrão; ligue só após validação por especialista).
 Variáveis de custo: `DAILY_TOKEN_BUDGET_GUEST` (60000) e `DAILY_TOKEN_BUDGET_USER` (200000) definem a cota diária de tokens (0 = sem limite); `ADMIN_TOKEN` (mín. 24 caracteres) ativa `GET /api/admin/usage` (cabeçalho `Authorization: Bearer ...`), com o consumo por botão.
 Variáveis opcionais: `RATE_LIMIT_PER_MINUTE` (padrão 8 chamadas de LLM/min por cliente),
 `LOGIN_ATTEMPTS_PER_MINUTE` (5), `TRUSTED_PROXY_HOPS` (1, para ler o IP real atrás do proxy do Render).

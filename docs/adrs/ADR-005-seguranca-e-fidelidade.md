@@ -18,6 +18,7 @@
 
 - Toda resposta da aba Medicina e as comparações clínicas recebem aviso persistente de que o
   conteúdo é apoio à leitura, gerado só de título + resumo.
+- **Dose, conduta, interações e reações adversas são extrativos por padrão**: o app copia as frases do resumo que tratam do tema (ou informa que não há), sem gerar texto. A versão gerada por IA fica atrás de `ENABLE_GENERATIVE_CLINICAL` e é bloqueada quando o resumo não traz o tema. Motivo: são as saídas em que um erro de modelo mais pode causar dano e em que a validação por especialista ainda não aconteceu.
 - Botões do contexto brasileiro desativam a checagem numérica (o contexto curado pode conter
   números que não estão no resumo) e anexam o status de verificação das fontes oficiais.
 - Não substitui bula, diretriz institucional nem texto completo. Uso como dispositivo de decisão

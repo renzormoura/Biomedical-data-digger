@@ -1,6 +1,6 @@
 # Plano: economizar tokens e usar IA só quando necessária
 
-**Status:** Fases 0 e 1 **implementadas** · Fase 2 **parcialmente implementada** (ver abaixo) · Fases 3 a 5 pendentes · 2026-10 · **Decisão vigente:** o produto lê **apenas título + resumo** (sem texto completo).
+**Status:** Fases 0 e 1 **implementadas** · Fase 2 **parcialmente implementada** · Fase 3 **implementada** · Fases 4 e 5 pendentes · 2026-10 · **Decisão vigente:** o produto lê **apenas título + resumo** (sem texto completo).
 
 ### Medição real (Fase 0), um artigo, GPT-OSS 20B no Groq
 
@@ -76,7 +76,14 @@ Reduzir o custo de LLM por uso, sem perder fidelidade ao texto-fonte, deixando a
 - **Manter a parte fixa no início do prompt** (já é assim) e verificar na documentação do provedor se há cache de prefixo.
 - **Aceite:** entrada mediana ≤ ~700 tokens; avaliação de fidelidade igual ou melhor que o baseline; contratos de prompt passando.
 
-### Fase 3 — IA só quando necessária
+### Fase 3 — IA só quando necessária ✅ concluída
+- **Implementado:** botão "Extrair do artigo" em todas as abas (`extraction.py`, `extraction_view.py`, `europepmc.py`): resumo dividido em seções com o texto original (rótulos com dois-pontos ou ponto, em inglês, português e espanhol), números e dados estatísticos com a frase de origem, tipo de estudo vindo do registro oficial da Europe PMC e metadados (revista, acesso aberto, citações, palavras-chave, MeSH, financiamento). Zero token.
+- **Dose, conduta, interações e reações adversas** (Medicina): agora **extrativos por padrão** ("trechos"): copiam as frases do resumo que tratam do tema, ou dizem "Nada encontrado". As versões geradas por IA continuam no código atrás da flag `ENABLE_GENERATIVE_CLINICAL` e, quando ligadas, cada uma é bloqueada se o resumo não traz o tema.
+- **Bloqueio sem chamar o modelo** (`requires`): Populações Especiais e Alertas e Contraindicações (e os botões clínicos gerados, se a flag estiver ligada) só chamam a IA se o resumo trouxer o tema; senão, resposta de zero token.
+- **Limites conhecidos:** a seleção é por palavras-chave e pode omitir frases relevantes (a interface avisa); abstracts com hifenização quebrada ("secunda-rios") passam por cobertura parcial; o tipo de estudo só aparece quando o registro o informa (nunca é deduzido).
+- **Achados de uso real:** o teste com um artigo verdadeiro revelou rótulos com ponto, vocabulário em espanhol e um aviso clínico que dizia "gerado por IA" em conteúdo extraído; todos corrigidos com testes de regressão.
+
+### Fase 3 — plano original
 Camada **sem IA** (zero token) e bloqueios que evitam chamar o modelo:
 - Abstract **dividido em seções** quando houver rótulos (se não houver, mostrar inteiro; os rótulos são irregulares).
 - **Tipo de estudo** do registro oficial (Europe PMC), como rótulo, nunca como opinião.
