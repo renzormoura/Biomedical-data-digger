@@ -514,6 +514,62 @@ Estruture a análise com os seguintes tópicos:
         {"role": "user", "content": user_prompt}
     ]
 
+PUBLICO_MAP = {
+    "Pesquisador / Acadêmico": "Dirija a resposta a um pesquisador ou acadêmico: priorize precisão, contexto científico e detalhes relevantes para análise crítica.",
+    "Profissional da área":    "Dirija a resposta a um profissional da área do artigo, usando terminologia técnica adequada e explicando conceitos que dependam de contexto.",
+    "Estudante":               "Dirija a resposta a um estudante: use linguagem didática, explique termos técnicos e contextualize os achados.",
+    "Público geral":            "Dirija a resposta ao público geral: use linguagem simples, evite jargões e explique conceitos especializados de forma acessível.",
+    "Médico / Especialista":  "Dirija a resposta a um médico ou especialista clínico com pleno domínio da linguagem técnica médica.",
+    "Residente / Interno":    "Dirija a resposta a um médico residente ou interno: use linguagem técnica, mas explique brevemente conceitos avançados quando necessário.",
+    "Estudante de Medicina":  "Dirija a resposta a um estudante de medicina: use linguagem didática, explique termos técnicos e contextualize os achados.",
+    "Paciente / Leigo":       "Dirija a resposta a um paciente ou leigo: use linguagem simples, evite jargões e explique tudo de forma acessível.",
+    "Enfermagem / Farmácia":  "Dirija a resposta a profissionais de enfermagem ou farmácia: foque em aspectos práticos de administração, monitoramento e segurança.",
+    "Graduação (iniciante)":  "Dirija a resposta a um estudante de graduação no início do curso: linguagem didática, termos técnicos explicados e passo a passo.",
+    "Graduação (avançado)":   "Dirija a resposta a um estudante de graduação em fase final: linguagem técnica, com foco em análise crítica e uso do artigo em TCC e seminários.",
+    "Pós-graduação":          "Dirija a resposta a um estudante de pós-graduação: rigor metodológico, nuances e relação com a literatura da área.",
+    "Gestor / Técnico ambiental": "Dirija a resposta a um gestor ou técnico ambiental: foque em impactos, indicadores, medidas de manejo e aplicabilidade em licenciamento e monitoramento.",
+    "Profissional de saúde pública": "Dirija a resposta a um profissional de saúde pública ou vigilância: foque em desenho do estudo, medidas de associação, população e implicações para políticas e serviços.",
+    "Desenvolvedor / Cientista de dados": "Dirija a resposta a um desenvolvedor ou cientista de dados: foque em método, dados, métricas, reprodutibilidade e viabilidade de implementação.",
+    "Engenheiro / Técnico":   "Dirija a resposta a um engenheiro ou técnico: foque em método, parâmetros, desempenho, incertezas e aplicabilidade prática.",
+}
+TOM_MAP = {
+    "Formal e Técnico":   "Use um tom formal, científico e altamente técnico.",
+    "Direto e Objetivo":  "Use um tom direto e objetivo, sem rodeios. Priorize clareza e brevidade.",
+    "Didático":           "Use um tom didático e explicativo, como se estivesse ensinando o conteúdo a alguém.",
+}
+IDIOMA_MAP = {
+    "Português (BR)": "Responda inteiramente em português brasileiro.",
+    "English":        "Respond entirely in English.",
+    "Español":        "Responde completamente en español.",
+}
+DETALHE_MAP = {
+    "Resumido":        "Seja conciso: priorize os pontos mais importantes e evite detalhes excessivos.",
+    "Completo":        "Seja completo: cubra todos os pontos relevantes com nível de detalhe adequado.",
+    "Ultra-detalhado": "Seja extremamente detalhado: explore cada ponto em profundidade, incluindo nuances e informações secundárias.",
+}
+FOCO_MAP = {
+    "Síntese geral":          "Priorize uma visão equilibrada do artigo, cobrindo contexto, objetivo, método, resultados e conclusão.",
+    "Farmacologia":    "Dê ênfase especial a informações farmacológicas: doses, mecanismos, interações e efeitos adversos.",
+    "Estatística":     "Dê ênfase especial aos dados estatísticos: métricas de efeito, intervalos de confiança, NNT e significância clínica.",
+    "Segurança":       "Dê ênfase especial à segurança do paciente: contraindicações, alertas, efeitos adversos e monitoramento.",
+    "Metodologia":     "Dê ênfase especial à qualidade metodológica: desenho do estudo, vieses e nível de evidência.",
+    "Clínico/Prático": "Dê ênfase especial à aplicabilidade clínica direta: o que muda na conduta, como e quando aplicar.",
+    "Resultados e evidências": "Dê ênfase aos resultados, dados quantitativos, força das evidências e limitações das conclusões.",
+    "Aplicações práticas":      "Dê ênfase às aplicações práticas, consequências e possíveis usos dos achados no mundo real.",
+    "Contexto brasileiro":      "Dê ênfase à relevância, limitações e possíveis aplicações dos achados no contexto brasileiro.",
+    "Estudo e revisão":         "Dê ênfase ao que o estudante precisa fixar e ser capaz de explicar: conceitos, método e conclusões do artigo.",
+    "Escrita acadêmica":        "Dê ênfase à utilidade do artigo para um trabalho acadêmico: o que ele permite afirmar, com quais limites, e como situá-lo na literatura.",
+    "Impacto ambiental":        "Dê ênfase aos impactos ambientais descritos: compartimentos afetados, magnitude relatada e incertezas.",
+    "Mitigação e gestão":       "Dê ênfase a medidas de mitigação, manejo e monitoramento descritas no artigo e seus limites.",
+    "Epidemiologia":            "Dê ênfase ao desenho epidemiológico, população, medidas de associação e vieses.",
+    "Vigilância e políticas":   "Dê ênfase às implicações para vigilância, serviços e políticas públicas descritas no artigo.",
+    "Método e dados":           "Dê ênfase ao método, aos dados utilizados e à forma de avaliação.",
+    "Desempenho e métricas":    "Dê ênfase às métricas, resultados quantitativos e comparações reportadas.",
+    "Projeto e parâmetros":     "Dê ênfase aos parâmetros de projeto, condições de ensaio e especificações descritas.",
+    "Normas e aplicação":       "Dê ênfase à aplicabilidade prática e à relação com normas, quando mencionadas no artigo.",
+}
+
+
 def build_dynamic_sys_prompt(
     publico: str,
     tom: str,
@@ -527,44 +583,6 @@ def build_dynamic_sys_prompt(
     """
     prompt = SYS_PROMPT.strip()
     extras = []
-
-    PUBLICO_MAP = {
-        "Pesquisador / Acadêmico": "Dirija a resposta a um pesquisador ou acadêmico: priorize precisão, contexto científico e detalhes relevantes para análise crítica.",
-        "Profissional da área":    "Dirija a resposta a um profissional da área do artigo, usando terminologia técnica adequada e explicando conceitos que dependam de contexto.",
-        "Estudante":               "Dirija a resposta a um estudante: use linguagem didática, explique termos técnicos e contextualize os achados.",
-        "Público geral":            "Dirija a resposta ao público geral: use linguagem simples, evite jargões e explique conceitos especializados de forma acessível.",
-        "Médico / Especialista":  "Dirija a resposta a um médico ou especialista clínico com pleno domínio da linguagem técnica médica.",
-        "Residente / Interno":    "Dirija a resposta a um médico residente ou interno: use linguagem técnica, mas explique brevemente conceitos avançados quando necessário.",
-        "Estudante de Medicina":  "Dirija a resposta a um estudante de medicina: use linguagem didática, explique termos técnicos e contextualize os achados.",
-        "Paciente / Leigo":       "Dirija a resposta a um paciente ou leigo: use linguagem simples, evite jargões e explique tudo de forma acessível.",
-        "Enfermagem / Farmácia":  "Dirija a resposta a profissionais de enfermagem ou farmácia: foque em aspectos práticos de administração, monitoramento e segurança.",
-    }
-    TOM_MAP = {
-        "Formal e Técnico":   "Use um tom formal, científico e altamente técnico.",
-        "Direto e Objetivo":  "Use um tom direto e objetivo, sem rodeios. Priorize clareza e brevidade.",
-        "Didático":           "Use um tom didático e explicativo, como se estivesse ensinando o conteúdo a alguém.",
-    }
-    IDIOMA_MAP = {
-        "Português (BR)": "Responda inteiramente em português brasileiro.",
-        "English":        "Respond entirely in English.",
-        "Español":        "Responde completamente en español.",
-    }
-    DETALHE_MAP = {
-        "Resumido":        "Seja conciso: priorize os pontos mais importantes e evite detalhes excessivos.",
-        "Completo":        "Seja completo: cubra todos os pontos relevantes com nível de detalhe adequado.",
-        "Ultra-detalhado": "Seja extremamente detalhado: explore cada ponto em profundidade, incluindo nuances e informações secundárias.",
-    }
-    FOCO_MAP = {
-        "Síntese geral":          "Priorize uma visão equilibrada do artigo, cobrindo contexto, objetivo, método, resultados e conclusão.",
-        "Farmacologia":    "Dê ênfase especial a informações farmacológicas: doses, mecanismos, interações e efeitos adversos.",
-        "Estatística":     "Dê ênfase especial aos dados estatísticos: métricas de efeito, intervalos de confiança, NNT e significância clínica.",
-        "Segurança":       "Dê ênfase especial à segurança do paciente: contraindicações, alertas, efeitos adversos e monitoramento.",
-        "Metodologia":     "Dê ênfase especial à qualidade metodológica: desenho do estudo, vieses e nível de evidência.",
-        "Clínico/Prático": "Dê ênfase especial à aplicabilidade clínica direta: o que muda na conduta, como e quando aplicar.",
-        "Resultados e evidências": "Dê ênfase aos resultados, dados quantitativos, força das evidências e limitações das conclusões.",
-        "Aplicações práticas":      "Dê ênfase às aplicações práticas, consequências e possíveis usos dos achados no mundo real.",
-        "Contexto brasileiro":      "Dê ênfase à relevância, limitações e possíveis aplicações dos achados no contexto brasileiro.",
-    }
 
     if publico and publico in PUBLICO_MAP:
         extras.append(PUBLICO_MAP[publico])
@@ -960,3 +978,78 @@ Estruture em:
 # ===========================================================================
 # PÁGINAS INDEPENDENTES
 # ===========================================================================
+
+
+# ===========================================================================
+# BUILDERS GERADOS A PARTIR DE prompt_specs (abas de area)
+# ===========================================================================
+from collections.abc import Callable  # noqa: E402
+
+import prompt_specs as _specs  # noqa: E402
+
+_SOURCE_ONLY = (
+    '**Restrição absoluta:** Somente informações do título e do resumo fornecidos. '
+    'Não use conhecimento externo. Quando um item não estiver no resumo, escreva exatamente '
+    '"Não descrito no resumo fornecido".'
+)
+
+
+def make_builder(spec: _specs.PromptSpec) -> Callable[..., list[dict[str, str]]]:
+    """Gera `build_message_<nome>` a partir de um `PromptSpec`.
+
+    A restricao "somente a fonte" e anexada pela fabrica, entao nenhum prompt
+    gerado pode omiti-la.
+    """
+    sections = "\n".join(f"{index}. {text}" for index, text in enumerate(spec.sections, start=1))
+    note = f"\n{spec.note}" if spec.note else ""
+
+    def builder(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> list[dict[str, str]]:
+        user_prompt = (
+            f"{spec.role} {spec.task}\n\n"
+            f"Título: {article_title}\n"
+            f"Abstract:\n{abstract_text}\n\n"
+            f"Estruture a resposta em:\n{sections}\n\n"
+            f"**FORMATO:** {spec.fmt}{note}\n"
+            f"{_SOURCE_ONLY}"
+        )
+        return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
+
+    builder.__name__ = f"build_message_{spec.name}"
+    builder.__qualname__ = builder.__name__
+    builder.__doc__ = spec.task
+    return builder
+
+
+build_message_flashcards = make_builder(_specs.FLASHCARDS)
+build_message_questoes_multipla_escolha = make_builder(_specs.QUESTOES_MULTIPLA_ESCOLHA)
+build_message_mapa_conceitos = make_builder(_specs.MAPA_CONCEITOS)
+build_message_fichamento = make_builder(_specs.FICHAMENTO)
+build_message_resenha_critica = make_builder(_specs.RESENHA_CRITICA)
+build_message_como_citar = make_builder(_specs.COMO_CITAR)
+build_message_justificativa_pesquisa = make_builder(_specs.JUSTIFICATIVA_PESQUISA)
+build_message_pergunta_pesquisa = make_builder(_specs.PERGUNTA_PESQUISA)
+build_message_estrategia_busca = make_builder(_specs.ESTRATEGIA_BUSCA)
+build_message_roteiro_seminario = make_builder(_specs.ROTEIRO_SEMINARIO)
+build_message_interacoes_medicamentosas = make_builder(_specs.INTERACOES_MEDICAMENTOSAS)
+build_message_reacoes_adversas = make_builder(_specs.REACOES_ADVERSAS)
+build_message_impacto_ambiental = make_builder(_specs.IMPACTO_AMBIENTAL)
+build_message_poluentes_exposicao = make_builder(_specs.POLUENTES_EXPOSICAO)
+build_message_ecossistemas_populacoes = make_builder(_specs.ECOSSISTEMAS_POPULACOES)
+build_message_medidas_mitigacao = make_builder(_specs.MEDIDAS_MITIGACAO)
+build_message_indicadores_ods = make_builder(_specs.INDICADORES_ODS)
+build_message_contexto_regulatorio_ambiental = make_builder(_specs.CONTEXTO_REGULATORIO_AMBIENTAL)
+build_message_desenho_epidemiologico = make_builder(_specs.DESENHO_EPIDEMIOLOGICO)
+build_message_medidas_associacao = make_builder(_specs.MEDIDAS_ASSOCIACAO)
+build_message_vieses_confusao = make_builder(_specs.VIESES_CONFUSAO)
+build_message_problema_abordagem = make_builder(_specs.PROBLEMA_ABORDAGEM)
+build_message_dados_datasets = make_builder(_specs.DADOS_DATASETS)
+build_message_metricas_resultados = make_builder(_specs.METRICAS_RESULTADOS)
+build_message_reprodutibilidade = make_builder(_specs.REPRODUTIBILIDADE)
+build_message_ameacas_validade = make_builder(_specs.AMEACAS_VALIDADE)
+build_message_riscos_eticos = make_builder(_specs.RISCOS_ETICOS)
+build_message_metodologia_experimental = make_builder(_specs.METODOLOGIA_EXPERIMENTAL)
+build_message_parametros_especificacoes = make_builder(_specs.PARAMETROS_ESPECIFICACOES)
+build_message_resultados_desempenho = make_builder(_specs.RESULTADOS_DESEMPENHO)
+build_message_limitacoes_incertezas = make_builder(_specs.LIMITACOES_INCERTEZAS)
+build_message_aplicacao_normas = make_builder(_specs.APLICACAO_NORMAS)
+build_message_viabilidade_custos = make_builder(_specs.VIABILIDADE_CUSTOS)

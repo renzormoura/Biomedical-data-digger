@@ -54,6 +54,32 @@ VERIFICATION_SOURCES: dict[str, dict] = {
         "note": "Conselho Nacional de Saude; posicionamentos e documentos de referencia.",
         "updated": "2026-09",
     },
+    # Fontes ambientais: URLs de portais institucionais; a alcancabilidade e checada em
+    # tempo de execucao. "updated" indica que o catalogo ainda nao foi revisado por especialista.
+    "mma": {
+        "name": "Ministério do Meio Ambiente",
+        "catalog_url": "https://www.gov.br/mma/pt-br",
+        "note": "Politicas ambientais nacionais, biodiversidade, clima e residuos.",
+        "updated": "2026-10 (pendente de revisão)",
+    },
+    "ibama": {
+        "name": "IBAMA",
+        "catalog_url": "https://www.gov.br/ibama/pt-br",
+        "note": "Licenciamento, fiscalizacao e controle ambiental federal.",
+        "updated": "2026-10 (pendente de revisão)",
+    },
+    "conama": {
+        "name": "CONAMA",
+        "catalog_url": "https://conama.mma.gov.br/",
+        "note": "Conselho Nacional do Meio Ambiente; resolucoes e normas ambientais.",
+        "updated": "2026-10 (pendente de revisão)",
+    },
+    "ods": {
+        "name": "ONU Brasil — Objetivos de Desenvolvimento Sustentável",
+        "catalog_url": "https://brasil.un.org/pt-br/sdgs",
+        "note": "Descricao oficial dos 17 ODS e suas metas.",
+        "updated": "2026-10 (pendente de revisão)",
+    },
 }
 
 # ---------------------------------------------------------------------------
