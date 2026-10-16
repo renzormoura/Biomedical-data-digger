@@ -2,7 +2,7 @@
 
 ## 1. Visão Geral
 
-**O que é:** Aplicação web de sumarização de artigos biomédicos com interface Gradio, hospedada no Render.
+**O que é:** Aplicação web de sumarização de artigos biomédicos com backend FastAPI e frontend próprio (HTML/CSS/JS, preto e laranja), hospedada no Render.
 
 **Problema resolvido:** Médicos, residentes e profissionais da saúde precisam extrair informações clínicas relevantes de artigos científicos de forma rápida, especialmente em ambientes de urgência/emergência onde o tempo é crítico.
 
@@ -18,7 +18,7 @@
 STATUS: 🟢 Desenvolvimento ativo — Em produção no Render
 
 CONCLUÍDO:
-- Interface Gradio funcional
+- Interface web própria (FastAPI + HTML/CSS/JS sem dependências de frontend), com tema escuro/claro, sessões e contas reais
 - Busca direta por PMID, PMCID, DOI, arXiv, OpenAlex, Semantic Scholar e URLs
 - Busca por palavras-chave agregando Europe PMC, OpenAlex, Semantic Scholar, Crossref e arXiv
 - Índice de Relevância Bibliográfica com fórmula documentada e campos normalizados por fonte
@@ -55,7 +55,9 @@ PRÓXIMO PASSO:
 | Componente | Tecnologia | Versão |
 |---|---|---|
 | Linguagem | Python | 3.11.9 |
-| Interface web | Gradio | 5.33.0 |
+| Servidor web / API | FastAPI + Uvicorn | 0.143.2 / 0.54.0 |
+| Templates | Jinja2 | 3.1.6 |
+| Frontend | HTML, CSS e JS próprios (sem CDN, sem fontes externas) | — |
 | HTTP client | requests | 2.32.3 |
 | HTML/XML parser | beautifulsoup4 + lxml | 4.12.3 / 5.3.0 |
 | Logging | loguru | 0.7.3 |
@@ -71,12 +73,14 @@ PRÓXIMO PASSO:
 
 ## 4. Arquitetura
 
-**Padrão:** Aplicação Gradio com orquestração no arquivo principal e serviços separados por responsabilidade.
+**Padrão:** API FastAPI + página servida por Jinja2; casos de uso independentes de framework web.
 
 **Módulos** (detalhes e justificativa em `adrs/ADR-004-arquitetura-em-camadas.md`):
 - `biomedical_data_digger.py`: ponto de entrada; compõe as dependências (`create_app`).
-- `ui.py`: páginas declarativas (`PageSpec`) e fábrica Gradio.
-- `workflow.py`: casos de uso (`ArticleRepository`, `AnalysisService`) sem Gradio.
+- `web.py`: rotas FastAPI, autenticação por sessão assinada, validação, limites e cabeçalhos de segurança.
+- `pages.py`: abas declarativas (`PageSpec`); `templates/` e `static/`: frontend.
+- `markdown_lite.py` e `sessions.py`: renderizador de markdown seguro e sessões HMAC, sem dependências.
+- `workflow.py`: casos de uso (`ArticleRepository`, `AnalysisService`) sem framework web.
 - `domain.py` / `grounding.py`: modelo de domínio e verificação numérica da resposta.
 - `article_services.py`: busca nas fontes externas, normalização e índice de relevância.
 - `llm_service.py`: `LLMBackend`/`LLMRouter` (Groq e Ollama).
@@ -102,7 +106,7 @@ Groq API (ou Ollama local) → gera resposta
         ↓
 summariser_with_label() → formata output com label e filtros
         ↓
-Gradio → exibe no output_box + atualiza histórico
+API JSON → frontend exibe o resultado (HTML sanitizado) + atualiza o histórico local
 ```
 
 **Detecção de backend:**
@@ -117,7 +121,7 @@ Gradio → exibe no output_box + atualiza histórico
 ```
 Biomedical_data_digger/
 ├── biomedical-article-summariser/
-│   ├── biomedical_data_digger.py   ← prompts, orquestração e interface Gradio
+│   ├── biomedical_data_digger.py   ← ponto de entrada (composição das dependências + Uvicorn)
 │   ├── article_services.py         ← busca, normalização e cache de artigos
 │   ├── llm_service.py              ← integração Groq/Ollama
 │   ├── prompt_builders.py          ← prompt base e análises especializadas
@@ -155,7 +159,7 @@ Cache de artigos: implementado em memória Python (`dict` com lock de thread), v
 
 O cadastro e login usam e-mail normalizado e senha derivada com PBKDF2-HMAC-SHA256,
 com salt aleatório por usuário. A sessão ainda é mantida no estado da interface
-Gradio; não há autorização por função ou controle de acesso a dados de artigos.
+cookie HttpOnly assinado (HMAC); o limite de uso é por conta (ou por IP para visitantes). Não há autorização por função.
 
 A única credencial é a `GROQ_API_KEY`, armazenada como variável de ambiente e nunca exposta na UI ou no código commitado.
 

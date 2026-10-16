@@ -6,7 +6,7 @@
 - Busca por palavras-chave em Europe PMC, OpenAlex, Semantic Scholar, Crossref e arXiv
 - Índice de Relevância Bibliográfica com fórmula explicável
 - Filtros por áreas médicas e gerais
-- Interface Gradio com tema visual
+- Interface web própria (FastAPI + frontend preto e laranja)
 - 11 tipos de análise com prompts especializados
 - Sistema de filtros de personalização (público, tom, idioma, detalhe, foco)
 - Suporte Groq API (produção) + Ollama (desenvolvimento local)

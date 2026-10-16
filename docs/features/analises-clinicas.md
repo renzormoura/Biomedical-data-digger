@@ -49,4 +49,4 @@ Sem seleção: comportamento padrão de cada botão, sem alteração.
 ## Dependências
 - Europe PMC, OpenAlex, Semantic Scholar, Crossref e arXiv (busca de artigos)
 - Groq API (geração de texto)
-- Gradio (interface)
+- FastAPI + frontend próprio (interface)

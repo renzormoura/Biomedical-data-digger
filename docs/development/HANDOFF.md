@@ -31,7 +31,7 @@ https://github.com/renzormoura/Biomedical-data-digger
 ## Arquivos principais
 | Arquivo | Descrição |
 |---|---|
-| `biomedical-article-summariser/biomedical_data_digger.py` | Orquestração e interface Gradio |
+| `biomedical-article-summariser/biomedical_data_digger.py` | Ponto de entrada (composição + Uvicorn); rotas em `web.py` |
 | `biomedical-article-summariser/article_services.py` | Busca, normalização e cache de artigos |
 | `biomedical-article-summariser/llm_service.py` | Integração Groq/Ollama |
 | `biomedical-article-summariser/prompt_builders.py` | Prompt base e análises especializadas |

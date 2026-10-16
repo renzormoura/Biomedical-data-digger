@@ -56,6 +56,11 @@ files = [
     "biomedical-article-summariser/config.py",
     "biomedical-article-summariser/llm_service.py",
     "biomedical-article-summariser/workflow.py",
+    "biomedical-article-summariser/markdown_lite.py",
+    "biomedical-article-summariser/sessions.py",
+    "biomedical-article-summariser/presentation.py",
+    "biomedical-article-summariser/citations.py",
+    "biomedical-article-summariser/web.py",
 ]
 follow_imports = "silent"
 strict_optional = true

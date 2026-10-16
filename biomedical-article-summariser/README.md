@@ -1,6 +1,6 @@
 # Biomedical Data Digger
 
-Aplicação web em Gradio para buscar artigos científicos, gerar resumos e executar análises especializadas com Groq ou Ollama.
+Aplicação web (FastAPI + frontend próprio, preto e laranja) para buscar artigos científicos, gerar resumos e executar análises especializadas com Groq ou Ollama.
 
 ## Funcionalidades
 
@@ -100,6 +100,7 @@ Avaliação de fidelidade com LLM real (opcional, consome cota):
 $env:RUN_LIVE_EVALS = "1"; $env:GROQ_API_KEY = "..."; pytest evals -m live
 ```
 
+Em produção é obrigatório definir `SESSION_SECRET` (mín. 32 caracteres; o `render.yaml` gera um valor automaticamente).
 Variáveis opcionais: `RATE_LIMIT_PER_MINUTE` (padrão 8 chamadas de LLM/min por cliente),
 `LOGIN_ATTEMPTS_PER_MINUTE` (5), `TRUSTED_PROXY_HOPS` (1, para ler o IP real atrás do proxy do Render).
 
@@ -124,8 +125,8 @@ Camadas (dependências apontam para baixo; ver `docs/adrs/ADR-004-arquitetura-em
 | Camada | Módulos |
 |---|---|
 | Entrada | `biomedical_data_digger.py` (composição das dependências e `launch`) |
-| Apresentação | `pages.py` (abas declarativas `PageSpec`) e `ui.py` (fábrica Gradio) |
-| Casos de uso | `workflow.py` (`ArticleRepository`, `AnalysisService`; sem Gradio) |
+| Apresentação | `pages.py` (abas declarativas `PageSpec`) e `web.py` (rotas FastAPI, sessões, limites); `templates/` e `static/` (frontend) |
+| Casos de uso | `workflow.py` (`ArticleRepository`, `AnalysisService`; sem framework web) |
 | Domínio | `domain.py` (`Article`, erros tipados), `grounding.py` (checagem numérica) |
 | Infraestrutura | `article_services.py` (fontes externas), `llm_service.py` (`LLMBackend`/`LLMRouter`), `account_store.py`, `cache.py`, `ratelimit.py`, `security.py` (anti-SSRF), `config.py` |
 | Conteúdo | `prompt_builders.py` + `prompt_specs.py`, `citations.py`, `contexto_brasil.py`, `styles.css` |
