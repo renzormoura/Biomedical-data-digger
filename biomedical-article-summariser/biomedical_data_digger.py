@@ -9,6 +9,7 @@ import uvicorn
 from config import Settings
 from llm_service import get_router
 from ratelimit import SlidingWindowLimiter
+from usage import UsageLog
 from web import create_app as create_web_app
 from workflow import AnalysisService, ArticleRepository
 
@@ -16,12 +17,14 @@ from workflow import AnalysisService, ArticleRepository
 def create_app():  # type: ignore[no-untyped-def]
     settings = Settings.from_env()
     repository = ArticleRepository()
+    usage_log = UsageLog()
     service = AnalysisService(
         repository=repository,
         generator=get_router(),
         limiter=SlidingWindowLimiter(settings.llm_calls_per_minute, window=60.0),
+        usage_log=usage_log,
     )
-    return create_web_app(service, repository, settings)
+    return create_web_app(service, repository, settings, usage_log=usage_log)
 
 
 if __name__ == "__main__":

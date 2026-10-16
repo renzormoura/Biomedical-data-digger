@@ -8,6 +8,7 @@ dependencias injetadas.
 from __future__ import annotations
 
 import re
+import time
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from typing import Optional, Protocol
@@ -15,7 +16,7 @@ from typing import Optional, Protocol
 import article_services
 import citations
 from cache import TTLCache
-from domain import Article, ArticleNotFoundError, DiggerError, RateLimitedError, is_failure_title
+from domain import Article, ArticleNotFoundError, Completion, DiggerError, RateLimitedError, is_failure_title
 from grounding import check_numeric_grounding
 from prompt_builders import (
     build_dynamic_sys_prompt,
@@ -23,6 +24,7 @@ from prompt_builders import (
     build_message_comparacao_artigos,
 )
 from ratelimit import RateLimitExceeded, SlidingWindowLimiter
+from usage import UsageLog, UsageRecord, client_kind, estimate_messages_tokens, estimate_tokens
 
 Message = dict[str, str]
 BuildFn = Callable[..., list[Message]]
@@ -43,7 +45,7 @@ class Resolver(Protocol):
 class TextGenerator(Protocol):
     def ensure_available(self, model: str) -> None: ...
 
-    def generate(self, messages: Sequence[Message], model: str) -> str: ...
+    def complete(self, messages: Sequence[Message], model: str) -> Completion: ...
 
 
 def canonical_key(raw: str) -> str:
@@ -124,24 +126,55 @@ class AnalysisService:
         generator: TextGenerator,
         limiter: SlidingWindowLimiter,
         citation_fetcher: Callable[[str], citations.CitationMetadata] = citations.fetch_citation_metadata,
+        usage_log: UsageLog | None = None,
     ) -> None:
         self._repository = repository
         self._generator = generator
         self._limiter = limiter
         self._citation_fetcher = citation_fetcher
+        self._usage_log = usage_log
 
-    def _generate(self, messages: Sequence[Message], model: str, client_id: str, error_prefix: str) -> str:
+    def _run(
+        self, messages: Sequence[Message], model: str, client_id: str, error_prefix: str, usage_key: str
+    ) -> Completion:
         self._generator.ensure_available(model)
         try:
             self._limiter.check(client_id)
         except RateLimitExceeded as error:
             raise RateLimitedError(str(error)) from error
+        started = time.monotonic()
         try:
-            return self._generator.generate(messages, model)
+            completion = self._generator.complete(messages, model)
         except DiggerError:
             raise
         except Exception as error:
             raise DiggerError(f"{error_prefix}: {error}") from error
+        self._record_usage(usage_key, model, client_id, messages, completion, started)
+        return completion
+
+    def _record_usage(
+        self, usage_key: str, model: str, client_id: str, messages: Sequence[Message],
+        completion: Completion, started: float,
+    ) -> None:
+        if self._usage_log is None:
+            return
+        estimated = completion.prompt_tokens is None or completion.completion_tokens is None
+        self._usage_log.record(
+            UsageRecord(
+                key=usage_key,
+                model=model,
+                prompt_tokens=completion.prompt_tokens
+                if completion.prompt_tokens is not None
+                else estimate_messages_tokens(messages),
+                completion_tokens=completion.completion_tokens
+                if completion.completion_tokens is not None
+                else estimate_tokens(completion.text),
+                cached=False,
+                estimated=estimated,
+                latency_ms=round((time.monotonic() - started) * 1000),
+                client_kind=client_kind(client_id),
+            )
+        )
 
     def analyze(
         self,
@@ -155,6 +188,7 @@ class AnalysisService:
         clinical: bool = False,
         check_numbers: bool = True,
         footer: str = "",
+        usage_key: str = "",
     ) -> str:
         filters = filters or Filters()
         self._generator.ensure_available(model)
@@ -166,7 +200,7 @@ class AnalysisService:
                 filters.publico, filters.tom, filters.idioma, filters.detalhe, filters.foco
             ),
         )
-        summary = self._generate(messages, model, client_id, "Erro ao gerar resumo com a LLM")
+        summary = self._run(messages, model, client_id, "Erro ao gerar resumo com a LLM", usage_key or label).text
         body = f"## Título do Artigo: {article.title}\n\n### Resumo:\n{summary}"
         if check_numbers:
             body += check_numeric_grounding(summary, f"{article.title}\n{article.abstract}").to_markdown()
@@ -174,7 +208,9 @@ class AnalysisService:
             body += CLINICAL_DISCLAIMER
         return f"---\n> **{label}**  ·  Filtros: *{filters.describe()}*\n\n---\n{body}{footer}"
 
-    def audit(self, article_id: str, model: str, response_text: str, *, client_id: str = "local") -> str:
+    def audit(
+        self, article_id: str, model: str, response_text: str, *, client_id: str = "local", usage_key: str = "audit"
+    ) -> str:
         if not response_text:
             raise DiggerError("Gere uma análise antes de executar a auditoria.")
         article = self._repository.get(article_id)
@@ -183,7 +219,7 @@ class AnalysisService:
             wrap_source("SOURCE_ABSTRACT", article.abstract),
             response_text,
         )
-        audit = self._generate(messages, model, client_id, "Erro ao auditar a resposta")
+        audit = self._run(messages, model, client_id, "Erro ao auditar a resposta", usage_key).text
         return f"---\n> **Auditoria da Resposta**\n\n---\n{audit}"
 
     def compare(
@@ -195,6 +231,7 @@ class AnalysisService:
         *,
         medical_context: bool = False,
         client_id: str = "local",
+        usage_key: str = "compare",
     ) -> str:
         if not (article_id_a or "").strip() or not (article_id_b or "").strip():
             raise DiggerError("Informe os dois IDs ou URLs para comparar os artigos.")
@@ -208,7 +245,7 @@ class AnalysisService:
             analysis_type=analysis_type,
             medical_context=medical_context,
         )
-        comparison = self._generate(messages, model, client_id, "Erro ao comparar os artigos")
+        comparison = self._run(messages, model, client_id, "Erro ao comparar os artigos", usage_key).text
         suffix = CLINICAL_DISCLAIMER if medical_context else ""
         return f"---\n> **Comparação entre Artigos**\n\n---\n{comparison}{suffix}"
 

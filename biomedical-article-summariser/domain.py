@@ -36,6 +36,21 @@ def is_failure_title(title: str) -> bool:
     return any(title.startswith(prefix) for prefix in _FAILURE_TITLE_PREFIXES)
 
 
+@dataclass(frozen=True)
+class Completion:
+    """Resposta de um LLM com o consumo de tokens quando o provedor o informa."""
+
+    text: str
+    prompt_tokens: int | None = None
+    completion_tokens: int | None = None
+
+    @property
+    def total_tokens(self) -> int | None:
+        if self.prompt_tokens is None and self.completion_tokens is None:
+            return None
+        return (self.prompt_tokens or 0) + (self.completion_tokens or 0)
+
+
 class DiggerError(Exception):
     """Erro esperado com mensagem segura para exibir ao usuario."""
 

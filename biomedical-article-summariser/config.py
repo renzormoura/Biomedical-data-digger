@@ -26,6 +26,7 @@ class Settings:
     trusted_proxy_hops: int = 1
     production: bool = False
     session_secret: str = field(default="", repr=False)
+    admin_token: str = field(default="", repr=False)
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -33,9 +34,13 @@ class Settings:
         secret = os.environ.get("SESSION_SECRET", "").strip()
         if production and len(secret) < 32:
             raise ValueError("SESSION_SECRET (>= 32 caracteres) e obrigatoria em producao.")
+        admin_token = os.environ.get("ADMIN_TOKEN", "").strip()
+        if admin_token and len(admin_token) < 24:
+            raise ValueError("ADMIN_TOKEN deve ter ao menos 24 caracteres (ou ficar vazio para desativar).")
         return cls(
             production=production,
             session_secret=secret,
+            admin_token=admin_token,
             llm_calls_per_minute=_int_env("RATE_LIMIT_PER_MINUTE", 8, minimum=1),
             login_attempts_per_minute=_int_env("LOGIN_ATTEMPTS_PER_MINUTE", 5, minimum=1),
             trusted_proxy_hops=_int_env("TRUSTED_PROXY_HOPS", 1, minimum=0),

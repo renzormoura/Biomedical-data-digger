@@ -1,6 +1,6 @@
 import pytest
 
-from domain import Article, ArticleNotFoundError, BackendUnavailableError, DiggerError
+from domain import Article, ArticleNotFoundError, BackendUnavailableError, Completion, DiggerError
 from prompt_builders import build_message_sumario
 from ratelimit import SlidingWindowLimiter
 from workflow import (
@@ -16,18 +16,19 @@ ABSTRACT = "Em 1200 pacientes a mortalidade caiu de 12,5% para 8,1% com a interv
 
 
 class FakeGenerator:
-    def __init__(self, reply="Mortalidade caiu de 12,5% para 8,1%.", available=True):
+    def __init__(self, reply="Mortalidade caiu de 12,5% para 8,1%.", available=True, usage=(None, None)):
         self.reply = reply
         self.available = available
+        self.usage = usage
         self.calls = []
 
     def ensure_available(self, model):
         if not self.available:
             raise BackendUnavailableError("sem backend")
 
-    def generate(self, messages, model):
+    def complete(self, messages, model):
         self.calls.append((messages, model))
-        return self.reply
+        return Completion(self.reply, *self.usage)
 
 
 class CountingResolver:
@@ -162,7 +163,7 @@ def test_rate_limit_is_enforced_per_client():
 
 def test_llm_failure_is_wrapped():
     class Boom(FakeGenerator):
-        def generate(self, messages, model):
+        def complete(self, messages, model):
             raise RuntimeError("503 upstream")
 
     service, *_ = make_service(generator=Boom())

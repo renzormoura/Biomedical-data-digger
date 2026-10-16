@@ -6,6 +6,7 @@ Sem JavaScript, CSS ou fontes de terceiros em tempo de execucao: tudo vem de
 
 from __future__ import annotations
 
+import hmac
 import os
 from collections.abc import Callable
 from typing import Any
@@ -39,6 +40,7 @@ from domain import (
 from presentation import UNVERIFIABLE_FALLBACK, verification_annex_md
 from ratelimit import RateLimitExceeded, SlidingWindowLimiter, client_key
 from sessions import SessionSigner
+from usage import UsageLog
 from workflow import AnalysisService, ArticleRepository, Filters
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -76,6 +78,7 @@ class AuditIn(BaseModel):
     article_id: str = Field(max_length=MAX_ARTICLE_ID)
     model: str = Field(max_length=80)
     previous: str = Field(max_length=MAX_PREVIOUS_RESPONSE)
+    page: str = Field("", max_length=40)
 
 
 class CompareIn(BaseModel):
@@ -84,6 +87,7 @@ class CompareIn(BaseModel):
     analysis: str = Field(max_length=80)
     model: str = Field(max_length=80)
     clinical: bool = False
+    page: str = Field("", max_length=40)
 
 
 class CiteIn(BaseModel):
@@ -112,6 +116,7 @@ def create_app(
     *,
     account_store_factory: Callable[[], AccountStore] = get_account_store,
     search_fn: Callable[..., list[dict]] = article_services.search_reliable_articles,
+    usage_log: UsageLog | None = None,
 ) -> FastAPI:
     app = FastAPI(title="Biomedical Data Digger", docs_url=None, redoc_url=None, openapi_url=None)
     signer = SessionSigner(settings.session_secret or SessionSigner.generate_secret())
@@ -295,6 +300,7 @@ def create_app(
             client_id=identity(request),
             clinical=spec.clinical,
             check_numbers=button.check_numbers,
+            usage_key=f"{spec.key}/{button.id}",
         )
         if button.sources:
             try:
@@ -307,7 +313,8 @@ def create_app(
     @app.post("/api/audit")
     def audit(body: AuditIn, request: Request) -> dict[str, Any]:
         markdown = service.audit(
-            body.article_id, validated_model(body.model), body.previous, client_id=identity(request)
+            body.article_id, validated_model(body.model), body.previous, client_id=identity(request),
+            usage_key=f"{body.page}/audit" if body.page else "audit",
         )
         return result(markdown)
 
@@ -318,8 +325,20 @@ def create_app(
         markdown = service.compare(
             body.article_a, body.article_b, body.analysis, validated_model(body.model),
             medical_context=body.clinical, client_id=identity(request),
+            usage_key=f"{body.page}/compare" if body.page else "compare",
         )
         return result(markdown)
+
+    @app.get("/api/admin/usage")
+    def admin_usage(request: Request) -> JSONResponse:
+        """Relatorio de consumo de tokens. Desativado (404) sem ADMIN_TOKEN."""
+        if not settings.admin_token or usage_log is None:
+            return JSONResponse({"error": "Não encontrado."}, status_code=404)
+        throttle_auth(request)
+        supplied = request.headers.get("authorization", "")
+        if not hmac.compare_digest(supplied.encode(), f"Bearer {settings.admin_token}".encode()):
+            return JSONResponse({"error": "Não autorizado."}, status_code=401)
+        return JSONResponse(usage_log.snapshot())
 
     @app.post("/api/cite")
     def cite(body: CiteIn, request: Request) -> dict[str, Any]:

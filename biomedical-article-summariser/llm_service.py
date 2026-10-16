@@ -13,7 +13,7 @@ from typing import Any, Optional, Protocol
 
 from dotenv import load_dotenv
 
-from domain import BackendUnavailableError
+from domain import BackendUnavailableError, Completion
 
 load_dotenv()
 
@@ -34,12 +34,25 @@ LOCAL_MODEL_MAP = {
 REQUEST_TIMEOUT_SECONDS = 120
 
 
+def _as_int(value: Any) -> int | None:
+    return value if isinstance(value, int) and not isinstance(value, bool) else None
+
+
+def _field(response: Any, name: str) -> Any:
+    try:
+        return response[name]
+    except (KeyError, TypeError, AttributeError, IndexError):
+        return getattr(response, name, None)
+
+
 class LLMBackend(Protocol):
     name: str
 
     def handles(self, model: str) -> bool: ...
 
     def is_available(self) -> bool: ...
+
+    def complete(self, messages: Sequence[Message], model: str) -> Completion: ...
 
     def generate(self, messages: Sequence[Message], model: str) -> str: ...
 
@@ -70,13 +83,21 @@ class GroqBackend:
     def _model_id(model: str) -> str:
         return GROQ_MODEL_MAP.get(model, DEFAULT_GROQ_MODEL)
 
-    def generate(self, messages: Sequence[Message], model: str) -> str:
+    def complete(self, messages: Sequence[Message], model: str) -> Completion:
         response = self._get_client().chat.completions.create(
             model=self._model_id(model),
             messages=list(messages),
             timeout=REQUEST_TIMEOUT_SECONDS,
         )
-        return response.choices[0].message.content or ""
+        usage = getattr(response, "usage", None)
+        return Completion(
+            text=response.choices[0].message.content or "",
+            prompt_tokens=_as_int(getattr(usage, "prompt_tokens", None)),
+            completion_tokens=_as_int(getattr(usage, "completion_tokens", None)),
+        )
+
+    def generate(self, messages: Sequence[Message], model: str) -> str:
+        return self.complete(messages, model).text
 
     def stream(self, messages: Sequence[Message], model: str) -> Generator[str, None, None]:
         chunks = self._get_client().chat.completions.create(
@@ -120,11 +141,19 @@ class OllamaBackend:
     def _model_id(model: str) -> str:
         return LOCAL_MODEL_MAP.get(model, model)
 
-    def generate(self, messages: Sequence[Message], model: str) -> str:
+    def complete(self, messages: Sequence[Message], model: str) -> Completion:
         client = self._get_module()
         model_id = self._model_id(model)
         client.pull(model_id)
-        return client.chat(model=model_id, messages=list(messages))["message"]["content"]
+        response = client.chat(model=model_id, messages=list(messages))
+        return Completion(
+            text=response["message"]["content"],
+            prompt_tokens=_as_int(_field(response, "prompt_eval_count")),
+            completion_tokens=_as_int(_field(response, "eval_count")),
+        )
+
+    def generate(self, messages: Sequence[Message], model: str) -> str:
+        return self.complete(messages, model).text
 
     def stream(self, messages: Sequence[Message], model: str) -> Generator[str, None, None]:
         client = self._get_module()
@@ -165,8 +194,11 @@ class LLMRouter:
     def has_any_backend(self) -> bool:
         return any(backend.is_available() for backend in self._backends)
 
+    def complete(self, messages: Sequence[Message], model: str) -> Completion:
+        return self._backend_for(model).complete(messages, model)
+
     def generate(self, messages: Sequence[Message], model: str) -> str:
-        return self._backend_for(model).generate(messages, model)
+        return self.complete(messages, model).text
 
     def stream(self, messages: Sequence[Message], model: str) -> Generator[str, None, None]:
         return self._backend_for(model).stream(messages, model)

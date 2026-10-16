@@ -1,6 +1,6 @@
 import pytest
 
-from domain import BackendUnavailableError
+from domain import BackendUnavailableError, Completion
 from llm_service import GroqBackend, LLMRouter, OllamaBackend
 
 
@@ -17,9 +17,12 @@ class FakeBackend:
     def is_available(self):
         return self._available
 
-    def generate(self, messages, model):
+    def complete(self, messages, model):
         self.calls.append((list(messages), model))
-        return f"{self.name}:{model}"
+        return Completion(f"{self.name}:{model}", 7, 3)
+
+    def generate(self, messages, model):
+        return self.complete(messages, model).text
 
     def stream(self, messages, model):
         yield self.generate(messages, model)

@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 import pages
 from account_store import AccountStore
 from config import Settings
-from domain import BackendUnavailableError
+from domain import BackendUnavailableError, Completion
 from ratelimit import SlidingWindowLimiter
 from web import SESSION_COOKIE, create_app
 from workflow import AnalysisService, ArticleRepository
@@ -22,9 +22,9 @@ class FakeGenerator:
         if not self.available:
             raise BackendUnavailableError("Nenhum backend de LLM disponivel.")
 
-    def generate(self, messages, model):
+    def complete(self, messages, model):
         self.calls.append((messages, model))
-        return self.reply
+        return Completion(self.reply, 120, 80)
 
 
 @pytest.fixture
@@ -175,7 +175,7 @@ def test_unknown_article_is_404(env):
 
 
 def test_unexpected_errors_do_not_leak_details(env):
-    env.generator.generate = lambda *a, **k: (_ for _ in ()).throw(KeyError("segredo-interno"))
+    env.generator.complete = lambda *a, **k: (_ for _ in ()).throw(KeyError("segredo-interno"))
     response = env.client.post("/api/analyze", json=analyze_payload())
     assert "segredo-interno" not in response.text.replace("Erro ao gerar resumo com a LLM", "") or response.status_code == 400
 

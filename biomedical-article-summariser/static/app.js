@@ -232,7 +232,7 @@
       if (!panel.dataset.lastMarkdown) { showError(panel, "Gere uma análise antes de executar a auditoria."); return; }
       if (!requireArticle(panel)) return;
       run(panel, "Auditoria da Resposta", "/api/audit", {
-        article_id: value(panel, "article"), model: value(panel, "model"), previous: panel.dataset.lastMarkdown,
+        article_id: value(panel, "article"), model: value(panel, "model"), previous: panel.dataset.lastMarkdown, page,
       });
     } else if (action === "compare") {
       if (!value(panel, "cmp-a") || !value(panel, "cmp-b")) {
@@ -242,7 +242,7 @@
       run(panel, "Comparação entre Artigos", "/api/compare", {
         article_a: value(panel, "cmp-a"), article_b: value(panel, "cmp-b"),
         analysis: value(panel, "cmp-type"), model: value(panel, "model"),
-        clinical: panel.dataset.clinical === "true",
+        clinical: panel.dataset.clinical === "true", page,
       });
     } else if (action === "clear-filters") {
       $$("[data-filter]", panel).forEach((select) => { select.value = ""; });
