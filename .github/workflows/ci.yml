@@ -32,6 +32,11 @@ jobs:
         run: mypy
       - name: Tests + coverage
         run: pytest --cov --cov-report=term-missing --cov-report=xml
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Testes do frontend (node:test)
+        run: node --test tests/js/browse-lib.test.js prototype/navegador/tests/lib.test.js
       - name: Dependency audit
         run: pip install pip-audit && pip-audit -r biomedical-article-summariser/requirements.txt
         continue-on-error: true
