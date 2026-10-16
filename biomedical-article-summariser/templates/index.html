@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <meta name="description" content="Análise de artigos científicos com IA, fiel ao texto-fonte, para estudantes e profissionais.">
+  <title>Biomedical Data Digger</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/app.css?v={{ asset_version }}">
+  <script src="/static/app.js?v={{ asset_version }}" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Pular para o conteúdo</a>
+
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Biomedical Data Digger — início">
+      <svg class="brand-mark" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true" focusable="false">
+        <rect width="32" height="32" rx="7" fill="currentColor"></rect>
+        <path d="M8 22V10l8 8 8-8v12" fill="none" stroke="var(--bg)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+      <span class="brand-name"><span class="accent">Biomedical</span> Data Digger</span>
+    </a>
+    <div class="topbar-actions">
+      <button type="button" class="btn btn-ghost" id="theme-toggle" aria-label="Alternar tema claro/escuro">☀️ Claro</button>
+      <button type="button" class="btn btn-ghost" id="account-button" data-user="{{ user or '' }}">
+        {% if user %}👤 {{ user }}{% else %}👤 Entrar{% endif %}
+      </button>
+    </div>
+  </header>
+
+  <div class="shell">
+    <nav class="tabs" role="tablist" aria-label="Áreas de análise">
+      {% for page in pages %}
+      <button type="button" role="tab" class="tab" id="tab-{{ page.key }}" data-target="{{ page.key }}"
+              aria-controls="panel-{{ page.key }}" aria-selected="false" tabindex="-1">{{ page.tab_name }}</button>
+      {% endfor %}
+      <button type="button" role="tab" class="tab" id="tab-pesquisa" data-target="pesquisa"
+              aria-controls="panel-pesquisa" aria-selected="false" tabindex="-1">🔎  Pesquisa</button>
+    </nav>
+
+    <main id="main" tabindex="-1">
+      {% for page in pages %}
+      {% set k = page.key %}
+      <section class="panel" id="panel-{{ k }}" role="tabpanel" aria-labelledby="tab-{{ k }}"
+               data-page="{{ k }}" data-clinical="{{ 'true' if page.clinical else 'false' }}" hidden>
+        <div class="panel-head">
+          <h1>{{ page.title }}</h1>
+          <p>{{ page.subtitle }}</p>
+        </div>
+
+        <div class="workspace">
+          <aside class="controls" aria-label="Controles de {{ page.title }}">
+            <div class="card">
+              <div class="field">
+                <label for="{{ k }}-article">ID ou URL do artigo</label>
+                <input type="text" id="{{ k }}-article" data-role="article" autocomplete="off" spellcheck="false"
+                       placeholder="{{ page.placeholder }}" maxlength="2000">
+              </div>
+              <div class="field">
+                <label for="{{ k }}-model">Modelo de linguagem</label>
+                <select id="{{ k }}-model" data-role="model">
+                  {% for m in models %}<option value="{{ m }}" {{ 'selected' if m == default_model }}>{{ m }}</option>{% endfor %}
+                </select>
+              </div>
+            </div>
+
+            {% for section in page.sections %}
+            <details class="group" {{ 'open' if section.is_open }}>
+              <summary>{{ section.title }}</summary>
+              <div class="group-body">
+                {% for row in section.rows %}
+                <div class="btn-row">
+                  {% for b in row %}
+                    {% if b.__class__.__name__ == 'CitationButton' %}
+                    <button type="button" class="btn btn-secondary" data-action="cite" data-style="{{ b.style }}">{{ b.label }}</button>
+                    {% else %}
+                    <button type="button" class="btn {{ 'btn-primary' if b.variant == 'primary' else 'btn-secondary' }}"
+                            data-action="analyze" data-button="{{ b.id }}">{{ b.label }}</button>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+                {% endfor %}
+                {% if section.audit_button %}
+                <div class="btn-row"><button type="button" class="btn btn-outline" data-action="audit">Auditoria da Resposta</button></div>
+                {% endif %}
+              </div>
+            </details>
+            {% endfor %}
+
+            <details class="group">
+              <summary>{{ page.compare_title }}</summary>
+              <div class="group-body">
+                <div class="field"><label for="{{ k }}-cmp-a">Artigo A — ID ou URL</label>
+                  <input type="text" id="{{ k }}-cmp-a" data-role="cmp-a" placeholder="{{ page.compare_placeholder }}" maxlength="2000"></div>
+                <div class="field"><label for="{{ k }}-cmp-b">Artigo B — ID ou URL</label>
+                  <input type="text" id="{{ k }}-cmp-b" data-role="cmp-b" placeholder="{{ page.compare_placeholder }}" maxlength="2000"></div>
+                <div class="field"><label for="{{ k }}-cmp-type">{{ page.compare_type_label }}</label>
+                  <select id="{{ k }}-cmp-type" data-role="cmp-type">
+                    {% for t in comparison_types %}<option>{{ t }}</option>{% endfor %}
+                  </select></div>
+                <button type="button" class="btn btn-primary" data-action="compare">{{ page.compare_button }}</button>
+              </div>
+            </details>
+
+            <details class="group">
+              <summary>Personalização (opcional)</summary>
+              <div class="group-body">
+                <div class="field"><label for="{{ k }}-f-publico">Público-alvo</label>
+                  <select id="{{ k }}-f-publico" data-filter="publico"><option value="">Padrão</option>
+                    {% for v in page.audience_choices %}<option>{{ v }}</option>{% endfor %}</select></div>
+                <div class="field"><label for="{{ k }}-f-tom">Tom</label>
+                  <select id="{{ k }}-f-tom" data-filter="tom"><option value="">Padrão</option>
+                    {% for v in tones %}<option>{{ v }}</option>{% endfor %}</select></div>
+                <div class="field"><label for="{{ k }}-f-idioma">Idioma</label>
+                  <select id="{{ k }}-f-idioma" data-filter="idioma"><option value="">Padrão</option>
+                    {% for v in languages %}<option>{{ v }}</option>{% endfor %}</select></div>
+                <div class="field"><label for="{{ k }}-f-detalhe">Detalhe</label>
+                  <select id="{{ k }}-f-detalhe" data-filter="detalhe"><option value="">Padrão</option>
+                    {% for v in details %}<option>{{ v }}</option>{% endfor %}</select></div>
+                <div class="field"><label for="{{ k }}-f-foco">Foco</label>
+                  <select id="{{ k }}-f-foco" data-filter="foco"><option value="">Padrão</option>
+                    {% for v in page.focus_choices %}<option>{{ v }}</option>{% endfor %}</select></div>
+                <button type="button" class="btn btn-ghost" data-action="clear-filters">↺ Limpar filtros</button>
+              </div>
+            </details>
+
+            <details class="group">
+              <summary>Histórico</summary>
+              <div class="group-body"><ul class="history" data-role="history" aria-label="Artigos consultados"></ul></div>
+            </details>
+
+            <details class="group">
+              <summary>Como encontrar o ID ou URL?</summary>
+              <div class="group-body prose">{{ help_html[k] }}</div>
+            </details>
+          </aside>
+
+          <section class="output" aria-label="Resultado">
+            <div class="output-bar">
+              <span class="output-title" data-role="output-title">Resultado</span>
+              <span class="output-actions">
+                <button type="button" class="btn btn-ghost btn-sm" data-action="copy" disabled>Copiar</button>
+                <button type="button" class="btn btn-ghost btn-sm" data-action="print" disabled>Imprimir</button>
+              </span>
+            </div>
+            <div class="output-body prose" data-role="output" aria-live="polite" aria-busy="false">
+              <p class="placeholder">Cole o ID ou a URL de um artigo, escolha o modelo e clique em uma análise para começar.</p>
+            </div>
+          </section>
+        </div>
+      </section>
+      {% endfor %}
+
+      <section class="panel" id="panel-pesquisa" role="tabpanel" aria-labelledby="tab-pesquisa" data-page="pesquisa" hidden>
+        <div class="panel-head">
+          <h1>Pesquisa por palavra-chave</h1>
+          <p>Busca em Europe PMC, OpenAlex, Semantic Scholar, Crossref e arXiv, ordenada por relevância bibliográfica.</p>
+        </div>
+        <div class="workspace">
+          <aside class="controls">
+            <form class="card" id="search-form">
+              <div class="field"><label for="search-query">Palavra-chave ou tema</label>
+                <input type="text" id="search-query" maxlength="200" placeholder="ex: diabetes mellitus, machine learning, sepsis" required></div>
+              <div class="field"><label for="search-area">Área de foco</label>
+                <select id="search-area">{% for a in areas %}<option>{{ a }}</option>{% endfor %}</select></div>
+              <div class="field"><label for="search-limit">Quantidade de recomendações</label>
+                <select id="search-limit"><option>3</option><option selected>5</option><option>8</option></select></div>
+              <button type="submit" class="btn btn-primary">Buscar artigos relevantes</button>
+              <p class="hint">O índice combina impacto, atualidade, completude dos metadados e cobertura da fonte. Ele não mede qualidade metodológica.</p>
+            </form>
+          </aside>
+          <section class="output" aria-label="Resultados da busca">
+            <div class="output-bar"><span class="output-title">Artigos recomendados</span></div>
+            <div class="output-body" id="search-output" aria-live="polite" aria-busy="false">
+              <p class="placeholder">Aguardando pesquisa.</p>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="auth-dialog" aria-labelledby="auth-title">
+    <form method="dialog" id="auth-form" class="auth-card">
+      <h2 id="auth-title">Conta</h2>
+      <p class="hint">Entre para ter limite de uso próprio. Visitantes podem usar o app normalmente.</p>
+      <div class="field"><label for="auth-email">E-mail</label>
+        <input type="email" id="auth-email" autocomplete="email" maxlength="320" required></div>
+      <div class="field"><label for="auth-password">Senha</label>
+        <input type="password" id="auth-password" autocomplete="current-password" minlength="8" maxlength="128" required></div>
+      <p class="auth-error" id="auth-error" role="alert" hidden></p>
+      <div class="btn-row">
+        <button type="button" class="btn btn-primary" data-auth="login">Entrar</button>
+        <button type="button" class="btn btn-secondary" data-auth="register">Criar conta</button>
+        <button type="button" class="btn btn-ghost" data-auth="cancel">Cancelar</button>
+      </div>
+      <button type="button" class="btn btn-outline logout" id="logout-button" hidden>Sair da conta</button>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

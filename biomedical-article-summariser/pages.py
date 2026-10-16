@@ -6,11 +6,37 @@ nenhum builder se repete dentro da mesma aba e que nenhum builder fica sem uso.
 
 from __future__ import annotations
 
+import re
+import unicodedata
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Union
 
 import prompt_builders as pb
+
+MODEL_CHOICES = ("GPT-OSS 20B (Groq)", "GPT-OSS 120B (Groq)", "Qwen 3.6 27B (Groq)", "Qwen 3.8 27B (Groq)", "Llama (local)")
+DEFAULT_MODEL = "GPT-OSS 20B (Groq)"
+COMPARISON_TYPES = (
+    "Comparação de resultados",
+    "Comparação metodológica",
+    "Concordâncias e contradições",
+    "Comparação de populações",
+    "Eficácia",
+    "Segurança",
+    "Qualidade e limitações",
+    "Comparação estatística",
+    "Aplicabilidade prática",
+    "Evolução do conhecimento",
+)
+TONE_CHOICES = ("Formal e Técnico", "Direto e Objetivo", "Didático")
+LANGUAGE_CHOICES = ("Português (BR)", "English", "Español")
+DETAIL_CHOICES = ("Resumido", "Completo", "Ultra-detalhado")
+
+
+def slugify(text: str) -> str:
+    """Identificador estavel e ASCII para uso em URLs e atributos HTML."""
+    ascii_text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode()
+    return re.sub(r"[^a-z0-9]+", "-", ascii_text.lower()).strip("-")
 
 
 @dataclass(frozen=True)
@@ -26,6 +52,10 @@ class AnalysisButton:
     def heading(self) -> str:
         return self.output_label or self.label
 
+    @property
+    def id(self) -> str:
+        return slugify(self.label)
+
 
 @dataclass(frozen=True)
 class CitationButton:
@@ -36,6 +66,10 @@ class CitationButton:
     @property
     def label(self) -> str:
         return self.style
+
+    @property
+    def id(self) -> str:
+        return slugify(self.style)
 
 
 AnyButton = Union[AnalysisButton, CitationButton]
@@ -66,6 +100,11 @@ class PageSpec:
     clinical: bool = False
     elem_id: str | None = None
     title_suffix: str = ""
+
+    @property
+    def title(self) -> str:
+        """Nome da aba sem o emoji/simbolo inicial."""
+        return re.sub(r"^[^\w]+", "", self.tab_name).strip()
 
     def buttons(self) -> list[AnalysisButton]:
         return [
