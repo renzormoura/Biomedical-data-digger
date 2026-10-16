@@ -1,5 +1,39 @@
 # CHANGELOG
 
+## 2026-10 — Refatoração arquitetural, segurança e qualidade
+
+### Segurança
+- `security.safe_get`: bloqueio de SSRF (esquema, IPs privados/loopback/metadata, revalidação a cada redirect, limite de redirects e de bytes) em toda busca de página feita a pedido do usuário.
+- Rate limiting por cliente (janela deslizante) nas chamadas de LLM e em login/cadastro; IP do cliente lido do último hop confiável de `X-Forwarded-For`.
+- Delimitadores do prompt agora são neutralizados na fonte (um abstract hostil não consegue "fechar" o bloco) e a fonte é truncada.
+- Contas: validação de e-mail e política de senha, limite máximo (anti-DoS no PBKDF2), custo de hash equalizado para usuário inexistente, mensagem de login genérica.
+
+### Fidelidade ao texto-fonte
+- `grounding.py`: números da resposta (doses, %, decimais) ausentes do título/resumo são sinalizados automaticamente.
+- Aviso clínico persistente na aba Medicina e nas comparações clínicas.
+- Prompts `Resumo Clínico` passaram a declarar explicitamente a restrição "somente a fonte" (descoberto por teste de contrato).
+- Avaliação de fidelidade com LLM real em `evals/` (opt-in).
+
+### Arquitetura
+- Camadas explícitas: `domain` → `workflow` (casos de uso sem Gradio) → `ui` (páginas declarativas). `biomedical_data_digger.py` reduzido a composição.
+- `LLMBackend` (Protocol) com `GroqBackend`/`OllamaBackend` e `LLMRouter`; cliente criado sob demanda.
+- `ArticleRepository` com cache LRU+TTL e chave canônica (PMID, URL do PubMed e DOI equivalentes compartilham entrada).
+- `account_store` sem efeitos colaterais no import (`get_account_store()`).
+- `Article` imutável e erros de domínio tipados (`DiggerError`, `ArticleNotFoundError`, `BackendUnavailableError`).
+
+### Corrigido
+- Botões duplicados/enganosos: "Avaliação Crítica", "Explicação para Iniciantes", "Questões de Discussão" e "Impacto na Sociedade" usavam o prompt de outro botão. "Aplicações no Mundo Real" (clone de "Implicações Práticas") foi removido. Um teste impede a regressão.
+- `UnboundLocalError` potencial em `_title_lookup`; `resolve_article` sem retorno em entradas não reconhecidas.
+- `_normalize_doi` não era idempotente (achado por teste de propriedade).
+- Chamadas HTTP sem timeout (Europe PMC); `print` substituído por logging.
+- Filtro de área casava substrings ("law" em "flaw"); agora casa início de palavra.
+- Auditoria de resposta agora também disponível na aba Medicina.
+
+### Tooling
+- `pyproject.toml` (ruff, mypy, pytest, coverage ≥ 80%), `requirements-dev.txt`, CI no GitHub Actions (3.10/3.11), pre-commit.
+- Testes: de 41 para 290+ (unitários, contrato de prompts, propriedades, smoke da UI).
+- Scripts avulsos de PDF movidos para `tools/pdf/`.
+
 ## 2026-09 — Busca e documentação
 
 ### Adicionado

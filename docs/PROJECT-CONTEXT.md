@@ -25,7 +25,7 @@ CONCLUÍDO:
 - Filtros de pesquisa médicos e gerais: tecnologia, engenharias, química, física, matemática, ciências sociais, psicologia, economia, educação, direito, sustentabilidade e agricultura
 - 11 tipos de análise com prompts especializados
 - Sistema de filtros de personalização (público, tom, idioma, detalhe, foco)
-- Cache de artigos em memória (até 20 artigos por sessão)
+- Cache de artigos em memória (LRU + TTL de 1 h, até 128 artigos, chave canônica)
 - Histórico de sessão (últimas 10 consultas)
 - Backend Groq API (produção) + Ollama local (desenvolvimento)
 - Deploy no Render (free tier)
@@ -73,11 +73,16 @@ PRÓXIMO PASSO:
 
 **Padrão:** Aplicação Gradio com orquestração no arquivo principal e serviços separados por responsabilidade.
 
-**Módulos:**
-- `article_services.py`: cache, limpeza, detecção de identificadores e busca nas fontes externas.
-- `llm_service.py`: seleção do backend Groq/Ollama e geração de respostas.
+**Módulos** (detalhes e justificativa em `adrs/ADR-004-arquitetura-em-camadas.md`):
+- `biomedical_data_digger.py`: ponto de entrada; compõe as dependências (`create_app`).
+- `ui.py`: páginas declarativas (`PageSpec`) e fábrica Gradio.
+- `workflow.py`: casos de uso (`ArticleRepository`, `AnalysisService`) sem Gradio.
+- `domain.py` / `grounding.py`: modelo de domínio e verificação numérica da resposta.
+- `article_services.py`: busca nas fontes externas, normalização e índice de relevância.
+- `llm_service.py`: `LLMBackend`/`LLMRouter` (Groq e Ollama).
+- `security.py`, `ratelimit.py`, `cache.py`, `config.py`: infraestrutura transversal.
 - `prompt_builders.py`: `SYS_PROMPT`, personalização e builders das análises.
-- `biomedical_data_digger.py`: orquestração e interface Gradio.
+- `account_store.py`: contas (PostgreSQL/SQLite).
 
 **Fluxo principal:**
 ```

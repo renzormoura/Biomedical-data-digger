@@ -62,15 +62,29 @@ Acesse `http://localhost:7860`.
 
 Sem `GROQ_API_KEY`, o projeto usa Ollama localmente. Nesse caso, o Ollama deve estar instalado e o modelo escolhido precisa estar disponível na máquina.
 
-## Testes
+## Desenvolvimento e qualidade
 
 Na raiz do repositório:
 
 ```powershell
-python -m unittest discover -s tests -v
+pip install -r requirements-dev.txt
+ruff check biomedical-article-summariser tests evals   # lint
+mypy                                                   # tipos (módulos do núcleo)
+pytest --cov                                           # testes + cobertura (mínimo 80%)
 ```
 
-Os testes cobrem a busca multi-fonte, deduplicação, áreas gerais e cálculo do índice com campos normalizados.
+A suíte combina testes unitários com dublês de rede, testes de contrato de todos os prompts,
+testes baseados em propriedades (Hypothesis) e um smoke test que monta a interface completa.
+O CI (`.github/workflows/ci.yml`) roda tudo em Python 3.10 e 3.11.
+
+Avaliação de fidelidade com LLM real (opcional, consome cota):
+
+```powershell
+$env:RUN_LIVE_EVALS = "1"; $env:GROQ_API_KEY = "..."; pytest evals -m live
+```
+
+Variáveis opcionais: `RATE_LIMIT_PER_MINUTE` (padrão 8 chamadas de LLM/min por cliente),
+`LOGIN_ATTEMPTS_PER_MINUTE` (5), `TRUSTED_PROXY_HOPS` (1, para ler o IP real atrás do proxy do Render).
 
 ## Deploy no Render
 
@@ -88,12 +102,16 @@ Em produção, configure `GROQ_API_KEY` e `DATABASE_URL`. O PostgreSQL é necess
 
 ## Estrutura principal
 
-- `biomedical_data_digger.py`: interface Gradio e orquestração das análises.
-- `article_services.py`: APIs de artigos, normalização, deduplicação, cache e índice de relevância.
-- `llm_service.py`: integração Groq/Ollama.
-- `prompt_builders.py`: prompts das análises.
-- `account_store.py`: autenticação e persistência de contas.
-- `tests/test_keyword_search.py`: testes da busca e do índice.
+Camadas (dependências apontam para baixo; ver `docs/adrs/ADR-004-arquitetura-em-camadas.md`):
+
+| Camada | Módulos |
+|---|---|
+| Entrada | `biomedical_data_digger.py` (composição das dependências e `launch`) |
+| Apresentação | `ui.py` (páginas declarativas `PageSpec` + fábrica Gradio) |
+| Casos de uso | `workflow.py` (`ArticleRepository`, `AnalysisService`; sem Gradio) |
+| Domínio | `domain.py` (`Article`, erros tipados), `grounding.py` (checagem numérica) |
+| Infraestrutura | `article_services.py` (fontes externas), `llm_service.py` (`LLMBackend`/`LLMRouter`), `account_store.py`, `cache.py`, `ratelimit.py`, `security.py` (anti-SSRF), `config.py` |
+| Conteúdo | `prompt_builders.py`, `contexto_brasil.py`, `styles.css` |
 
 ## Limitações
 
@@ -101,3 +119,5 @@ Em produção, configure `GROQ_API_KEY` e `DATABASE_URL`. O PostgreSQL é necess
 - A sumarização usa o abstract; a extração de texto completo existe para Europe PMC, mas ainda não está exposta como opção na interface.
 - O Render Free pode hibernar após um período sem tráfego.
 - Streaming permanece desativado por desempenho no plano Free.
+- A aba Contas autentica, mas ainda não restringe funcionalidades (o acesso de visitante é intencional).
+- A proteção anti-SSRF valida DNS antes da conexão; não fixa o IP resolvido (ver `security.py`).
