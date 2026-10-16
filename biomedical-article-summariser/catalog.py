@@ -41,6 +41,7 @@ class Work:
     abstract: str = ""
     keywords: tuple[str, ...] = ()
     source: str = ""
+    retracted: bool = False  # a fonte marca o registro como retratado
 
     def to_dict(self) -> dict[str, object]:
         """Representacao JSON-segura (usada no banco e na API)."""
@@ -51,7 +52,7 @@ class Work:
             "pages": self.pages, "doi": self.doi, "pmid": self.pmid, "pmcid": self.pmcid,
             "study_types": list(self.study_types), "open_access": self.open_access, "oa_url": self.oa_url,
             "cited_by": self.cited_by, "language": self.language, "abstract": self.abstract,
-            "keywords": list(self.keywords), "source": self.source,
+            "keywords": list(self.keywords), "source": self.source, "retracted": self.retracted,
         }
 
     @classmethod
@@ -78,7 +79,7 @@ class Work:
             pages=text("pages"), doi=text("doi"), pmid=text("pmid"), pmcid=text("pmcid"),
             study_types=texts("study_types"), open_access=data.get("open_access") is True, oa_url=text("oa_url"),
             cited_by=cited if isinstance(cited, int) else 0, language=text("language"), abstract=text("abstract"),
-            keywords=texts("keywords"), source=text("source"),
+            keywords=texts("keywords"), source=text("source"), retracted=data.get("retracted") is True,
         )
 
     @property

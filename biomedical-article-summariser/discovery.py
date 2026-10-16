@@ -13,6 +13,7 @@ from loguru import logger
 
 import article_services
 import citations
+import reliability
 from cache import TTLCache
 from catalog import Catalog, CatalogError, SearchQuery, SearchResult, Work
 from domain import ArticleNotFoundError, DiggerError, RateLimitedError, SourceUnavailableError
@@ -33,6 +34,7 @@ class WorkDetail:
     findings: tuple[Finding, ...]
     citations: Mapping[str, str]
     similar: tuple[Work, ...]
+    reliability: reliability.Reliability
 
 
 def citation_metadata(work: Work) -> citations.CitationMetadata:
@@ -157,10 +159,13 @@ class DiscoveryService:
 
     def detail(self, ref: str, *, source: str | None = None, client_id: str = "local") -> WorkDetail:
         work = self.work(ref, source=source, client_id=client_id)
+        sections = tuple(split_sections(work.abstract))
+        findings = tuple(extract_findings(work.abstract))
         return WorkDetail(
             work=work,
-            sections=tuple(split_sections(work.abstract)),
-            findings=tuple(extract_findings(work.abstract)),
+            sections=sections,
+            findings=findings,
+            reliability=reliability.assess(work, sections, findings),
             citations={style: citations.format_citation(citation_metadata(work), style) for style in citations.FORMATTERS},
             similar=self.similar(work, client_id=client_id),
         )

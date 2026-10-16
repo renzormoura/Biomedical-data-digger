@@ -135,3 +135,24 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.65); }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
 @media print { .topbar, .filters-wrap, .toast, .skip-link { display: none !important; } }
+
+/* Pontuação de confiabilidade */
+.reliability-badge { display: flex; align-items: center; gap: 16px; width: 100%; text-align: left; cursor: pointer; background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-left: 6px solid var(--muted); border-radius: var(--radius); padding: 12px 16px; font: inherit; }
+.reliability-badge:hover { border-color: var(--accent); }
+.reliability-badge.band-alta { border-left-color: var(--ok); }
+.reliability-badge.band-moderada { border-left-color: var(--accent); }
+.reliability-badge.band-baixa, .reliability-badge.band-retratado { border-left-color: var(--danger); }
+.reliability-score { font-size: 2rem; font-weight: 800; line-height: 1; min-width: 4.2ch; }
+.reliability-score small { font-size: 0.85rem; color: var(--muted); font-weight: 600; }
+.reliability-text { display: flex; flex-direction: column; gap: 2px; }
+.reliability-text span { color: var(--muted); font-size: 0.86rem; }
+.criteria { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.criterion { border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; background: var(--bg); }
+.criterion p { margin: 6px 0 0; }
+.criterion-head { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.criterion-icon { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; background: var(--surface-2); flex: none; }
+.criterion-points { margin-left: auto; color: var(--muted); font-size: 0.85rem; font-weight: 700; }
+.status-met .criterion-icon { background: color-mix(in srgb, var(--ok) 25%, transparent); color: var(--ok); }
+.status-partial .criterion-icon { background: var(--accent-soft); color: var(--accent); }
+.status-unmet .criterion-icon { background: color-mix(in srgb, var(--danger) 20%, transparent); color: var(--danger); }
+.evidence { margin: 8px 0 0; padding: 6px 12px; border-left: 3px solid var(--accent); color: var(--muted); font-size: 0.88rem; overflow-wrap: anywhere; }

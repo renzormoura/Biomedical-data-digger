@@ -341,6 +341,38 @@
   }
 
   // ------------------------------------------------------------------ Artigo
+  const STATUS_LABELS = { met: "Atendido", partial: "Parcial", unmet: "Não atendido", na: "Não se aplica", unknown: "Desconhecido" };
+  const STATUS_ICONS = { met: "✓", partial: "◐", unmet: "✗", na: "–", unknown: "?" };
+
+  function reliabilityCard(rel) {
+    if (!rel) return null;
+    const panelId = "reliability-panel";
+    const scoreText = rel.score === null ? "—" : `${rel.score}`;
+    const button = h("button", { type: "button", class: `reliability-badge band-${rel.band.toLowerCase()}`, "aria-expanded": "false", "aria-controls": panelId },
+      h("span", { class: "reliability-score" }, scoreText, rel.score === null ? null : h("small", {}, "/100")),
+      h("span", { class: "reliability-text" }, h("strong", {}, `Confiabilidade: ${rel.band}`), h("span", {}, "Toque para ver como a nota é calculada")));
+    const rows = rel.criteria.map((c) => h("li", { class: `criterion status-${c.status}` },
+      h("div", { class: "criterion-head" },
+        h("span", { class: "criterion-icon", "aria-hidden": "true" }, STATUS_ICONS[c.status] || "?"),
+        h("strong", {}, c.name),
+        h("span", { class: "criterion-points" }, c.status === "na" || c.status === "unknown" ? `${STATUS_LABELS[c.status]} (fora do cálculo)` : `${STATUS_LABELS[c.status]} · ${c.points}/${c.weight}`)),
+      h("p", {}, c.detail),
+      c.evidence ? h("blockquote", { class: "evidence" }, c.evidence) : null,
+      h("p", { class: "hint" }, `Como avaliamos: ${c.how}`)));
+    const panel = h("div", { id: panelId, class: "reliability-panel stack", hidden: "" },
+      h("p", {}, rel.summary),
+      h("p", { class: "hint" }, "A nota é a soma dos pontos dos critérios avaliáveis dividida pelo peso desses critérios, em escala de 0 a 100. Critérios \"desconhecido\" ou \"não se aplica\" ficam fora do cálculo, e a cobertura mostra quanto foi realmente avaliado. Artigo retratado vale 0. Faixas: Alta (75 ou mais), Moderada (50 a 74), Baixa (abaixo de 50)."),
+      rel.warnings.map((w) => h("p", { class: "note" }, w)),
+      h("ul", { class: "criteria" }, rows),
+      h("p", { class: "note" }, rel.disclaimer));
+    button.addEventListener("click", () => {
+      const open = panel.hasAttribute("hidden");
+      if (open) panel.removeAttribute("hidden"); else panel.setAttribute("hidden", "");
+      button.setAttribute("aria-expanded", String(open));
+    });
+    return h("div", { class: "card stack reliability" }, button, panel);
+  }
+
   async function renderArticle(params) {
     const ref = params.get("ref") || "";
     mount($app, loading("Abrindo o artigo…"));
@@ -428,6 +460,7 @@
         h("h1", {}, work.title),
         h("div", { class: "meta" }, metaLine(work)),
         badges(work),
+        reliabilityCard(data.reliability),
         h("div", { class: "row" },
           saveButton(work, { small: false, onChange: renderOrganize }),
           oaHref ? h("a", { class: "btn btn-secondary", href: oaHref, target: "_blank", rel: "noopener noreferrer" }, "Abrir versão aberta ↗")

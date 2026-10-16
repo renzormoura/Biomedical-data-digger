@@ -93,6 +93,7 @@ def to_work(record: dict[str, Any]) -> Work:
         abstract=_abstract_from_inverted_index(record.get("abstract_inverted_index")),
         keywords=tuple(dict.fromkeys(keywords))[:MAX_KEYWORDS],
         source="OpenAlex",
+        retracted=record.get("is_retracted") is True,
     )
 
 

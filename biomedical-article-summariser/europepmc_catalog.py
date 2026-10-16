@@ -124,7 +124,10 @@ def to_work(record: dict[str, Any]) -> Work:
     pmcid = str(record.get("pmcid") or "")
     doi = str(record.get("doi") or "")
     info = record.get("journalInfo") or {}
-    pub_types = (record.get("pubTypeList") or {}).get("pubType") or []
+    pub_types = [str(t) for t in (record.get("pubTypeList") or {}).get("pubType") or []]
+    study_types = [label for label in study_type_labels(pub_types) if label in _KNOWN_LABELS]
+    if record.get("source") == "PPR" and "Preprint" not in study_types:
+        study_types.append("Preprint")
     return Work(
         ref=pmid or pmcid or doi or str(record.get("id") or ""),
         title=_clean_title(str(record.get("title") or "Título não informado")),
@@ -138,7 +141,7 @@ def to_work(record: dict[str, Any]) -> Work:
         pmid=pmid,
         pmcid=pmcid,
         # na navegacao so entram rotulos que sabemos traduzir; tipos tecnicos do registro virariam ruido
-        study_types=tuple(label for label in study_type_labels([str(t) for t in pub_types]) if label in _KNOWN_LABELS),
+        study_types=tuple(study_types),
         open_access=record.get("isOpenAccess") == "Y",
         oa_url=_oa_url(record),
         cited_by=_int(record.get("citedByCount")) or 0,
@@ -146,6 +149,7 @@ def to_work(record: dict[str, Any]) -> Work:
         abstract=clean_html_text(str(record.get("abstractText") or "")),
         keywords=_keywords(record),
         source="Europe PMC",
+        retracted="retracted publication" in {t.lower() for t in pub_types},
     )
 
 

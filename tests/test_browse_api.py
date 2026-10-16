@@ -305,3 +305,11 @@ def test_browser_assets_are_served_with_cache_headers(env, asset, kind):
     response = env.client.get(f"/static/{asset}")
     assert response.status_code == 200 and kind in response.headers["content-type"]
     assert "max-age" in response.headers["cache-control"]
+
+
+def test_work_detail_carries_the_reliability_score(env):
+    data = env.client.get("/api/discover/work", params={"ref": "1"}).json()
+    rel = data["reliability"]
+    assert {"score", "band", "coverage", "criteria", "disclaimer"} <= set(rel)
+    assert {c["key"] for c in rel["criteria"]} >= {"integridade", "desenho", "revisao_pares", "amostra"}
+    assert all(c["how"] and c["detail"] for c in rel["criteria"])

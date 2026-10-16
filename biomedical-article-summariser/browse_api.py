@@ -13,6 +13,7 @@ from fastapi import FastAPI, Query, Request
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
 
+import reliability
 from catalog import SearchQuery, Work
 from discovery import DiscoveryService
 from domain import AuthRequiredError, DiggerError, NotFoundError, RateLimitedError
@@ -65,6 +66,18 @@ def work_full(work: Work, saved: bool | None = None) -> dict[str, Any]:
         "authorList": [{"family": a.family, "given": a.given} for a in work.authors],
     })
     return full
+
+
+def reliability_payload(result: reliability.Reliability) -> dict[str, Any]:
+    return {
+        "score": result.score, "band": result.band, "coverage": result.coverage, "summary": result.summary,
+        "warnings": list(result.warnings), "disclaimer": result.disclaimer,
+        "criteria": [
+            {"key": c.key, "name": c.name, "weight": c.weight, "status": c.status, "points": c.points,
+             "detail": c.detail, "evidence": c.evidence, "how": c.how}
+            for c in result.criteria
+        ],
+    }
 
 
 def list_payload(reading_list: ReadingList) -> dict[str, Any]:
@@ -140,6 +153,7 @@ def register_browse_routes(
             "sections": [{"heading": s.heading, "label": s.label, "text": s.text} for s in detail.sections],
             "findings": [{"sentence": f.sentence, "tags": list(f.tags)} for f in detail.findings],
             "citations": dict(detail.citations),
+            "reliability": reliability_payload(detail.reliability),
             "similar": [work_card(w) for w in detail.similar],
         }
 
