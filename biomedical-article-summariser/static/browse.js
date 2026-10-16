@@ -214,25 +214,59 @@
   }
 
   // ------------------------------------------------------------------ Início
+  const TOPICS = ["diabetes tipo 2", "sepse", "hipertensão", "câncer de mama", "saúde mental", "COVID-19", "inteligência artificial na saúde", "mudanças climáticas"];
+  const STEPS = [
+    ["1", "Busque", "Digite um tema, título ou palavra-chave. Filtre por ano, tipo de estudo, idioma e acesso aberto, em uma ou em todas as fontes."],
+    ["2", "Entenda", "Veja o resumo organizado por seções, os números com a frase de origem, o tipo de estudo e a nota de confiabilidade explicada."],
+    ["3", "Organize", "Salve, etiquete, monte listas de leitura, compartilhe por link e exporte as referências em BibTeX, RIS, ABNT, APA ou Vancouver."],
+  ];
+  const FEATURES = [
+    ["🔎", "Várias fontes em uma busca", "Europe PMC (ciências da vida e saúde) e OpenAlex (todas as áreas), com resultados sem repetição."],
+    ["✅", "Nota de confiabilidade que se explica", "Retratação, tipo de estudo, revisão por pares, amostra e estatística. Toque na nota e veja cada critério e a evidência."],
+    ["📄", "Leitura fiel, sem inventar", "Trechos copiados do próprio resumo. Nada é gerado nem interpretado, então não há lacunas preenchidas por palavras de um modelo."],
+    ["🔓", "Versão aberta", "Mostramos quando existe uma cópia gratuita e legal do artigo e levamos você até ela."],
+    ["📚", "Biblioteca e listas", "Etiquetas, listas de leitura e link público somente leitura, que você pode revogar quando quiser."],
+    ["🤖", "IA opcional, com cautela", "Resumos e análises no Laboratório de IA, com trava contra instruções maliciosas, checagem de números e avisos claros."],
+  ];
+
   function renderHome() {
     setTitle("Início");
     const input = h("input", { type: "search", id: "home-q", placeholder: "Busque por tema, título ou palavra-chave", "aria-label": "Buscar artigos", maxlength: "300" });
+    const go = (q) => { location.hash = Lib.buildHash("/busca", { q }); };
     mount($app,
-      h("section", { class: "hero" },
+      h("section", { class: "hero home-hero" },
+        h("span", { class: "eyebrow" }, "Navegador de artigos científicos"),
         h("h1", {}, "Encontre, entenda e organize artigos científicos"),
-        h("p", { class: "lead" }, "Busque com filtros, veja o essencial copiado do próprio texto (sem IA), saiba quando há versão aberta e monte listas de leitura para compartilhar. A IA é um complemento opcional."),
-        h("form", { class: "searchbar", onsubmit: (e) => { e.preventDefault(); location.hash = Lib.buildHash("/busca", { q: input.value.trim() }); } },
-          input, h("button", { type: "submit", class: "btn btn-primary" }, "Buscar"))),
+        h("p", { class: "lead" }, "O Biomedical Data Digger reúne milhões de artigos em um só lugar, mostra o essencial do jeito que o autor escreveu e diz, com critérios abertos, o quanto cada artigo merece confiança. Feito para estudantes, professores, pesquisadores e profissionais de saúde."),
+        h("form", { class: "searchbar", onsubmit: (e) => { e.preventDefault(); go(input.value.trim()); } },
+          input, h("button", { type: "submit", class: "btn btn-primary" }, "Buscar")),
+        h("div", { class: "chips topics", role: "group", "aria-label": "Sugestões de busca" },
+          h("span", { class: "muted topics-label" }, "Experimente:"),
+          TOPICS.map((t) => h("a", { class: "chip", href: Lib.buildHash("/busca", { q: t }) }, t)))),
+
+      h("h2", {}, "Como funciona"),
+      h("ol", { class: "steps" }, STEPS.map(([n, title, text]) => h("li", { class: "card step" },
+        h("span", { class: "step-number", "aria-hidden": "true" }, n), h("h3", {}, title), h("p", { class: "muted" }, text)))),
+
+      h("h2", {}, "Por que usar"),
+      h("div", { class: "grid features" }, FEATURES.map(([icon, title, text]) => h("div", { class: "card feature" },
+        h("span", { class: "feature-icon", "aria-hidden": "true" }, icon), h("h3", {}, title), h("p", { class: "muted" }, text)))),
+
       h("h2", {}, "Por onde você quer começar?"),
       h("div", { class: "grid" }, SHORTCUTS.map((s) => h("div", { class: "card stack" },
         h("h3", {}, s.title), h("p", { class: "muted" }, s.hint),
         h("a", { class: "btn btn-secondary", href: Lib.buildHash("/busca", { q: s.q }) }, `Começar com "${s.q}"`)))),
-      h("h2", {}, "O que é diferente aqui"),
-      h("div", { class: "grid" },
-        h("div", { class: "card" }, h("h3", {}, "Sem IA primeiro"), h("p", { class: "muted" }, "Resumo organizado, números com a frase de origem e tipo de estudo vêm direto do registro. Nada é gerado nem interpretado.")),
-        h("div", { class: "card" }, h("h3", {}, "Versão aberta"), h("p", { class: "muted" }, "Mostramos quando existe uma cópia gratuita e legal do artigo e levamos você até ela.")),
-        h("div", { class: "card" }, h("h3", {}, "Organize e compartilhe"), h("p", { class: "muted" }, "Salve, etiquete, exporte em BibTeX, RIS ou ABNT e compartilhe listas de leitura por link."))),
-      h("p", { class: "note" }, "As buscas consultam a Europe PMC (ciências da vida e saúde). Quer resumos e análises com IA? Abra o ", h("a", { href: "/ia" }, "Laboratório de IA"), "."));
+
+      h("section", { class: "card cta" },
+        h("div", {}, h("h2", {}, "Sua biblioteca, no seu ritmo"),
+          h("p", { class: "muted" }, "Buscar e ler não exige conta. Crie uma para salvar artigos, montar listas e exportar referências.")),
+        h("div", { class: "row" },
+          session.user
+            ? h("a", { class: "btn btn-primary", href: "#/biblioteca" }, "Abrir minha biblioteca")
+            : h("button", { type: "button", class: "btn btn-primary", onclick: () => openAuth("Crie uma conta para salvar artigos e montar listas.") }, "Criar conta ou entrar"),
+          h("a", { class: "btn btn-outline", href: "/ia" }, "Conhecer o Laboratório de IA"))),
+
+      h("p", { class: "note" }, "As informações vêm de fontes públicas (Europe PMC e OpenAlex). A nota de confiabilidade resume sinais verificáveis no registro e no resumo; não substitui a leitura crítica do texto completo nem orientação profissional."));
   }
 
   // ------------------------------------------------------------------ Busca
