@@ -42,6 +42,45 @@ class Work:
     keywords: tuple[str, ...] = ()
     source: str = ""
 
+    def to_dict(self) -> dict[str, object]:
+        """Representacao JSON-segura (usada no banco e na API)."""
+        return {
+            "ref": self.ref, "title": self.title,
+            "authors": [{"family": a.family, "given": a.given} for a in self.authors],
+            "journal": self.journal, "year": self.year, "volume": self.volume, "issue": self.issue,
+            "pages": self.pages, "doi": self.doi, "pmid": self.pmid, "pmcid": self.pmcid,
+            "study_types": list(self.study_types), "open_access": self.open_access, "oa_url": self.oa_url,
+            "cited_by": self.cited_by, "language": self.language, "abstract": self.abstract,
+            "keywords": list(self.keywords), "source": self.source,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, object]) -> Work:
+        """Reconstroi um Work de dados salvos, tolerando campos ausentes ou de tipo errado."""
+        def text(key: str) -> str:
+            value = data.get(key)
+            return value if isinstance(value, str) else ""
+
+        def texts(key: str) -> tuple[str, ...]:
+            value = data.get(key)
+            return tuple(str(v) for v in value) if isinstance(value, list) else ()
+
+        raw_authors = data.get("authors")
+        authors = tuple(
+            Author(family=str(a.get("family", "")), given=str(a.get("given", "")))
+            for a in (raw_authors if isinstance(raw_authors, list) else [])
+            if isinstance(a, dict) and a.get("family")
+        )
+        year, cited = data.get("year"), data.get("cited_by")
+        return cls(
+            ref=text("ref"), title=text("title") or "Título não informado", authors=authors, journal=text("journal"),
+            year=year if isinstance(year, int) else None, volume=text("volume"), issue=text("issue"),
+            pages=text("pages"), doi=text("doi"), pmid=text("pmid"), pmcid=text("pmcid"),
+            study_types=texts("study_types"), open_access=data.get("open_access") is True, oa_url=text("oa_url"),
+            cited_by=cited if isinstance(cited, int) else 0, language=text("language"), abstract=text("abstract"),
+            keywords=texts("keywords"), source=text("source"),
+        )
+
     @property
     def author_line(self) -> str:
         names = [f"{a.given} {a.family}".strip() for a in self.authors[:6]]

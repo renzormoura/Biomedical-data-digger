@@ -64,6 +64,10 @@ class RateLimitedError(DiggerError):
     """O cliente excedeu o limite de uso (HTTP 429)."""
 
 
+class SourceUnavailableError(DiggerError):
+    """Uma fonte de artigos (Europe PMC, OpenAlex...) esta indisponivel (HTTP 503)."""
+
+
 class BackendUnavailableError(DiggerError):
     """Nenhum backend de LLM apto a atender o modelo pedido."""
 
