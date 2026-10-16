@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from typing import Optional, Protocol
 
 import article_services
+import citations
 from cache import TTLCache
 from domain import Article, ArticleNotFoundError, DiggerError, is_failure_title
 from grounding import check_numeric_grounding
@@ -122,10 +123,12 @@ class AnalysisService:
         repository: ArticleRepository,
         generator: TextGenerator,
         limiter: SlidingWindowLimiter,
+        citation_fetcher: Callable[[str], citations.CitationMetadata] = citations.fetch_citation_metadata,
     ) -> None:
         self._repository = repository
         self._generator = generator
         self._limiter = limiter
+        self._citation_fetcher = citation_fetcher
 
     def _generate(self, messages: Sequence[Message], model: str, client_id: str, error_prefix: str) -> str:
         self._generator.ensure_available(model)
@@ -208,3 +211,19 @@ class AnalysisService:
         comparison = self._generate(messages, model, client_id, "Erro ao comparar os artigos")
         suffix = CLINICAL_DISCLAIMER if medical_context else ""
         return f"---\n> **Comparação entre Artigos**\n\n---\n{comparison}{suffix}"
+
+    def cite(self, article_id: str, style: str, *, client_id: str = "local") -> str:
+        """Referencia formatada (ABNT/APA/Vancouver) a partir de registros oficiais, sem LLM."""
+        if not (article_id or "").strip():
+            raise DiggerError("Cole um DOI, PMID ou PMCID para gerar a referência.")
+        try:
+            self._limiter.check(client_id)
+        except RateLimitExceeded as error:
+            raise DiggerError(str(error)) from error
+        meta = self._citation_fetcher(article_id)
+        reference = citations.format_citation(meta, style)
+        return (
+            f"---\n> **Referência · {style}**\n\n---\n{reference}\n\n"
+            "> Gerada automaticamente a partir do registro oficial (Crossref ou Europe PMC), "
+            "sem uso de IA. Confira com as normas do seu curso antes de entregar."
+        )

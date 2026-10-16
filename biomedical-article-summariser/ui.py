@@ -9,8 +9,7 @@ reutilizado por dois botoes da mesma pagina.
 from __future__ import annotations
 
 import os
-from collections.abc import Callable, Sequence
-from dataclasses import dataclass
+from collections.abc import Sequence
 from functools import wraps
 from typing import Optional
 
@@ -26,34 +25,7 @@ from account_store import (
 )
 from config import Settings
 from domain import DiggerError
-from prompt_builders import (
-    build_message_alertas,
-    build_message_aplicabilidade_br,
-    build_message_checklist,
-    build_message_comparacao_literatura,
-    build_message_conduta_urgencia,
-    build_message_confiabilidade,
-    build_message_critica_metodologica,
-    build_message_disponibilidade_sus,
-    build_message_estatisticas,
-    build_message_glossario,
-    build_message_impacto_brasil,
-    build_message_implicacoes_praticas,
-    build_message_lacunas_pesquisa,
-    build_message_medicamentos,
-    build_message_pico,
-    build_message_pontos_chave,
-    build_message_populacoes_especiais,
-    build_message_questoes_discussao,
-    build_message_resumo,
-    build_message_resumo_academico,
-    build_message_resumo_clinico,
-    build_message_resumo_estudante,
-    build_message_resumo_introdutorio,
-    build_message_resumo_paciente,
-    build_message_sumario,
-    build_message_vigilancia_sanitaria,
-)
+from pages import ALL_PAGES, AnalysisButton, CitationButton, PageSpec
 from ratelimit import RateLimitExceeded, SlidingWindowLimiter, client_key
 from workflow import AnalysisService, ArticleRepository, Filters
 
@@ -86,162 +58,6 @@ def load_css() -> tuple[str, str]:
         content = css_file.read()
     base, _, overrides = content.partition(_CSS_MARKER)
     return base, base + overrides
-
-
-# ---------------------------------------------------------------------------
-# Especificacao declarativa
-# ---------------------------------------------------------------------------
-@dataclass(frozen=True)
-class AnalysisButton:
-    label: str
-    builder: Callable
-    output_label: str = ""
-    variant: str = "secondary"
-    sources: tuple[str, ...] = ()
-    check_numbers: bool = True
-
-    @property
-    def heading(self) -> str:
-        return self.output_label or self.label
-
-
-@dataclass(frozen=True)
-class Section:
-    title: str
-    rows: tuple[tuple[AnalysisButton, ...], ...]
-    is_open: bool = False
-    audit_button: bool = False
-
-
-@dataclass(frozen=True)
-class PageSpec:
-    key: str
-    subtitle: str
-    sections: tuple[Section, ...]
-    audience_choices: tuple[str, ...]
-    focus_choices: tuple[str, ...]
-    placeholder: str
-    compare_title: str
-    compare_placeholder: str
-    compare_type_label: str
-    compare_button: str
-    clinical: bool = False
-    elem_id: Optional[str] = None
-    title_suffix: str = ""
-    help_markdown: str = ""
-
-    def buttons(self) -> list[AnalysisButton]:
-        return [button for section in self.sections for row in section.rows for button in row]
-
-
-def _b(label: str, builder: Callable, output_label: str = "", **kwargs) -> AnalysisButton:
-    return AnalysisButton(label, builder, output_label, **kwargs)
-
-
-GENERAL_HELP = """
-**Cole qualquer um destes formatos — o sistema detecta automaticamente:**
-
-**PubMed (PMID):** `33984217` ou `https://pubmed.ncbi.nlm.nih.gov/33984217/`
-
-**PubMed Central (PMCID):** `PMC8234567` ou `https://pmc.ncbi.nlm.nih.gov/articles/PMC8234567/`
-
-**DOI (qualquer área):** `10.1038/s41586-021-03819-2` ou `https://doi.org/10.1038/s41586-021-03819-2`
-
-**arXiv:** `2301.00001` ou `https://arxiv.org/abs/2301.00001`
-
-**OpenAlex:** `W2741809807` ou `https://openalex.org/W2741809807`
-
-**Google Acadêmico:** cole o link da busca, de um cluster ou de um resultado — o sistema encontra o artigo automaticamente
-
-**Qualquer outro link:** páginas de editoras (Springer, Elsevier, Wiley...), repositórios e periódicos funcionam — o sistema extrai o que estiver disponível
-
-💡 **Dica:** Copie a URL da barra do navegador e cole aqui diretamente.
-"""
-
-MEDICAL_HELP = """
-**Cole qualquer um destes formatos — o sistema detecta automaticamente:**
-
-**PubMed (PMID):** `33984217` ou `https://pubmed.ncbi.nlm.nih.gov/33984217/`
-
-**PubMed Central (PMCID):** `PMC8234567` ou `https://pmc.ncbi.nlm.nih.gov/articles/PMC8234567/`
-
-**DOI:** `10.1038/s41586-021-03819-2` ou `https://doi.org/10.1038/s41586-021-03819-2`
-
-**Google Acadêmico:** cole o link da busca, de um cluster ou de um resultado — o sistema encontra o artigo automaticamente
-
-**Qualquer outro link:** páginas de editoras (Springer, Elsevier, Wiley...), repositórios e periódicos funcionam — o sistema extrai o que estiver disponível
-
-💡 **Dica:** Copie a URL da barra do navegador e cole aqui diretamente.
-"""
-
-GENERAL_PAGE = PageSpec(
-    key="geral",
-    subtitle="Análise científica universal · Europe PMC · arXiv · DOI · OpenAlex",
-    sections=(
-        Section("Visão Geral", (
-            (_b("Sumário", build_message_sumario), _b("Resumo", build_message_resumo)),
-            (_b("Pontos-Chave", build_message_pontos_chave), _b("Resumo Introdutório", build_message_resumo_introdutorio)),
-        ), is_open=True),
-        Section("Análise Científica", (
-            (_b("Resumo Acadêmico", build_message_resumo_academico), _b("Crítica Metodológica", build_message_critica_metodologica)),
-            (_b("Dados Estatísticos", build_message_estatisticas), _b("PICO", build_message_pico, "Pergunta PICO")),
-            (_b("Lacunas de Pesquisa", build_message_lacunas_pesquisa), _b("Comparação Literatura", build_message_comparacao_literatura, "Comparação com Literatura")),
-            (_b("Implicações Práticas", build_message_implicacoes_praticas),),
-            (_b("Avaliação Crítica", build_message_confiabilidade, variant="primary"),),
-        ), audit_button=True),
-        Section("Educacional", (
-            (_b("Explicação para Iniciantes", build_message_resumo_paciente), _b("Guia para Estudantes", build_message_resumo_estudante)),
-            (_b("Questões de Discussão", build_message_questoes_discussao), _b("Glossário de Termos", build_message_glossario)),
-        )),
-        Section("Aplicações e Impacto", (
-            (_b("Impacto na Sociedade", build_message_impacto_brasil),),
-        )),
-    ),
-    audience_choices=("Pesquisador / Acadêmico", "Profissional da área", "Estudante", "Público geral"),
-    focus_choices=("Síntese geral", "Metodologia", "Resultados e evidências", "Aplicações práticas", "Contexto brasileiro"),
-    placeholder="ex: 33984217 · PMC8234567 · 10.1038/nature · arxiv.org/abs/2301.00001 · qualquer URL (Google Acadêmico, editora, etc.)",
-    compare_title="Comparar dois artigos",
-    compare_placeholder="PMID, PMCID, DOI, arXiv, OpenAlex ou URL",
-    compare_type_label="Tipo de análise",
-    compare_button="Comparar Artigos",
-    help_markdown=GENERAL_HELP,
-)
-
-MEDICAL_PAGE = PageSpec(
-    key="medicina",
-    subtitle="Pronto-Socorro · Farmacologia · Segurança do Paciente · Contexto Brasileiro",
-    sections=(
-        Section("Resumos Clínicos", (
-            (_b("Resumo Clínico", build_message_resumo_clinico), _b("Resumo Médico", build_message_resumo_academico)),
-        ), is_open=True),
-        Section("Farmacologia e Protocolos", (
-            (_b("Medicamentos / Protocolos", build_message_medicamentos), _b("Populações Especiais", build_message_populacoes_especiais)),
-            (_b("Conduta em Urgência", build_message_conduta_urgencia),),
-        )),
-        Section("Segurança do Paciente", (
-            (_b("Alertas e Contraindicações", build_message_alertas), _b("Checklist Pré-Conduta", build_message_checklist)),
-            (_b("Confiabilidade do Artigo", build_message_confiabilidade, variant="primary"),),
-        ), audit_button=True),
-        Section("Contexto BR — Saúde", (
-            (
-                _b("Disponib. SUS", build_message_disponibilidade_sus, "Disponibilidade no SUS", sources=("bvs", "minsaude"), check_numbers=False),
-                _b("Vigilância Sanitária", build_message_vigilancia_sanitaria, sources=("anvisa", "minsaude"), check_numbers=False),
-            ),
-            (_b("Aplicabilidade BR", build_message_aplicabilidade_br, "Aplicabilidade Brasileira", sources=("minsaude", "anvisa", "bvs"), check_numbers=False),),
-        )),
-    ),
-    audience_choices=("Médico / Especialista", "Residente / Interno", "Estudante de Medicina", "Enfermagem / Farmácia"),
-    focus_choices=("Farmacologia", "Estatística", "Segurança", "Metodologia", "Clínico/Prático"),
-    placeholder="ex: 33984217 · PMC8234567 · 10.1038/nature12373 · qualquer URL (Google Acadêmico, editora, etc.)",
-    compare_title="Comparar dois artigos clínicos",
-    compare_placeholder="PMID, PMCID, DOI ou URL do artigo clínico",
-    compare_type_label="Tipo de análise clínica",
-    compare_button="Comparar Artigos Clínicos",
-    clinical=True,
-    elem_id="medical-page",
-    title_suffix=' <span style="font-size:1rem;color:#94a3b8;font-weight:400">— Medicina</span>',
-    help_markdown=MEDICAL_HELP,
-)
 
 
 # ---------------------------------------------------------------------------
@@ -379,13 +195,17 @@ def build_analysis_page(spec: PageSpec, service: AnalysisService, repository: Ar
                     clear_button = gr.Button("↺  Limpar filtros", size="sm", variant="secondary")
 
                 analysis_buttons: list[tuple[AnalysisButton, gr.Button]] = []
+                citation_buttons: list[tuple[CitationButton, gr.Button]] = []
                 audit_button: Optional[gr.Button] = None
                 for section in spec.sections:
                     with gr.Accordion(section.title, open=section.is_open):
                         for row in section.rows:
                             with gr.Row():
                                 for button in row:
-                                    analysis_buttons.append((button, gr.Button(button.label, variant=button.variant)))
+                                    if isinstance(button, CitationButton):
+                                        citation_buttons.append((button, gr.Button(button.label, variant="secondary")))
+                                    else:
+                                        analysis_buttons.append((button, gr.Button(button.label, variant=button.variant)))
                         if section.audit_button:
                             audit_button = gr.Button("Auditoria da Resposta", variant="primary")
 
@@ -425,6 +245,19 @@ def build_analysis_page(spec: PageSpec, service: AnalysisService, repository: Ar
 
         for button, component in analysis_buttons:
             component.click(fn=make_handler(button), inputs=analysis_inputs, outputs=analysis_outputs, show_progress="full")
+
+        def make_citation_handler(style: str):
+            @_gradio_errors
+            def handler(aid, request: gr.Request):
+                return service.cite(aid, style, client_id=_client_id(request, settings))
+
+            return handler
+
+        for citation, component in citation_buttons:
+            component.click(
+                fn=make_citation_handler(citation.style), inputs=[article_id],
+                outputs=output_box, show_progress="full",
+            )
 
         if audit_button is not None:
             @_gradio_errors
@@ -580,13 +413,12 @@ def build_accounts_page(css: str, settings: Settings) -> gr.Blocks:
 def build_app(service: AnalysisService, repository: ArticleRepository, settings: Settings) -> gr.TabbedInterface:
     base_css, medical_css = load_css()
     pages = [
-        build_analysis_page(GENERAL_PAGE, service, repository, settings, base_css),
-        build_analysis_page(MEDICAL_PAGE, service, repository, settings, medical_css),
-        build_search_page(base_css),
-        build_accounts_page(base_css, settings),
+        build_analysis_page(spec, service, repository, settings, medical_css if spec.elem_id else base_css)
+        for spec in ALL_PAGES
     ]
+    pages += [build_search_page(base_css), build_accounts_page(base_css, settings)]
     return gr.TabbedInterface(
         pages,
-        tab_names=["☰  Geral", "⚕  Medicina", "🔎  Pesquisa por palavra-chave", "👤  Contas"],
+        tab_names=[spec.tab_name for spec in ALL_PAGES] + ["🔎  Pesquisa por palavra-chave", "👤  Contas"],
         title="Biomedical Data Digger",
     )

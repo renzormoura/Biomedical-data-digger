@@ -190,3 +190,29 @@ def test_compare_validates_both_inputs_and_labels_sources_separately():
     assert "Comparação entre Artigos" in result and CLINICAL_DISCLAIMER in result
     content = gen.calls[0][0][1]["content"]
     assert "SOURCE_A_ABSTRACT_START" in content and "SOURCE_B_ABSTRACT_START" in content
+
+
+def test_cite_formats_reference_without_calling_llm():
+    import citations
+
+    meta = citations.CitationMetadata(title="Um artigo", authors=(citations.Author("Silva", "Ana"),), journal="J", year="2020")
+    gen = FakeGenerator()
+    repository = ArticleRepository(CountingResolver())
+    service = AnalysisService(repository, gen, SlidingWindowLimiter(5, 60), citation_fetcher=lambda raw: meta)
+    result = service.cite("10.1000/abc", "ABNT")
+    assert "Referência · ABNT" in result and "SILVA, A." in result and "sem uso de IA" in result
+    assert gen.calls == []
+
+
+def test_cite_validates_input_and_rate_limits():
+    import citations
+
+    meta = citations.CitationMetadata(title="T")
+    service = AnalysisService(
+        ArticleRepository(CountingResolver()), FakeGenerator(), SlidingWindowLimiter(1, 60), citation_fetcher=lambda raw: meta
+    )
+    with pytest.raises(DiggerError):
+        service.cite("  ", "APA")
+    service.cite("10.1000/abc", "APA", client_id="x")
+    with pytest.raises(DiggerError, match="Limite"):
+        service.cite("10.1000/abc", "APA", client_id="x")

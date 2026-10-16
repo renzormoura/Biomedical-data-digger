@@ -4,6 +4,7 @@ from collections import Counter
 
 import pytest
 
+import pages
 import prompt_builders
 import ui
 from config import Settings
@@ -11,7 +12,7 @@ from domain import Article
 from ratelimit import SlidingWindowLimiter
 from workflow import AnalysisService, ArticleRepository
 
-PAGES = [ui.GENERAL_PAGE, ui.MEDICAL_PAGE]
+PAGES = list(pages.ALL_PAGES)
 
 
 @pytest.mark.parametrize("page", PAGES, ids=lambda p: p.key)
@@ -41,11 +42,11 @@ def test_every_prompt_builder_is_reachable_from_some_page():
 
 
 def test_medical_page_is_clinical_and_general_is_not():
-    assert ui.MEDICAL_PAGE.clinical and not ui.GENERAL_PAGE.clinical
+    assert pages.MEDICAL_PAGE.clinical and not pages.GENERAL_PAGE.clinical
 
 
 def test_brazil_context_buttons_declare_verification_sources():
-    sources = {b.label: b.sources for b in ui.MEDICAL_PAGE.buttons() if b.sources}
+    sources = {b.label: b.sources for b in pages.MEDICAL_PAGE.buttons() if b.sources}
     assert len(sources) == 3
 
 
@@ -116,3 +117,43 @@ def test_article_dataclass_is_hashable_and_frozen():
     article = Article("id", "t", "abs")
     with pytest.raises(Exception):
         article.title = "x"  # type: ignore[misc]
+
+
+def test_page_keys_and_tab_names_are_unique():
+    assert len({p.key for p in PAGES}) == len(PAGES)
+    assert len({p.tab_name for p in PAGES}) == len(PAGES)
+
+
+def test_expected_tabs_are_present():
+    assert {p.key for p in PAGES} == {
+        "geral", "academico", "medicina", "ambiental", "saude_publica", "tecnologia", "engenharias",
+    }
+
+
+@pytest.mark.parametrize("page", PAGES, ids=lambda p: p.key)
+def test_every_page_has_exactly_one_audit_button(page):
+    assert sum(section.audit_button for section in page.sections) == 1
+
+
+@pytest.mark.parametrize("page", PAGES, ids=lambda p: p.key)
+def test_health_pages_are_flagged_clinical(page):
+    assert page.clinical == (page.key in {"medicina", "saude_publica"})
+
+
+def test_general_page_no_longer_has_educational_section():
+    assert "Educacional" not in [s.title for s in pages.GENERAL_PAGE.sections]
+
+
+def test_academic_page_owns_educational_and_citation_buttons():
+    labels = {b.label for b in pages.ACADEMIC_PAGE.buttons()}
+    assert {"Explicação para Iniciantes", "Guia para Estudantes", "Glossário de Termos", "Questões de Discussão"} <= labels
+    assert [c.style for c in pages.ACADEMIC_PAGE.citation_buttons()] == ["ABNT", "APA", "Vancouver"]
+    assert all(not p.citation_buttons() for p in PAGES if p.key != "academico")
+
+
+def test_app_has_one_tab_per_page_plus_search_and_accounts(monkeypatch, tmp_path):
+    monkeypatch.setenv("DATABASE_PATH", str(tmp_path / "a.sqlite3"))
+    repository = ArticleRepository(lambda raw: ("t", "x" * 300, "s"))
+    service = AnalysisService(repository, _NoopGenerator(), SlidingWindowLimiter(5, 60))
+    app = ui.build_app(service, repository, Settings())
+    assert len(app.blocks) > 0
