@@ -6,7 +6,7 @@ import threading
 import time
 from collections import OrderedDict
 from collections.abc import Callable
-from typing import Generic, Optional, TypeVar
+from typing import Any, Generic, Optional, TypeVar
 
 V = TypeVar("V")
 
@@ -48,3 +48,45 @@ class TTLCache(Generic[V]):
     def __len__(self) -> int:
         with self._lock:
             return len(self._items)
+
+
+class SingleFlight(Generic[V]):
+    """Deduplica execucoes simultaneas da mesma chave (so uma roda, as outras esperam).
+
+    Util para nao pagar duas vezes por uma analise identica pedida ao mesmo tempo.
+    O resultado e entregue a todos; um erro tambem e propagado a todos.
+    """
+
+    def __init__(self, timeout: float = 180.0) -> None:
+        self._timeout = timeout
+        self._calls: dict[str, _Call] = {}
+        self._lock = threading.Lock()
+
+    def do(self, key: str, fn: Callable[[], V]) -> tuple[V, bool]:
+        """Executa `fn` uma vez por chave em voo. Retorna (resultado, foi_o_lider)."""
+        with self._lock:
+            call = self._calls.get(key)
+            leader = call is None
+            if call is None:
+                call = self._calls[key] = _Call()
+        if leader:
+            try:
+                call.result = fn()
+            except BaseException as error:
+                call.error = error
+            finally:
+                with self._lock:
+                    del self._calls[key]
+                call.event.set()
+        elif not call.event.wait(self._timeout):
+            raise TimeoutError(f"Execução idêntica excedeu {self._timeout:.0f}s.")
+        if call.error is not None:
+            raise call.error
+        return call.result, leader
+
+
+class _Call:
+    def __init__(self) -> None:
+        self.event = threading.Event()
+        self.result: Any = None
+        self.error: BaseException | None = None
