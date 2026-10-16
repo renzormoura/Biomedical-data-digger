@@ -74,3 +74,10 @@ def test_output_never_contains_raw_user_angle_brackets(text):
     tags = set(re.findall(r"</?([a-zA-Z0-9]+)", html))
     assert tags <= allowed
     assert not re.search(r"<a [^>]*on\w+=", html)
+
+
+def test_nul_characters_cannot_forge_internal_placeholders():
+    # regressao: "\x000\x00" casava com o marcador interno e levantava IndexError
+    for hostile in ("\x000\x00", "a\x001\x00b `x`", "\x00\x00\x00 **\x0099\x00**", "[l](https://a.b) \x005\x00"):
+        html = render(hostile)
+        assert "\x00" not in html

@@ -25,7 +25,8 @@ _LINK = re.compile(r"\[([^\]\n]+)\]\((https?://[^\s)]+)\)")
 
 
 def _inline(text: str) -> str:
-    escaped = html.escape(text, quote=True)
+    # NUL delimita os marcadores internos: texto do usuario nao pode forja-los (causava IndexError)
+    escaped = html.escape(text.replace("\x00", ""), quote=True)
     placeholders: list[str] = []
 
     def stash(fragment: str) -> str:
