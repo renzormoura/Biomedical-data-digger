@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 2026-10 — Nove novas abas no Laboratório de IA
+
+### Adicionado
+- Enfermagem, Farmácia, Nutrição, Psicologia, Direito e Políticas, Educação, Agro e Veterinária, Biotecnologia e Para o Paciente, com 23 prompts novos (mesma fábrica, restrição "somente a fonte" e testes de contrato).
+- Abas de saúde (Enfermagem, Farmácia, Nutrição, Psicologia, Para o Paciente) são clínicas: sem redução de raciocínio e com avisos de que não substituem orientação profissional. Doses, interações e reações na Farmácia seguem extrativas, sem IA.
+- Públicos e focos novos nos filtros; no desktop as abas quebram em linhas.
+
 ## 2026-10 — Navegador de artigos (pivô do produto)
 
 ### Adicionado

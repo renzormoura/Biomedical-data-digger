@@ -33,6 +33,15 @@ Fonte padrão: Europe PMC (sem chave). OpenAlex é opcional e exige uma chave gr
 | Saúde Pública | Desenho epidemiológico, medidas de associação, vieses, SUS e vigilância |
 | Tecnologia e IA | Problema, dados, métricas, reprodutibilidade, validade e riscos éticos |
 | Engenharias | Metodologia, parâmetros, desempenho, incertezas, normas e viabilidade |
+| Enfermagem | Cuidados descritos, escalas e instrumentos, implicações para a prática (sem recomendar condutas) |
+| Farmácia | Fármaco e mecanismo, eficácia e segurança; doses, interações e reações como trechos copiados (sem IA) |
+| Nutrição | Intervenção alimentar, desfechos e limites para aplicar o resultado |
+| Psicologia | Instrumentos e escalas, amostra e tamanho de efeito, generalização |
+| Direito e Políticas | Política avaliada, implicações regulatórias e impacto social (sem parecer jurídico) |
+| Educação | Metodologia de ensino, resultados de aprendizagem e aplicação em sala de aula |
+| Agro e Veterinária | Espécie e sistema, manejo e resultados, viabilidade e normas (sem recomendar doses ou insumos) |
+| Biotecnologia | Organismo e método molecular, dados e acesso, reprodutibilidade e ética |
+| Para o Paciente | Linguagem simples: o que o estudo mostra, o que não prova e perguntas para levar ao profissional (não é orientação médica) |
 | Pesquisa / Contas | Busca por palavra-chave em 5 fontes e cadastro de usuários |
 
 Para criar uma nova aba: adicione um `PageSpec` em `pages.py` (e, se precisar de prompts novos, um

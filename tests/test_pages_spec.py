@@ -9,6 +9,7 @@ import prompt_builders
 from config import Settings
 
 PAGES = list(pages.ALL_PAGES)
+CLINICAL_KEYS = {"medicina", "saude_publica", "enfermagem", "farmacia", "nutricao", "psicologia", "paciente"}
 
 
 @pytest.mark.parametrize("page", PAGES, ids=lambda p: p.key)
@@ -69,6 +70,7 @@ def test_page_title_drops_leading_symbol():
 def test_expected_tabs_are_present():
     assert {p.key for p in PAGES} == {
         "geral", "academico", "medicina", "ambiental", "saude_publica", "tecnologia", "engenharias",
+        "enfermagem", "farmacia", "nutricao", "psicologia", "direito", "educacao", "agro", "biotecnologia", "paciente",
     }
 
 
@@ -79,7 +81,7 @@ def test_every_page_has_exactly_one_audit_button(page):
 
 @pytest.mark.parametrize("page", PAGES, ids=lambda p: p.key)
 def test_health_pages_are_flagged_clinical(page):
-    assert page.clinical == (page.key in {"medicina", "saude_publica"})
+    assert page.clinical == (page.key in CLINICAL_KEYS)
 
 
 def test_general_page_no_longer_has_educational_section():

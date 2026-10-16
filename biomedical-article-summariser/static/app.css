@@ -382,3 +382,8 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.65); }
   .output { border: 0; }
   .panel[hidden] { display: none !important; }
 }
+
+/* Com muitas abas, no desktop elas quebram em linhas em vez de exigir rolagem lateral */
+@media (min-width: 900px) {
+  .tabs { flex-wrap: wrap; overflow-x: visible; }
+}

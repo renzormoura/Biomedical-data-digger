@@ -453,6 +453,350 @@ VIABILIDADE_CUSTOS = PromptSpec(
     ),
 )
 
+
+# ---------------------------------------------------------------------------
+# Enfermagem
+# ---------------------------------------------------------------------------
+CUIDADOS_DESCRITOS = PromptSpec(
+    name="cuidados_descritos",
+    role="Você é um enfermeiro pesquisador que lê artigos para a prática baseada em evidências.",
+    task="Liste os cuidados, intervenções de enfermagem ou práticas assistenciais descritos neste resumo.",
+    sections=(
+        "**Cuidado ou intervenção estudada** — exatamente como descrita no resumo.",
+        "**População e cenário** — quem recebeu o cuidado e onde (UTI, atenção básica, domicílio etc.), se descrito.",
+        "**Frequência, duração ou forma de aplicação** — somente se constar no resumo.",
+        "**Resultado observado** — com números exatos quando existirem.",
+    ),
+    fmt="Bullet points com subtítulos em negrito. Sem tabelas. Descreva o que o estudo relata; não recomende condutas.",
+    note="Não transforme o achado do estudo em orientação de cuidado. Se o resumo não descreve cuidados, declare isso.",
+)
+
+ESCALAS_INSTRUMENTOS = PromptSpec(
+    name="escalas_instrumentos",
+    role="Você é um pesquisador que cataloga instrumentos de avaliação usados em estudos de saúde.",
+    task="Identifique escalas, questionários, índices e instrumentos de medida citados neste resumo.",
+    sections=(
+        "**Instrumento ou escala** — nome exatamente como no resumo (sigla e nome por extenso, se ambos constarem).",
+        "**O que mede** — somente se o resumo disser.",
+        "**Como foi usado no estudo** — momento de aplicação, quem respondeu, se descrito.",
+        "**Resultado nesse instrumento** — valores exatos, se houver.",
+    ),
+    note="Não use conhecimento externo para explicar o instrumento. Se nenhum instrumento é citado, declare isso.",
+)
+
+IMPLICACOES_ENFERMAGEM = PromptSpec(
+    name="implicacoes_enfermagem",
+    role="Você é um professor de enfermagem que ajuda a relacionar pesquisa e prática.",
+    task="Aponte o que os autores dizem sobre as implicações do estudo para a prática de enfermagem e para a assistência.",
+    sections=(
+        "**Implicações declaradas pelos autores**",
+        "**Condições em que o resultado foi obtido** — população, cenário e limitações que restringem a aplicação.",
+        "**O que o resumo não permite concluir** — lacunas para aplicar o achado na prática.",
+    ),
+    note="Não crie recomendações próprias. Registre apenas o que o resumo afirma e o que ele deixa em aberto.",
+)
+
+# ---------------------------------------------------------------------------
+# Farmacia
+# ---------------------------------------------------------------------------
+FARMACO_CLASSE_MECANISMO = PromptSpec(
+    name="farmaco_classe_mecanismo",
+    role="Você é um farmacêutico clínico que identifica o fármaco estudado em um artigo.",
+    task="Identifique os fármacos, classes terapêuticas e mecanismos de ação mencionados neste resumo.",
+    sections=(
+        "**Fármaco(s) ou intervenção farmacológica** — nomes exatamente como no resumo.",
+        "**Classe terapêutica** — somente se o resumo a mencionar.",
+        "**Mecanismo de ação descrito** — somente o que o resumo disser.",
+        "**Comparador ou controle** — placebo, outro fármaco ou nenhum.",
+    ),
+    fmt="Bullet points com subtítulos em negrito. Sem tabelas.",
+    note="Não use conhecimento externo para completar classe ou mecanismo. O que não estiver no resumo deve ser declarado como tal.",
+)
+
+EFICACIA_SEGURANCA_FARMACO = PromptSpec(
+    name="eficacia_seguranca_farmaco",
+    role="Você é um farmacêutico clínico que resume desfechos de eficácia e segurança de um estudo.",
+    task="Resuma os desfechos de eficácia e de segurança relatados neste resumo.",
+    sections=(
+        "**Desfecho principal de eficácia** — com números exatos, intervalos e valores de p quando existirem.",
+        "**Desfechos secundários relevantes**",
+        "**Eventos adversos e segurança** — somente os citados no resumo, com frequências exatas.",
+        "**Descontinuações ou perdas de seguimento** — se descritas.",
+    ),
+    note=(
+        "**AVISO DE USO CLÍNICO:** Informações extraídas exclusivamente do artigo. Não substitui bula, protocolo "
+        "institucional ou julgamento clínico."
+    ),
+)
+
+# ---------------------------------------------------------------------------
+# Nutricao
+# ---------------------------------------------------------------------------
+INTERVENCAO_NUTRICIONAL = PromptSpec(
+    name="intervencao_nutricional",
+    role="Você é um nutricionista pesquisador que lê artigos de ciência da nutrição.",
+    task="Descreva a intervenção, exposição alimentar ou nutricional e a população estudada neste resumo.",
+    sections=(
+        "**Intervenção ou exposição** — dieta, nutriente, suplemento, padrão alimentar, exatamente como descrita.",
+        "**Quantidade, duração e forma** — somente se constar no resumo.",
+        "**População** — idade, condição de saúde e tamanho da amostra, se descritos.",
+        "**Comparador ou grupo controle**",
+    ),
+    note="Não converta o achado em recomendação alimentar. Se o resumo não descreve a intervenção, declare isso.",
+)
+
+DESFECHOS_NUTRICIONAIS = PromptSpec(
+    name="desfechos_nutricionais",
+    role="Você é um nutricionista pesquisador que resume desfechos de estudos de nutrição.",
+    task="Resuma os desfechos e resultados relatados neste resumo, separando o que foi medido do que foi concluído.",
+    sections=(
+        "**Desfechos medidos** — peso, marcadores bioquímicos, incidência de doença, consumo etc., conforme o resumo.",
+        "**Resultados** — números, intervalos e valores de p copiados exatamente.",
+        "**Conclusão dos autores**",
+        "**Limites para aplicar o resultado** — desenho, população e tempo de seguimento citados.",
+    ),
+)
+
+# ---------------------------------------------------------------------------
+# Psicologia
+# ---------------------------------------------------------------------------
+INSTRUMENTOS_PSICOMETRICOS = PromptSpec(
+    name="instrumentos_psicometricos",
+    role="Você é um psicólogo pesquisador que revisa a medida usada em estudos do comportamento e da saúde mental.",
+    task="Liste as escalas, testes, inventários, entrevistas e medidas psicológicas citados neste resumo.",
+    sections=(
+        "**Instrumento** — nome ou sigla exatamente como no resumo.",
+        "**Construto medido** — somente se o resumo disser.",
+        "**Evidências de validade ou confiabilidade citadas** — alfa, validação, apenas se constarem.",
+        "**Resultado no instrumento** — valores exatos, se houver.",
+    ),
+    note="Não use conhecimento externo para descrever propriedades do instrumento. Se nenhum instrumento é citado, declare isso.",
+)
+
+AMOSTRA_EFEITO = PromptSpec(
+    name="amostra_efeito",
+    role="Você é um psicólogo pesquisador que avalia o que um estudo permite concluir.",
+    task="Descreva a amostra e a magnitude dos efeitos relatados neste resumo.",
+    sections=(
+        "**Amostra** — tamanho, idade, sexo, contexto e forma de recrutamento, se descritos.",
+        "**Desenho** — transversal, longitudinal, experimental ou outro, conforme o resumo.",
+        "**Medidas de efeito ou associação** — d de Cohen, r, OR, β, com valores, intervalos e p exatos.",
+        "**Significado prático declarado** — somente se os autores o discutirem.",
+    ),
+)
+
+GENERALIZACAO_LIMITES = PromptSpec(
+    name="generalizacao_limites",
+    role="Você é um psicólogo pesquisador que examina a generalização de achados.",
+    task="Aponte os limites de generalização do estudo que o resumo declara ou deixa evidentes.",
+    sections=(
+        "**Limitações declaradas pelos autores**",
+        "**Características da amostra que restringem a generalização** — conforme o resumo.",
+        "**Vieses de medida ou de seleção mencionados**",
+        "**O que o resumo não informa** — lacunas relevantes para interpretar o resultado.",
+    ),
+    note="Não acrescente críticas que o resumo não sustente. Registre apenas o declarado e o ausente.",
+)
+
+# ---------------------------------------------------------------------------
+# Direito e politicas publicas
+# ---------------------------------------------------------------------------
+POLITICA_AVALIADA = PromptSpec(
+    name="politica_avaliada",
+    role="Você é um analista de políticas públicas que lê estudos empíricos.",
+    task="Descreva a política, norma, programa ou instituição analisada neste resumo.",
+    sections=(
+        "**Política, norma ou programa** — nome e escopo, exatamente como no resumo.",
+        "**País, região e período** — se descritos.",
+        "**Método de avaliação** — como o estudo mediu o efeito ou a aplicação.",
+        "**Resultado principal** — com números exatos quando existirem.",
+    ),
+)
+
+IMPLICACOES_REGULATORIAS = PromptSpec(
+    name="implicacoes_regulatorias",
+    role="Você é um analista jurídico que relaciona evidência científica e regulação, sem emitir parecer.",
+    task="Aponte as implicações regulatórias, normativas ou de política que o resumo menciona.",
+    sections=(
+        "**Implicações declaradas pelos autores**",
+        "**Normas ou marcos legais citados no resumo** — somente os que o texto mencionar.",
+        "**Condições e limites da evidência** — população, local e desenho que restringem a aplicação.",
+    ),
+    note=(
+        "Isto não é parecer jurídico. Não cite leis, artigos ou jurisprudência que não estejam no resumo."
+    ),
+)
+
+IMPACTO_SOCIAL_GRUPOS = PromptSpec(
+    name="impacto_social_grupos",
+    role="Você é um analista de políticas públicas atento a efeitos distributivos.",
+    task="Descreva os grupos afetados e os efeitos sociais ou econômicos relatados neste resumo.",
+    sections=(
+        "**Grupos ou populações afetados**",
+        "**Efeitos observados** — econômicos, sociais ou institucionais, com números exatos.",
+        "**Desigualdades ou efeitos diferenciados mencionados**",
+        "**Incertezas declaradas**",
+    ),
+)
+
+# ---------------------------------------------------------------------------
+# Educacao
+# ---------------------------------------------------------------------------
+METODOLOGIA_ENSINO = PromptSpec(
+    name="metodologia_ensino",
+    role="Você é um pesquisador em educação que revisa estudos sobre ensino e aprendizagem.",
+    task="Descreva a abordagem de ensino, intervenção pedagógica ou programa avaliado neste resumo.",
+    sections=(
+        "**Abordagem ou intervenção** — metodologia ativa, tecnologia, currículo, formação docente etc., como descrita.",
+        "**Nível e contexto** — etapa de ensino, disciplina, instituição, país, se descritos.",
+        "**Participantes** — alunos, professores, tamanho da amostra.",
+        "**Duração e forma de aplicação** — somente se constar.",
+    ),
+)
+
+RESULTADOS_APRENDIZAGEM = PromptSpec(
+    name="resultados_aprendizagem",
+    role="Você é um pesquisador em educação que resume resultados de aprendizagem.",
+    task="Resuma os resultados de aprendizagem, engajamento ou desempenho relatados neste resumo.",
+    sections=(
+        "**Desfechos medidos** — notas, provas, retenção, evasão, engajamento, percepção, conforme o resumo.",
+        "**Resultados** — números, tamanhos de efeito e valores de p exatos.",
+        "**Comparação com grupo controle ou método tradicional** — se existir.",
+        "**Conclusão dos autores**",
+    ),
+)
+
+APLICABILIDADE_SALA = PromptSpec(
+    name="aplicabilidade_sala",
+    role="Você é um coordenador pedagógico que avalia se um estudo pode orientar a prática docente.",
+    task="Indique o que o resumo permite dizer sobre aplicar o achado em sala de aula e o que ele não permite.",
+    sections=(
+        "**Condições em que o resultado foi obtido** — contexto, nível de ensino e recursos descritos.",
+        "**Aplicações sugeridas pelos autores**",
+        "**Limites para outros contextos** — conforme o resumo.",
+        "**Perguntas que o professor deveria fazer antes de adotar a prática**",
+    ),
+    note="As perguntas devem derivar dos limites do resumo, sem acrescentar fatos externos.",
+)
+
+# ---------------------------------------------------------------------------
+# Agro e veterinaria
+# ---------------------------------------------------------------------------
+SISTEMA_ESPECIE = PromptSpec(
+    name="sistema_especie",
+    role="Você é um engenheiro agrônomo e médico-veterinário pesquisador que lê estudos aplicados.",
+    task="Descreva a espécie, cultura ou sistema produtivo estudado e o contexto do estudo neste resumo.",
+    sections=(
+        "**Espécie, cultivar, raça ou sistema** — como descritos no resumo.",
+        "**Ambiente e local** — clima, solo, bioma, instalação, país, se descritos.",
+        "**Período e escala do estudo** — duração, número de animais, parcelas ou áreas.",
+        "**Delineamento experimental** — somente se constar.",
+    ),
+)
+
+INTERVENCAO_MANEJO = PromptSpec(
+    name="intervencao_manejo",
+    role="Você é um pesquisador em produção vegetal e animal que resume intervenções e resultados.",
+    task="Descreva o manejo, tratamento ou intervenção avaliado e os resultados produtivos ou sanitários relatados.",
+    sections=(
+        "**Manejo, insumo ou tratamento avaliado** — doses e formas apenas se constarem no resumo.",
+        "**Resultado principal** — produtividade, ganho de peso, sanidade, qualidade, com números exatos.",
+        "**Comparação com controle ou prática convencional**",
+        "**Limitações e incertezas declaradas**",
+    ),
+    note="Não recomende doses, produtos ou manejos. Registre apenas o que o estudo relata.",
+)
+
+# ---------------------------------------------------------------------------
+# Biotecnologia e genetica
+# ---------------------------------------------------------------------------
+ORGANISMO_MODELO_METODO = PromptSpec(
+    name="organismo_modelo_metodo",
+    role="Você é um biólogo molecular que revisa métodos em estudos de biotecnologia e genética.",
+    task="Descreva o organismo ou modelo e as técnicas moleculares usadas neste resumo.",
+    sections=(
+        "**Organismo, linhagem celular ou modelo** — como descrito.",
+        "**Alvo biológico** — gene, proteína, via ou variante citados.",
+        "**Técnicas e plataformas** — sequenciamento, CRISPR, PCR, ômica etc., exatamente como no resumo.",
+        "**Escala do estudo** — número de amostras, indivíduos ou réplicas, se descrito.",
+    ),
+)
+
+DADOS_SEQUENCIAS_ACESSO = PromptSpec(
+    name="dados_sequencias_acesso",
+    role="Você é um bioinformata que verifica a disponibilidade de dados e métodos de um estudo.",
+    task="Identifique o que o resumo informa sobre dados, repositórios, códigos e reprodutibilidade.",
+    sections=(
+        "**Dados gerados ou usados** — tipo, tamanho e origem, se descritos.",
+        "**Repositórios e identificadores citados** — somente os que aparecerem no resumo.",
+        "**Código, protocolos ou materiais disponibilizados** — se mencionados.",
+        "**O que não é informado** — lacunas para reproduzir o estudo.",
+    ),
+    note="Não invente identificadores, links ou repositórios. Se não há menção, declare isso.",
+)
+
+# ---------------------------------------------------------------------------
+# Para o paciente
+# ---------------------------------------------------------------------------
+ESTUDO_MOSTRA = PromptSpec(
+    name="estudo_mostra",
+    role="Você explica pesquisa em saúde para o público leigo, com cuidado para não induzir decisões.",
+    task="Explique em linguagem simples o que este estudo investigou e o que ele encontrou.",
+    sections=(
+        "**O que os pesquisadores quiseram descobrir** — em uma ou duas frases simples.",
+        "**Quem participou** — de forma resumida, conforme o resumo.",
+        "**O que encontraram** — com números do resumo explicados de forma simples.",
+    ),
+    fmt="Frases curtas, sem jargão; termos técnicos entre parênteses só quando necessários. Sem tabelas.",
+    note=(
+        "**AVISO:** Isto explica um estudo e não é orientação médica. Não sugira iniciar, parar ou mudar tratamento. "
+        "Não use conhecimento externo."
+    ),
+)
+
+ESTUDO_NAO_PROVA = PromptSpec(
+    name="estudo_nao_prova",
+    role="Você explica pesquisa em saúde para o público leigo, com ênfase nos limites do que um estudo mostra.",
+    task="Explique em linguagem simples o que este estudo NÃO permite concluir.",
+    sections=(
+        "**Limites do estudo** — tamanho, tipo de estudo, população e tempo, conforme o resumo.",
+        "**Quem pode não se parecer com quem participou**",
+        "**O que ainda não se sabe** — o que o resumo deixa em aberto.",
+    ),
+    fmt="Frases curtas, sem jargão. Sem tabelas.",
+    note=(
+        "**AVISO:** Isto não é orientação médica e não indica se um tratamento serve para alguém em particular. "
+        "Não use conhecimento externo."
+    ),
+)
+
+PERGUNTAS_PROFISSIONAL = PromptSpec(
+    name="perguntas_profissional",
+    role="Você ajuda pessoas a conversar com profissionais de saúde sobre o que leram.",
+    task="Sugira perguntas que a pessoa pode levar a um profissional de saúde sobre este estudo.",
+    sections=(
+        "**Perguntas sobre o estudo** — 4 a 6 perguntas simples que derivam do resumo.",
+        "**Perguntas sobre a situação pessoal** — 3 perguntas genéricas para relacionar o estudo ao caso de quem pergunta.",
+    ),
+    fmt="Lista numerada de perguntas curtas, em linguagem simples.",
+    note=(
+        "**AVISO:** Isto não substitui consulta. Não dê resposta às perguntas, nem recomende conduta. "
+        "Não use conhecimento externo."
+    ),
+)
+
+NEW_SPECS: tuple[PromptSpec, ...] = (
+    CUIDADOS_DESCRITOS, ESCALAS_INSTRUMENTOS, IMPLICACOES_ENFERMAGEM,
+    FARMACO_CLASSE_MECANISMO, EFICACIA_SEGURANCA_FARMACO,
+    INTERVENCAO_NUTRICIONAL, DESFECHOS_NUTRICIONAIS,
+    INSTRUMENTOS_PSICOMETRICOS, AMOSTRA_EFEITO, GENERALIZACAO_LIMITES,
+    POLITICA_AVALIADA, IMPLICACOES_REGULATORIAS, IMPACTO_SOCIAL_GRUPOS,
+    METODOLOGIA_ENSINO, RESULTADOS_APRENDIZAGEM, APLICABILIDADE_SALA,
+    SISTEMA_ESPECIE, INTERVENCAO_MANEJO,
+    ORGANISMO_MODELO_METODO, DADOS_SEQUENCIAS_ACESSO,
+    ESTUDO_MOSTRA, ESTUDO_NAO_PROVA, PERGUNTAS_PROFISSIONAL,
+)
+
 ALL_SPECS: tuple[PromptSpec, ...] = (
     FLASHCARDS, QUESTOES_MULTIPLA_ESCOLHA, MAPA_CONCEITOS, FICHAMENTO, RESENHA_CRITICA, COMO_CITAR,
     JUSTIFICATIVA_PESQUISA, PERGUNTA_PESQUISA, ESTRATEGIA_BUSCA, ROTEIRO_SEMINARIO,
@@ -463,4 +807,4 @@ ALL_SPECS: tuple[PromptSpec, ...] = (
     PROBLEMA_ABORDAGEM, DADOS_DATASETS, METRICAS_RESULTADOS, REPRODUTIBILIDADE, AMEACAS_VALIDADE, RISCOS_ETICOS,
     METODOLOGIA_EXPERIMENTAL, PARAMETROS_ESPECIFICACOES, RESULTADOS_DESEMPENHO, LIMITACOES_INCERTEZAS,
     APLICACAO_NORMAS, VIABILIDADE_CUSTOS,
-)
+) + NEW_SPECS

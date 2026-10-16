@@ -485,6 +485,274 @@ ENGINEERING_PAGE = PageSpec(
     title_suffix=_suffix("Engenharias"),
 )
 
+# ---------------------------------------------------------------------------
+# Abas adicionais (saude aplicada, humanas, aplicadas e para o publico leigo)
+# ---------------------------------------------------------------------------
+def _overview_section() -> Section:
+    return Section("Visão Geral", (
+        (_b("Sumário", pb.build_message_sumario), _b("Pontos-Chave", pb.build_message_pontos_chave)),
+    ), is_open=True)
+
+
+NURSING_PAGE = PageSpec(
+    key="enfermagem",
+    tab_name="🩺  Enfermagem",
+    subtitle="Cuidados descritos · Escalas e instrumentos · Prática baseada em evidências",
+    sections=(
+        _no_ai_section(),
+        _overview_section(),
+        Section("Cuidado e Prática", (
+            (_b("Cuidados Descritos", pb.build_message_cuidados_descritos), _b("Escalas e Instrumentos", pb.build_message_escalas_instrumentos)),
+            (_b("Implicações para a Prática", pb.build_message_implicacoes_enfermagem),
+             _b("Populações Especiais", pb.build_message_populacoes_especiais, requires="populacoes")),
+        )),
+        Section("Linguagem Simples", (
+            (_b("Explicação para o Paciente", pb.build_message_resumo_paciente), _b("Glossário de Termos", pb.build_message_glossario)),
+        )),
+        Section("Evidência", (
+            (_b("Crítica Metodológica", pb.build_message_critica_metodologica), _b("Dados Estatísticos", pb.build_message_estatisticas)),
+            (_b("Alertas e Contraindicações", pb.build_message_alertas, requires="alertas"),),
+        ), audit_button=True),
+    ),
+    audience_choices=("Enfermeiro(a)", "Técnico(a) de enfermagem", "Estudante de enfermagem", "Público geral"),
+    focus_choices=("Cuidado e assistência", "Instrumentos e escalas", "Metodologia", "Prática baseada em evidências"),
+    placeholder=_GENERIC_PLACEHOLDER,
+    help_markdown=MEDICAL_HELP,
+    compare_title="Comparar dois estudos",
+    compare_button="Comparar Estudos",
+    clinical=True,
+    title_suffix=_suffix("Enfermagem"),
+)
+
+PHARMACY_PAGE = PageSpec(
+    key="farmacia",
+    tab_name="💊  Farmácia",
+    subtitle="Fármaco e mecanismo · Eficácia e segurança · Trechos de doses e interações (sem IA)",
+    sections=(
+        _no_ai_section(),
+        _overview_section(),
+        Section("Fármaco", (
+            (_b("Fármaco, Classe e Mecanismo", pb.build_message_farmaco_classe_mecanismo),
+             _b("Eficácia e Segurança", pb.build_message_eficacia_seguranca_farmaco)),
+        )),
+        Section("Doses, Interações e Reações (trechos, sem IA)", (
+            (ExtractButton("Doses e esquemas (trechos)", "dose"), ExtractButton("Interações medicamentosas (trechos)", "interacoes")),
+            (ExtractButton("Reações adversas (trechos)", "reacoes"),
+             _b("Populações Especiais", pb.build_message_populacoes_especiais, requires="populacoes")),
+        )),
+        Section("Evidência e Segurança", (
+            (_b("Crítica Metodológica", pb.build_message_critica_metodologica), _b("Dados Estatísticos", pb.build_message_estatisticas)),
+            (_b("Alertas e Contraindicações", pb.build_message_alertas, requires="alertas"),),
+        ), audit_button=True),
+        Section("Contexto BR — Regulação", (
+            (_b("Vigilância Sanitária", pb.build_message_vigilancia_sanitaria, sources=("anvisa", "minsaude"), check_numbers=False),
+             _b("Disponib. SUS", pb.build_message_disponibilidade_sus, "Disponibilidade no SUS", sources=("bvs", "minsaude"), check_numbers=False)),
+        )),
+    ),
+    audience_choices=("Farmacêutico(a)", "Estudante de farmácia", "Pesquisador / Acadêmico", "Público geral"),
+    focus_choices=("Farmacologia", "Eficácia e segurança", "Metodologia", "Contexto brasileiro"),
+    placeholder=_GENERIC_PLACEHOLDER,
+    help_markdown=MEDICAL_HELP,
+    compare_title="Comparar dois estudos de fármacos",
+    compare_button="Comparar Estudos",
+    clinical=True,
+    title_suffix=_suffix("Farmácia"),
+)
+
+NUTRITION_PAGE = PageSpec(
+    key="nutricao",
+    tab_name="🥗  Nutrição",
+    subtitle="Intervenção alimentar · Desfechos · Limites para aplicar o resultado",
+    sections=(
+        _no_ai_section(),
+        _overview_section(),
+        Section("Estudo de Nutrição", (
+            (_b("Intervenção e População", pb.build_message_intervencao_nutricional),
+             _b("Desfechos e Resultados", pb.build_message_desfechos_nutricionais)),
+            (_b("PICO", pb.build_message_pico, "Pergunta PICO"),),
+        )),
+        Section("Linguagem Simples", (
+            (_b("Explicação para o Paciente", pb.build_message_resumo_paciente), _b("Glossário de Termos", pb.build_message_glossario)),
+        )),
+        Section("Evidência", (
+            (_b("Crítica Metodológica", pb.build_message_critica_metodologica), _b("Dados Estatísticos", pb.build_message_estatisticas)),
+            (_b("Implicações Práticas", pb.build_message_implicacoes_praticas),),
+        ), audit_button=True),
+    ),
+    audience_choices=("Nutricionista", "Estudante de nutrição", "Pesquisador / Acadêmico", "Público geral"),
+    focus_choices=("Intervenção alimentar", "Desfechos e resultados", "Metodologia", "Aplicação prática"),
+    placeholder=_GENERIC_PLACEHOLDER,
+    help_markdown=MEDICAL_HELP,
+    compare_title="Comparar dois estudos",
+    compare_button="Comparar Estudos",
+    clinical=True,
+    title_suffix=_suffix("Nutrição"),
+)
+
+PSYCHOLOGY_PAGE = PageSpec(
+    key="psicologia",
+    tab_name="🧠  Psicologia",
+    subtitle="Instrumentos e escalas · Amostra e tamanho de efeito · Generalização",
+    sections=(
+        _no_ai_section(),
+        _overview_section(),
+        Section("Medidas e Amostra", (
+            (_b("Instrumentos e Escalas", pb.build_message_instrumentos_psicometricos),
+             _b("Amostra e Tamanho de Efeito", pb.build_message_amostra_efeito)),
+            (_b("Generalização e Limites", pb.build_message_generalizacao_limites),),
+        )),
+        Section("Evidência", (
+            (_b("Crítica Metodológica", pb.build_message_critica_metodologica), _b("Dados Estatísticos", pb.build_message_estatisticas)),
+            (_b("Lacunas de Pesquisa", pb.build_message_lacunas_pesquisa), _b("Implicações Práticas", pb.build_message_implicacoes_praticas)),
+        ), audit_button=True),
+    ),
+    audience_choices=("Psicólogo(a)", "Estudante de psicologia", "Pesquisador / Acadêmico", "Público geral"),
+    focus_choices=("Instrumentos e medidas", "Amostra e efeitos", "Metodologia", "Aplicação prática"),
+    placeholder=_GENERIC_PLACEHOLDER,
+    help_markdown=GENERAL_HELP,
+    compare_title="Comparar dois estudos",
+    compare_button="Comparar Estudos",
+    clinical=True,
+    title_suffix=_suffix("Psicologia"),
+)
+
+LAW_PAGE = PageSpec(
+    key="direito",
+    tab_name="⚖  Direito e Políticas",
+    subtitle="Política avaliada · Implicações regulatórias · Impacto social (sem parecer jurídico)",
+    sections=(
+        _no_ai_section(),
+        _overview_section(),
+        Section("Política e Regulação", (
+            (_b("Política ou Norma Avaliada", pb.build_message_politica_avaliada),
+             _b("Implicações Regulatórias", pb.build_message_implicacoes_regulatorias)),
+            (_b("Impacto Social e Grupos", pb.build_message_impacto_social_grupos),
+             _b("Impacto na Sociedade", pb.build_message_impacto_brasil)),
+        )),
+        Section("Evidência", (
+            (_b("Crítica Metodológica", pb.build_message_critica_metodologica), _b("Dados Estatísticos", pb.build_message_estatisticas)),
+            (_b("Lacunas de Pesquisa", pb.build_message_lacunas_pesquisa), _b("Implicações para Políticas", pb.build_message_implicacoes_praticas)),
+        ), audit_button=True),
+    ),
+    audience_choices=("Gestor / Analista de políticas", "Estudante de direito", "Pesquisador / Acadêmico", "Público geral"),
+    focus_choices=("Política avaliada", "Regulação", "Impacto social", "Contexto brasileiro"),
+    placeholder=_GENERIC_PLACEHOLDER,
+    help_markdown=GENERAL_HELP,
+    title_suffix=_suffix("Direito e Políticas"),
+)
+
+EDUCATION_PAGE = PageSpec(
+    key="educacao",
+    tab_name="📖  Educação",
+    subtitle="Metodologia de ensino · Resultados de aprendizagem · Aplicação em sala de aula",
+    sections=(
+        _no_ai_section(),
+        _overview_section(),
+        Section("Ensino e Aprendizagem", (
+            (_b("Metodologia de Ensino", pb.build_message_metodologia_ensino),
+             _b("Resultados de Aprendizagem", pb.build_message_resultados_aprendizagem)),
+            (_b("Aplicação em Sala de Aula", pb.build_message_aplicabilidade_sala),),
+        )),
+        Section("Para a Turma", (
+            (_b("Questões de Discussão", pb.build_message_questoes_discussao), _b("Glossário de Termos", pb.build_message_glossario)),
+        )),
+        Section("Evidência", (
+            (_b("Crítica Metodológica", pb.build_message_critica_metodologica), _b("Dados Estatísticos", pb.build_message_estatisticas)),
+        ), audit_button=True),
+    ),
+    audience_choices=("Professor(a)", "Coordenador(a) pedagógico(a)", "Estudante de licenciatura", "Pesquisador / Acadêmico"),
+    focus_choices=("Metodologia de ensino", "Resultados de aprendizagem", "Aplicação em sala", "Metodologia"),
+    placeholder=_GENERIC_PLACEHOLDER,
+    help_markdown=GENERAL_HELP,
+    title_suffix=_suffix("Educação"),
+)
+
+AGRO_PAGE = PageSpec(
+    key="agro",
+    tab_name="🌾  Agro e Veterinária",
+    subtitle="Cultura e espécie · Manejo e intervenção · Viabilidade e normas",
+    sections=(
+        _no_ai_section(),
+        _overview_section(),
+        Section("Sistema e Manejo", (
+            (_b("Espécie e Sistema", pb.build_message_sistema_especie), _b("Manejo e Intervenção", pb.build_message_intervencao_manejo)),
+            (_b("Resultados e Desempenho", pb.build_message_resultados_desempenho),),
+        )),
+        Section("Aplicação", (
+            (_b("Aplicação e Normas", pb.build_message_aplicacao_normas), _b("Viabilidade e Custos", pb.build_message_viabilidade_custos)),
+        )),
+        Section("Evidência", (
+            (_b("Limitações e Incertezas", pb.build_message_limitacoes_incertezas), _b("Crítica Metodológica", pb.build_message_critica_metodologica)),
+        ), audit_button=True),
+    ),
+    audience_choices=("Agrônomo / Veterinário", "Técnico / Produtor", "Estudante", "Pesquisador / Acadêmico"),
+    focus_choices=("Manejo e intervenção", "Produtividade e sanidade", "Viabilidade", "Metodologia"),
+    placeholder=_GENERIC_PLACEHOLDER,
+    help_markdown=GENERAL_HELP,
+    title_suffix=_suffix("Agro e Veterinária"),
+)
+
+BIOTECH_PAGE = PageSpec(
+    key="biotecnologia",
+    tab_name="🧬  Biotecnologia",
+    subtitle="Organismo e método molecular · Dados e acesso · Reprodutibilidade e ética",
+    sections=(
+        _no_ai_section(),
+        _overview_section(),
+        Section("Método Molecular", (
+            (_b("Organismo e Método Molecular", pb.build_message_organismo_modelo_metodo),
+             _b("Dados e Acesso", pb.build_message_dados_sequencias_acesso)),
+        )),
+        Section("Qualidade", (
+            (_b("Reprodutibilidade", pb.build_message_reprodutibilidade), _b("Riscos e Ética", pb.build_message_riscos_eticos)),
+            (_b("Estado da Arte", pb.build_message_comparacao_literatura, "Comparação com o Estado da Arte"),),
+        )),
+        Section("Evidência", (
+            (_b("Crítica Metodológica", pb.build_message_critica_metodologica), _b("Dados Estatísticos", pb.build_message_estatisticas)),
+            (_b("Lacunas de Pesquisa", pb.build_message_lacunas_pesquisa),),
+        ), audit_button=True),
+    ),
+    audience_choices=("Biólogo / Biotecnólogo", "Pesquisador / Acadêmico", "Estudante", "Público geral"),
+    focus_choices=("Método molecular", "Dados e reprodutibilidade", "Ética e riscos", "Metodologia"),
+    placeholder=_GENERIC_PLACEHOLDER,
+    help_markdown=GENERAL_HELP,
+    title_suffix=_suffix("Biotecnologia"),
+)
+
+PATIENT_HELP = (
+    MEDICAL_HELP
+    + """
+🙋 **Aviso importante:** esta aba explica o que um estudo encontrou, em linguagem simples. Ela **não é orientação
+médica**, não diz se um tratamento serve para você e não deve ser usada para iniciar, parar ou mudar tratamento.
+Converse com um profissional de saúde.
+"""
+)
+
+PATIENT_PAGE = PageSpec(
+    key="paciente",
+    tab_name="🙋  Para o Paciente",
+    subtitle="Linguagem simples · O que o estudo mostra e não mostra · Perguntas para levar ao profissional",
+    sections=(
+        _no_ai_section(),
+        Section("Em linguagem simples", (
+            (_b("O que o Estudo Mostra", pb.build_message_estudo_mostra), _b("O que Ele Não Prova", pb.build_message_estudo_nao_prova)),
+            (_b("Perguntas para o Profissional", pb.build_message_perguntas_profissional),),
+        ), is_open=True),
+        Section("Entender melhor", (
+            (_b("Explicação Simples", pb.build_message_resumo_paciente), _b("Termos Explicados", pb.build_message_glossario)),
+        ), audit_button=True),
+    ),
+    audience_choices=("Paciente", "Familiar / Cuidador", "Público geral"),
+    focus_choices=("O que o estudo encontrou", "Limites do estudo", "Perguntas para a consulta"),
+    placeholder=_GENERIC_PLACEHOLDER,
+    help_markdown=PATIENT_HELP,
+    compare_title="Comparar dois artigos",
+    compare_button="Comparar Artigos",
+    clinical=True,
+    title_suffix=_suffix("Para o Paciente"),
+)
+
+
 def pages_for(generative_clinical: bool = False) -> tuple[PageSpec, ...]:
     """Abas na ordem da interface. `generative_clinical` liga os botoes de dose/conduta gerados por IA."""
     return (
@@ -495,6 +763,15 @@ def pages_for(generative_clinical: bool = False) -> tuple[PageSpec, ...]:
         PUBLIC_HEALTH_PAGE,
         TECHNOLOGY_PAGE,
         ENGINEERING_PAGE,
+        NURSING_PAGE,
+        PHARMACY_PAGE,
+        NUTRITION_PAGE,
+        PSYCHOLOGY_PAGE,
+        LAW_PAGE,
+        EDUCATION_PAGE,
+        AGRO_PAGE,
+        BIOTECH_PAGE,
+        PATIENT_PAGE,
     )
 
 

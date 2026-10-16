@@ -519,6 +519,25 @@ PUBLICO_MAP = {
     "Profissional de saúde pública": "Dirija a resposta a um profissional de saúde pública ou vigilância: foque em desenho do estudo, medidas de associação, população e implicações para políticas e serviços.",
     "Desenvolvedor / Cientista de dados": "Dirija a resposta a um desenvolvedor ou cientista de dados: foque em método, dados, métricas, reprodutibilidade e viabilidade de implementação.",
     "Engenheiro / Técnico":   "Dirija a resposta a um engenheiro ou técnico: foque em método, parâmetros, desempenho, incertezas e aplicabilidade prática.",
+    "Enfermeiro(a)":          "Dirija a resposta a um enfermeiro: foque em cuidado, população, escalas e instrumentos e limites para aplicar o achado na assistência.",
+    "Técnico(a) de enfermagem": "Dirija a resposta a um técnico de enfermagem: linguagem clara, foco no que foi feito no estudo e em seus limites, sem orientar condutas.",
+    "Estudante de enfermagem": "Dirija a resposta a um estudante de enfermagem: linguagem didática, termos explicados e ligação com a prática baseada em evidências.",
+    "Farmacêutico(a)":        "Dirija a resposta a um farmacêutico: foque em fármaco, desfechos de eficácia e segurança e limites da evidência.",
+    "Estudante de farmácia":  "Dirija a resposta a um estudante de farmácia: linguagem didática, termos farmacológicos explicados e atenção ao que o estudo realmente mostra.",
+    "Nutricionista":          "Dirija a resposta a um nutricionista: foque em intervenção, população, desfechos e limites do desenho.",
+    "Estudante de nutrição":  "Dirija a resposta a um estudante de nutrição: linguagem didática, termos explicados e atenção aos limites do estudo.",
+    "Psicólogo(a)":           "Dirija a resposta a um psicólogo: foque em instrumentos, amostra, tamanho de efeito e limites de generalização.",
+    "Estudante de psicologia": "Dirija a resposta a um estudante de psicologia: linguagem didática, termos metodológicos explicados e limites do estudo.",
+    "Gestor / Analista de políticas": "Dirija a resposta a um gestor ou analista de políticas públicas: foque na política avaliada, nos efeitos, nos grupos afetados e nos limites da evidência.",
+    "Estudante de direito":   "Dirija a resposta a um estudante de direito: linguagem clara, sem parecer jurídico, com atenção ao que o estudo empírico mostra e não mostra.",
+    "Professor(a)":           "Dirija a resposta a um professor: foque em metodologia de ensino, resultados de aprendizagem e aplicabilidade em sala de aula.",
+    "Coordenador(a) pedagógico(a)": "Dirija a resposta a um coordenador pedagógico: foque em evidências para decisões pedagógicas e em seus limites de contexto.",
+    "Estudante de licenciatura": "Dirija a resposta a um estudante de licenciatura: linguagem didática, termos explicados e ligação com a prática docente.",
+    "Agrônomo / Veterinário": "Dirija a resposta a um agrônomo ou médico-veterinário: foque em espécie ou cultura, manejo, resultados produtivos ou sanitários e limites.",
+    "Técnico / Produtor":     "Dirija a resposta a um técnico ou produtor rural: linguagem simples e prática, foco no que foi testado e em quais condições, sem recomendar insumos ou doses.",
+    "Biólogo / Biotecnólogo": "Dirija a resposta a um biólogo ou biotecnólogo: foque em organismo, método molecular, dados, reprodutibilidade e ética.",
+    "Paciente":               "Dirija a resposta a um paciente: linguagem simples, sem jargão, sem orientação médica e destacando o que o estudo não permite concluir.",
+    "Familiar / Cuidador":    "Dirija a resposta a um familiar ou cuidador: linguagem simples, sem jargão, sem orientação médica e destacando os limites do estudo.",
 }
 TOM_MAP = {
     "Formal e Técnico":   "Use um tom formal, científico e altamente técnico.",
@@ -555,6 +574,30 @@ FOCO_MAP = {
     "Desempenho e métricas":    "Dê ênfase às métricas, resultados quantitativos e comparações reportadas.",
     "Projeto e parâmetros":     "Dê ênfase aos parâmetros de projeto, condições de ensaio e especificações descritas.",
     "Normas e aplicação":       "Dê ênfase à aplicabilidade prática e à relação com normas, quando mencionadas no artigo.",
+    "Cuidado e assistência":    "Dê ênfase aos cuidados e intervenções descritos, à população e ao cenário, sem transformá-los em recomendação.",
+    "Instrumentos e escalas":   "Dê ênfase aos instrumentos, escalas e medidas usados e aos resultados obtidos neles.",
+    "Prática baseada em evidências": "Dê ênfase ao que o estudo permite e não permite concluir para a prática, conforme o resumo.",
+    "Eficácia e segurança":     "Dê ênfase aos desfechos de eficácia e aos eventos adversos relatados, com números exatos.",
+    "Intervenção alimentar":    "Dê ênfase à intervenção ou exposição alimentar, à população e à duração descritas.",
+    "Desfechos e resultados":   "Dê ênfase aos desfechos medidos e aos resultados com números exatos.",
+    "Aplicação prática":        "Dê ênfase às aplicações práticas descritas no artigo e às condições em que valem.",
+    "Instrumentos e medidas":   "Dê ênfase aos instrumentos e medidas usados, ao construto medido e aos resultados.",
+    "Amostra e efeitos":        "Dê ênfase à amostra, ao desenho e à magnitude dos efeitos relatados.",
+    "Política avaliada":        "Dê ênfase à política, norma ou programa avaliado e ao método de avaliação.",
+    "Regulação":                "Dê ênfase às implicações regulatórias descritas, sem emitir parecer jurídico.",
+    "Impacto social":           "Dê ênfase aos grupos afetados e aos efeitos sociais ou econômicos descritos.",
+    "Metodologia de ensino":    "Dê ênfase à abordagem de ensino e ao contexto em que foi aplicada.",
+    "Resultados de aprendizagem": "Dê ênfase aos resultados de aprendizagem, engajamento ou desempenho e à comparação com controle.",
+    "Aplicação em sala":        "Dê ênfase à aplicabilidade em sala de aula e aos limites de contexto.",
+    "Manejo e intervenção":     "Dê ênfase ao manejo ou intervenção avaliados e aos resultados, sem recomendar insumos ou doses.",
+    "Produtividade e sanidade": "Dê ênfase aos resultados produtivos e sanitários relatados.",
+    "Viabilidade":              "Dê ênfase à viabilidade técnica e econômica descrita, com valores exatos.",
+    "Método molecular":         "Dê ênfase ao organismo, às técnicas moleculares e à escala do estudo.",
+    "Dados e reprodutibilidade": "Dê ênfase aos dados, repositórios e à reprodutibilidade, sem inventar identificadores.",
+    "Ética e riscos":           "Dê ênfase a riscos, vieses e considerações éticas mencionados no artigo.",
+    "O que o estudo encontrou": "Dê ênfase ao que o estudo investigou e encontrou, em linguagem simples e sem orientação médica.",
+    "Limites do estudo":        "Dê ênfase aos limites do estudo e ao que ele não permite concluir.",
+    "Perguntas para a consulta": "Dê ênfase a perguntas simples que a pessoa pode levar a um profissional de saúde.",
 }
 
 
@@ -1041,3 +1084,26 @@ build_message_resultados_desempenho = make_builder(_specs.RESULTADOS_DESEMPENHO)
 build_message_limitacoes_incertezas = make_builder(_specs.LIMITACOES_INCERTEZAS)
 build_message_aplicacao_normas = make_builder(_specs.APLICACAO_NORMAS)
 build_message_viabilidade_custos = make_builder(_specs.VIABILIDADE_CUSTOS)
+build_message_cuidados_descritos = make_builder(_specs.CUIDADOS_DESCRITOS)
+build_message_escalas_instrumentos = make_builder(_specs.ESCALAS_INSTRUMENTOS)
+build_message_implicacoes_enfermagem = make_builder(_specs.IMPLICACOES_ENFERMAGEM)
+build_message_farmaco_classe_mecanismo = make_builder(_specs.FARMACO_CLASSE_MECANISMO)
+build_message_eficacia_seguranca_farmaco = make_builder(_specs.EFICACIA_SEGURANCA_FARMACO)
+build_message_intervencao_nutricional = make_builder(_specs.INTERVENCAO_NUTRICIONAL)
+build_message_desfechos_nutricionais = make_builder(_specs.DESFECHOS_NUTRICIONAIS)
+build_message_instrumentos_psicometricos = make_builder(_specs.INSTRUMENTOS_PSICOMETRICOS)
+build_message_amostra_efeito = make_builder(_specs.AMOSTRA_EFEITO)
+build_message_generalizacao_limites = make_builder(_specs.GENERALIZACAO_LIMITES)
+build_message_politica_avaliada = make_builder(_specs.POLITICA_AVALIADA)
+build_message_implicacoes_regulatorias = make_builder(_specs.IMPLICACOES_REGULATORIAS)
+build_message_impacto_social_grupos = make_builder(_specs.IMPACTO_SOCIAL_GRUPOS)
+build_message_metodologia_ensino = make_builder(_specs.METODOLOGIA_ENSINO)
+build_message_resultados_aprendizagem = make_builder(_specs.RESULTADOS_APRENDIZAGEM)
+build_message_aplicabilidade_sala = make_builder(_specs.APLICABILIDADE_SALA)
+build_message_sistema_especie = make_builder(_specs.SISTEMA_ESPECIE)
+build_message_intervencao_manejo = make_builder(_specs.INTERVENCAO_MANEJO)
+build_message_organismo_modelo_metodo = make_builder(_specs.ORGANISMO_MODELO_METODO)
+build_message_dados_sequencias_acesso = make_builder(_specs.DADOS_SEQUENCIAS_ACESSO)
+build_message_estudo_mostra = make_builder(_specs.ESTUDO_MOSTRA)
+build_message_estudo_nao_prova = make_builder(_specs.ESTUDO_NAO_PROVA)
+build_message_perguntas_profissional = make_builder(_specs.PERGUNTAS_PROFISSIONAL)
