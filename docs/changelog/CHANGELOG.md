@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 2026-10 — Economia de tokens: medição, cache e cotas (Fases 0 e 1)
+
+### Adicionado
+- **Registro de uso de tokens** por chamada, botão e aba (`usage.py`): usa o `usage` informado pelo Groq (estimativa quando ausente), emite uma linha de log estruturada sem conteúdo nem dados pessoais e agrega média, p95 e taxa de acerto de cache. Relatório em `GET /api/admin/usage` (exige `ADMIN_TOKEN`; 404 se não configurado).
+- **Cache de resultados** (6 h): repetir a mesma análise custa 0 token e responde em milissegundos. Chave estável entre PMID, URL e DOI do mesmo artigo.
+- **Deduplicação de requisições simultâneas** (`SingleFlight`): análises idênticas ao mesmo tempo chamam o modelo uma vez.
+- **Cotas diárias de tokens por identidade** (`quota.py`): visitante 60.000 e conta 200.000 por padrão (`DAILY_TOKEN_BUDGET_GUEST` e `DAILY_TOKEN_BUDGET_USER`, 0 = sem limite).
+- A interface mostra se o resultado veio do cache, os tokens da chamada e a cota restante.
+
+### Alterado
+- `LLMBackend`/`LLMRouter` ganham `complete()` (texto + uso); `generate()` virou atalho.
+- `AnalysisService.analyze/audit/compare` retornam `Reply`, uma `str` com `cached`, `tokens` e `quota_remaining`.
+
+### Testes
+- De 613 para 667 (uso, cache, concorrência, cotas, API). Verificado no navegador com o Groq real.
+
 ## 2026-10 — Gradio substituído por FastAPI e frontend próprio
 
 ### Alterado

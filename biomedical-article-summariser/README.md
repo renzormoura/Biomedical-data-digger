@@ -101,6 +101,7 @@ $env:RUN_LIVE_EVALS = "1"; $env:GROQ_API_KEY = "..."; pytest evals -m live
 ```
 
 Em produção é obrigatório definir `SESSION_SECRET` (mín. 32 caracteres; o `render.yaml` gera um valor automaticamente).
+Variáveis de custo: `DAILY_TOKEN_BUDGET_GUEST` (60000) e `DAILY_TOKEN_BUDGET_USER` (200000) definem a cota diária de tokens (0 = sem limite); `ADMIN_TOKEN` (mín. 24 caracteres) ativa `GET /api/admin/usage` (cabeçalho `Authorization: Bearer ...`), com o consumo por botão.
 Variáveis opcionais: `RATE_LIMIT_PER_MINUTE` (padrão 8 chamadas de LLM/min por cliente),
 `LOGIN_ATTEMPTS_PER_MINUTE` (5), `TRUSTED_PROXY_HOPS` (1, para ler o IP real atrás do proxy do Render).
 
