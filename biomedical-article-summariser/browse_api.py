@@ -13,10 +13,12 @@ from fastapi import FastAPI, Query, Request
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
 
+import downloads
 import reliability
 from catalog import SearchQuery, Work
 from discovery import DiscoveryService
-from domain import AuthRequiredError, DiggerError, NotFoundError, RateLimitedError
+from domain import AuthRequiredError, DiggerError, NotFoundError, RateLimitedError, SourceUnavailableError
+from enrichment import Enrichment
 from exports import EXPORT_FORMATS
 from library_store import LibraryStore, ReadingList
 from ratelimit import RateLimitExceeded, SlidingWindowLimiter
@@ -77,6 +79,18 @@ def reliability_payload(result: reliability.Reliability) -> dict[str, Any]:
              "detail": c.detail, "evidence": c.evidence, "how": c.how}
             for c in result.criteria
         ],
+    }
+
+
+def enrichment_payload(result: Enrichment) -> dict[str, Any]:
+    return {
+        "mentionedTrials": list(result.mentioned_trials),
+        "trials": [
+            {"nct": t.nct, "title": t.title, "status": t.status, "start": t.start, "hasResults": t.has_results, "url": t.url}
+            for t in result.trials
+        ],
+        "citations": result.citations,
+        "relatedData": [{"doi": d.doi, "title": d.title, "kind": d.kind, "publisher": d.publisher, "url": d.url} for d in result.related_data],
     }
 
 
@@ -162,16 +176,78 @@ def register_browse_routes(
         request: Request,
         ref: Annotated[str, Query(min_length=1, max_length=MAX_REF)],
     ) -> dict[str, Any]:
-        result = discovery.enrich(ref, client_id=identity(request))
-        return {
-            "mentionedTrials": list(result.mentioned_trials),
-            "trials": [
-                {"nct": t.nct, "title": t.title, "status": t.status, "start": t.start, "hasResults": t.has_results, "url": t.url}
-                for t in result.trials
-            ],
-            "citations": result.citations,
-            "relatedData": [{"doi": d.doi, "title": d.title, "kind": d.kind, "publisher": d.publisher, "url": d.url} for d in result.related_data],
-        }
+        return enrichment_payload(discovery.enrich(ref, client_id=identity(request)))
+
+    @app.get("/api/discover/downloads")
+    def downloads_menu(
+        request: Request,
+        ref: Annotated[str, Query(min_length=1, max_length=MAX_REF)],
+    ) -> dict[str, Any]:
+        client = identity(request)
+        work = discovery.work(ref, client_id=client)
+        note = ""
+        try:
+            fulltext = discovery.fulltext(ref, client_id=client)
+            if fulltext is None:
+                note = "Sem texto completo aberto na Europe PMC para este artigo."
+        except SourceUnavailableError as error:
+            fulltext, note = None, str(error)
+        return downloads.menu(work, fulltext, note)
+
+    @app.get("/api/discover/download")
+    def download(
+        request: Request,
+        ref: Annotated[str, Query(min_length=1, max_length=MAX_REF)],
+        kind: Annotated[str, Query(max_length=20)] = "abstract",
+        format: Annotated[str, Query(max_length=20)] = "txt",  # noqa: A002 - nome do parametro HTTP
+    ) -> Response:
+        client = identity(request)
+        valid = downloads.CITATION_FORMATS if kind == "citation" else downloads.KIND_FORMATS.get(kind)
+        if valid is None or format not in valid:
+            raise DiggerError("Tipo ou formato de download inválido.")
+        if kind == "citation":
+            work = discovery.work(ref, client_id=client)
+            ext = EXPORT_FORMATS[format][0].rsplit(".", 1)[-1]
+            content, media = EXPORT_FORMATS[format][2]([work]).encode("utf-8"), f"{EXPORT_FORMATS[format][1]}; charset=utf-8"
+            filename = downloads.safe_filename(work, f"referencia-{format}", ext)
+        elif kind == "fulltext":
+            work = discovery.work(ref, client_id=client)
+            fulltext = discovery.fulltext(ref, client_id=client)
+            if fulltext is None:
+                raise NotFoundError("Este artigo não tem texto completo aberto disponível.")
+            if format == "xml":
+                content, media, ext = fulltext.xml, "application/xml", "xml"
+            else:
+                content, media = downloads.render(downloads.fulltext_blocks(work, fulltext), format)
+                ext = format
+            filename = downloads.safe_filename(work, "texto-completo", ext)
+        else:
+            detail = discovery.analysis(ref, client_id=client)
+            work = detail.work
+            sections = [(s.heading, s.text) for s in detail.sections]
+            if kind == "abstract":
+                blocks = downloads.abstract_blocks(work, sections)
+                payload: dict[str, object] = {"work": work.to_dict(), "sections": [{"heading": h, "text": t} for h, t in sections]}
+            else:
+                cached = discovery.cached_enrichment(ref, client_id=client)
+                extra = enrichment_payload(cached) if cached else None
+                findings = [(", ".join(f.tags), f.sentence) for f in detail.findings]
+                scored = reliability_payload(detail.reliability)
+                blocks = downloads.sheet_blocks(work, sections, findings, scored, dict(detail.citations), extra)
+                payload = {
+                    "work": work.to_dict(), "sections": [{"heading": h, "text": t} for h, t in sections],
+                    "findings": [{"tags": list(f.tags), "sentence": f.sentence} for f in detail.findings],
+                    "reliability": scored, "citations": dict(detail.citations), "registryAndData": extra,
+                }
+            if format == "json":
+                content, media, ext = downloads.to_json_bytes(payload), "application/json", "json"
+            else:
+                content, media = downloads.render(blocks, format)
+                ext = format
+            filename = downloads.safe_filename(work, "resumo" if kind == "abstract" else "ficha", ext)
+        return Response(content, media_type=media, headers={
+            "Content-Disposition": f'attachment; filename="{filename}"', "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff",
+        })
 
     # -- biblioteca ---------------------------------------------------------------
     @app.get("/api/library")

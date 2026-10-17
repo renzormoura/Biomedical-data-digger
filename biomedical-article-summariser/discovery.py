@@ -15,6 +15,7 @@ from loguru import logger
 
 import article_services
 import citations
+import downloads
 import reliability
 from cache import TTLCache
 from catalog import Catalog, CatalogError, SearchQuery, SearchResult, Work
@@ -125,6 +126,7 @@ class DiscoveryService:
         self._limiter = limiter
         self._fallback = fallback
         self._enricher = Enricher()
+        self._fulltexts: TTLCache[downloads.FullText | bool] = TTLCache(64, WORK_CACHE_TTL)
         self._searches: TTLCache[SearchResult] = TTLCache(CACHE_SIZE, SEARCH_CACHE_TTL)
         self._works: TTLCache[Work] = TTLCache(CACHE_SIZE, WORK_CACHE_TTL)
 
@@ -283,6 +285,13 @@ class DiscoveryService:
 
     def detail(self, ref: str, *, source: str | None = None, client_id: str = "local") -> WorkDetail:
         work = self.work(ref, source=source, client_id=client_id)
+        return self._analyze(work, self.similar(work, client_id=client_id))
+
+    def analysis(self, ref: str, *, client_id: str = "local") -> WorkDetail:
+        """Mesma analise da pagina do artigo, sem artigos semelhantes (nao faz busca extra)."""
+        return self._analyze(self.work(ref, client_id=client_id), ())
+
+    def _analyze(self, work: Work, similar: tuple[Work, ...]) -> WorkDetail:
         sections = tuple(split_sections(work.abstract))
         findings = tuple(extract_findings(work.abstract))
         return WorkDetail(
@@ -291,7 +300,7 @@ class DiscoveryService:
             findings=findings,
             reliability=reliability.assess(work, sections, findings),
             citations={style: citations.format_citation(citation_metadata(work), style) for style in citations.FORMATTERS},
-            similar=self.similar(work, client_id=client_id),
+            similar=similar,
         )
 
     def enrich(self, ref: str, *, client_id: str = "local") -> Enrichment:
@@ -302,6 +311,42 @@ class DiscoveryService:
             return cached
         self._check(client_id)
         return self._enricher.enrich(work)
+
+    def cached_enrichment(self, ref: str, *, client_id: str = "local") -> Enrichment | None:
+        return self._enricher.cached(self.work(ref, client_id=client_id))
+
+    def fulltext(self, ref: str, *, client_id: str = "local") -> downloads.FullText | None:
+        """Texto completo aberto (Europe PMC, so PMC de acesso aberto); None quando nao existe. Resultado em cache."""
+        work = self.work(ref, client_id=client_id)
+        cached = self._fulltexts.get(work.ref)
+        if cached is not None:
+            return cached if isinstance(cached, downloads.FullText) else None
+        self._check(client_id)
+        pmcid = work.pmcid or self._pmcid_from_europepmc(work)
+        result: downloads.FullText | None = None
+        if pmcid:
+            try:
+                xml = downloads.fetch_fulltext_xml(pmcid)
+            except CatalogError as error:
+                raise SourceUnavailableError(str(error)) from error
+            if xml is not None:
+                try:
+                    result = downloads.jats_to_fulltext(pmcid, xml)
+                except CatalogError:
+                    result = None
+        self._fulltexts.set(work.ref, result or False)
+        return result
+
+    def _pmcid_from_europepmc(self, work: Work) -> str:
+        catalog = self._catalogs.get("europepmc")
+        key = work.pmid or work.doi
+        if catalog is None or not key:
+            return ""
+        try:
+            found = catalog.get(key)
+        except CatalogError:
+            return ""
+        return found.pmcid if found else ""
 
     def similar(self, work: Work, *, client_id: str = "local") -> tuple[Work, ...]:
         """Obras com as mesmas palavras-chave, mais citadas primeiro. Melhor esforco: falhas viram lista vazia."""

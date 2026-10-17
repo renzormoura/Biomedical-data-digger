@@ -51,7 +51,7 @@ def test_text_citations_use_the_requested_style():
 
 
 def test_export_formats_registry_is_complete():
-    assert set(EXPORT_FORMATS) == {"bibtex", "ris", "abnt", "apa", "vancouver"}
+    assert set(EXPORT_FORMATS) == {"bibtex", "ris", "abnt", "apa", "vancouver", "csv", "json", "resumos"}
     for filename, mime, build in EXPORT_FORMATS.values():
         assert filename and mime and build([work()])
     assert to_bibtex([]) == "" and to_ris([]) == ""
