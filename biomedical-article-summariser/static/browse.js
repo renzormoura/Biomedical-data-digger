@@ -796,6 +796,56 @@
         h("a", { class: "btn btn-sm btn-outline", href: Lib.aiLabHref(work.pmid || work.ref) }, "Abrir no Laboratório de IA"));
     }
 
+    // situacao no Brasil: decisoes da Conitec (dados oficiais locais, sem IA) para os medicamentos do resumo
+    const brasilBox = h("div", { class: "stack" }, loading("Consultando dados oficiais…"));
+    const METHODS = { sinonimo: "sinônimo conhecido", cognato: "nome parecido", aproximado: "grafia aproximada" };
+    const fmtDate = (iso) => { const d = new Date(`${iso}T12:00:00`); return Number.isNaN(d.getTime()) ? "" : d.toLocaleDateString("pt-BR"); };
+    function conitecRows(records) {
+      const rowFor = (r) => h("li", { class: "conitec-row" },
+        h("div", {}, h("strong", {}, `${r.year || "—"} · ${r.recommendation || "—"}`),
+          r.decisionMs && r.decisionMs !== r.recommendation ? h("span", { class: "muted" }, ` · decisão do MS: ${r.decisionMs}`) : null),
+        r.indication ? h("p", { class: "conitec-indication" }, r.indication.length > 160 ? `${r.indication.slice(0, 157)}…` : r.indication) : null,
+        h("small", { class: "muted" }, [r.ordinance, r.publishedAt ? fmtDate(r.publishedAt) : "", r.technicalReport ? `Relatório técnico ${r.technicalReport}` : ""].filter(Boolean).join(" · ")));
+      const first = records.slice(0, 3);
+      const rest = records.slice(3);
+      return [h("ul", { class: "plain-list" }, first.map(rowFor)),
+        rest.length ? h("details", { class: "more-records" }, h("summary", {}, `Ver as outras ${rest.length} decisões`), h("ul", { class: "plain-list" }, rest.map(rowFor))) : null];
+    }
+    async function renderBrasil() {
+      let data;
+      try { data = await api(`/api/discover/brasil?ref=${encodeURIComponent(work.ref)}`); } catch {
+        mount(brasilBox, h("p", { class: "muted" }, "Os dados oficiais do Brasil não estão disponíveis agora."));
+        return;
+      }
+      const manualResult = h("div", { class: "stack" });
+      const manualInput = h("input", { type: "text", placeholder: "Outro medicamento (nome em português)", maxlength: "80", "aria-label": "Buscar medicamento na Conitec" });
+      const manualButton = h("button", { type: "button", class: "btn btn-sm btn-secondary" }, "Buscar");
+      const runManual = async () => {
+        const term = manualInput.value.trim();
+        if (term.length < 3) { manualInput.focus(); return; }
+        const found = await guarded(() => api(`/api/brasil/conitec?q=${encodeURIComponent(term)}`));
+        if (!found) return;
+        mount(manualResult, found.registros.length
+          ? [h("h4", {}, `${term}: ${found.registros.length} ${found.registros.length === 1 ? "decisão" : "decisões"}`), conitecRows(found.registros)]
+          : h("p", { class: "muted" }, `A Conitec não tem decisão registrada para "${term}". Isso não significa que o medicamento não esteja no SUS (veja a Rename).`));
+      };
+      manualButton.addEventListener("click", runManual);
+      manualInput.addEventListener("keydown", (event) => { if (event.key === "Enter") { event.preventDefault(); runManual(); } });
+      const meta = data.meta;
+      const source = Lib.safeHttpUrl(meta.paginaUrl);
+      mount(brasilBox,
+        data.candidatos.length
+          ? [h("p", { class: "hint" }, "Medicamentos que o resumo parece citar. A correspondência de nomes é automática: confirme."),
+            data.candidatos.map((c) => h("div", { class: "conitec-drug" },
+              h("h4", {}, c.pt, h("span", { class: "muted" }, ` · no texto: ${c.en} (${METHODS[c.metodo] || c.metodo})`)), conitecRows(c.registros)))]
+          : h("p", { class: "muted" }, "Não identificamos, no resumo, medicamentos com decisão da Conitec. Busque pelo nome em português:"),
+        h("div", { class: "new-list" }, manualInput, manualButton), manualResult,
+        meta.defasado ? h("p", { class: "note" }, `Atenção: estes dados foram extraídos em ${fmtDate(meta.extraidoEm)} e podem estar desatualizados.`) : null,
+        h("p", { class: "note" }, "Decisões de incorporação ao SUS (Conitec), de uma lista local extraída em ", fmtDate(meta.extraidoEm),
+          source ? [" da ", h("a", { href: source, target: "_blank", rel: "noopener noreferrer" }, "planilha oficial")] : null,
+          ". Não indicam se o medicamento está disponível na sua unidade de saúde: consulte a Secretaria de Saúde. Ainda não inclui ANVISA nem Rename."));
+    }
+
     // artigos semelhantes: carregam depois da pagina e ficam no fim dela
     const similarBox = h("div", { class: "similar-grid" }, loading("Procurando artigos semelhantes…"));
     const similarNote = h("p", { class: "hint" });
@@ -867,6 +917,7 @@
               h("table", {}, h("tbody", {}, meta.map(([k, v]) => h("tr", {}, h("th", { scope: "row" }, k), h("td", {}, v))))),
               work.keywords.length ? h("div", { class: "kw" }, work.keywords.map((k) => h("a", { href: Lib.buildHash("/busca", { q: k }) }, k))) : null),
             h("section", { class: "card stack" }, h("h3", {}, "Registro e dados"), openData),
+            h("section", { class: "card stack" }, h("h3", {}, "Situação no Brasil"), brasilBox),
             h("section", { class: "card stack" }, h("h3", {}, "Análises do Laboratório"), analysesBox),
             h("section", { class: "card stack" }, h("h3", {}, "Organizar"), organize),
           )),
@@ -874,6 +925,7 @@
     renderOrganize();
     renderAnalyses();
     renderOpenData();
+    renderBrasil();
     renderSimilar();
   }
 

@@ -16,6 +16,7 @@ from pydantic import BaseModel, Field
 import downloads
 import markdown_lite
 import reliability
+from brasil import conitec
 from catalog import SearchQuery, Work
 from discovery import DiscoveryService
 from domain import AuthRequiredError, DiggerError, NotFoundError, RateLimitedError, SourceUnavailableError
@@ -83,6 +84,24 @@ def analysis_file(article_title: str, label: str, markdown: str, fmt: str) -> Re
     })
 
 
+def conitec_meta(snapshot: conitec.Instantaneo) -> dict[str, Any]:
+    days = conitec.dias_desde_extracao(snapshot)
+    meta = snapshot.meta
+    return {
+        "fonte": meta.get("fonte"), "paginaUrl": meta.get("pagina_url"), "arquivoUrl": meta.get("arquivo_url"),
+        "extraidoEm": meta.get("extraido_em"), "medicamentos": meta.get("linhas_medicamento"), "dias": days,
+        "defasado": days is None or days > conitec.STALE_AFTER_DAYS,
+    }
+
+
+def conitec_registro(item: conitec.Registro) -> dict[str, Any]:
+    return {
+        "year": item.ano, "technology": item.tecnologia, "indication": item.indicacao, "recommendation": item.recomendacao,
+        "decisionMs": item.decisao_ms, "ordinance": item.portaria, "publishedAt": item.data_publicacao,
+        "technicalReport": item.relatorio_tecnico, "societyReport": item.relatorio_sociedade,
+    }
+
+
 def work_card(work: Work, saved: bool | None = None) -> dict[str, Any]:
     snippet = work.abstract[:SNIPPET_CHARS] + ("…" if len(work.abstract) > SNIPPET_CHARS else "")
     card: dict[str, Any] = {
@@ -145,6 +164,17 @@ def register_browse_routes(
     identity: Callable[[Request], str],
 ) -> None:
     shared_limiter = SlidingWindowLimiter(60, window=60.0)
+    brasil_limiter = SlidingWindowLimiter(120, window=60.0)
+
+    def brasil_snapshot(request: Request) -> conitec.Instantaneo:
+        try:
+            brasil_limiter.check(identity(request))
+        except RateLimitExceeded as error:
+            raise RateLimitedError(str(error)) from error
+        try:
+            return conitec.carregar()
+        except (OSError, ValueError, KeyError) as error:
+            raise SourceUnavailableError("Os dados da Conitec não estão disponíveis agora.") from error
 
     def require_user(request: Request) -> str:
         user = current_user(request)
@@ -216,6 +246,27 @@ def register_browse_routes(
         return {
             "work": work_card(detail.work),
             "reliability": {"score": scored.score, "band": scored.band, "coverage": scored.coverage},
+        }
+
+    @app.get("/api/brasil/conitec")
+    def brasil_conitec(request: Request, q: Annotated[str, Query(min_length=3, max_length=80)]) -> dict[str, Any]:
+        """Decisoes da Conitec para um medicamento (nome em portugues). Instantaneo local, sem rede e sem IA."""
+        snapshot = brasil_snapshot(request)
+        return {"consulta": q, "registros": [conitec_registro(r) for r in conitec.buscar(q, instantaneo=snapshot)], "meta": conitec_meta(snapshot)}
+
+    @app.get("/api/discover/brasil")
+    def brasil_artigo(request: Request, ref: Annotated[str, Query(min_length=1, max_length=MAX_REF)]) -> dict[str, Any]:
+        """Medicamentos que o resumo parece citar e as decisoes da Conitec sobre eles (correspondencia a confirmar)."""
+        snapshot = brasil_snapshot(request)
+        work = discovery.work(ref, client_id=identity(request))
+        found = conitec.candidatos(f"{work.title}. {work.abstract}", instantaneo=snapshot)
+        return {
+            "candidatos": [
+                {"pt": c.pt, "en": c.en, "metodo": c.metodo,
+                 "registros": [conitec_registro(r) for r in conitec.buscar(c.termo, instantaneo=snapshot)]}
+                for c in found
+            ],
+            "meta": conitec_meta(snapshot),
         }
 
     @app.get("/api/discover/similar")

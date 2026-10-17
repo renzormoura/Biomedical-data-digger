@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 2026-10 — Dados reais do Brasil, fase 1: CONITEC
+
+### Adicionado
+- Cartão **Situação no Brasil** na página do artigo: decisões da Conitec (incorporar, não incorporar, ampliar, excluir...) para os medicamentos que o resumo parece citar, com portaria, data e número do relatório, e uma busca manual por nome em português. Sem IA e sem rede em tempo de execução.
+- Instantâneo versionado `dados_brasil/conitec.json` (782 decisões sobre medicamentos, planilha oficial da Conitec) com origem e data da extração; `scripts/atualizar_conitec.py` o regenera (descobre o link atual na página, baixa com tentativas, lê o XLSX só com a biblioteca padrão e recusa leituras suspeitas).
+- Ligação entre o nome em inglês e a DCB em português por sinônimos curados, cognatos de sufixo (-ine/-ina, -mab/-mabe...) e grafia aproximada; todo resultado vem marcado como correspondência a confirmar, com o método usado. Em 108 resumos reais testados, todas as correspondências eram corretas e os textos sem medicamento não geraram nenhuma.
+- `GET /api/brasil/conitec?q=` e `GET /api/discover/brasil?ref=`.
+
+### Limitações
+- Só medicamentos e só Conitec: ainda não inclui ANVISA nem Rename (fases 2 e 3 do plano). Estar na Conitec não é o mesmo que estar disponível na sua unidade de saúde, e a tela diz isso.
+- O portal gov.br responde 404 de forma intermitente; a atualização tenta até 6 vezes.
+- A tabela de sinônimos precisa de revisão por farmacêutico.
+
 ## 2026-10 — Contexto do Brasil: correções de honestidade
 
 ### Corrigido
