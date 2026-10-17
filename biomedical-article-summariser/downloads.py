@@ -58,6 +58,11 @@ def safe_filename(work: Work, label: str, extension: str) -> str:
     return f"{slug}{year}-{label}.{extension}"
 
 
+def analysis_filename(article_title: str, label: str, extension: str) -> str:
+    text = unicodedata.normalize("NFKD", f"{label} {article_title}").encode("ascii", "ignore").decode().lower()
+    return f"{_FILENAME_BAD.sub('-', text).strip('-')[:70].strip('-') or 'analise'}.{extension}"
+
+
 # ------------------------------------------------------------------ montagem dos blocos
 def _identity_lines(work: Work) -> list[str]:
     lines = []
@@ -381,3 +386,56 @@ def menu(work: Work, fulltext: FullText | None, fulltext_note: str = "") -> dict
     if work.doi:
         links.append({"label": "Página do editor (DOI)", "url": f"https://doi.org/{work.doi}"})
     return {"options": options, "links": links, "note": "PDFs de editoras abrem no site de origem; só oferecemos o que a fonte informa como aberto."}
+
+
+# ------------------------------------------------------------------ analises do Laboratorio (Markdown -> documento)
+_MD_HEADING = re.compile(r"^(#{1,6})\s+(.*)$")
+_MD_LIST = re.compile(r"^\s*(?:[-*+]|\d{1,3}[.)])\s+(.*)$")
+_MD_INLINE = re.compile(r"(\*\*|__|`)")
+_MD_LINK = re.compile(r"\[([^\]]+)\]\((?:https?://[^)\s]+)\)")
+
+
+def _md_plain(text: str) -> str:
+    return " ".join(_MD_INLINE.sub("", _MD_LINK.sub(r"\1", text)).replace("*", "").split())
+
+
+def markdown_to_blocks(markdown: str) -> list[Block]:
+    """Markdown simples do Laboratorio (titulos, listas, citacoes, paragrafos) em blocos; sem HTML nem links ativos."""
+    blocks: list[Block] = []
+    paragraph: list[str] = []
+
+    def flush() -> None:
+        if paragraph:
+            blocks.append(("p", _md_plain(" ".join(paragraph))))
+            paragraph.clear()
+
+    for raw in markdown.splitlines():
+        line = raw.rstrip()
+        if not line.strip() or re.fullmatch(r"\s*(?:-{3,}|\*{3,}|_{3,})\s*", line):
+            flush()
+            continue
+        heading, item = _MD_HEADING.match(line), _MD_LIST.match(line)
+        if heading:
+            flush()
+            blocks.append((f"h{min(len(heading.group(1)), 3)}", _md_plain(heading.group(2))))
+        elif line.lstrip().startswith(">"):
+            flush()
+            quote = _md_plain(line.lstrip().lstrip(">").strip())
+            if quote:
+                blocks.append(("quote", quote))
+        elif item:
+            flush()
+            blocks.append(("li", _md_plain(item.group(1))))
+        else:
+            paragraph.append(line.strip())
+    flush()
+    return [(kind, text) for kind, text in blocks if text]
+
+
+def analysis_blocks(article_title: str, label: str, markdown: str) -> list[Block]:
+    return [
+        ("title", label or "Análise"), *([("meta", f"Artigo: {article_title}")] if article_title else []),
+        *markdown_to_blocks(markdown),
+        ("meta", f"Gerado em {date.today():%d/%m/%Y} no Laboratório do Biomedical Data Digger. Análises com IA podem conter erros: "
+                 "confira sempre com o artigo original."),
+    ]

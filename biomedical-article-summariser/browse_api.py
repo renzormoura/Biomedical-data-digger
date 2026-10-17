@@ -9,18 +9,19 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import Annotated, Any
 
-from fastapi import FastAPI, Query, Request
+from fastapi import FastAPI, Path, Query, Request
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
 
 import downloads
+import markdown_lite
 import reliability
 from catalog import SearchQuery, Work
 from discovery import DiscoveryService
 from domain import AuthRequiredError, DiggerError, NotFoundError, RateLimitedError, SourceUnavailableError
 from enrichment import Enrichment
 from exports import EXPORT_FORMATS
-from library_store import LibraryStore, ReadingList
+from library_store import MAX_ANALYSIS_CHARS, LibraryStore, ReadingList, SavedAnalysis
 from ratelimit import RateLimitExceeded, SlidingWindowLimiter
 
 SNIPPET_CHARS = 300
@@ -46,6 +47,40 @@ class ListIn(BaseModel):
 class ListItemIn(BaseModel):
     ref: str = Field(min_length=1, max_length=MAX_REF)
     source: str | None = Field(None, max_length=40)
+
+
+class AnalysisIn(BaseModel):
+    article_id: str = Field(min_length=1, max_length=2000)
+    page: str = Field("", max_length=60)
+    label: str = Field("Análise", max_length=200)
+    markdown: str = Field(min_length=1, max_length=MAX_ANALYSIS_CHARS + 1000)
+
+
+class ExportAnalysisIn(BaseModel):
+    title: str = Field("", max_length=500)
+    label: str = Field("Análise", max_length=200)
+    markdown: str = Field(min_length=1, max_length=MAX_ANALYSIS_CHARS + 1000)
+    format: str = Field("md", max_length=10)
+
+
+def analysis_payload(item: SavedAnalysis, *, full: bool = False) -> dict[str, Any]:
+    payload: dict[str, Any] = {
+        "id": item.id, "ref": item.ref, "title": item.title, "page": item.page, "label": item.label, "createdAt": item.created_at,
+    }
+    if full:
+        payload["markdown"] = item.markdown
+        payload["html"] = markdown_lite.render(item.markdown)  # sanitizado no servidor
+    return payload
+
+
+def analysis_file(article_title: str, label: str, markdown: str, fmt: str) -> Response:
+    if fmt not in downloads.TEXT_FORMATS:
+        raise DiggerError("Formato de download inválido.")
+    content, media = downloads.render(downloads.analysis_blocks(article_title, label, markdown), fmt)
+    filename = downloads.analysis_filename(article_title, label, downloads.TEXT_FORMATS[fmt][2])
+    return Response(content, media_type=media, headers={
+        "Content-Disposition": f'attachment; filename="{filename}"', "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff",
+    })
 
 
 def work_card(work: Work, saved: bool | None = None) -> dict[str, Any]:
@@ -170,6 +205,19 @@ def register_browse_routes(
             "reliability": reliability_payload(detail.reliability),
         }
 
+    @app.get("/api/discover/brief")
+    def brief(
+        request: Request,
+        ref: Annotated[str, Query(min_length=1, max_length=2000)],
+    ) -> dict[str, Any]:
+        """Cartao resumido do artigo (para o Laboratorio mostrar qual artigo esta carregado)."""
+        detail = discovery.analysis(ref, client_id=identity(request))
+        scored = detail.reliability
+        return {
+            "work": work_card(detail.work),
+            "reliability": {"score": scored.score, "band": scored.band, "coverage": scored.coverage},
+        }
+
     @app.get("/api/discover/similar")
     def similar_route(
         request: Request,
@@ -262,6 +310,43 @@ def register_browse_routes(
         return Response(content, media_type=media, headers={
             "Content-Disposition": f'attachment; filename="{filename}"', "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff",
         })
+
+    # -- analises do Laboratorio ----------------------------------------------------
+    @app.post("/api/export/analysis")
+    def export_analysis(body: ExportAnalysisIn, request: Request) -> Response:
+        try:
+            shared_limiter.check(identity(request))
+        except RateLimitExceeded as error:
+            raise RateLimitedError(str(error)) from error
+        return analysis_file(body.title, body.label, body.markdown, body.format)
+
+    @app.post("/api/analyses")
+    def save_analysis(body: AnalysisIn, request: Request) -> dict[str, Any]:
+        user = require_user(request)
+        work = discovery.work(body.article_id, client_id=identity(request))
+        return analysis_payload(library.save_analysis(user, work, body.page, body.label, body.markdown))
+
+    @app.get("/api/analyses")
+    def list_analyses(request: Request, ref: Annotated[str | None, Query(max_length=MAX_REF)] = None) -> dict[str, Any]:
+        user = require_user(request)
+        return {"analyses": [analysis_payload(a) for a in library.analyses(user, ref)]}
+
+    @app.get("/api/analyses/{analysis_id}")
+    def get_analysis(analysis_id: Annotated[str, Path(max_length=64)], request: Request) -> dict[str, Any]:
+        return analysis_payload(library.get_analysis(require_user(request), analysis_id), full=True)
+
+    @app.get("/api/analyses/{analysis_id}/download")
+    def download_analysis(
+        analysis_id: Annotated[str, Path(max_length=64)], request: Request,
+        format: Annotated[str, Query(max_length=10)] = "md",  # noqa: A002 - nome do parametro HTTP
+    ) -> Response:
+        item = library.get_analysis(require_user(request), analysis_id)
+        return analysis_file(item.title, item.label, item.markdown, format)
+
+    @app.delete("/api/analyses/{analysis_id}")
+    def delete_analysis(analysis_id: Annotated[str, Path(max_length=64)], request: Request) -> dict[str, bool]:
+        library.delete_analysis(require_user(request), analysis_id)
+        return {"ok": True}
 
     # -- biblioteca ---------------------------------------------------------------
     @app.get("/api/library")

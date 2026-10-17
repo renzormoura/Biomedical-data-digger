@@ -25,6 +25,9 @@ MAX_TAGS = 12
 MAX_TAG_CHARS = 30
 MAX_NAME_CHARS = 80
 MAX_ABSTRACT_CHARS = 4000
+MAX_ANALYSES = 200
+MAX_ANALYSIS_CHARS = 60000
+MAX_LABEL_CHARS = 120
 
 _SCHEMA = (
     """CREATE TABLE IF NOT EXISTS library_items (
@@ -37,6 +40,10 @@ _SCHEMA = (
         list_id TEXT NOT NULL REFERENCES reading_lists(id) ON DELETE CASCADE, ref TEXT NOT NULL,
         data TEXT NOT NULL, position INTEGER NOT NULL, PRIMARY KEY (list_id, ref))""",
     "CREATE INDEX IF NOT EXISTS idx_lists_owner ON reading_lists (owner_email)",
+    """CREATE TABLE IF NOT EXISTS saved_analyses (
+        id TEXT PRIMARY KEY, user_email TEXT NOT NULL, ref TEXT NOT NULL, title TEXT NOT NULL, page TEXT NOT NULL,
+        label TEXT NOT NULL, markdown TEXT NOT NULL, created_at TEXT NOT NULL)""",
+    "CREATE INDEX IF NOT EXISTS idx_analyses_user_ref ON saved_analyses (user_email, ref)",
 )
 
 
@@ -54,6 +61,17 @@ class ReadingList:
     share_token: str | None
     created_at: str
     works: tuple[Work, ...] = field(default_factory=tuple)
+
+
+@dataclass(frozen=True)
+class SavedAnalysis:
+    id: str
+    ref: str
+    title: str  # titulo do artigo analisado
+    page: str  # aba do Laboratorio (ex.: medicina)
+    label: str  # nome da analise (ex.: Resumo Clinico)
+    markdown: str
+    created_at: str
 
 
 def _now() -> str:
@@ -137,6 +155,45 @@ class LibraryStore:
         if not changed:
             raise NotFoundError("Artigo não encontrado na sua biblioteca.")
         return cleaned
+
+    # ------------------------------------------------------------------ analises salvas
+    def save_analysis(self, user: str, work: Work, page: str, label: str, markdown: str) -> SavedAnalysis:
+        markdown = markdown.strip()
+        if not markdown:
+            raise NotFoundError("Não há análise para salvar.")
+        if len(markdown) > MAX_ANALYSIS_CHARS:
+            raise LimitReachedError("Esta análise é grande demais para ser salva.")
+        label = clean_name(label)[:MAX_LABEL_CHARS] or "Análise"
+        item = SavedAnalysis(uuid.uuid4().hex, work.ref, work.title[:500], clean_name(page)[:40], label, markdown, _now())
+        with self._db.transaction() as tx:
+            if tx.query("SELECT COUNT(*) FROM saved_analyses WHERE user_email = ?", (user,))[0][0] >= MAX_ANALYSES:
+                raise LimitReachedError(f"Você chegou ao limite de {MAX_ANALYSES} análises salvas.")
+            tx.execute(
+                "INSERT INTO saved_analyses (id, user_email, ref, title, page, label, markdown, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                (item.id, user, item.ref, item.title, item.page, item.label, item.markdown, item.created_at),
+            )
+        return item
+
+    def analyses(self, user: str, ref: str | None = None) -> list[SavedAnalysis]:
+        sql = "SELECT id, ref, title, page, label, markdown, created_at FROM saved_analyses WHERE user_email = ?"
+        params: tuple[str, ...] = (user,)
+        if ref:
+            sql += " AND ref = ?"
+            params = (user, ref)
+        return [SavedAnalysis(*row) for row in self._db.query(sql + " ORDER BY created_at DESC, id", params)]
+
+    def get_analysis(self, user: str, analysis_id: str) -> SavedAnalysis:
+        rows = self._db.query(
+            "SELECT id, ref, title, page, label, markdown, created_at FROM saved_analyses WHERE user_email = ? AND id = ?",
+            (user, analysis_id),
+        )
+        if not rows:
+            raise NotFoundError("Análise não encontrada.")
+        return SavedAnalysis(*rows[0])
+
+    def delete_analysis(self, user: str, analysis_id: str) -> None:
+        if not self._db.execute("DELETE FROM saved_analyses WHERE user_email = ? AND id = ?", (user, analysis_id)):
+            raise NotFoundError("Análise não encontrada.")
 
     # ------------------------------------------------------------------ listas
     def create_list(self, user: str, name: str) -> ReadingList:
