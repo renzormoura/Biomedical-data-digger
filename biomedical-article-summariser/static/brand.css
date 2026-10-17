@@ -339,3 +339,9 @@ input[type="text"], input[type="search"], input[type="email"], input[type="passw
   a { color: #000; text-decoration: underline; }
   .result, .list-block, .library-table tr { break-inside: avoid; }
 }
+
+/* ---------- Registro e dados ---------- */
+.article-aside h4 { font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 0 0 6px; }
+.plain-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; font-size: 0.9rem; }
+.plain-list li { display: grid; gap: 2px; overflow-wrap: anywhere; }
+.plain-list small { display: block; }

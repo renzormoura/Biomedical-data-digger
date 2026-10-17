@@ -157,6 +157,22 @@ def register_browse_routes(
             "similar": [work_card(w) for w in detail.similar],
         }
 
+    @app.get("/api/discover/enrichment")
+    def enrichment_route(
+        request: Request,
+        ref: Annotated[str, Query(min_length=1, max_length=MAX_REF)],
+    ) -> dict[str, Any]:
+        result = discovery.enrich(ref, client_id=identity(request))
+        return {
+            "mentionedTrials": list(result.mentioned_trials),
+            "trials": [
+                {"nct": t.nct, "title": t.title, "status": t.status, "start": t.start, "hasResults": t.has_results, "url": t.url}
+                for t in result.trials
+            ],
+            "citations": result.citations,
+            "relatedData": [{"doi": d.doi, "title": d.title, "kind": d.kind, "publisher": d.publisher, "url": d.url} for d in result.related_data],
+        }
+
     # -- biblioteca ---------------------------------------------------------------
     @app.get("/api/library")
     def get_library(request: Request) -> dict[str, Any]:

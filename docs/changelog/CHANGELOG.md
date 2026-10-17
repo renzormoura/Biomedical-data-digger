@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## 2026-10 — Mais fontes e registros abertos
+
+### Adicionado
+- Fontes de busca: PubMed (E-utilities), arXiv, DOAJ e OpenAIRE, sem chave. O PubMed aceita `NCBI_API_KEY` opcional.
+- Cartão "Registro e dados" no artigo: ClinicalTrials.gov, OpenCitations e DataCite (inclui Zenodo), carregado em segundo plano (`GET /api/discover/enrichment`).
+- Leitura de XML da rede com recusa de declarações de entidade (`xmlutil.py`).
+
+### Alterado
+- A opção combinada passou a se chamar "Europe PMC + OpenAlex" e só reúne as fontes principais; as novas são escolhidas uma a uma.
+- A etiqueta de citações some quando a fonte não informa o número.
+
+### Limitações conhecidas
+- medRxiv e bioRxiv não têm busca por palavra-chave na API; seus preprints já aparecem pela Europe PMC.
+- arXiv, DOAJ e OpenAIRE não oferecem alguns filtros (tipo de estudo, idioma, acesso aberto, ordenação); a tela avisa quando um filtro não foi aplicado.
+
 ## 2026-10 — Nove novas abas no Laboratório de IA
 
 ### Adicionado

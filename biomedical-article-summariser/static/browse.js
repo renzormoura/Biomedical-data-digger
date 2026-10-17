@@ -191,7 +191,7 @@
     return h("div", { class: "badges" },
       (work.studyTypes || []).map((t) => h("span", { class: "badge type" }, t)),
       work.openAccess ? h("span", { class: "badge oa" }, "Acesso aberto") : h("span", { class: "badge" }, "Acesso restrito"),
-      h("span", { class: "badge" }, `${Lib.formatCount(work.citedBy)} citações`),
+      work.citedBy > 0 ? h("span", { class: "badge" }, `${Lib.formatCount(work.citedBy)} citações`) : null,
       work.language ? h("span", { class: "badge" }, work.language.toUpperCase()) : null,
       work.source ? h("span", { class: "badge" }, work.source) : null);
   }
@@ -522,6 +522,40 @@
         h("div", { class: "row" }, newName, h("button", { type: "button", class: "btn btn-secondary btn-sm", onclick: create }, "Criar lista com este artigo")));
     }
 
+    // registro de ensaios, citacoes e dados ligados (fontes abertas); carrega depois da pagina
+    const openData = h("div", { class: "stack" }, loading("Consultando registros abertos…"));
+    async function renderOpenData() {
+      let extra;
+      try { extra = await api(`/api/discover/enrichment?ref=${encodeURIComponent(work.ref)}`); } catch {
+        mount(openData, h("p", { class: "muted" }, "Os registros abertos não responderam agora."));
+        return;
+      }
+      const external = (href, label) => {
+        const safe = Lib.safeHttpUrl(href);
+        return safe ? h("a", { href: safe, target: "_blank", rel: "noopener noreferrer" }, label) : label;
+      };
+      const blocks = [];
+      if (extra.mentionedTrials.length) {
+        blocks.push(h("div", {}, h("h4", {}, "Registro do ensaio"),
+          extra.trials.length
+            ? h("ul", { class: "plain-list" }, extra.trials.map((t) => h("li", {},
+              external(t.url, t.nct), ` · ${t.status}${t.start ? ` · início ${t.start}` : ""}${t.hasResults ? " · resultados publicados" : ""}`,
+              h("small", { class: "muted" }, t.title))))
+            : h("p", { class: "muted" }, `O resumo cita ${extra.mentionedTrials.join(", ")}, mas o ClinicalTrials.gov não confirmou o registro.`)));
+      }
+      if (extra.citations !== null) {
+        blocks.push(h("div", {}, h("h4", {}, "Citações (OpenCitations)"), h("p", {}, Lib.formatCount(extra.citations))));
+      }
+      if (extra.relatedData.length) {
+        blocks.push(h("div", {}, h("h4", {}, "Dados e materiais ligados"),
+          h("ul", { class: "plain-list" }, extra.relatedData.map((d) => h("li", {},
+            external(d.url, d.title), h("small", { class: "muted" }, [d.kind, d.publisher].filter(Boolean).join(" · ")))))));
+      }
+      mount(openData, blocks.length ? blocks
+        : h("p", { class: "muted" }, "Nenhum registro de ensaio, citação ou dado ligado foi encontrado nas fontes abertas."),
+      h("p", { class: "note" }, "Fontes: ClinicalTrials.gov, OpenCitations e DataCite (inclui Zenodo)."));
+    }
+
     const oaHref = Lib.safeHttpUrl(work.oaUrl);
     const doiHref = work.doi ? Lib.safeHttpUrl(`https://doi.org/${work.doi}`) : "";
     const pmidHref = /^\d+$/.test(work.pmid) ? `https://pubmed.ncbi.nlm.nih.gov/${work.pmid}/` : "";
@@ -533,7 +567,7 @@
       ["PubMed", pmidHref ? h("a", { href: pmidHref, target: "_blank", rel: "noopener noreferrer" }, `PMID ${work.pmid}`) : "—"],
       ["Idioma", work.language ? work.language.toUpperCase() : "—"],
       ["Fonte", work.source || "—"],
-      ["Citações", Lib.formatCount(work.citedBy)],
+      ["Citações", work.citedBy > 0 ? Lib.formatCount(work.citedBy) : "—"],
     ];
 
     mount($app,
@@ -570,10 +604,12 @@
             h("section", { class: "card stack" }, h("h3", {}, "Detalhes"),
               h("table", {}, h("tbody", {}, meta.map(([k, v]) => h("tr", {}, h("th", { scope: "row" }, k), h("td", {}, v))))),
               work.keywords.length ? h("div", { class: "kw" }, work.keywords.map((k) => h("a", { href: Lib.buildHash("/busca", { q: k }) }, k))) : null),
+            h("section", { class: "card stack" }, h("h3", {}, "Registro e dados"), openData),
             h("section", { class: "card stack" }, h("h3", {}, "Organizar"), organize),
             data.similar.length ? h("section", { class: "card stack" }, h("h3", {}, "Artigos semelhantes"),
               h("ul", { class: "similar" }, data.similar.map((sim) => h("li", {}, h("a", { href: articleHref(sim) }, sim.title), h("small", { class: "muted" }, `${(sim.studyTypes || [])[0] || "Artigo"} · ${sim.year || "—"}`))))) : null))));
     renderOrganize();
+    renderOpenData();
   }
 
   // ------------------------------------------------------------------ Biblioteca

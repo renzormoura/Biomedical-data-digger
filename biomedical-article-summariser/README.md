@@ -9,7 +9,11 @@ Navegador de artigos científicos (FastAPI + frontend próprio, preto e laranja)
 | `/` | Navegador: início, busca, artigo, biblioteca, listas (`#/lista/TOKEN` é pública e somente leitura) |
 | `/ia` | Laboratório de IA com as abas e botões descritos abaixo; "Analisar com IA" no artigo abre aqui com o campo preenchido |
 
-Fonte padrão: Europe PMC (sem chave). OpenAlex é opcional e exige uma chave gratuita criada por você em `OPENALEX_API_KEY` (mais `OPENALEX_MAILTO` opcional). `DISCOVERY_CALLS_PER_MINUTE` (30) limita buscas por cliente. A biblioteca usa o mesmo banco das contas (SQLite local, PostgreSQL em produção; o caminho PostgreSQL ainda não foi exercitado em instância real).
+Fonte padrão: Europe PMC (sem chave). Outras fontes de busca, escolhidas uma a uma no seletor (todas sem chave): **PubMed** (E-utilities; `NCBI_API_KEY` é opcional e eleva o limite), **arXiv** (1 chamada a cada 3 s, como pedem os termos), **DOAJ** e **OpenAIRE**. A opção combinada reúne só as fontes principais (Europe PMC e OpenAlex).
+
+Na página do artigo, o cartão "Registro e dados" consulta, em segundo plano, o **ClinicalTrials.gov** (confirma registros NCT citados no resumo), o **OpenCitations** (citações por DOI) e o **DataCite** (dados e códigos ligados, inclui Zenodo). Se uma fonte não responde, o cartão avisa e tenta de novo na próxima visita.
+
+OpenAlex é opcional e exige uma chave gratuita criada por você em `OPENALEX_API_KEY` (mais `OPENALEX_MAILTO` opcional). `DISCOVERY_CALLS_PER_MINUTE` (30) limita buscas por cliente. A biblioteca usa o mesmo banco das contas (SQLite local, PostgreSQL em produção; o caminho PostgreSQL ainda não foi exercitado em instância real).
 
 ## Funcionalidades
 
