@@ -9,7 +9,7 @@ Navegador de artigos científicos (FastAPI + frontend próprio, preto e laranja)
 | `/` | Navegador: início, busca, artigo, biblioteca, listas (`#/lista/TOKEN` é pública e somente leitura) |
 | `/ia` | Laboratório de IA com as abas e botões descritos abaixo; "Analisar com IA" no artigo abre aqui com o campo preenchido |
 
-Fonte padrão: Europe PMC (sem chave). Outras fontes de busca, escolhidas uma a uma no seletor (todas sem chave): **PubMed** (E-utilities; `NCBI_API_KEY` é opcional e eleva o limite), **arXiv** (1 chamada a cada 3 s, como pedem os termos), **DOAJ** e **OpenAIRE**. A opção combinada reúne só as fontes principais (Europe PMC e OpenAlex).
+Fonte padrão: Europe PMC (sem chave). Outras fontes de busca (todas sem chave): **PubMed** (E-utilities; `NCBI_API_KEY` é opcional e eleva o limite), **arXiv** (1 chamada a cada 3 s, como pedem os termos), **DOAJ** e **OpenAIRE**. O seletor oferece cada fonte e a opção **Todas as fontes**, que consulta todas em paralelo, remove repetidos e intercala por relevância; cada fonte entrega uma fatia da página e, se uma demorar mais de 14 s ou falhar, a tela avisa e mostra as demais.
 
 Na página do artigo, o cartão "Registro e dados" consulta, em segundo plano, o **ClinicalTrials.gov** (confirma registros NCT citados no resumo), o **OpenCitations** (citações por DOI) e o **DataCite** (dados e códigos ligados, inclui Zenodo). Se uma fonte não responde, o cartão avisa e tenta de novo na próxima visita.
 

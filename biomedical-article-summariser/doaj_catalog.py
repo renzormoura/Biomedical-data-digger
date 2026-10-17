@@ -71,7 +71,7 @@ def to_work(record: dict[str, Any]) -> Work:
 class DoajCatalog:
     id = "doaj"
     name = "DOAJ (revistas de acesso aberto)"
-    combined = False
+    combined = True
 
     def study_types(self) -> tuple[str, ...]:
         return ()

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Callable, Mapping, Sequence
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, wait
 from dataclasses import dataclass, replace
 
 from loguru import logger
@@ -28,6 +28,9 @@ WORK_CACHE_TTL = 3600
 CACHE_SIZE = 512
 SIMILAR_LIMIT = 4
 ALL_SOURCES = "all"
+ALL_SOURCES_NAME = "Todas as fontes"
+ALL_DEADLINE = 14.0  # segundos; fonte mais lenta fica de fora desta busca (e entra no cache para a proxima)
+MIN_PER_SOURCE = 2
 _NON_WORD = re.compile(r"\W+")
 Fallback = Callable[[str], Work | None]
 
@@ -143,7 +146,7 @@ class DiscoveryService:
         combined = self._combined
         if len(combined) > 1:
             union = list(dict.fromkeys(t for c in combined for t in c.study_types()))
-            name = " + ".join(c.name.split(" (")[0] for c in combined)
+            name = ALL_SOURCES_NAME if len(combined) == len(self._catalogs) else " + ".join(c.name.split(" (")[0] for c in combined)
             listed.insert(0, {"id": ALL_SOURCES, "name": name, "studyTypes": union, "default": False})
         return listed
 
@@ -206,21 +209,30 @@ class DiscoveryService:
         if not runnable:
             raise SourceUnavailableError("Nenhuma fonte oferece os tipos de estudo escolhidos. Ajuste os filtros.")
 
-        def run(item: tuple[Catalog, SearchQuery]) -> tuple[Catalog, SearchResult | None]:
+        # cada fonte entrega uma fatia da pagina, para a pagina combinada ter o tamanho pedido
+        per_source = max(MIN_PER_SOURCE, -(-query.per_page // len(runnable))) if len(runnable) > 1 else query.per_page
+        runnable = [(catalog, replace(sub_query, per_page=per_source)) for catalog, sub_query in runnable]
+
+        def run(item: tuple[Catalog, SearchQuery]) -> SearchResult | None:
             try:
-                return item[0], self._search_one(item[0], item[1])
+                return self._search_one(item[0], item[1])
             except DiggerError as error:
                 logger.debug("Fonte {} falhou na busca combinada: {}", item[0].id, error)
-                return item[0], None
+                return None
 
-        with ThreadPoolExecutor(max_workers=len(runnable)) as pool:
-            outcomes = list(pool.map(run, runnable))
+        pool = ThreadPoolExecutor(max_workers=len(runnable))
+        futures = [(catalog, pool.submit(run, item)) for item in runnable for catalog in (item[0],)]
+        wait([f for _, f in futures], timeout=ALL_DEADLINE)
+        pool.shutdown(wait=False, cancel_futures=True)  # quem atrasou termina sozinho e deixa o resultado no cache
         results: list[SearchResult] = []
-        for catalog, result in outcomes:
-            if result is None:
-                notes.append(f"{catalog.name.split(' (')[0]} não respondeu; os resultados abaixo vêm das outras fontes.")
+        for catalog, future in futures:
+            short = catalog.name.split(" (")[0]
+            if not future.done():
+                notes.append(f"{short} demorou demais e ficou de fora desta busca; tente de novo em instantes.")
+            elif future.result() is None:
+                notes.append(f"{short} não respondeu; os resultados abaixo vêm das outras fontes.")
             else:
-                results.append(result)
+                results.append(future.result())  # type: ignore[arg-type]
         if not results:
             raise SourceUnavailableError("Nenhuma fonte de artigos respondeu agora. Tente novamente em instantes.")
         merged = SearchResult(

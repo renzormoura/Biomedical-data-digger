@@ -73,7 +73,7 @@ def to_work(record: dict[str, Any]) -> Work:
 class OpenAireCatalog:
     id = "openaire"
     name = "OpenAIRE (pesquisa europeia)"
-    combined = False
+    combined = True
 
     def study_types(self) -> tuple[str, ...]:
         return ()

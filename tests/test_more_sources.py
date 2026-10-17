@@ -314,3 +314,41 @@ def test_discovery_enrich_uses_the_work_and_caches_without_spending_the_limit():
         assert first.citations == 1806
         for _ in range(5):
             assert svc.enrich("9") is first
+
+
+# ------------------------------------------------------------------ todas as fontes de verdade
+class Recorder(Stub):
+    def __init__(self, id, name, works=(), delay=0.0, **kw):
+        super().__init__(id, name, works=works, **kw)
+        self.per_pages, self.delay = [], delay
+
+    def search(self, query):
+        import time
+        self.per_pages.append(query.per_page)
+        time.sleep(self.delay)
+        return super().search(query)
+
+
+def test_all_sources_name_and_slice_the_page_between_sources():
+    cats = [Recorder(f"s{i}", f"Fonte {i} (x)", works=[Work(ref=f"{i}-{n}", title=f"T{i}{n}", doi=f"10.1/{i}-{n}") for n in range(3)])
+            for i in range(5)]
+    svc = DiscoveryService(cats, SlidingWindowLimiter(100, 60), fallback=None)
+    assert svc.sources()[0]["name"] == "Todas as fontes"
+    result = svc.search(SearchQuery(q="x", per_page=10), source="all")
+    assert all(c.per_pages == [2] for c in cats)  # 10 / 5 fontes = 2 por fonte
+    assert len(result.works) == 15 and result.total == 15
+
+
+def test_slow_source_is_left_out_with_a_note_but_warms_the_cache(monkeypatch):
+    import discovery
+    monkeypatch.setattr(discovery, "ALL_DEADLINE", 0.2)
+    fast = Recorder("a", "Rapida (x)", works=[Work(ref="1", title="Rapida", doi="10.1/a")])
+    slow = Recorder("b", "Lenta (x)", works=[Work(ref="2", title="Lenta", doi="10.1/b")], delay=0.8)
+    svc = DiscoveryService([fast, slow], SlidingWindowLimiter(100, 60), fallback=None)
+    result = svc.search(SearchQuery(q="x"), source="all")
+    assert [w.ref for w in result.works] == ["1"]
+    assert any("Lenta demorou demais" in n for n in result.notes)
+    import time
+    time.sleep(1.0)  # a fonte lenta termina sozinha e deixa o resultado no cache da fonte
+    assert [w.ref for w in svc.search(SearchQuery(q="x", per_page=5), source="b").works] == ["2"]
+    assert slow.per_pages == [5]  # a segunda leitura veio do cache, sem nova chamada

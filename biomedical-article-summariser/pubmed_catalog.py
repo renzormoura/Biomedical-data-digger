@@ -109,7 +109,7 @@ def to_work(article: Element) -> Work:
 class PubMedCatalog:
     id = "pubmed"
     name = "PubMed (MEDLINE)"
-    combined = False
+    combined = True
 
     def __init__(self, api_key: str = "") -> None:
         self._api_key = api_key

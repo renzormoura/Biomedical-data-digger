@@ -85,7 +85,7 @@ def to_work(entry: Element) -> Work:
 class ArxivCatalog:
     id = "arxiv"
     name = "arXiv (computação, física e matemática)"
-    combined = False
+    combined = True
 
     def study_types(self) -> tuple[str, ...]:
         return ()

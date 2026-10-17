@@ -8,7 +8,7 @@
 - Leitura de XML da rede com recusa de declarações de entidade (`xmlutil.py`).
 
 ### Alterado
-- A opção combinada passou a se chamar "Europe PMC + OpenAlex" e só reúne as fontes principais; as novas são escolhidas uma a uma.
+- "Todas as fontes" passa a consultar as seis fontes em paralelo: cada uma entrega uma fatia da página (a página combinada mantém o tamanho pedido), fonte que passa de 14 s fica de fora com aviso e deixa o resultado no cache.
 - A etiqueta de citações some quando a fonte não informa o número.
 
 ### Limitações conhecidas
