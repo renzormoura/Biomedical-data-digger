@@ -27,7 +27,18 @@ from ratelimit import RateLimitExceeded, SlidingWindowLimiter
 SEARCH_CACHE_TTL = 600
 WORK_CACHE_TTL = 3600
 CACHE_SIZE = 512
-SIMILAR_LIMIT = 4
+SIMILAR_LIMIT = 6
+MAX_SIMILAR_TERMS = 4
+_TITLE_WORD = re.compile(r"[^\W\d_]{5,}", re.UNICODE)
+_STOP_WORDS = frozenset(
+    ["about", "after", "among", "between", "during", "their", "there", "these", "those", "which", "while", "with", "without", "using", "study", "studies", "analysis", "effect", "effects", "results", "result", "review", "based", "novel", "versus", "under", "through", "towards", "toward", "sobre", "entre", "durante", "desde", "estudo", "estudos", "analise", "efeito", "efeitos", "resultado", "resultados", "revisao", "baseado", "treatment", "therapy", "patients", "clinical", "report", "final", "tratamento", "terapia", "pacientes", "clinico", "relatorio"]
+)
+# termos MeSH de contexto que aparecem em quase todo artigo e estragam a busca por semelhantes
+_GENERIC_KEYWORDS = frozenset([
+    "humans", "human", "male", "female", "animals", "animal", "adult", "adults", "aged", "middle aged", "young adult",
+    "adolescent", "child", "infant", "mice", "rats", "retrospective studies", "prospective studies", "cohort studies",
+    "risk factors", "treatment outcome", "follow-up studies", "time factors",
+])
 ALL_SOURCES = "all"
 ALL_SOURCES_NAME = "Todas as fontes"
 ALL_DEADLINE = 14.0  # segundos; fonte mais lenta fica de fora desta busca (e entra no cache para a proxima)
@@ -291,7 +302,7 @@ class DiscoveryService:
 
     def detail(self, ref: str, *, source: str | None = None, client_id: str = "local") -> WorkDetail:
         work = self.work(ref, source=source, client_id=client_id)
-        return self._analyze(work, self.similar(work, client_id=client_id))
+        return self._analyze(work, ())  # os semelhantes carregam a parte, por rota propria
 
     def analysis(self, ref: str, *, client_id: str = "local") -> WorkDetail:
         """Mesma analise da pagina do artigo, sem artigos semelhantes (nao faz busca extra)."""
@@ -354,20 +365,36 @@ class DiscoveryService:
             return ""
         return found.pmcid if found else ""
 
+    @staticmethod
+    def similar_terms(work: Work) -> list[str]:
+        """Termos que definem a semelhanca: palavras-chave do artigo ou, sem elas, as palavras mais longas do titulo."""
+        keywords = [" ".join(re.sub(r"[,;]+", " ", k).split()) for k in work.keywords]
+        keywords = [k for k in keywords if len(k) > 2 and k.lower() not in _GENERIC_KEYWORDS]
+        words = [w for w in dict.fromkeys(_TITLE_WORD.findall(work.title.lower())) if w not in _STOP_WORDS]
+        words.sort(key=len, reverse=True)
+        chosen = keywords[:2]
+        words = [w for w in words if not any(w in k.lower() for k in chosen)]  # nao repete o que ja esta numa palavra-chave
+        mixed = chosen + words[:2] if keywords else words
+        return list(dict.fromkeys(mixed))[:MAX_SIMILAR_TERMS]
+
     def similar(self, work: Work, *, client_id: str = "local") -> tuple[Work, ...]:
-        """Obras com as mesmas palavras-chave, mais citadas primeiro. Melhor esforco: falhas viram lista vazia."""
-        terms = [k for k in work.keywords if k][:2]
+        """Artigos parecidos: busca pelos termos do artigo na mesma fonte, por relevancia. Falhas viram lista vazia."""
+        terms = self.similar_terms(work)
         if not terms:
             return ()
         try:
             result = self.search(
-                SearchQuery(q=" ".join(terms), sort="cited", per_page=SIMILAR_LIMIT + 2),
+                SearchQuery(q=" ".join(terms), sort="relevance", per_page=SIMILAR_LIMIT + 4),
                 source=self._source_of(work), client_id=client_id,
             )
         except DiggerError:
             return ()
         own = {work.ref, work.pmid, work.doi, work.pmcid} - {""}
-        others = [w for w in result.works if not ({w.ref, w.pmid, w.doi, w.pmcid} - {""}) & own]
+        own_title = _NON_WORD.sub("", work.title.lower())
+        others = [
+            w for w in result.works
+            if not ({w.ref, w.pmid, w.doi, w.pmcid} - {""}) & own and _NON_WORD.sub("", w.title.lower()) != own_title
+        ]
         return tuple(others[:SIMILAR_LIMIT])
 
     def _source_of(self, work: Work) -> str | None:

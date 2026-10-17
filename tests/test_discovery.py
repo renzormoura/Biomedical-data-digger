@@ -108,6 +108,10 @@ def test_service_requires_at_least_one_catalog():
 
 
 # ------------------------------------------------------------------ obra
+def svc_for(catalog):
+    return service(catalog)
+
+
 def test_work_detail_has_sections_findings_citations_and_similar():
     catalog = FakeCatalog(works=[make_work("1"), make_work("2"), make_work("3")])
     detail = service(catalog).detail("1")
@@ -117,7 +121,8 @@ def test_work_detail_has_sections_findings_citations_and_similar():
     assert set(detail.citations) == {"ABNT", "APA", "Vancouver"}
     assert detail.citations["Vancouver"] == "Weber A, Suzuki H. Artigo 1. Example Journal. 2020;27(5):890-903. doi:10.0000/1"
     assert detail.citations["ABNT"].startswith("WEBER, A.; SUZUKI, H. Artigo 1.")
-    assert [w.ref for w in detail.similar] == ["2", "3"]  # sem a propria obra
+    assert detail.similar == ()  # os semelhantes carregam por rota propria
+    assert [w.ref for w in svc_for(catalog).similar(detail.work)] == ["2", "3"]  # sem a propria obra
 
 
 def test_work_uses_the_search_cache_so_opening_a_result_costs_no_extra_call():
@@ -156,8 +161,8 @@ def test_work_input_is_validated_and_rate_limited():
         svc.work("zzz", client_id="a")
 
 
-def test_similar_is_best_effort_and_needs_keywords():
-    assert service().similar(make_work("1", keywords=())) == ()
+def test_similar_is_best_effort_and_needs_usable_terms():
+    assert service().similar(make_work("1", keywords=(), title="Um de")) == ()  # sem palavras-chave nem palavras de titulo
     catalog = FakeCatalog(works=[make_work("1")])
     svc = service(catalog)
     assert svc.similar(make_work("1")) == ()  # so ha a propria obra

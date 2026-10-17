@@ -363,3 +363,30 @@ def test_search_default_is_all_sources_when_there_is_more_than_one():
     listing = two.sources()
     assert two.search_default == "all" and [s["id"] for s in listing if s["default"]] == ["all"]
     assert {w.ref for w in two.search(SearchQuery(q="x"), source=two.search_default).works} == {"1", "2"}
+
+
+# ------------------------------------------------------------------ artigos semelhantes
+def test_similar_terms_use_keywords_or_the_longest_title_words():
+    svc = DiscoveryService([Stub("europepmc", "Europe PMC (x)")], SlidingWindowLimiter(100, 60), fallback=None)
+    with_keywords = Work(ref="1", title="Algo", keywords=("Humans", "sepsis", "Pneumonia, Viral", "Male", "extra"))
+    assert svc.similar_terms(with_keywords) == ["sepsis", "Pneumonia Viral"]  # termos genericos fora, virgula some
+    mixed = Work(ref="2", title="Early prediction of sepsis using machine learning in the intensive care unit", keywords=("so uma",))
+    assert svc.similar_terms(mixed) == ["so uma", "prediction", "intensive"]
+    no_keywords = Work(ref="4", title="Remdesivir for the Treatment of Covid-19 - Final Report")
+    assert svc.similar_terms(no_keywords) == ["remdesivir", "covid"]
+    assert svc.similar_terms(Work(ref="3", title="Um de em")) == []
+
+
+def test_similar_searches_by_relevance_excludes_the_work_and_same_titles():
+    own = Work(ref="1", title="Sepsis prediction with machine learning", doi="10.1/a", keywords=("sepsis", "machine learning"))
+    cat = Recorder("europepmc", "Europe PMC (x)", works=[
+        own, Work(ref="2", title="Outro artigo", doi="10.1/b"),
+        Work(ref="3", title="Sepsis prediction with machine learning!", doi="10.1/c"),  # mesmo titulo (versao duplicada)
+        Work(ref="4", title="Terceiro", doi="10.1/d"),
+    ])
+    queries = []
+    original = cat.search
+    cat.search = lambda q: (queries.append(q), original(q))[1]
+    svc = DiscoveryService([cat], SlidingWindowLimiter(100, 60), fallback=None)
+    assert [w.ref for w in svc.similar(own)] == ["2", "4"]
+    assert queries[0].q == "sepsis machine learning prediction" and queries[0].sort == "relevance" and queries[0].per_page == 10

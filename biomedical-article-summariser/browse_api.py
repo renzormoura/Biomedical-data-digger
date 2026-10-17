@@ -168,7 +168,21 @@ def register_browse_routes(
             "findings": [{"sentence": f.sentence, "tags": list(f.tags)} for f in detail.findings],
             "citations": dict(detail.citations),
             "reliability": reliability_payload(detail.reliability),
-            "similar": [work_card(w) for w in detail.similar],
+        }
+
+    @app.get("/api/discover/similar")
+    def similar_route(
+        request: Request,
+        ref: Annotated[str, Query(min_length=1, max_length=MAX_REF)],
+    ) -> dict[str, Any]:
+        client = identity(request)
+        work = discovery.work(ref, client_id=client)
+        found = discovery.similar(work, client_id=client)
+        user = current_user(request)
+        saved = library.saved_refs(user, [w.ref for w in found]) if user and found else None
+        return {
+            "terms": discovery.similar_terms(work),
+            "works": [work_card(w, None if saved is None else w.ref in saved) for w in found],
         }
 
     @app.get("/api/discover/enrichment")

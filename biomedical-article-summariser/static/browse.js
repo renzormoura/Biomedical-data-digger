@@ -637,6 +637,27 @@
       h("p", { class: "note" }, "Fontes: ClinicalTrials.gov, OpenCitations e DataCite (inclui Zenodo)."));
     }
 
+    // artigos semelhantes: carregam depois da pagina e ficam no fim dela
+    const similarBox = h("div", { class: "similar-grid" }, loading("Procurando artigos semelhantes…"));
+    const similarNote = h("p", { class: "hint" });
+    const similarSection = h("section", { class: "similar-section", "aria-labelledby": "similar-title" },
+      h("h2", { id: "similar-title" }, "Artigos semelhantes"), similarNote, similarBox);
+    async function renderSimilar() {
+      let data;
+      try { data = await api(`/api/discover/similar?ref=${encodeURIComponent(work.ref)}`); } catch {
+        mount(similarBox, h("p", { class: "muted" }, "Não foi possível buscar artigos semelhantes agora."));
+        return;
+      }
+      similarNote.textContent = data.terms.length ? `Buscamos na mesma fonte por: ${data.terms.join(", ")}.` : "";
+      mount(similarBox, data.works.length
+        ? data.works.map((w) => h("article", { class: "similar-card" },
+          h("h3", {}, h("a", { href: articleHref(w) }, w.title)),
+          h("p", { class: "meta" }, metaLine(w)),
+          badges(w),
+          h("div", { class: "row" }, saveButton(w), h("a", { class: "btn btn-sm btn-ghost", href: articleHref(w) }, "Abrir"))))
+        : h("p", { class: "muted" }, "Não encontramos artigos semelhantes nesta fonte."));
+    }
+
     const oaHref = Lib.safeHttpUrl(work.oaUrl);
     const doiHref = work.doi ? Lib.safeHttpUrl(`https://doi.org/${work.doi}`) : "";
     const pmidHref = /^\d+$/.test(work.pmid) ? `https://pubmed.ncbi.nlm.nih.gov/${work.pmid}/` : "";
@@ -688,10 +709,11 @@
               work.keywords.length ? h("div", { class: "kw" }, work.keywords.map((k) => h("a", { href: Lib.buildHash("/busca", { q: k }) }, k))) : null),
             h("section", { class: "card stack" }, h("h3", {}, "Registro e dados"), openData),
             h("section", { class: "card stack" }, h("h3", {}, "Organizar"), organize),
-            data.similar.length ? h("section", { class: "card stack" }, h("h3", {}, "Artigos semelhantes"),
-              h("ul", { class: "similar" }, data.similar.map((sim) => h("li", {}, h("a", { href: articleHref(sim) }, sim.title), h("small", { class: "muted" }, `${(sim.studyTypes || [])[0] || "Artigo"} · ${sim.year || "—"}`))))) : null))));
+          )),
+        similarSection));
     renderOrganize();
     renderOpenData();
+    renderSimilar();
   }
 
   // ------------------------------------------------------------------ Biblioteca

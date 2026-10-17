@@ -364,3 +364,16 @@ input[type="text"], input[type="search"], input[type="email"], input[type="passw
 .download-panel .note { margin: 6px 0 0; }
 @media (max-width: 560px) { .download-panel { position: fixed; left: 8px; right: 8px; top: auto; bottom: 8px; width: auto; max-height: 75vh; } }
 @media print { .download-wrap, .save-wrap { display: none !important; } }
+
+/* ---------- Artigos semelhantes (fim da página do artigo) ---------- */
+.similar-section { margin-top: 24px; padding: 36px 0 8px; border-top: 1px solid var(--border); }
+.similar-section h2 { margin: 0 0 6px; font-size: 1.25rem; font-weight: 700; }
+.similar-section .hint { margin: 0 0 16px; }
+.similar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+.similar-card { display: flex; flex-direction: column; gap: 8px; padding: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+.similar-card h3 { font-size: 1rem; line-height: 1.35; font-weight: 600; }
+.similar-card h3 a { color: var(--text); text-decoration: none; }
+.similar-card h3 a:hover { color: var(--accent-text); text-decoration: underline; text-decoration-thickness: 1px; }
+.similar-card .meta { margin: 0; font-size: 0.86rem; }
+.similar-card .row { margin-top: auto; }
+@media print { .similar-section { display: none; } }

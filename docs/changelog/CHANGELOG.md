@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 2026-10 — Artigos semelhantes no fim do artigo
+
+- Seção "Artigos semelhantes" no fim da página do artigo, com até 6 cartões (salvar e abrir) e a lista dos termos usados na busca; carrega depois da página, por `GET /api/discover/similar`.
+- Semelhança por palavras-chave úteis (sem termos genéricos como Humans) somadas às palavras mais específicas do título, por relevância e na mesma fonte; artigos sem palavra-chave (como os do arXiv) passam a ter semelhantes pelo título.
+- O detalhe do artigo não faz mais a busca de semelhantes, o que acelera a abertura da página.
+
 ## 2026-10 — Busca em todas as fontes por padrão
 
 - A busca abre em "Todas as fontes" (também na página inicial); a fonte única continua a um clique. Com uma só fonte configurada, o padrão é ela.
