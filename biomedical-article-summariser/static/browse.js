@@ -605,20 +605,26 @@
     mount($app,
       h("h1", {}, "Biblioteca"),
       h("p", { class: "lead" }, `${data.items.length} ${data.items.length === 1 ? "artigo salvo" : "artigos salvos"}. Etiquete, exporte e monte listas para compartilhar.`),
-      data.items.length ? h("div", { class: "row" }, h("span", { class: "muted" }, "Exportar tudo:"), formats.map(([l, f]) => exportLink(l, f))) : null,
-      allTags.length ? h("div", { class: "chips" },
-        h("a", { class: `chip${activeTag ? "" : " active"}`, href: "#/biblioteca" }, "todas"),
-        allTags.map((t) => h("a", { class: `chip${t === activeTag ? " active" : ""}`, href: Lib.buildHash("/biblioteca", { tag: t }) }, t))) : null,
+      data.items.length ? h("div", { class: "library-toolbar" },
+        allTags.length ? h("div", { class: "chips", role: "group", "aria-label": "Filtrar por etiqueta" },
+          h("a", { class: `chip${activeTag ? "" : " active"}`, href: "#/biblioteca" }, "Todas"),
+          allTags.map((t) => h("a", { class: `chip${t === activeTag ? " active" : ""}`, href: Lib.buildHash("/biblioteca", { tag: t }) }, t))) : h("span", {}),
+        h("div", { class: "row export-row" }, h("span", { class: "muted" }, "Exportar tudo"), formats.map(([l, f]) => exportLink(l, f)))) : null,
       !data.items.length
         ? h("div", { class: "empty card" }, h("p", {}, "Sua biblioteca está vazia."), h("a", { class: "btn btn-primary", href: "#/busca" }, "Buscar artigos"))
-        : h("ul", { class: "results" }, shown.map((item) => h("li", { class: "result" },
-          h("h3", {}, h("a", { href: articleHref(item) }, item.title)),
-          h("div", { class: "meta" }, metaLine(item)),
-          h("div", { class: "chips" }, item.tags.map((t) => h("span", { class: "chip" }, t))),
-          h("div", { class: "row" },
-            h("button", { type: "button", class: "btn btn-sm btn-ghost", onclick: async () => {
+        : h("div", { class: "table-wrap" }, h("table", { class: "library-table" },
+          h("thead", {}, h("tr", {},
+            h("th", { scope: "col" }, "Artigo"), h("th", { scope: "col", class: "col-year" }, "Ano"),
+            h("th", { scope: "col", class: "col-type" }, "Tipo"), h("th", { scope: "col" }, "Etiquetas"),
+            h("th", { scope: "col", class: "col-actions" }, h("span", { class: "visually-hidden" }, "Ações")))),
+          h("tbody", {}, shown.map((item) => h("tr", {},
+            h("td", { class: "col-title" }, h("a", { href: articleHref(item) }, item.title), h("div", { class: "meta" }, [item.authors, item.journal].filter(Boolean).join(" · "))),
+            h("td", { class: "col-year" }, item.year || "—"),
+            h("td", { class: "col-type" }, (item.studyTypes || [])[0] || "Artigo"),
+            h("td", {}, item.tags.length ? h("div", { class: "chips" }, item.tags.map((t) => h("span", { class: "chip" }, t))) : h("span", { class: "muted" }, "—")),
+            h("td", { class: "col-actions" }, h("button", { type: "button", class: "btn btn-sm btn-ghost", "aria-label": `Remover ${item.title} da biblioteca`, onclick: async () => {
               if (await guarded(() => api(`/api/library?ref=${encodeURIComponent(item.ref)}`, { method: "DELETE" }))) renderLibrary(params);
-            } }, "Remover"))))),
+            } }, "Remover"))))))),
       h("h2", {}, "Listas de leitura"),
       h("div", { class: "row" }, listName, h("button", { type: "button", class: "btn btn-primary", onclick: createList }, "Criar lista")),
       data.lists.length ? data.lists.map((list) => renderListCard(list, params, exportLink, formats))
@@ -638,14 +644,14 @@
           h("span", { class: "note" }, "Qualquer pessoa com o link pode ver esta lista (somente leitura).")));
     };
     if (list.shareToken) showLink(list.shareToken);
-    return h("div", { class: "card stack" },
-      h("h3", {}, `${list.name} (${list.works.length})`),
-      list.works.length ? h("ul", { class: "stack" }, list.works.map((w) => h("li", { class: "row" },
+    return h("section", { class: "list-block stack" },
+      h("h3", {}, list.name, h("span", { class: "muted count" }, ` ${list.works.length} ${list.works.length === 1 ? "artigo" : "artigos"}`)),
+      list.works.length ? h("ul", { class: "list-items" }, list.works.map((w) => h("li", {},
         h("a", { href: articleHref(w) }, w.title),
         h("button", { type: "button", class: "btn btn-sm btn-ghost", "aria-label": `Tirar ${w.title} da lista`, onclick: async () => {
           if (await guarded(() => api(`/api/lists/${list.id}/items?ref=${encodeURIComponent(w.ref)}`, { method: "DELETE" }))) renderLibrary(params);
         } }, "Tirar")))) : h("p", { class: "muted" }, "Lista vazia."),
-      h("div", { class: "row" },
+      h("div", { class: "row list-actions" },
         h("button", { type: "button", class: "btn btn-secondary btn-sm", disabled: !list.works.length, onclick: async () => {
           const shared = await guarded(() => api(`/api/lists/${list.id}/share`, { method: "POST", body: {} }));
           if (shared) { showLink(shared.token); copyText(`${location.origin}/#/lista/${shared.token}`, "Link copiado"); }
