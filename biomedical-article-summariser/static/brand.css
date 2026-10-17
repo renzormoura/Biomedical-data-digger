@@ -520,3 +520,15 @@ input[type="text"], input[type="search"], input[type="email"], input[type="passw
   .save-picker { position: fixed; left: 8px; right: 8px; bottom: 72px; top: auto; width: auto; max-height: 75vh; overflow-y: auto; z-index: 55; }
   .list-check { min-height: 44px; }
 }
+
+/* ---------- Listas recolhíveis na biblioteca ---------- */
+.list-block { padding: 0; }
+.list-block h3 { margin: 0; }
+.list-toggle { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 12px 0; background: none; border: 0; color: var(--text); font: inherit; font-size: 1.05rem; font-weight: 600; text-align: left; cursor: pointer; }
+.list-toggle:hover .list-name { color: var(--accent-text); }
+.list-toggle .icon { transition: transform 0.15s ease; transform: rotate(-90deg); color: var(--muted); }
+.list-toggle[aria-expanded="true"] .icon { transform: none; }
+.list-toggle .list-name { flex: 1; overflow-wrap: anywhere; }
+.list-toggle .count { font-size: 0.86rem; font-weight: 400; white-space: nowrap; }
+.list-body { padding: 0 0 20px 28px; }
+@media (max-width: 900px) { .list-body { padding-left: 0; } }

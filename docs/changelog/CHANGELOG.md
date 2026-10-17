@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2026-10 — Listas recolhíveis na biblioteca
+
+- Em "Listas de leitura" aparecem só os nomes (com a contagem de artigos); ao tocar no nome, a lista abre com os artigos, o link de compartilhamento e as exportações. A lista aberta continua aberta depois de tirar um artigo ou compartilhar.
+
 ## 2026-10 — Salvar em lista, sem rodeios
 
 - O botão **Salvar** é um só: salva na biblioteca e abre o menu para marcar listas, **criar uma lista nova na hora** (mesmo sem nenhuma lista ainda) e remover da biblioteca. Com o artigo já salvo, o clique abre o mesmo menu em vez de remover. Vale na busca, no artigo e nos semelhantes; no celular o menu sobe como painel na base da tela.

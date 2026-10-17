@@ -937,6 +937,9 @@
         : h("p", { class: "muted" }, "Nenhuma análise salva ainda. No Laboratório de IA, clique em \"Salvar no artigo\" depois de gerar uma análise."));
   }
 
+  // listas abertas sobrevivem aos redesenhos da biblioteca (tirar artigo, compartilhar...)
+  const openLists = new Set();
+
   function renderListCard(list, params, exportLink, formats) {
     const linkBox = h("div", { class: "stack" });
     const showLink = (token) => {
@@ -950,8 +953,12 @@
           h("span", { class: "note" }, "Qualquer pessoa com o link pode ver esta lista (somente leitura).")));
     };
     if (list.shareToken) showLink(list.shareToken);
-    return h("section", { class: "list-block stack" },
-      h("h3", {}, list.name, h("span", { class: "muted count" }, ` ${list.works.length} ${list.works.length === 1 ? "artigo" : "artigos"}`)),
+    const bodyId = `list-${list.id}`;
+    const expanded = openLists.has(list.id);
+    const toggle = h("button", { type: "button", class: "list-toggle", "aria-expanded": String(expanded), "aria-controls": bodyId },
+      icon("chevron"), h("span", { class: "list-name" }, list.name),
+      h("span", { class: "muted count" }, `${list.works.length} ${list.works.length === 1 ? "artigo" : "artigos"}`));
+    const body = h("div", { id: bodyId, class: "list-body stack", hidden: expanded ? null : "" },
       list.works.length ? h("ul", { class: "list-items" }, list.works.map((w) => h("li", {},
         h("a", { href: articleHref(w) }, w.title),
         h("button", { type: "button", class: "btn btn-sm btn-ghost", "aria-label": `Tirar ${w.title} da lista`, onclick: async () => {
@@ -967,6 +974,13 @@
           if (await guarded(() => api(`/api/lists/${list.id}`, { method: "DELETE" }))) renderLibrary(params);
         } }, "Excluir lista")),
       linkBox);
+    toggle.addEventListener("click", () => {
+      const open = body.hidden;
+      body.hidden = !open;
+      toggle.setAttribute("aria-expanded", String(open));
+      if (open) openLists.add(list.id); else openLists.delete(list.id);
+    });
+    return h("section", { class: "list-block" }, h("h3", {}, toggle), body);
   }
 
   // ------------------------------------------------------------------ Lista compartilhada
