@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field
 import downloads
 import markdown_lite
 import reliability
-from brasil import anvisa, conitec, consulta
+from brasil import anvisa, conitec, consulta, rename
 from catalog import SearchQuery, Work
 from discovery import DiscoveryService
 from domain import AuthRequiredError, DiggerError, NotFoundError, RateLimitedError, SourceUnavailableError
@@ -111,9 +111,27 @@ def anvisa_substancia(item: anvisa.Substancia) -> dict[str, Any]:
     }
 
 
+def rename_meta(snapshot: rename.Instantaneo) -> dict[str, Any]:
+    days = rename.dias_desde_extracao(snapshot)
+    meta = snapshot.meta
+    return {
+        "fonte": meta.get("fonte"), "arquivoUrl": meta.get("url"), "licenca": meta.get("licenca"), "extraidoEm": meta.get("extraido_em"),
+        "substancias": meta.get("substancias"), "dias": days, "defasado": days is None or days > rename.STALE_AFTER_DAYS,
+    }
+
+
+def rename_registro(item: rename.Registro) -> dict[str, Any]:
+    return {
+        "name": item.nome, "key": item.chave, "components": list(item.componentes), "atc": list(item.atc),
+        "presentations": [{"text": a.texto, "component": a.componente, "atc": a.atc, "page": a.pagina} for a in item.apresentacoes[: rename.MAX_PRESENTATIONS]],
+        "totalPresentations": len(item.apresentacoes),
+    }
+
+
 def situacao_payload(item: consulta.Situacao) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "anvisa": [anvisa_substancia(s) for s in item.anvisa], "conitec": [conitec_registro(r) for r in item.conitec],
+        "rename": [rename_registro(r) for r in item.rename],
     }
     if item.candidato is not None:
         payload.update({"pt": item.candidato.pt, "en": item.candidato.en, "metodo": item.candidato.metodo})
@@ -192,18 +210,18 @@ def register_browse_routes(
     shared_limiter = SlidingWindowLimiter(60, window=60.0)
     brasil_limiter = SlidingWindowLimiter(120, window=60.0)
 
-    def brasil_bases(request: Request) -> tuple[anvisa.Instantaneo, conitec.Instantaneo]:
+    def brasil_bases(request: Request) -> tuple[anvisa.Instantaneo, conitec.Instantaneo, rename.Instantaneo]:
         try:
             brasil_limiter.check(identity(request))
         except RateLimitExceeded as error:
             raise RateLimitedError(str(error)) from error
         try:
-            return anvisa.carregar(), conitec.carregar()
+            return anvisa.carregar(), conitec.carregar(), rename.carregar()
         except (OSError, ValueError, KeyError) as error:
             raise SourceUnavailableError("Os dados oficiais do Brasil não estão disponíveis agora.") from error
 
-    def brasil_meta(bases: tuple[anvisa.Instantaneo, conitec.Instantaneo]) -> dict[str, Any]:
-        return {"anvisa": anvisa_meta(bases[0]), "conitec": conitec_meta(bases[1])}
+    def brasil_meta(bases: tuple[anvisa.Instantaneo, conitec.Instantaneo, rename.Instantaneo]) -> dict[str, Any]:
+        return {"anvisa": anvisa_meta(bases[0]), "conitec": conitec_meta(bases[1]), "rename": rename_meta(bases[2])}
 
     def require_user(request: Request) -> str:
         user = current_user(request)
@@ -288,7 +306,7 @@ def register_browse_routes(
     def brasil_medicamento(request: Request, q: Annotated[str, Query(min_length=3, max_length=80)]) -> dict[str, Any]:
         """Registro na ANVISA e decisoes da Conitec para um medicamento (nome em portugues), sem IA e sem rede."""
         bases = brasil_bases(request)
-        found = consulta.situacao(consulta.normalizar_termo(q), bases[0], bases[1])
+        found = consulta.situacao(consulta.normalizar_termo(q), bases[0], bases[1], rename_data=bases[2])
         return {"consulta": q, **situacao_payload(found), "meta": brasil_meta(bases)}
 
     @app.get("/api/discover/brasil")
@@ -296,7 +314,7 @@ def register_browse_routes(
         """Medicamentos que o resumo parece citar, com registro na ANVISA e decisoes da Conitec (a confirmar)."""
         bases = brasil_bases(request)
         work = discovery.work(ref, client_id=identity(request))
-        found = consulta.situacoes_do_texto(f"{work.title}. {work.abstract}", bases[0], bases[1])
+        found = consulta.situacoes_do_texto(f"{work.title}. {work.abstract}", bases[0], bases[1], bases[2])
         return {"candidatos": [situacao_payload(item) for item in found], "meta": brasil_meta(bases)}
 
     @app.get("/api/discover/similar")

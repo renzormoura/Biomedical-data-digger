@@ -81,6 +81,8 @@ files = [
     "biomedical-article-summariser/brasil/conitec.py",
     "biomedical-article-summariser/brasil/nomes.py",
     "biomedical-article-summariser/brasil/anvisa.py",
+    "biomedical-article-summariser/brasil/rename.py",
+    "biomedical-article-summariser/brasil/rename_build.py",
     "biomedical-article-summariser/brasil/anvisa_build.py",
     "biomedical-article-summariser/brasil/consulta.py",
     "biomedical-article-summariser/brasil/conitec_build.py",

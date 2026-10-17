@@ -828,8 +828,23 @@
       return [h("h5", {}, "Registro na ANVISA"), h("ul", { class: "plain-list" }, anvisaSummary(exact)),
         others.length ? h("details", { class: "more-records" }, h("summary", {}, `Associações e outras formas (${others.length})`), h("ul", { class: "plain-list" }, others.map(anvisaSummary))) : null];
     }
+    function renameSummary(r) {
+      const rows = r.presentations.map((a) => h("li", {}, `${a.text} · ${a.component}`, h("span", { class: "muted" }, ` (p. ${a.page} do PDF)`)));
+      const more = r.totalPresentations - r.presentations.length;
+      return h("li", { class: "anvisa-row" },
+        h("div", {}, h("strong", {}, `${r.name}: consta na Rename 2024`), h("span", { class: "muted" }, ` · componente ${r.components.join(", ").toLowerCase()}`)),
+        h("details", { class: "more-records" }, h("summary", {}, `Apresentações listadas (${r.totalPresentations})`),
+          h("ul", { class: "plain-list" }, rows, more > 0 ? h("li", { class: "muted" }, `e mais ${more} no PDF`) : null)));
+    }
+    function renameBlock(list, key) {
+      if (!list.length) return h("p", { class: "muted" }, "Rename 2024: a substância não consta na relação nacional de medicamentos essenciais.");
+      const exact = list.find((r) => r.key === key) || list[0];
+      const others = list.filter((r) => r !== exact);
+      return [h("h5", {}, "Rename 2024 (medicamentos essenciais)"), h("ul", { class: "plain-list" }, renameSummary(exact)),
+        others.length ? h("details", { class: "more-records" }, h("summary", {}, `Associações e outras formas (${others.length})`), h("ul", { class: "plain-list" }, others.map(renameSummary))) : null];
+    }
     function situationBlock(item, key) {
-      return [anvisaBlock(item.anvisa, key),
+      return [renameBlock(item.rename || [], key), anvisaBlock(item.anvisa, key),
         h("h5", {}, "Decisões da Conitec (incorporação ao SUS)"),
         item.conitec.length ? conitecRows(item.conitec) : h("p", { class: "muted" }, "A Conitec não tem decisão registrada para esta substância.")];
     }
@@ -854,7 +869,8 @@
       const meta = data.meta;
       const source = Lib.safeHttpUrl(meta.conitec.paginaUrl);
       const anvisaSource = Lib.safeHttpUrl(meta.anvisa.arquivoUrl);
-      const stale = [meta.anvisa.defasado ? `ANVISA (extraída em ${fmtDate(meta.anvisa.extraidoEm)})` : "", meta.conitec.defasado ? `Conitec (extraída em ${fmtDate(meta.conitec.extraidoEm)})` : ""].filter(Boolean);
+      const renameSource = meta.rename ? Lib.safeHttpUrl(meta.rename.arquivoUrl) : null;
+      const stale = [meta.anvisa.defasado ? `ANVISA (extraída em ${fmtDate(meta.anvisa.extraidoEm)})` : "", meta.conitec.defasado ? `Conitec (extraída em ${fmtDate(meta.conitec.extraidoEm)})` : "", meta.rename && meta.rename.defasado ? `Rename (extraída em ${fmtDate(meta.rename.extraidoEm)})` : ""].filter(Boolean);
       mount(brasilBox,
         data.candidatos.length
           ? [h("p", { class: "hint" }, "Medicamentos que o resumo parece citar. A correspondência de nomes é automática: confirme."),
@@ -866,7 +882,8 @@
         stale.length ? h("p", { class: "note" }, `Atenção: dados possivelmente desatualizados: ${stale.join("; ")}.`) : null,
         h("p", { class: "note" }, "Fontes: registros de medicamentos da ", anvisaSource ? h("a", { href: anvisaSource, target: "_blank", rel: "noopener noreferrer" }, "ANVISA (dados abertos)") : "ANVISA",
           ` (extraídos em ${fmtDate(meta.anvisa.extraidoEm)}) e decisões da `, source ? h("a", { href: source, target: "_blank", rel: "noopener noreferrer" }, "Conitec") : "Conitec",
-          ` (extraídas em ${fmtDate(meta.conitec.extraidoEm)}). Registro ativo na ANVISA permite comercializar o medicamento; decisão da Conitec trata da incorporação ao SUS. Nenhum dos dois indica disponibilidade na sua unidade de saúde: consulte a Secretaria de Saúde. Ainda não inclui a Rename.`));
+          ` (extraídas em ${fmtDate(meta.conitec.extraidoEm)})`, meta.rename ? [" e a ", renameSource ? h("a", { href: renameSource, target: "_blank", rel: "noopener noreferrer" }, "Rename 2024") : "Rename 2024", ` (extraída do PDF oficial em ${fmtDate(meta.rename.extraidoEm)}, licença CC BY-NC-SA 4.0)`] : null,
+          ". Constar na Rename indica medicamento essencial; registro ativo na ANVISA permite comercializar; decisão da Conitec trata da incorporação ao SUS. Nenhum dos três indica disponibilidade na sua unidade de saúde: consulte a Secretaria de Saúde."));
     }
 
     // artigos semelhantes: carregam depois da pagina e ficam no fim dela

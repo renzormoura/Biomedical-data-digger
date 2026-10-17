@@ -1,6 +1,6 @@
 # Plano: dados reais do Brasil (ANVISA, RENAME e CONITEC)
 
-Status: fases 1 (CONITEC) e 2 (ANVISA) implementadas em 2026-10-17; fase 3 (Rename) pendente. Escrito depois de verificar as três bases ao vivo.
+Status: fases 1 (CONITEC), 2 (ANVISA) e 3 (Rename) implementadas em 2026-10-17; faltam as fases 4 em diante (avaliação e revisão por especialista). Escrito depois de verificar as três bases ao vivo.
 
 ## 1. Problema
 

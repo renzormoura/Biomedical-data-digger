@@ -1,0 +1,7758 @@
+{
+ "meta": {
+  "fonte": "RENAME 2024 (2ª edição, 2025)",
+  "url": "https://bvsms.saude.gov.br/bvs/publicacoes/relacao_nacional_medicamentos_2024_2ed.pdf",
+  "licenca": "CC BY-NC-SA 4.0 (uso não comercial, com atribuição e mesma licença)",
+  "paginas_pdf": 267,
+  "itens": 968,
+  "substancias": 514,
+  "extraido_em": "2026-10-17",
+  "aviso": "Extraido do PDF por script; conferido por amostra. Constar na Rename nao significa disponibilidade na unidade."
+ },
+ "itens": [
+  {
+   "nome": "ácido ursodesoxicólico",
+   "apresentacao": "50 mg comprimido",
+   "componente": "Especializado",
+   "atc": "A05AA02",
+   "pagina": 26,
+   "chave": "acido ursodesoxicolico"
+  },
+  {
+   "nome": "ácido ursodesoxicólico",
+   "apresentacao": "150 mg comprimido",
+   "componente": "Especializado",
+   "atc": "A05AA02",
+   "pagina": 26,
+   "chave": "acido ursodesoxicolico"
+  },
+  {
+   "nome": "ácido ursodesoxicólico",
+   "apresentacao": "300 mg comprimido",
+   "componente": "Especializado",
+   "atc": "A05AA02",
+   "pagina": 26,
+   "chave": "acido ursodesoxicolico"
+  },
+  {
+   "nome": "alfa-agalsidase",
+   "apresentacao": "1 mg/mL solução injetável",
+   "componente": "Especializado",
+   "atc": "A16AB03",
+   "pagina": 26,
+   "chave": "alfa agalsidase"
+  },
+  {
+   "nome": "alfa-alglicosidade",
+   "apresentacao": "50 mg pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "A16AB07",
+   "pagina": 26,
+   "chave": "alfa alglicosidade"
+  },
+  {
+   "nome": "alfacerliponase",
+   "apresentacao": "30 mg/mL solução para infusão",
+   "componente": "Especializado",
+   "atc": "A16AB17",
+   "pagina": 26,
+   "chave": "alfacerliponase"
+  },
+  {
+   "nome": "alfaelosulfase",
+   "apresentacao": "5 mg solução injetável",
+   "componente": "Especializado",
+   "atc": "A16AB12",
+   "pagina": 26,
+   "chave": "alfaelosulfase"
+  },
+  {
+   "nome": "alfataliglicerase",
+   "apresentacao": "200 U pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "A16AB11",
+   "pagina": 26,
+   "chave": "alfataliglicerase"
+  },
+  {
+   "nome": "alfavelaglicerase",
+   "apresentacao": "400 U pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "A16AB10",
+   "pagina": 26,
+   "chave": "alfavelaglicerase"
+  },
+  {
+   "nome": "alfavestronidase",
+   "apresentacao": "2 mg/mL solução injetável",
+   "componente": "Especializado",
+   "atc": "A16AB18",
+   "pagina": 26,
+   "chave": "alfavestronidase"
+  },
+  {
+   "nome": "beta-agalsidase",
+   "apresentacao": "35 mg pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "A16AB04",
+   "pagina": 26,
+   "chave": "beta agalsidase"
+  },
+  {
+   "nome": "biotina",
+   "apresentacao": "2,5 mg cápsula",
+   "componente": "Especializado",
+   "atc": "A11HA05",
+   "pagina": 26,
+   "chave": "biotina"
+  },
+  {
+   "nome": "calcitriol",
+   "apresentacao": "0,25 mcg cápsula",
+   "componente": "Especializado",
+   "atc": "A11CC04",
+   "pagina": 27,
+   "chave": "calcitriol"
+  },
+  {
+   "nome": "carbonato de cálcio",
+   "apresentacao": "1.250 mg (equivalente a 500 mg de cálcio elementar) comprimido",
+   "componente": "Básico",
+   "atc": "A12AA04",
+   "pagina": 27,
+   "chave": "carbonato de calcio"
+  },
+  {
+   "nome": "carbonato de cálcio + colecalciferol",
+   "apresentacao": "1.250 mg (equivalente a 500 mg de cálcio elementar) + 200 UI comprimido",
+   "componente": "Básico",
+   "atc": "A12AX",
+   "pagina": 27,
+   "chave": "calcio colecalciferol"
+  },
+  {
+   "nome": "carbonato de cálcio + colecalciferol",
+   "apresentacao": "1.250 mg (equivalente a 500 mg de cálcio elementar) + 400 UI comprimido",
+   "componente": "Básico",
+   "atc": "A12AX",
+   "pagina": 27,
+   "chave": "calcio colecalciferol"
+  },
+  {
+   "nome": "carbonato de cálcio + colecalciferol",
+   "apresentacao": "1.500 mg (equivalente a 600 mg de cálcio elementar) + 400 UI comprimido",
+   "componente": "Básico",
+   "atc": "A12AX",
+   "pagina": 27,
+   "chave": "calcio colecalciferol"
+  },
+  {
+   "nome": "carvão vegetal ativado",
+   "apresentacao": "pó para suspensão oral",
+   "componente": "Básico",
+   "atc": "A07BA01",
+   "pagina": 28,
+   "chave": "carvao vegetal ativado"
+  },
+  {
+   "nome": "cloridrato de metformina",
+   "apresentacao": "500 mg comprimido",
+   "componente": "Básico",
+   "atc": "A10BA02",
+   "pagina": 28,
+   "chave": "metformina"
+  },
+  {
+   "nome": "cloridrato de metformina",
+   "apresentacao": "850 mg comprimido",
+   "componente": "Básico",
+   "atc": "A10BA02",
+   "pagina": 28,
+   "chave": "metformina"
+  },
+  {
+   "nome": "cloridrato de metoclopramida",
+   "apresentacao": "10 mg comprimido",
+   "componente": "Básico",
+   "atc": "A03FA01",
+   "pagina": 28,
+   "chave": "metoclopramida"
+  },
+  {
+   "nome": "cloridrato de metoclopramida",
+   "apresentacao": "5 mg/mL solução injetável",
+   "componente": "Básico",
+   "atc": "A03FA01",
+   "pagina": 28,
+   "chave": "metoclopramida"
+  },
+  {
+   "nome": "cloridrato de metoclopramida",
+   "apresentacao": "4 mg/mL solução oral",
+   "componente": "Básico",
+   "atc": "A03FA01",
+   "pagina": 28,
+   "chave": "metoclopramida"
+  },
+  {
+   "nome": "cloridrato de ondansetrona",
+   "apresentacao": "4 mg comprimido",
+   "componente": "Básico",
+   "atc": "A04AA01",
+   "pagina": 28,
+   "chave": "ondansetrona"
+  },
+  {
+   "nome": "cloridrato de ondansetrona",
+   "apresentacao": "4 mg comprimido orodispersível",
+   "componente": "Básico",
+   "atc": "A04AA01",
+   "pagina": 28,
+   "chave": "ondansetrona"
+  },
+  {
+   "nome": "cloridrato de ondansetrona",
+   "apresentacao": "8 mg comprimido",
+   "componente": "Básico",
+   "atc": "A04AA01",
+   "pagina": 28,
+   "chave": "ondansetrona"
+  },
+  {
+   "nome": "cloridrato de ondansetrona",
+   "apresentacao": "8 mg comprimido orodispersível",
+   "componente": "Básico",
+   "atc": "A04AA01",
+   "pagina": 28,
+   "chave": "ondansetrona"
+  },
+  {
+   "nome": "cloridrato de piridoxina",
+   "apresentacao": "40 mg comprimido",
+   "componente": "Básico",
+   "atc": "A11HA02",
+   "pagina": 29,
+   "chave": "piridoxina"
+  },
+  {
+   "nome": "cloridrato de piridoxina",
+   "apresentacao": "100 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "A11HA02",
+   "pagina": 29,
+   "chave": "piridoxina"
+  },
+  {
+   "nome": "cloridrato de piridoxina",
+   "apresentacao": "50 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "A11HA02",
+   "pagina": 29,
+   "chave": "piridoxina"
+  },
+  {
+   "nome": "cloridrato de tiamina",
+   "apresentacao": "300 mg comprimido",
+   "componente": "Básico",
+   "atc": "A11DA01",
+   "pagina": 29,
+   "chave": "tiamina"
+  },
+  {
+   "nome": "dapagliflozina propanodiol",
+   "apresentacao": "10 mg comprimido",
+   "componente": "Especializado",
+   "atc": "A10BK01",
+   "pagina": 29,
+   "chave": "dapagliflozina propanodiol"
+  },
+  {
+   "nome": "dicloridrato de sapropterina",
+   "apresentacao": "100 mg comprimido solúvel",
+   "componente": "Estratégico e Especializado",
+   "atc": "A16AX07",
+   "pagina": 29,
+   "chave": "sapropterina"
+  },
+  {
+   "nome": "dicloridrato de trientina",
+   "apresentacao": "250 mg cápsula",
+   "componente": "Especializado",
+   "atc": "A16AX12",
+   "pagina": 29,
+   "chave": "trientina"
+  },
+  {
+   "nome": "digliconato de clorexidina",
+   "apresentacao": "0,12% solução bucal",
+   "componente": "Básico",
+   "atc": "A01AB03",
+   "pagina": 29,
+   "chave": "digliconato de clorexidina"
+  },
+  {
+   "nome": "fosfato de cálcio tribásico + colecalciferol",
+   "apresentacao": "1661,616 mg (600 mg de cálcio) + 400 UI comprimido",
+   "componente": "Básico",
+   "atc": "A12AX",
+   "pagina": 29,
+   "chave": "calcio tribasico colecalciferol"
+  },
+  {
+   "nome": "galsulfase",
+   "apresentacao": "5 mg solução injetável",
+   "componente": "Especializado",
+   "atc": "A16AB08",
+   "pagina": 29,
+   "chave": "galsulfase"
+  },
+  {
+   "nome": "glibenclamida",
+   "apresentacao": "5 mg comprimido",
+   "componente": "Básico",
+   "atc": "A10BB01",
+   "pagina": 29,
+   "chave": "glibenclamida"
+  },
+  {
+   "nome": "glicerol",
+   "apresentacao": "120 mg/mL solução retal",
+   "componente": "Básico",
+   "atc": "A06AG04",
+   "pagina": 30,
+   "chave": "glicerol"
+  },
+  {
+   "nome": "glicerol",
+   "apresentacao": "72 mg supositório retal",
+   "componente": "Básico",
+   "atc": "A06AG04",
+   "pagina": 30,
+   "chave": "glicerol"
+  },
+  {
+   "nome": "gliclazida",
+   "apresentacao": "30 mg comprimido de liberação prolongada",
+   "componente": "Básico",
+   "atc": "A10BB09",
+   "pagina": 30,
+   "chave": "gliclazida"
+  },
+  {
+   "nome": "gliclazida",
+   "apresentacao": "60 mg comprimido de liberação prolongada",
+   "componente": "Básico",
+   "atc": "A10BB09",
+   "pagina": 30,
+   "chave": "gliclazida"
+  },
+  {
+   "nome": "gliclazida",
+   "apresentacao": "80 mg comprimido",
+   "componente": "Básico",
+   "atc": "A10BB09",
+   "pagina": 30,
+   "chave": "gliclazida"
+  },
+  {
+   "nome": "hidróxido de alumínio",
+   "apresentacao": "230 mg comprimido",
+   "componente": "Básico",
+   "atc": "A02AB01",
+   "pagina": 30,
+   "chave": "hidroxido de aluminio"
+  },
+  {
+   "nome": "hidróxido de alumínio",
+   "apresentacao": "60 mg/mL suspensão oral",
+   "componente": "Básico",
+   "atc": "A02AB01",
+   "pagina": 30,
+   "chave": "hidroxido de aluminio"
+  },
+  {
+   "nome": "idursulfase",
+   "apresentacao": "2 mg/mL solução injetável",
+   "componente": "Especializado",
+   "atc": "A16AB09",
+   "pagina": 30,
+   "chave": "idursulfase"
+  },
+  {
+   "nome": "imiglucerase",
+   "apresentacao": "400 U pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "A16AB02",
+   "pagina": 30,
+   "chave": "imiglucerase"
+  },
+  {
+   "nome": "insulina análoga de ação prolongada",
+   "apresentacao": "100 UI/mL solução injetável",
+   "componente": "Especializado",
+   "atc": "A10AE",
+   "pagina": 30,
+   "chave": "insulina analoga de acao"
+  },
+  {
+   "nome": "insulina análoga de ação prolongada",
+   "apresentacao": "300 UI/mL solução injetável",
+   "componente": "Especializado",
+   "atc": "A10AE",
+   "pagina": 30,
+   "chave": "insulina analoga de acao"
+  },
+  {
+   "nome": "insulina análoga de ação rápida",
+   "apresentacao": "100 UI/mL solução injetável",
+   "componente": "Especializado",
+   "atc": "A10AB",
+   "pagina": 30,
+   "chave": "insulina analoga de acao rapida"
+  },
+  {
+   "nome": "insulina humana NPH",
+   "apresentacao": "100 UI/mL suspensão injetável",
+   "componente": "Básico",
+   "atc": "A10AC01",
+   "pagina": 31,
+   "chave": "insulina humana nph"
+  },
+  {
+   "nome": "insulina humana regular",
+   "apresentacao": "100 UI/mL solução injetável",
+   "componente": "Básico",
+   "atc": "A10AB01",
+   "pagina": 31,
+   "chave": "insulina humana regular"
+  },
+  {
+   "nome": "lactulose",
+   "apresentacao": "667 mg/mL xarope",
+   "componente": "Básico",
+   "atc": "A06AD11",
+   "pagina": 31,
+   "chave": "lactulose"
+  },
+  {
+   "nome": "laronidase",
+   "apresentacao": "0,58 mg/mL solução injetável",
+   "componente": "Especializado",
+   "atc": "A16AB05",
+   "pagina": 31,
+   "chave": "laronidase"
+  },
+  {
+   "nome": "mesalazina",
+   "apresentacao": "400 mg comprimido",
+   "componente": "Especializado",
+   "atc": "A07EC02",
+   "pagina": 31,
+   "chave": "mesalazina"
+  },
+  {
+   "nome": "mesalazina",
+   "apresentacao": "500 mg comprimido de liberação prolongada",
+   "componente": "Especializado",
+   "atc": "A07EC02",
+   "pagina": 31,
+   "chave": "mesalazina"
+  },
+  {
+   "nome": "mesalazina",
+   "apresentacao": "800 mg comprimido",
+   "componente": "Especializado",
+   "atc": "A07EC02",
+   "pagina": 31,
+   "chave": "mesalazina"
+  },
+  {
+   "nome": "mesalazina",
+   "apresentacao": "250 mg supositório retal",
+   "componente": "Especializado",
+   "atc": "A07EC02",
+   "pagina": 31,
+   "chave": "mesalazina"
+  },
+  {
+   "nome": "mesalazina",
+   "apresentacao": "500 mg supositório retal",
+   "componente": "Especializado",
+   "atc": "A07EC02",
+   "pagina": 31,
+   "chave": "mesalazina"
+  },
+  {
+   "nome": "mesalazina",
+   "apresentacao": "1.000 mg supositório retal",
+   "componente": "Especializado",
+   "atc": "A07EC02",
+   "pagina": 31,
+   "chave": "mesalazina"
+  },
+  {
+   "nome": "mesalazina",
+   "apresentacao": "10 mg/mL enema",
+   "componente": "Especializado",
+   "atc": "A07EC02",
+   "pagina": 31,
+   "chave": "mesalazina"
+  },
+  {
+   "nome": "mesalazina",
+   "apresentacao": "2 g granulado revestido de liberação prolongada",
+   "componente": "Especializado",
+   "atc": "A07EC02",
+   "pagina": 31,
+   "chave": "mesalazina"
+  },
+  {
+   "nome": "miglustate",
+   "apresentacao": "100 mg cápsula",
+   "componente": "Especializado",
+   "atc": "A16AX06",
+   "pagina": 32,
+   "chave": "miglustate"
+  },
+  {
+   "nome": "nistatina",
+   "apresentacao": "100.000 UI/mL suspensão oral",
+   "componente": "Básico",
+   "atc": "A07AA02",
+   "pagina": 32,
+   "chave": "nistatina"
+  },
+  {
+   "nome": "nitrato de miconazol",
+   "apresentacao": "2% (20 mg/g) gel oral",
+   "componente": "Básico",
+   "atc": "A01AB09",
+   "pagina": 32,
+   "chave": "miconazol"
+  },
+  {
+   "nome": "óleo mineral",
+   "apresentacao": "óleo para uso oral",
+   "componente": "Básico",
+   "atc": "A06AA01",
+   "pagina": 32,
+   "chave": "oleo mineral"
+  },
+  {
+   "nome": "omeprazol",
+   "apresentacao": "10 mg cápsula",
+   "componente": "Básico",
+   "atc": "A02BC01",
+   "pagina": 32,
+   "chave": "omeprazol"
+  },
+  {
+   "nome": "omeprazol",
+   "apresentacao": "20 mg cápsula",
+   "componente": "Básico",
+   "atc": "A02BC01",
+   "pagina": 32,
+   "chave": "omeprazol"
+  },
+  {
+   "nome": "palmitato de retinol",
+   "apresentacao": "100.000 UI cápsula",
+   "componente": "Estratégico",
+   "atc": "A11CA01",
+   "pagina": 32,
+   "chave": "retinol"
+  },
+  {
+   "nome": "palmitato de retinol",
+   "apresentacao": "200.000 UI cápsula",
+   "componente": "Estratégico",
+   "atc": "A11CA01",
+   "pagina": 32,
+   "chave": "retinol"
+  },
+  {
+   "nome": "palmitato de retinol",
+   "apresentacao": "150.000 UI/mL solução oral",
+   "componente": "Básico",
+   "atc": "A11CA01",
+   "pagina": 32,
+   "chave": "retinol"
+  },
+  {
+   "nome": "pancreatina",
+   "apresentacao": "10.000 UI cápsula",
+   "componente": "Especializado",
+   "atc": "A09AA02",
+   "pagina": 32,
+   "chave": "pancreatina"
+  },
+  {
+   "nome": "pancreatina",
+   "apresentacao": "25.000 UI cápsula",
+   "componente": "Especializado",
+   "atc": "A09AA02",
+   "pagina": 32,
+   "chave": "pancreatina"
+  },
+  {
+   "nome": "sais para reidratação oral",
+   "apresentacao": "cloreto de sódio, glicose anidra, cloreto de potássio, citrato de sódio diidratado pó para solução oral",
+   "componente": "Básico",
+   "atc": "A07CA",
+   "pagina": 33,
+   "chave": "sais para reidratacao"
+  },
+  {
+   "nome": "sulfassalazina",
+   "apresentacao": "500 mg comprimido",
+   "componente": "Especializado",
+   "atc": "A07EC01",
+   "pagina": 33,
+   "chave": "sulfassalazina"
+  },
+  {
+   "nome": "sulfato de atropina",
+   "apresentacao": "0,25 mg/mL solução injetável",
+   "componente": "Básico",
+   "atc": "A03BA01",
+   "pagina": 33,
+   "chave": "atropina"
+  },
+  {
+   "nome": "sulfato de magnésio",
+   "apresentacao": "pó para solução oral",
+   "componente": "Básico",
+   "atc": "A06AD04",
+   "pagina": 33,
+   "chave": "sulfato de magnesio"
+  },
+  {
+   "nome": "sulfato de magnésio",
+   "apresentacao": "10% (0,81 mEq/mL Mg++) solução injetável",
+   "componente": "Básico",
+   "atc": "A12CC02",
+   "pagina": 33,
+   "chave": "sulfato de magnesio"
+  },
+  {
+   "nome": "sulfato de magnésio",
+   "apresentacao": "50% (4,05 mEq/mL Mg++) solução injetável",
+   "componente": "Básico",
+   "atc": "A12CC02",
+   "pagina": 33,
+   "chave": "sulfato de magnesio"
+  },
+  {
+   "nome": "sulfato de zinco",
+   "apresentacao": "200 mcg/mL solução injetável",
+   "componente": "Básico",
+   "atc": "A12CB01",
+   "pagina": 33,
+   "chave": "sulfato de zinco"
+  },
+  {
+   "nome": "sulfato de zinco",
+   "apresentacao": "10 mg comprimido mastigável",
+   "componente": "Básico",
+   "atc": "A12CB01",
+   "pagina": 33,
+   "chave": "sulfato de zinco"
+  },
+  {
+   "nome": "equivalente a",
+   "apresentacao": "4 mg/mL de zinco elementar xarope",
+   "componente": "Básico",
+   "atc": "A12CB01",
+   "pagina": 33,
+   "chave": "equivalente a"
+  },
+  {
+   "nome": "abciximabe",
+   "apresentacao": "2 mg/mL solução injetável",
+   "componente": "Procedimento Hospitalar",
+   "atc": "B01AC13",
+   "pagina": 34,
+   "chave": "abciximabe"
+  },
+  {
+   "nome": "acetato de sódio",
+   "apresentacao": "2 mEq/mL solução injetável",
+   "componente": "Básico",
+   "atc": "B05XA08",
+   "pagina": 34,
+   "chave": "acetato de sodio"
+  },
+  {
+   "nome": "ácido acetilsalicílico",
+   "apresentacao": "100 mg comprimido",
+   "componente": "Básico",
+   "atc": "B01AC06",
+   "pagina": 34,
+   "chave": "acido acetilsalicilico"
+  },
+  {
+   "nome": "ácido fólico",
+   "apresentacao": "5 mg comprimido",
+   "componente": "Básico",
+   "atc": "B03BB01",
+   "pagina": 34,
+   "chave": "acido folico"
+  },
+  {
+   "nome": "ácido fólico",
+   "apresentacao": "0,2 mg/mL solução oral",
+   "componente": "Básico",
+   "atc": "B03BB01",
+   "pagina": 34,
+   "chave": "acido folico"
+  },
+  {
+   "nome": "ácido tranexâmico",
+   "apresentacao": "250 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "B02AA02",
+   "pagina": 34,
+   "chave": "acido tranexamico"
+  },
+  {
+   "nome": "albumina humana",
+   "apresentacao": "0,2 g/mL (20%) solução injetável",
+   "componente": "Procedimento Hospitalar",
+   "atc": "B05AA01",
+   "pagina": 34,
+   "chave": "albumina humana"
+  },
+  {
+   "nome": "alfaepoetina",
+   "apresentacao": "1.000 UI solução injetável",
+   "componente": "Especializado",
+   "atc": "B03XA01",
+   "pagina": 34,
+   "chave": "alfaepoetina"
+  },
+  {
+   "nome": "alfaepoetina",
+   "apresentacao": "1.000 UI pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "B03XA01",
+   "pagina": 34,
+   "chave": "alfaepoetina"
+  },
+  {
+   "nome": "alfaepoetina",
+   "apresentacao": "2.000 UI solução injetável",
+   "componente": "Especializado",
+   "atc": "B03XA01",
+   "pagina": 34,
+   "chave": "alfaepoetina"
+  },
+  {
+   "nome": "alfaepoetina",
+   "apresentacao": "2.000 UI pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "B03XA01",
+   "pagina": 34,
+   "chave": "alfaepoetina"
+  },
+  {
+   "nome": "alfaepoetina",
+   "apresentacao": "3.000 UI solução injetável",
+   "componente": "Especializado",
+   "atc": "B03XA01",
+   "pagina": 35,
+   "chave": "alfaepoetina"
+  },
+  {
+   "nome": "alfaepoetina",
+   "apresentacao": "3.000 UI pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "B03XA01",
+   "pagina": 35,
+   "chave": "alfaepoetina"
+  },
+  {
+   "nome": "alfaepoetina",
+   "apresentacao": "4.000 UI pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "B03XA01",
+   "pagina": 35,
+   "chave": "alfaepoetina"
+  },
+  {
+   "nome": "alfaepoetina",
+   "apresentacao": "4.000 UI solução injetável",
+   "componente": "Especializado",
+   "atc": "B03XA01",
+   "pagina": 35,
+   "chave": "alfaepoetina"
+  },
+  {
+   "nome": "alfaepoetina",
+   "apresentacao": "10.000 UI solução injetável",
+   "componente": "Especializado",
+   "atc": "B03XA01",
+   "pagina": 35,
+   "chave": "alfaepoetina"
+  },
+  {
+   "nome": "alfaepoetina",
+   "apresentacao": "10.000 UI pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "B03XA01",
+   "pagina": 35,
+   "chave": "alfaepoetina"
+  },
+  {
+   "nome": "alteplase",
+   "apresentacao": "10 mg pó para solução injetável",
+   "componente": "Procedimento Hospitalar",
+   "atc": "B01AD02",
+   "pagina": 35,
+   "chave": "alteplase"
+  },
+  {
+   "nome": "alteplase",
+   "apresentacao": "20 mg pó para solução injetável",
+   "componente": "Procedimento Hospitalar",
+   "atc": "B01AD02",
+   "pagina": 35,
+   "chave": "alteplase"
+  },
+  {
+   "nome": "alteplase",
+   "apresentacao": "50 mg pó para solução injetável",
+   "componente": "Procedimento Hospitalar",
+   "atc": "B01AD02",
+   "pagina": 35,
+   "chave": "alteplase"
+  },
+  {
+   "nome": "bicarbonato de sódio",
+   "apresentacao": "84 mg/mL (8,4%) equivalente a 1 mEq/mL solução injetável",
+   "componente": "Básico",
+   "atc": "B05XA02",
+   "pagina": 36,
+   "chave": "bicarbonato de sodio"
+  },
+  {
+   "nome": "bissulfato de clopidogrel",
+   "apresentacao": "75 mg comprimido",
+   "componente": "Especializado e Procedimento Hospitalar",
+   "atc": "B01AC04",
+   "pagina": 36,
+   "chave": "bissulfato de clopidogrel"
+  },
+  {
+   "nome": "cianocobalamina",
+   "apresentacao": "500 mcg/mL solução injetável",
+   "componente": "Básico",
+   "atc": "B03BA01",
+   "pagina": 36,
+   "chave": "cianocobalamina"
+  },
+  {
+   "nome": "cloreto de potássio",
+   "apresentacao": "191 mg/mL (19,1%) equivalente a 2,56 mEq/mL solução injetável",
+   "componente": "Básico",
+   "atc": "B05XA01",
+   "pagina": 36,
+   "chave": "cloreto de potassio"
+  },
+  {
+   "nome": "cloreto de sódio",
+   "apresentacao": "200 mg/mL (20%) equivalente a 3,4 mEq/mL solução injetável",
+   "componente": "Básico",
+   "atc": "B05XA03",
+   "pagina": 36,
+   "chave": "cloreto de sodio"
+  },
+  {
+   "nome": "cloreto de sódio",
+   "apresentacao": "9 mg/mL (0,9%) equivalente a 0,154 mEq/mL solução injetável",
+   "componente": "Básico",
+   "atc": "B05XA03",
+   "pagina": 37,
+   "chave": "cloreto de sodio"
+  },
+  {
+   "nome": "cloridrato de tirofibana",
+   "apresentacao": "0,25 mg/mL solução injetável",
+   "componente": "Procedimento Hospitalar",
+   "atc": "B01AC17",
+   "pagina": 37,
+   "chave": "tirofibana"
+  },
+  {
+   "nome": "complexo protrombínico humano",
+   "apresentacao": "500 UI pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "B02BD01",
+   "pagina": 37,
+   "chave": "complexo protrombinico humano"
+  },
+  {
+   "nome": "complexo protrombínico humano",
+   "apresentacao": "600 UI pó para solução injetável",
+   "componente": "Estratégico e Procedimento Hospitalar",
+   "atc": "B02BD01",
+   "pagina": 37,
+   "chave": "complexo protrombinico humano"
+  },
+  {
+   "nome": "complexo protrombínico parcialmente ativado",
+   "apresentacao": "500 UI pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "B02BD03",
+   "pagina": 37,
+   "chave": "complexo protrombinico parcialmente ativado"
+  },
+  {
+   "nome": "complexo protrombínico parcialmente ativado",
+   "apresentacao": "1.000UI pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "B02BD03",
+   "pagina": 37,
+   "chave": "complexo protrombinico parcialmente ativado"
+  },
+  {
+   "nome": "complexo protrombínico parcialmente ativado",
+   "apresentacao": "2.500UI pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "B02BD03",
+   "pagina": 37,
+   "chave": "complexo protrombinico parcialmente ativado"
+  },
+  {
+   "nome": "eltrombopague olamina",
+   "apresentacao": "25 mg comprimido",
+   "componente": "Especializado",
+   "atc": "B02BX05",
+   "pagina": 37,
+   "chave": "eltrombopague olamina"
+  },
+  {
+   "nome": "eltrombopague olamina",
+   "apresentacao": "50 mg comprimido",
+   "componente": "Especializado",
+   "atc": "B02BX05",
+   "pagina": 37,
+   "chave": "eltrombopague olamina"
+  },
+  {
+   "nome": "emicizumabe",
+   "apresentacao": "30 mg/mL solução injetável",
+   "componente": "Estratégico",
+   "atc": "B02BX06",
+   "pagina": 38,
+   "chave": "emicizumabe"
+  },
+  {
+   "nome": "emicizumabe",
+   "apresentacao": "150 mg /mL (apresentações de 0,4 ml , 0,7 ml e 1 ml) solução injetável",
+   "componente": "Estratégico",
+   "atc": "B02BX06",
+   "pagina": 38,
+   "chave": "emicizumabe"
+  },
+  {
+   "nome": "enoxaparina sódica",
+   "apresentacao": "40 mg/0,4 mL solução injetável",
+   "componente": "Especializado",
+   "atc": "B01AB05",
+   "pagina": 38,
+   "chave": "enoxaparina"
+  },
+  {
+   "nome": "enoxaparina sódica",
+   "apresentacao": "60 mg/0,6 mL solução injetável",
+   "componente": "Especializado",
+   "atc": "B01AB05",
+   "pagina": 38,
+   "chave": "enoxaparina"
+  },
+  {
+   "nome": "estreptoquinase",
+   "apresentacao": "250.000 UI pó para solução injetável",
+   "componente": "Procedimento Hospitalar",
+   "atc": "B01AD01",
+   "pagina": 38,
+   "chave": "estreptoquinase"
+  },
+  {
+   "nome": "fator IX de coagulação",
+   "apresentacao": "200 UI pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "B02BD04",
+   "pagina": 38,
+   "chave": "fator ix de coagulacao"
+  },
+  {
+   "nome": "fator IX de coagulação",
+   "apresentacao": "250 UI pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "B02BD04",
+   "pagina": 38,
+   "chave": "fator ix de coagulacao"
+  },
+  {
+   "nome": "fator IX de coagulação",
+   "apresentacao": "500 UI pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "B02BD04",
+   "pagina": 38,
+   "chave": "fator ix de coagulacao"
+  },
+  {
+   "nome": "fator IX de coagulação",
+   "apresentacao": "600 UI pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "B02BD04",
+   "pagina": 38,
+   "chave": "fator ix de coagulacao"
+  },
+  {
+   "nome": "fator IX de coagulação",
+   "apresentacao": "1.000 UI pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "B02BD04",
+   "pagina": 38,
+   "chave": "fator ix de coagulacao"
+  },
+  {
+   "nome": "fator IX de coagulação",
+   "apresentacao": "1.200 UI pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "B02BD04",
+   "pagina": 38,
+   "chave": "fator ix de coagulacao"
+  },
+  {
+   "nome": "fator VII de coagulação ativado recombinante",
+   "apresentacao": "1 mg (50.000 UI) pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "B02BD05",
+   "pagina": 39,
+   "chave": "fator vii de coagulacao ativado recombinante"
+  },
+  {
+   "nome": "fator VII de coagulação ativado recombinante",
+   "apresentacao": "2 mg (100.000 UI) pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "B02BD05",
+   "pagina": 39,
+   "chave": "fator vii de coagulacao ativado recombinante"
+  },
+  {
+   "nome": "fator VII de coagulação ativado recombinante",
+   "apresentacao": "5 mg (250.000 UI) pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "B02BD05",
+   "pagina": 39,
+   "chave": "fator vii de coagulacao ativado recombinante"
+  },
+  {
+   "nome": "fator VIII de coagulação",
+   "apresentacao": "250 UI pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "B02BD02",
+   "pagina": 39,
+   "chave": "fator viii de coagulacao"
+  },
+  {
+   "nome": "fator VIII de coagulação",
+   "apresentacao": "500 UI pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "B02BD02",
+   "pagina": 39,
+   "chave": "fator viii de coagulacao"
+  },
+  {
+   "nome": "fator VIII de coagulação",
+   "apresentacao": "1.000 UI pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "B02BD02",
+   "pagina": 39,
+   "chave": "fator viii de coagulacao"
+  },
+  {
+   "nome": "fator VIII de coagulação contendo fator de von Willebrand",
+   "apresentacao": "250 UI pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "B02BD06",
+   "pagina": 39,
+   "chave": "fator viii de coagulacao contendo fator de von willebrand"
+  },
+  {
+   "nome": "fator VIII de coagulação contendo fator de von Willebrand",
+   "apresentacao": "500 UI pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "B02BD06",
+   "pagina": 39,
+   "chave": "fator viii de coagulacao contendo fator de von willebrand"
+  },
+  {
+   "nome": "fator VIII de coagulação contendo fator de von Willebrand",
+   "apresentacao": "1.000 UI pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "B02BD06",
+   "pagina": 39,
+   "chave": "fator viii de coagulacao contendo fator de von willebrand"
+  },
+  {
+   "nome": "fator VIII de coagulação recombinante",
+   "apresentacao": "250 UI pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "B02BD02",
+   "pagina": 39,
+   "chave": "fator viii de coagulacao recombinante"
+  },
+  {
+   "nome": "fator VIII de coagulação recombinante",
+   "apresentacao": "500 UI pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "B02BD02",
+   "pagina": 39,
+   "chave": "fator viii de coagulacao recombinante"
+  },
+  {
+   "nome": "fator VIII de coagulação recombinante",
+   "apresentacao": "1.000 UI pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "B02BD02",
+   "pagina": 39,
+   "chave": "fator viii de coagulacao recombinante"
+  },
+  {
+   "nome": "fator VIII de coagulação recombinante",
+   "apresentacao": "1.500 UI pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "B02BD02",
+   "pagina": 39,
+   "chave": "fator viii de coagulacao recombinante"
+  },
+  {
+   "nome": "fator XIII de coagulação",
+   "apresentacao": "250 UI pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "B02BD07",
+   "pagina": 40,
+   "chave": "fator xiii de coagulacao"
+  },
+  {
+   "nome": "ferripolimaltose",
+   "apresentacao": "50 mg/mL solução oral",
+   "componente": "Básico",
+   "atc": "B03AB05",
+   "pagina": 40,
+   "chave": "ferripolimaltose"
+  },
+  {
+   "nome": "ferripolimaltose",
+   "apresentacao": "10 mg/mL xarope",
+   "componente": "Básico",
+   "atc": "B03AB05",
+   "pagina": 40,
+   "chave": "ferripolimaltose"
+  },
+  {
+   "nome": "ferripolimaltose",
+   "apresentacao": "100 mg comprimido mastigável",
+   "componente": "Básico",
+   "atc": "B03AB05",
+   "pagina": 40,
+   "chave": "ferripolimaltose"
+  },
+  {
+   "nome": "fibrinogênio",
+   "apresentacao": "1 g pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "B02BB01",
+   "pagina": 40,
+   "chave": "fibrinogenio"
+  },
+  {
+   "nome": "fosfato de potássio monobásico + fosfato de potássio dibásico",
+   "apresentacao": "0,03 g/mL + 0,1567 g/mL (equivalente a 2 mEq/mL) solução injetável",
+   "componente": "Básico",
+   "atc": "B05XA06",
+   "pagina": 40,
+   "chave": "potassio monobasico fosfato de potassio dibasico"
+  },
+  {
+   "nome": "heparina sódica",
+   "apresentacao": "5.000 UI/0,25 mL solução injetável",
+   "componente": "Básico",
+   "atc": "B01AB01",
+   "pagina": 40,
+   "chave": "heparina"
+  },
+  {
+   "nome": "iloprosta",
+   "apresentacao": "10 mcg/mL solução inalatória",
+   "componente": "Especializado",
+   "atc": "B01AC11",
+   "pagina": 40,
+   "chave": "iloprosta"
+  },
+  {
+   "nome": "sacarato de hidróxido férrico",
+   "apresentacao": "20 mg/mL solução injetável",
+   "componente": "Especializado",
+   "atc": "B03AB02",
+   "pagina": 40,
+   "chave": "sacarato de hidroxido ferrico"
+  },
+  {
+   "nome": "selexipague",
+   "apresentacao": "200 mcg comprimido",
+   "componente": "Especializado",
+   "atc": "B01AC27",
+   "pagina": 41,
+   "chave": "selexipague"
+  },
+  {
+   "nome": "selexipague",
+   "apresentacao": "400 mcg comprimido",
+   "componente": "Especializado",
+   "atc": "B01AC27",
+   "pagina": 41,
+   "chave": "selexipague"
+  },
+  {
+   "nome": "selexipague",
+   "apresentacao": "600 mcg comprimido",
+   "componente": "Especializado",
+   "atc": "B01AC27",
+   "pagina": 41,
+   "chave": "selexipague"
+  },
+  {
+   "nome": "selexipague",
+   "apresentacao": "800 mcg comprimido",
+   "componente": "Especializado",
+   "atc": "B01AC27",
+   "pagina": 41,
+   "chave": "selexipague"
+  },
+  {
+   "nome": "selexipague",
+   "apresentacao": "1.000 mcg comprimido",
+   "componente": "Especializado",
+   "atc": "B01AC27",
+   "pagina": 41,
+   "chave": "selexipague"
+  },
+  {
+   "nome": "selexipague",
+   "apresentacao": "1.200 mcg comprimido",
+   "componente": "Especializado",
+   "atc": "B01AC27",
+   "pagina": 41,
+   "chave": "selexipague"
+  },
+  {
+   "nome": "selexipague",
+   "apresentacao": "1.400 mcg comprimido",
+   "componente": "Especializado",
+   "atc": "B01AC27",
+   "pagina": 41,
+   "chave": "selexipague"
+  },
+  {
+   "nome": "selexipague",
+   "apresentacao": "1.600 mcg comprimido",
+   "componente": "Especializado",
+   "atc": "B01AC27",
+   "pagina": 41,
+   "chave": "selexipague"
+  },
+  {
+   "nome": "solução ringer + lactato lactato de sódio",
+   "apresentacao": "3 mg/mL + cloreto de sódio 6 mg/mL + cloreto de potássio 0/ ,3 mg/mL + cloreto de cálcio 0,2 mg/mL solução injetável",
+   "componente": "Básico",
+   "atc": "B05BB01",
+   "pagina": 41,
+   "chave": "solucao ringer lactato lactato de sodio"
+  },
+  {
+   "nome": "sulfato ferroso Equivalente a",
+   "apresentacao": "5 mg/mL de ferro elementar xarope",
+   "componente": "Básico",
+   "atc": "B03AA07",
+   "pagina": 42,
+   "chave": "sulfato ferroso equivalente a"
+  },
+  {
+   "nome": "Equivalente a",
+   "apresentacao": "25 mg/mL de ferro elementar solução oral",
+   "componente": "Básico",
+   "atc": "B03AA07",
+   "pagina": 42,
+   "chave": "equivalente a"
+  },
+  {
+   "nome": "Equivalente a",
+   "apresentacao": "40 mg de ferro elementar comprimido",
+   "componente": "Básico",
+   "atc": "B03AA07",
+   "pagina": 42,
+   "chave": "equivalente a"
+  },
+  {
+   "nome": "tenecteplase",
+   "apresentacao": "40 mg pó para solução injetável",
+   "componente": "Procedimento Hospitalar",
+   "atc": "B01AD11",
+   "pagina": 42,
+   "chave": "tenecteplase"
+  },
+  {
+   "nome": "tenecteplase",
+   "apresentacao": "50 mg pó para solução injetável",
+   "componente": "Procedimento Hospitalar",
+   "atc": "B01AD11",
+   "pagina": 42,
+   "chave": "tenecteplase"
+  },
+  {
+   "nome": "varfarina sódica",
+   "apresentacao": "1 mg comprimido",
+   "componente": "Básico",
+   "atc": "B01AA03",
+   "pagina": 42,
+   "chave": "varfarina"
+  },
+  {
+   "nome": "varfarina sódica",
+   "apresentacao": "5 mg comprimido",
+   "componente": "Básico",
+   "atc": "B01AA03",
+   "pagina": 42,
+   "chave": "varfarina"
+  },
+  {
+   "nome": "ácido nicotínico",
+   "apresentacao": "500 mg comprimido de liberação prolongada",
+   "componente": "Especializado",
+   "atc": "C10AD02",
+   "pagina": 43,
+   "chave": "acido nicotinico"
+  },
+  {
+   "nome": "ambrisentana",
+   "apresentacao": "5 mg comprimido",
+   "componente": "Especializado",
+   "atc": "C02KX02",
+   "pagina": 43,
+   "chave": "ambrisentana"
+  },
+  {
+   "nome": "ambrisentana",
+   "apresentacao": "10 mg comprimido",
+   "componente": "Especializado",
+   "atc": "C02KX02",
+   "pagina": 43,
+   "chave": "ambrisentana"
+  },
+  {
+   "nome": "atenolol",
+   "apresentacao": "50 mg comprimido",
+   "componente": "Básico",
+   "atc": "C07AB03",
+   "pagina": 43,
+   "chave": "atenolol"
+  },
+  {
+   "nome": "atenolol",
+   "apresentacao": "100 mg comprimido",
+   "componente": "Básico",
+   "atc": "C07AB03",
+   "pagina": 43,
+   "chave": "atenolol"
+  },
+  {
+   "nome": "atorvastatina cálcica",
+   "apresentacao": "10 mg comprimido",
+   "componente": "Especializado",
+   "atc": "C10AA05",
+   "pagina": 43,
+   "chave": "atorvastatina"
+  },
+  {
+   "nome": "atorvastatina cálcica",
+   "apresentacao": "20 mg comprimido",
+   "componente": "Especializado",
+   "atc": "C10AA05",
+   "pagina": 43,
+   "chave": "atorvastatina"
+  },
+  {
+   "nome": "atorvastatina cálcica",
+   "apresentacao": "40 mg comprimido",
+   "componente": "Especializado",
+   "atc": "C10AA05",
+   "pagina": 43,
+   "chave": "atorvastatina"
+  },
+  {
+   "nome": "atorvastatina cálcica",
+   "apresentacao": "80 mg comprimido",
+   "componente": "Especializado",
+   "atc": "C10AA05",
+   "pagina": 43,
+   "chave": "atorvastatina"
+  },
+  {
+   "nome": "besilato de anlodipino",
+   "apresentacao": "5 mg comprimido",
+   "componente": "Básico",
+   "atc": "C08CA01",
+   "pagina": 43,
+   "chave": "anlodipino"
+  },
+  {
+   "nome": "besilato de anlodipino",
+   "apresentacao": "10 mg comprimido",
+   "componente": "Básico",
+   "atc": "C08CA01",
+   "pagina": 43,
+   "chave": "anlodipino"
+  },
+  {
+   "nome": "bezafibrato",
+   "apresentacao": "200 mg comprimido",
+   "componente": "Especializado",
+   "atc": "C10AB02",
+   "pagina": 44,
+   "chave": "bezafibrato"
+  },
+  {
+   "nome": "bezafibrato",
+   "apresentacao": "400 mg comprimido de liberação prolongada",
+   "componente": "Especializado",
+   "atc": "C10AB02",
+   "pagina": 44,
+   "chave": "bezafibrato"
+  },
+  {
+   "nome": "bosentana",
+   "apresentacao": "62,5 mg comprimido",
+   "componente": "Especializado",
+   "atc": "C02KX01",
+   "pagina": 44,
+   "chave": "bosentana"
+  },
+  {
+   "nome": "bosentana",
+   "apresentacao": "125 mg comprimido",
+   "componente": "Especializado",
+   "atc": "C02KX01",
+   "pagina": 44,
+   "chave": "bosentana"
+  },
+  {
+   "nome": "captopril",
+   "apresentacao": "25 mg comprimido",
+   "componente": "Básico",
+   "atc": "C09AA01",
+   "pagina": 44,
+   "chave": "captopril"
+  },
+  {
+   "nome": "carvedilol",
+   "apresentacao": "3,125 mg comprimido",
+   "componente": "Básico",
+   "atc": "C07AG02",
+   "pagina": 44,
+   "chave": "carvedilol"
+  },
+  {
+   "nome": "carvedilol",
+   "apresentacao": "6,25 mg comprimido",
+   "componente": "Básico",
+   "atc": "C07AG02",
+   "pagina": 44,
+   "chave": "carvedilol"
+  },
+  {
+   "nome": "carvedilol",
+   "apresentacao": "12,5 mg comprimido",
+   "componente": "Básico",
+   "atc": "C07AG02",
+   "pagina": 44,
+   "chave": "carvedilol"
+  },
+  {
+   "nome": "carvedilol",
+   "apresentacao": "25 mg comprimido",
+   "componente": "Básico",
+   "atc": "C07AG02",
+   "pagina": 44,
+   "chave": "carvedilol"
+  },
+  {
+   "nome": "ciprofibrato",
+   "apresentacao": "100 mg comprimido",
+   "componente": "Especializado",
+   "atc": "C10AB08",
+   "pagina": 44,
+   "chave": "ciprofibrato"
+  },
+  {
+   "nome": "cloridrato de amiodarona",
+   "apresentacao": "50 mg/mL solução injetável",
+   "componente": "Básico",
+   "atc": "C01BD01",
+   "pagina": 44,
+   "chave": "amiodarona"
+  },
+  {
+   "nome": "cloridrato de amiodarona",
+   "apresentacao": "200 mg comprimido",
+   "componente": "Básico",
+   "atc": "C01BD01",
+   "pagina": 44,
+   "chave": "amiodarona"
+  },
+  {
+   "nome": "cloridrato de dobutamina",
+   "apresentacao": "12,5 mg/mL solução injetável",
+   "componente": "Básico",
+   "atc": "C01CA07",
+   "pagina": 44,
+   "chave": "dobutamina"
+  },
+  {
+   "nome": "cloridrato de dopamina",
+   "apresentacao": "5 mg/mL solução injetável",
+   "componente": "Básico",
+   "atc": "C01CA04",
+   "pagina": 45,
+   "chave": "dopamina"
+  },
+  {
+   "nome": "cloridrato de hidralazina",
+   "apresentacao": "25 mg comprimido",
+   "componente": "Básico",
+   "atc": "C02DB02",
+   "pagina": 45,
+   "chave": "hidralazina"
+  },
+  {
+   "nome": "cloridrato de hidralazina",
+   "apresentacao": "50 mg comprimido",
+   "componente": "Básico",
+   "atc": "C02DB02",
+   "pagina": 45,
+   "chave": "hidralazina"
+  },
+  {
+   "nome": "cloridrato de lidocaína",
+   "apresentacao": "10 mg/mL (1%) solução injetável",
+   "componente": "Básico",
+   "atc": "C01BB01",
+   "pagina": 45,
+   "chave": "lidocaina"
+  },
+  {
+   "nome": "cloridrato de lidocaína",
+   "apresentacao": "20 mg/mL (2%) solução injetável",
+   "componente": "Básico",
+   "atc": "C01BB01",
+   "pagina": 45,
+   "chave": "lidocaina"
+  },
+  {
+   "nome": "cloridrato de propafenona",
+   "apresentacao": "300 mg comprimido",
+   "componente": "Básico",
+   "atc": "C01BC03",
+   "pagina": 45,
+   "chave": "propafenona"
+  },
+  {
+   "nome": "cloridrato de propafenona",
+   "apresentacao": "150 mg comprimido",
+   "componente": "Básico",
+   "atc": "C01BC03",
+   "pagina": 45,
+   "chave": "propafenona"
+  },
+  {
+   "nome": "cloridrato de propranolol",
+   "apresentacao": "10 mg comprimido",
+   "componente": "Básico",
+   "atc": "C07AA05",
+   "pagina": 45,
+   "chave": "propranolol"
+  },
+  {
+   "nome": "cloridrato de propranolol",
+   "apresentacao": "40 mg comprimido",
+   "componente": "Básico",
+   "atc": "C07AA05",
+   "pagina": 45,
+   "chave": "propranolol"
+  },
+  {
+   "nome": "citrato de sildenafila",
+   "apresentacao": "20 mg comprimido",
+   "componente": "Especializado",
+   "atc": "C01CE",
+   "pagina": 45,
+   "chave": "sildenafila"
+  },
+  {
+   "nome": "citrato de sildenafila",
+   "apresentacao": "25 mg comprimido",
+   "componente": "Especializado",
+   "atc": "C01CE",
+   "pagina": 45,
+   "chave": "sildenafila"
+  },
+  {
+   "nome": "citrato de sildenafila",
+   "apresentacao": "50 mg comprimido",
+   "componente": "Especializado",
+   "atc": "C01CE",
+   "pagina": 45,
+   "chave": "sildenafila"
+  },
+  {
+   "nome": "cloridrato de verapamil",
+   "apresentacao": "80 mg comprimido",
+   "componente": "Básico",
+   "atc": "C08DA01",
+   "pagina": 46,
+   "chave": "verapamil"
+  },
+  {
+   "nome": "cloridrato de verapamil",
+   "apresentacao": "2,5 mg/mL solução injetável",
+   "componente": "Básico",
+   "atc": "C08DA01",
+   "pagina": 46,
+   "chave": "verapamil"
+  },
+  {
+   "nome": "cloridrato de verapamil",
+   "apresentacao": "120 mg comprimido",
+   "componente": "Básico",
+   "atc": "C08DA01",
+   "pagina": 46,
+   "chave": "verapamil"
+  },
+  {
+   "nome": "digoxina",
+   "apresentacao": "0,25 mg comprimido",
+   "componente": "Básico",
+   "atc": "C01AA05",
+   "pagina": 46,
+   "chave": "digoxina"
+  },
+  {
+   "nome": "digoxina",
+   "apresentacao": "0,05 mg/mL elixir",
+   "componente": "Básico",
+   "atc": "C01AA05",
+   "pagina": 46,
+   "chave": "digoxina"
+  },
+  {
+   "nome": "dinitrato de isossorbida",
+   "apresentacao": "5 mg comprimido sublingual",
+   "componente": "Básico",
+   "atc": "C01DA08",
+   "pagina": 46,
+   "chave": "isossorbida"
+  },
+  {
+   "nome": "epinefrina",
+   "apresentacao": "1 mg/mL solução injetável",
+   "componente": "Básico",
+   "atc": "C01CA24",
+   "pagina": 46,
+   "chave": "epinefrina"
+  },
+  {
+   "nome": "espironolactona",
+   "apresentacao": "25 mg comprimido",
+   "componente": "Básico",
+   "atc": "C03DA01",
+   "pagina": 46,
+   "chave": "espironolactona"
+  },
+  {
+   "nome": "espironolactona",
+   "apresentacao": "100 mg comprimido",
+   "componente": "Básico",
+   "atc": "C03DA01",
+   "pagina": 46,
+   "chave": "espironolactona"
+  },
+  {
+   "nome": "etofibrato",
+   "apresentacao": "500 mg cápsula",
+   "componente": "Especializado",
+   "atc": "C10AB09",
+   "pagina": 46,
+   "chave": "etofibrato"
+  },
+  {
+   "nome": "fenofibrato",
+   "apresentacao": "200 mg cápsula",
+   "componente": "Especializado",
+   "atc": "C10AB05",
+   "pagina": 46,
+   "chave": "fenofibrato"
+  },
+  {
+   "nome": "fenofibrato",
+   "apresentacao": "250 mg cápsula de liberação retardada",
+   "componente": "Especializado",
+   "atc": "C10AB05",
+   "pagina": 46,
+   "chave": "fenofibrato"
+  },
+  {
+   "nome": "furosemida",
+   "apresentacao": "40 mg comprimido",
+   "componente": "Básico",
+   "atc": "C03CA01",
+   "pagina": 47,
+   "chave": "furosemida"
+  },
+  {
+   "nome": "furosemida",
+   "apresentacao": "10 mg/mL solução injetável",
+   "componente": "Básico",
+   "atc": "C03CA01",
+   "pagina": 47,
+   "chave": "furosemida"
+  },
+  {
+   "nome": "genfibrozila",
+   "apresentacao": "600 mg comprimido",
+   "componente": "Especializado",
+   "atc": "C10AB04",
+   "pagina": 47,
+   "chave": "genfibrozila"
+  },
+  {
+   "nome": "genfibrozila",
+   "apresentacao": "900 mg comprimido",
+   "componente": "Especializado",
+   "atc": "C10AB04",
+   "pagina": 47,
+   "chave": "genfibrozila"
+  },
+  {
+   "nome": "hemitartarato de norepinefrina",
+   "apresentacao": "2 mg/mL solução injetável",
+   "componente": "Básico",
+   "atc": "C01CA03",
+   "pagina": 47,
+   "chave": "norepinefrina"
+  },
+  {
+   "nome": "hidroclorotiazida",
+   "apresentacao": "12,5 mg comprimido",
+   "componente": "Básico",
+   "atc": "C03AA03",
+   "pagina": 47,
+   "chave": "hidroclorotiazida"
+  },
+  {
+   "nome": "hidroclorotiazida",
+   "apresentacao": "25 mg comprimido",
+   "componente": "Básico",
+   "atc": "C03AA03",
+   "pagina": 47,
+   "chave": "hidroclorotiazida"
+  },
+  {
+   "nome": "losartana potássica",
+   "apresentacao": "50 mg comprimido",
+   "componente": "Básico",
+   "atc": "C09CA01",
+   "pagina": 47,
+   "chave": "losartana"
+  },
+  {
+   "nome": "maleato de enalapril",
+   "apresentacao": "5 mg comprimido",
+   "componente": "Básico",
+   "atc": "C09AA02",
+   "pagina": 47,
+   "chave": "enalapril"
+  },
+  {
+   "nome": "maleato de enalapril",
+   "apresentacao": "10 mg comprimido",
+   "componente": "Básico",
+   "atc": "C09AA02",
+   "pagina": 47,
+   "chave": "enalapril"
+  },
+  {
+   "nome": "maleato de enalapril",
+   "apresentacao": "20 mg comprimido",
+   "componente": "Básico",
+   "atc": "C09AA02",
+   "pagina": 47,
+   "chave": "enalapril"
+  },
+  {
+   "nome": "mesilato de doxazosina",
+   "apresentacao": "2 mg comprimido",
+   "componente": "Básico",
+   "atc": "C02CA04",
+   "pagina": 47,
+   "chave": "doxazosina"
+  },
+  {
+   "nome": "mesilato de doxazosina",
+   "apresentacao": "4 mg comprimido",
+   "componente": "Básico",
+   "atc": "C02CA04",
+   "pagina": 47,
+   "chave": "doxazosina"
+  },
+  {
+   "nome": "metildopa",
+   "apresentacao": "250 mg comprimido",
+   "componente": "Básico",
+   "atc": "C02AB01",
+   "pagina": 48,
+   "chave": "metildopa"
+  },
+  {
+   "nome": "mononitrato de isossorbida",
+   "apresentacao": "20 mg comprimido",
+   "componente": "Básico",
+   "atc": "C01DA14",
+   "pagina": 48,
+   "chave": "isossorbida"
+  },
+  {
+   "nome": "mononitrato de isossorbida",
+   "apresentacao": "40 mg comprimido",
+   "componente": "Básico",
+   "atc": "C01DA14",
+   "pagina": 48,
+   "chave": "isossorbida"
+  },
+  {
+   "nome": "nifedipino",
+   "apresentacao": "10 mg cápsula",
+   "componente": "Básico",
+   "atc": "C08CA05",
+   "pagina": 48,
+   "chave": "nifedipino"
+  },
+  {
+   "nome": "nifedipino",
+   "apresentacao": "10 mg comprimido",
+   "componente": "Básico",
+   "atc": "C08CA05",
+   "pagina": 48,
+   "chave": "nifedipino"
+  },
+  {
+   "nome": "pentoxifilina",
+   "apresentacao": "400 mg comprimido de liberação prolongada",
+   "componente": "Estratégico",
+   "atc": "C04AD03",
+   "pagina": 48,
+   "chave": "pentoxifilina"
+  },
+  {
+   "nome": "pravastatina sódica",
+   "apresentacao": "10 mg comprimido",
+   "componente": "Especializado",
+   "atc": "C10AA03",
+   "pagina": 48,
+   "chave": "pravastatina"
+  },
+  {
+   "nome": "pravastatina sódica",
+   "apresentacao": "20 mg comprimido",
+   "componente": "Especializado",
+   "atc": "C10AA03",
+   "pagina": 48,
+   "chave": "pravastatina"
+  },
+  {
+   "nome": "pravastatina sódica",
+   "apresentacao": "40 mg comprimido",
+   "componente": "Especializado",
+   "atc": "C10AA03",
+   "pagina": 48,
+   "chave": "pravastatina"
+  },
+  {
+   "nome": "sacubitril valsartana sódica hidratada",
+   "apresentacao": "50 mg comprimido",
+   "componente": "Especializado",
+   "atc": "C09DX04",
+   "pagina": 48,
+   "chave": "sacubitril valsartana sodica hidratada"
+  },
+  {
+   "nome": "sacubitril valsartana sódica hidratada",
+   "apresentacao": "100 mg comprimido",
+   "componente": "Especializado",
+   "atc": "C09DX04",
+   "pagina": 48,
+   "chave": "sacubitril valsartana sodica hidratada"
+  },
+  {
+   "nome": "sacubitril valsartana sódica hidratada",
+   "apresentacao": "200 mg comprimido",
+   "componente": "Especializado",
+   "atc": "C09DX04",
+   "pagina": 48,
+   "chave": "sacubitril valsartana sodica hidratada"
+  },
+  {
+   "nome": "sinvastatina",
+   "apresentacao": "10 mg comprimido",
+   "componente": "Básico",
+   "atc": "C10AA01",
+   "pagina": 49,
+   "chave": "sinvastatina"
+  },
+  {
+   "nome": "sinvastatina",
+   "apresentacao": "20 mg comprimido",
+   "componente": "Básico",
+   "atc": "C10AA01",
+   "pagina": 49,
+   "chave": "sinvastatina"
+  },
+  {
+   "nome": "sinvastatina",
+   "apresentacao": "40 mg comprimido",
+   "componente": "Básico",
+   "atc": "C10AA01",
+   "pagina": 49,
+   "chave": "sinvastatina"
+  },
+  {
+   "nome": "succinato de metoprolol",
+   "apresentacao": "25 mg comprimido de liberação prolongada",
+   "componente": "Básico",
+   "atc": "C07AB02",
+   "pagina": 49,
+   "chave": "metoprolol"
+  },
+  {
+   "nome": "succinato de metoprolol",
+   "apresentacao": "50 mg comprimido de liberação prolongada",
+   "componente": "Básico",
+   "atc": "C07AB02",
+   "pagina": 49,
+   "chave": "metoprolol"
+  },
+  {
+   "nome": "succinato de metoprolol",
+   "apresentacao": "100 mg comprimido de liberação prolongada",
+   "componente": "Básico",
+   "atc": "C07AB02",
+   "pagina": 49,
+   "chave": "metoprolol"
+  },
+  {
+   "nome": "tartarato de metoprolol",
+   "apresentacao": "100 mg comprimido",
+   "componente": "Básico",
+   "atc": "C07AB02",
+   "pagina": 49,
+   "chave": "metoprolol"
+  },
+  {
+   "nome": "acetato de hidrocortisona",
+   "apresentacao": "10 mg/g (1%) creme",
+   "componente": "Básico",
+   "atc": "D07AA02",
+   "pagina": 50,
+   "chave": "hidrocortisona"
+  },
+  {
+   "nome": "aciclovir",
+   "apresentacao": "50 mg/g (5%) creme",
+   "componente": "Básico",
+   "atc": "D06BB03",
+   "pagina": 50,
+   "chave": "aciclovir"
+  },
+  {
+   "nome": "ácido salicílico (FN)",
+   "apresentacao": "50 mg/g (5%) pomada",
+   "componente": "Básico",
+   "atc": "D02AF",
+   "pagina": 50,
+   "chave": "acido salicilico"
+  },
+  {
+   "nome": "acitretina",
+   "apresentacao": "10 mg cápsula",
+   "componente": "Especializado",
+   "atc": "D05BB02",
+   "pagina": 50,
+   "chave": "acitretina"
+  },
+  {
+   "nome": "acitretina",
+   "apresentacao": "25 mg cápsula",
+   "componente": "Especializado",
+   "atc": "D05BB02",
+   "pagina": 50,
+   "chave": "acitretina"
+  },
+  {
+   "nome": "alcatrão mineral (FN)",
+   "apresentacao": "10 mg/g (1%) pomada",
+   "componente": "Básico",
+   "atc": "D05AA",
+   "pagina": 50,
+   "chave": "alcatrao mineral"
+  },
+  {
+   "nome": "calcipotriol",
+   "apresentacao": "50 mcg/g (0,005%) pomada",
+   "componente": "Especializado",
+   "atc": "D05AX02",
+   "pagina": 50,
+   "chave": "calcipotriol"
+  },
+  {
+   "nome": "cetoconazol",
+   "apresentacao": "20 mg/mL (2%) xampu",
+   "componente": "Básico",
+   "atc": "D01AC08",
+   "pagina": 50,
+   "chave": "cetoconazol"
+  },
+  {
+   "nome": "cloridrato de lidocaína",
+   "apresentacao": "20 mg/g (2%) gel",
+   "componente": "Básico",
+   "atc": "D04AB01",
+   "pagina": 50,
+   "chave": "lidocaina"
+  },
+  {
+   "nome": "dexametasona",
+   "apresentacao": "1 mg/g (0,1%) creme dermatológico",
+   "componente": "Básico",
+   "atc": "D07AB19",
+   "pagina": 51,
+   "chave": "dexametasona"
+  },
+  {
+   "nome": "digliconato de clorexidina",
+   "apresentacao": "2% a 4% solução para uso tópico",
+   "componente": "Básico",
+   "atc": "D08AC02",
+   "pagina": 51,
+   "chave": "digliconato de clorexidina"
+  },
+  {
+   "nome": "fosfato de clindamicina",
+   "apresentacao": "10 mg/g solução tópica",
+   "componente": "Básico",
+   "atc": "D10AF01",
+   "pagina": 51,
+   "chave": "clindamicina"
+  },
+  {
+   "nome": "fosfato de clindamicina",
+   "apresentacao": "10 mg/g gel",
+   "componente": "Básico",
+   "atc": "D10AF01",
+   "pagina": 51,
+   "chave": "clindamicina"
+  },
+  {
+   "nome": "imiquimode",
+   "apresentacao": "50 mg/g creme",
+   "componente": "Básico",
+   "atc": "D06BB10",
+   "pagina": 51,
+   "chave": "imiquimode"
+  },
+  {
+   "nome": "isotretinoína",
+   "apresentacao": "10 mg cápsula",
+   "componente": "Especializado",
+   "atc": "D10BA01",
+   "pagina": 51,
+   "chave": "isotretinoina"
+  },
+  {
+   "nome": "isotretinoína",
+   "apresentacao": "20 mg cápsula",
+   "componente": "Especializado",
+   "atc": "D10BA01",
+   "pagina": 51,
+   "chave": "isotretinoina"
+  },
+  {
+   "nome": "nitrato de miconazol",
+   "apresentacao": "2% (20 mg/g) loção",
+   "componente": "Básico",
+   "atc": "D01AC02",
+   "pagina": 51,
+   "chave": "miconazol"
+  },
+  {
+   "nome": "nitrato de miconazol",
+   "apresentacao": "2% (20 mg/g) pó",
+   "componente": "Básico",
+   "atc": "D01AC02",
+   "pagina": 51,
+   "chave": "miconazol"
+  },
+  {
+   "nome": "nitrato de miconazol",
+   "apresentacao": "2% (20 mg/g) creme",
+   "componente": "Básico",
+   "atc": "D01AC02",
+   "pagina": 51,
+   "chave": "miconazol"
+  },
+  {
+   "nome": "pasta de óxido de zinco (FN)",
+   "apresentacao": "250 mg/g (25%) pasta",
+   "componente": "Básico",
+   "atc": "D02AB",
+   "pagina": 51,
+   "chave": "pasta de oxido de zinco"
+  },
+  {
+   "nome": "permanganato de potássio",
+   "apresentacao": "100 mg comprimido para uso tópico",
+   "componente": "Básico",
+   "atc": "D08AX06",
+   "pagina": 51,
+   "chave": "permanganato de potassio"
+  },
+  {
+   "nome": "permanganato de potássio",
+   "apresentacao": "100 mg (FN) pó",
+   "componente": "Básico",
+   "atc": "D08AX06",
+   "pagina": 51,
+   "chave": "permanganato de potassio"
+  },
+  {
+   "nome": "peróxido de benzoíla (FN)",
+   "apresentacao": "25 mg/g (2,5%) gel",
+   "componente": "Básico",
+   "atc": "D10AE01",
+   "pagina": 52,
+   "chave": "peroxido de benzoila"
+  },
+  {
+   "nome": "peróxido de benzoíla (FN)",
+   "apresentacao": "50 mg/g (5%) gel",
+   "componente": "Básico",
+   "atc": "D10AE01",
+   "pagina": 52,
+   "chave": "peroxido de benzoila"
+  },
+  {
+   "nome": "podofilina (FN)",
+   "apresentacao": "100 mg/mL (10%) a 250 mg/mL (25%) solução para uso tópico",
+   "componente": "Básico",
+   "atc": "D11AF",
+   "pagina": 52,
+   "chave": "podofilina"
+  },
+  {
+   "nome": "podofilotoxina",
+   "apresentacao": "1,5 mg/g creme",
+   "componente": "Básico",
+   "atc": "D06BB04",
+   "pagina": 52,
+   "chave": "podofilotoxina"
+  },
+  {
+   "nome": "propionato de clobetasol",
+   "apresentacao": "0,5 mg/g creme",
+   "componente": "Especializado",
+   "atc": "D07AD01",
+   "pagina": 52,
+   "chave": "clobetasol"
+  },
+  {
+   "nome": "propionato de clobetasol",
+   "apresentacao": "0,5 mg/g solução capilar",
+   "componente": "Especializado",
+   "atc": "D07AD01",
+   "pagina": 52,
+   "chave": "clobetasol"
+  },
+  {
+   "nome": "sulfadiazina de prata",
+   "apresentacao": "10 mg/g (1%) creme",
+   "componente": "Básico",
+   "atc": "D06BA01",
+   "pagina": 52,
+   "chave": "sulfadiazina de prata"
+  },
+  {
+   "nome": "acetato de medroxiprogesterona",
+   "apresentacao": "50 mg/mL suspensão injetável",
+   "componente": "Básico",
+   "atc": "G03AC06",
+   "pagina": 53,
+   "chave": "medroxiprogesterona"
+  },
+  {
+   "nome": "acetato de medroxiprogesterona",
+   "apresentacao": "150 mg/mL suspensão injetável",
+   "componente": "Básico",
+   "atc": "G03AC06",
+   "pagina": 53,
+   "chave": "medroxiprogesterona"
+  },
+  {
+   "nome": "acetato de medroxiprogesterona",
+   "apresentacao": "10 mg comprimido",
+   "componente": "Básico",
+   "atc": "G03DA02",
+   "pagina": 53,
+   "chave": "medroxiprogesterona"
+  },
+  {
+   "nome": "acetato de medroxiprogesterona + cipionato de estradiol",
+   "apresentacao": "25 mg/0,5 mL + 5 mg/ 0,5 mL suspensão injetável",
+   "componente": "Básico",
+   "atc": "G03AA17",
+   "pagina": 53,
+   "chave": "medroxiprogesterona cipionato de estradiol"
+  },
+  {
+   "nome": "acetato de ciproterona",
+   "apresentacao": "50 mg comprimido",
+   "componente": "Especializado",
+   "atc": "G03HA01",
+   "pagina": 53,
+   "chave": "ciproterona"
+  },
+  {
+   "nome": "algestona acetofenida + enantato de estradiol",
+   "apresentacao": "150 mg/mL + 10 mg/mL solução injetável",
+   "componente": "Básico",
+   "atc": "G03F",
+   "pagina": 53,
+   "chave": "algestona acetofenida enantato de estradiol"
+  },
+  {
+   "nome": "cabergolina",
+   "apresentacao": "0,5 mg comprimido Básico,",
+   "componente": "Especializado e Procedimento Hospitalar",
+   "atc": "G02CB03",
+   "pagina": 53,
+   "chave": "cabergolina"
+  },
+  {
+   "nome": "cloridrato de raloxifeno",
+   "apresentacao": "60 mg comprimido",
+   "componente": "Especializado",
+   "atc": "G03XC01",
+   "pagina": 53,
+   "chave": "raloxifeno"
+  },
+  {
+   "nome": "danazol",
+   "apresentacao": "100 mg cápsula",
+   "componente": "Especializado",
+   "atc": "G03XA01",
+   "pagina": 54,
+   "chave": "danazol"
+  },
+  {
+   "nome": "danazol",
+   "apresentacao": "200 mg cápsula",
+   "componente": "Especializado",
+   "atc": "G03XA01",
+   "pagina": 54,
+   "chave": "danazol"
+  },
+  {
+   "nome": "enantato de noretisterona + valerato de estradiol",
+   "apresentacao": "50 mg/mL + 5 mg/mL solução injetável",
+   "componente": "Básico",
+   "atc": "G03FA01",
+   "pagina": 54,
+   "chave": "noretisterona valerato de estradiol"
+  },
+  {
+   "nome": "estriol",
+   "apresentacao": "1 mg/g creme vaginal",
+   "componente": "Básico",
+   "atc": "G03CA04",
+   "pagina": 54,
+   "chave": "estriol"
+  },
+  {
+   "nome": "estrogênios conjugados",
+   "apresentacao": "0,625 mg/g creme vaginal",
+   "componente": "Básico",
+   "atc": "G03CA57",
+   "pagina": 54,
+   "chave": "estrogenios conjugados"
+  },
+  {
+   "nome": "estrogênios conjugados",
+   "apresentacao": "0,3 mg comprimido",
+   "componente": "Básico",
+   "atc": "G03CA57",
+   "pagina": 54,
+   "chave": "estrogenios conjugados"
+  },
+  {
+   "nome": "estrogênios conjugados",
+   "apresentacao": "0,625 mg comprimido",
+   "componente": "Básico",
+   "atc": "G03CA57",
+   "pagina": 54,
+   "chave": "estrogenios conjugados"
+  },
+  {
+   "nome": "etinilestradiol + levonorgestrel",
+   "apresentacao": "0,03 mg + 0,15 mg comprimido",
+   "componente": "Básico",
+   "atc": "G03AA07",
+   "pagina": 54,
+   "chave": "etinilestradiol levonorgestrel"
+  },
+  {
+   "nome": "finasterida",
+   "apresentacao": "5 mg comprimido",
+   "componente": "Básico",
+   "atc": "G04CB01",
+   "pagina": 54,
+   "chave": "finasterida"
+  },
+  {
+   "nome": "levonorgestrel",
+   "apresentacao": "0,75 mg comprimido",
+   "componente": "Básico",
+   "atc": "G03AC03",
+   "pagina": 55,
+   "chave": "levonorgestrel"
+  },
+  {
+   "nome": "levonorgestrel",
+   "apresentacao": "1,5 mg comprimido",
+   "componente": "Básico",
+   "atc": "G03AC03",
+   "pagina": 55,
+   "chave": "levonorgestrel"
+  },
+  {
+   "nome": "mesilato de bromocriptina",
+   "apresentacao": "2,5 mg comprimido",
+   "componente": "Especializado",
+   "atc": "G02CB01",
+   "pagina": 55,
+   "chave": "bromocriptina"
+  },
+  {
+   "nome": "metronidazol",
+   "apresentacao": "100 mg/g (10%) gel vaginal",
+   "componente": "Básico",
+   "atc": "G01AF01",
+   "pagina": 55,
+   "chave": "metronidazol"
+  },
+  {
+   "nome": "misoprostol",
+   "apresentacao": "25 mcg comprimido vaginal",
+   "componente": "Básico",
+   "atc": "G02AD06",
+   "pagina": 55,
+   "chave": "misoprostol"
+  },
+  {
+   "nome": "misoprostol",
+   "apresentacao": "200 mcg comprimido vaginal",
+   "componente": "Básico",
+   "atc": "G02AD06",
+   "pagina": 55,
+   "chave": "misoprostol"
+  },
+  {
+   "nome": "nitrato de miconazol",
+   "apresentacao": "2% (20 mg/g) creme vaginal",
+   "componente": "Básico",
+   "atc": "G01AF04",
+   "pagina": 55,
+   "chave": "miconazol"
+  },
+  {
+   "nome": "noretisterona",
+   "apresentacao": "0,35 mg comprimido",
+   "componente": "Básico",
+   "atc": "G03AC01",
+   "pagina": 55,
+   "chave": "noretisterona"
+  },
+  {
+   "nome": "acetato de betametasona + fosfato dissódico de betametasona",
+   "apresentacao": "3 mg/mL + 3 mg/mL suspensão injetável",
+   "componente": "Básico",
+   "atc": "H02AB01",
+   "pagina": 56,
+   "chave": "betametasona fosfato dissodico de betametasona"
+  },
+  {
+   "nome": "acetato de desmopressina",
+   "apresentacao": "0,1 mg/mL solução spray nasal",
+   "componente": "Especializado",
+   "atc": "H01BA02",
+   "pagina": 56,
+   "chave": "desmopressina"
+  },
+  {
+   "nome": "acetato de desmopressina",
+   "apresentacao": "4 mcg/mL solução injetável",
+   "componente": "Estratégico",
+   "atc": "H01BA02",
+   "pagina": 56,
+   "chave": "desmopressina"
+  },
+  {
+   "nome": "acetato de desmopressina",
+   "apresentacao": "15 mcg/mL solução injetável",
+   "componente": "Estratégico",
+   "atc": "H01BA02",
+   "pagina": 56,
+   "chave": "desmopressina"
+  },
+  {
+   "nome": "acetato de desmopressina",
+   "apresentacao": "0,1 mg comprimido",
+   "componente": "Especializado",
+   "atc": "H01BA02",
+   "pagina": 56,
+   "chave": "desmopressina"
+  },
+  {
+   "nome": "acetato de desmopressina",
+   "apresentacao": "0,2 mg comprimido",
+   "componente": "Especializado",
+   "atc": "H01BA02",
+   "pagina": 56,
+   "chave": "desmopressina"
+  },
+  {
+   "nome": "acetato de fludrocortisona",
+   "apresentacao": "0,1 mg comprimido",
+   "componente": "Especializado",
+   "atc": "H02AA02",
+   "pagina": 56,
+   "chave": "fludrocortisona"
+  },
+  {
+   "nome": "acetato de lanreotida",
+   "apresentacao": "60 mg solução injetável de liberação prolongada",
+   "componente": "Especializado",
+   "atc": "H01CB03",
+   "pagina": 56,
+   "chave": "lanreotida"
+  },
+  {
+   "nome": "acetato de lanreotida",
+   "apresentacao": "90 mg solução injetável de liberação prolongada",
+   "componente": "Especializado",
+   "atc": "H01CB03",
+   "pagina": 56,
+   "chave": "lanreotida"
+  },
+  {
+   "nome": "acetato de lanreotida",
+   "apresentacao": "120 mg solução injetável de liberação prolongada",
+   "componente": "Especializado",
+   "atc": "H01CB03",
+   "pagina": 56,
+   "chave": "lanreotida"
+  },
+  {
+   "nome": "acetato de octreotida",
+   "apresentacao": "10 mg pó para suspensão injetável",
+   "componente": "Especializado",
+   "atc": "H01CB02",
+   "pagina": 57,
+   "chave": "octreotida"
+  },
+  {
+   "nome": "acetato de octreotida",
+   "apresentacao": "20 mg pó para suspensão injetável",
+   "componente": "Especializado",
+   "atc": "H01CB02",
+   "pagina": 57,
+   "chave": "octreotida"
+  },
+  {
+   "nome": "acetato de octreotida",
+   "apresentacao": "30 mg pó para suspensão injetável",
+   "componente": "Especializado",
+   "atc": "H01CB02",
+   "pagina": 57,
+   "chave": "octreotida"
+  },
+  {
+   "nome": "acetato de octreotida",
+   "apresentacao": "0,1 mg/mL solução injetável",
+   "componente": "Especializado",
+   "atc": "H01CB02",
+   "pagina": 57,
+   "chave": "octreotida"
+  },
+  {
+   "nome": "calcitonina",
+   "apresentacao": "200 UI/dose solução nasal",
+   "componente": "Especializado",
+   "atc": "H05BA01",
+   "pagina": 57,
+   "chave": "calcitonina"
+  },
+  {
+   "nome": "dexametasona",
+   "apresentacao": "4 mg comprimido",
+   "componente": "Básico",
+   "atc": "H02AB02",
+   "pagina": 57,
+   "chave": "dexametasona"
+  },
+  {
+   "nome": "dexametasona",
+   "apresentacao": "0,1 mg/mL elixir",
+   "componente": "Básico",
+   "atc": "H02AB02",
+   "pagina": 57,
+   "chave": "dexametasona"
+  },
+  {
+   "nome": "dexametasona",
+   "apresentacao": "4 mg/mL solução injetável",
+   "componente": "Básico",
+   "atc": "H02AB02",
+   "pagina": 57,
+   "chave": "dexametasona"
+  },
+  {
+   "nome": "cloridrato de cinacalcete",
+   "apresentacao": "30 mg comprimido",
+   "componente": "Especializado",
+   "atc": "H05BX01",
+   "pagina": 57,
+   "chave": "cinacalcete"
+  },
+  {
+   "nome": "cloridrato de cinacalcete",
+   "apresentacao": "60 mg comprimido",
+   "componente": "Especializado",
+   "atc": "H05BX01",
+   "pagina": 57,
+   "chave": "cinacalcete"
+  },
+  {
+   "nome": "fosfato sódico de prednisolona",
+   "apresentacao": "1 mg/mL solução oral",
+   "componente": "Básico",
+   "atc": "H02AB06",
+   "pagina": 57,
+   "chave": "prednisolona"
+  },
+  {
+   "nome": "fosfato sódico de prednisolona",
+   "apresentacao": "3 mg/mL solução oral",
+   "componente": "Básico",
+   "atc": "H02AB06",
+   "pagina": 57,
+   "chave": "prednisolona"
+  },
+  {
+   "nome": "levotiroxina sódica",
+   "apresentacao": "12,5 mcg comprimido",
+   "componente": "Básico",
+   "atc": "H03AA01",
+   "pagina": 58,
+   "chave": "levotiroxina"
+  },
+  {
+   "nome": "levotiroxina sódica",
+   "apresentacao": "25 mcg comprimido",
+   "componente": "Básico",
+   "atc": "H03AA01",
+   "pagina": 58,
+   "chave": "levotiroxina"
+  },
+  {
+   "nome": "levotiroxina sódica",
+   "apresentacao": "37,5 mcg comprimido",
+   "componente": "Básico",
+   "atc": "H03AA01",
+   "pagina": 58,
+   "chave": "levotiroxina"
+  },
+  {
+   "nome": "levotiroxina sódica",
+   "apresentacao": "50 mcg comprimido",
+   "componente": "Básico",
+   "atc": "H03AA01",
+   "pagina": 58,
+   "chave": "levotiroxina"
+  },
+  {
+   "nome": "levotiroxina sódica",
+   "apresentacao": "100 mcg comprimido",
+   "componente": "Básico",
+   "atc": "H03AA01",
+   "pagina": 58,
+   "chave": "levotiroxina"
+  },
+  {
+   "nome": "pamoato de pasireotida",
+   "apresentacao": "40 mg pó para suspensão injetável",
+   "componente": "Especializado",
+   "atc": "H01CB05",
+   "pagina": 58,
+   "chave": "pasireotida"
+  },
+  {
+   "nome": "pamoato de pasireotida",
+   "apresentacao": "60 mg pó para suspensão injetável",
+   "componente": "Especializado",
+   "atc": "H01CB05",
+   "pagina": 58,
+   "chave": "pasireotida"
+  },
+  {
+   "nome": "paricalcitol",
+   "apresentacao": "5 mcg/mL solução injetável",
+   "componente": "Especializado",
+   "atc": "H05BX02",
+   "pagina": 58,
+   "chave": "paricalcitol"
+  },
+  {
+   "nome": "prednisona",
+   "apresentacao": "5 mg comprimido",
+   "componente": "Básico e Estratégico",
+   "atc": "H02AB07",
+   "pagina": 58,
+   "chave": "prednisona"
+  },
+  {
+   "nome": "prednisona",
+   "apresentacao": "20 mg comprimido",
+   "componente": "Básico e Estratégico",
+   "atc": "H02AB07",
+   "pagina": 58,
+   "chave": "prednisona"
+  },
+  {
+   "nome": "propiltiouracila",
+   "apresentacao": "100 mg comprimido",
+   "componente": "Básico",
+   "atc": "H03BA02",
+   "pagina": 58,
+   "chave": "propiltiouracila"
+  },
+  {
+   "nome": "somatropina",
+   "apresentacao": "4 UI solução injetável",
+   "componente": "Especializado",
+   "atc": "H01AC01",
+   "pagina": 59,
+   "chave": "somatropina"
+  },
+  {
+   "nome": "somatropina",
+   "apresentacao": "4 UI pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "H01AC01",
+   "pagina": 59,
+   "chave": "somatropina"
+  },
+  {
+   "nome": "somatropina",
+   "apresentacao": "12 UI solução injetável",
+   "componente": "Especializado",
+   "atc": "H01AC01",
+   "pagina": 59,
+   "chave": "somatropina"
+  },
+  {
+   "nome": "somatropina",
+   "apresentacao": "12 UI pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "H01AC01",
+   "pagina": 59,
+   "chave": "somatropina"
+  },
+  {
+   "nome": "somatropina",
+   "apresentacao": "15 UI solução injetável",
+   "componente": "Especializado",
+   "atc": "H01AC01",
+   "pagina": 59,
+   "chave": "somatropina"
+  },
+  {
+   "nome": "somatropina",
+   "apresentacao": "15 UI pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "H01AC01",
+   "pagina": 59,
+   "chave": "somatropina"
+  },
+  {
+   "nome": "somatropina",
+   "apresentacao": "16 UI solução injetável",
+   "componente": "Especializado",
+   "atc": "H01AC01",
+   "pagina": 59,
+   "chave": "somatropina"
+  },
+  {
+   "nome": "somatropina",
+   "apresentacao": "16 UI pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "H01AC01",
+   "pagina": 59,
+   "chave": "somatropina"
+  },
+  {
+   "nome": "somatropina",
+   "apresentacao": "18 UI solução injetável",
+   "componente": "Especializado",
+   "atc": "H01AC01",
+   "pagina": 59,
+   "chave": "somatropina"
+  },
+  {
+   "nome": "somatropina",
+   "apresentacao": "18 UI pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "H01AC01",
+   "pagina": 59,
+   "chave": "somatropina"
+  },
+  {
+   "nome": "somatropina",
+   "apresentacao": "24 UI solução injetável",
+   "componente": "Especializado",
+   "atc": "H01AC01",
+   "pagina": 59,
+   "chave": "somatropina"
+  },
+  {
+   "nome": "somatropina",
+   "apresentacao": "24 UI pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "H01AC01",
+   "pagina": 59,
+   "chave": "somatropina"
+  },
+  {
+   "nome": "somatropina",
+   "apresentacao": "30 UI solução injetável",
+   "componente": "Especializado",
+   "atc": "H01AC01",
+   "pagina": 59,
+   "chave": "somatropina"
+  },
+  {
+   "nome": "somatropina",
+   "apresentacao": "30 UI pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "H01AC01",
+   "pagina": 59,
+   "chave": "somatropina"
+  },
+  {
+   "nome": "succinato sódico de metilprednisolona",
+   "apresentacao": "500 mg pó para solução injetável",
+   "componente": "Especializado e Procedimento Hospitalar",
+   "atc": "H02AB04",
+   "pagina": 60,
+   "chave": "metilprednisolona"
+  },
+  {
+   "nome": "succinato sódico de hidrocortisona",
+   "apresentacao": "100 mg pó para solução injetável",
+   "componente": "Básico",
+   "atc": "H02AB09",
+   "pagina": 60,
+   "chave": "hidrocortisona"
+  },
+  {
+   "nome": "succinato sódico de hidrocortisona",
+   "apresentacao": "500 mg pó para solução injetável",
+   "componente": "Básico",
+   "atc": "H02AB09",
+   "pagina": 60,
+   "chave": "hidrocortisona"
+  },
+  {
+   "nome": "tiamazol",
+   "apresentacao": "5 mg comprimido",
+   "componente": "Básico",
+   "atc": "H03BB02",
+   "pagina": 60,
+   "chave": "tiamazol"
+  },
+  {
+   "nome": "tiamazol",
+   "apresentacao": "10 mg comprimido",
+   "componente": "Básico",
+   "atc": "H03BB02",
+   "pagina": 60,
+   "chave": "tiamazol"
+  },
+  {
+   "nome": "aciclovir",
+   "apresentacao": "200 mg comprimido",
+   "componente": "Básico",
+   "atc": "J05AB01",
+   "pagina": 61,
+   "chave": "aciclovir"
+  },
+  {
+   "nome": "aciclovir",
+   "apresentacao": "250 mg pó para solução injetável",
+   "componente": "Básico",
+   "atc": "J05AB01",
+   "pagina": 61,
+   "chave": "aciclovir"
+  },
+  {
+   "nome": "ácido paraminossalicílico",
+   "apresentacao": "4 g granulado oral",
+   "componente": "Estratégico",
+   "atc": "J04AA01",
+   "pagina": 61,
+   "chave": "acido paraminossalicilico"
+  },
+  {
+   "nome": "amoxicilina",
+   "apresentacao": "50 mg/mL suspensão oral",
+   "componente": "Básico",
+   "atc": "J01CA04",
+   "pagina": 61,
+   "chave": "amoxicilina"
+  },
+  {
+   "nome": "amoxicilina",
+   "apresentacao": "500 mg cápsula",
+   "componente": "Básico",
+   "atc": "J01CA04",
+   "pagina": 61,
+   "chave": "amoxicilina"
+  },
+  {
+   "nome": "amoxicilina",
+   "apresentacao": "500 mg comprimido",
+   "componente": "Básico",
+   "atc": "J01CA04",
+   "pagina": 61,
+   "chave": "amoxicilina"
+  },
+  {
+   "nome": "amoxicilina + clavulanato de potássio",
+   "apresentacao": "50 mg/mL + 12,5 mg/mL suspensão oral",
+   "componente": "Básico",
+   "atc": "J01CR02",
+   "pagina": 61,
+   "chave": "amoxicilina clavulanato de potassio"
+  },
+  {
+   "nome": "amoxicilina + clavulanato de potássio",
+   "apresentacao": "500 mg + 125 mg comprimido",
+   "componente": "Básico",
+   "atc": "J01CR02",
+   "pagina": 61,
+   "chave": "amoxicilina clavulanato de potassio"
+  },
+  {
+   "nome": "anfotericina B (complexo lipídico)",
+   "apresentacao": "5 mg/mL suspensão injetável",
+   "componente": "Estratégico",
+   "atc": "J02AA01",
+   "pagina": 61,
+   "chave": "anfotericina b"
+  },
+  {
+   "nome": "anfotericina B (desoxicolato)",
+   "apresentacao": "50 mg pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "J02AA01",
+   "pagina": 61,
+   "chave": "anfotericina b"
+  },
+  {
+   "nome": "anfotericina B (lipossomal)",
+   "apresentacao": "50 mg pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "J02AA01",
+   "pagina": 62,
+   "chave": "anfotericina b"
+  },
+  {
+   "nome": "anidulafungina",
+   "apresentacao": "100 mg pó liofilizado para solução injetável",
+   "componente": "Estratégico",
+   "atc": "J02AX06",
+   "pagina": 62,
+   "chave": "anidulafungina"
+  },
+  {
+   "nome": "azitromicina",
+   "apresentacao": "250 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J01FA10",
+   "pagina": 62,
+   "chave": "azitromicina"
+  },
+  {
+   "nome": "azitromicina",
+   "apresentacao": "500 mg comprimido",
+   "componente": "Básico e Estratégico",
+   "atc": "J01FA10",
+   "pagina": 62,
+   "chave": "azitromicina"
+  },
+  {
+   "nome": "azitromicina",
+   "apresentacao": "40 mg/mL pó para suspensão oral",
+   "componente": "Básico e Estratégico",
+   "atc": "J01FA10",
+   "pagina": 62,
+   "chave": "azitromicina"
+  },
+  {
+   "nome": "bedaquilina",
+   "apresentacao": "100 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J04AK05",
+   "pagina": 62,
+   "chave": "bedaquilina"
+  },
+  {
+   "nome": "benzilpenicilina benzatina",
+   "apresentacao": "600.000 UI pó para suspensão injetável",
+   "componente": "Básico",
+   "atc": "J01CE08",
+   "pagina": 62,
+   "chave": "benzilpenicilina benzatina"
+  },
+  {
+   "nome": "benzilpenicilina benzatina",
+   "apresentacao": "600.000 UI suspensão injetável",
+   "componente": "Básico",
+   "atc": "J01CE08",
+   "pagina": 62,
+   "chave": "benzilpenicilina benzatina"
+  },
+  {
+   "nome": "benzilpenicilina benzatina",
+   "apresentacao": "1.200.000 UI pó para suspensão injetável",
+   "componente": "Básico e Estratégico",
+   "atc": "J01CE08",
+   "pagina": 62,
+   "chave": "benzilpenicilina benzatina"
+  },
+  {
+   "nome": "benzilpenicilina benzatina",
+   "apresentacao": "1.200.000 UI suspensão injetável",
+   "componente": "Básico e Estratégico",
+   "atc": "J01CE08",
+   "pagina": 62,
+   "chave": "benzilpenicilina benzatina"
+  },
+  {
+   "nome": "benzilpenicilina potássica",
+   "apresentacao": "5.000.000 UI pó para solução injetável",
+   "componente": "Básico e Estratégico",
+   "atc": "J01CE01",
+   "pagina": 63,
+   "chave": "benzilpenicilina"
+  },
+  {
+   "nome": "benzilpenicilina procaína + benzilpenicilina potássica",
+   "apresentacao": "300.000 UI + 100.000 UI pó para suspensão injetável",
+   "componente": "Básico",
+   "atc": "J01CE30",
+   "pagina": 63,
+   "chave": "benzilpenicilina procaina benzilpenicilina"
+  },
+  {
+   "nome": "capreomicina",
+   "apresentacao": "1 g pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "J04AB30",
+   "pagina": 63,
+   "chave": "capreomicina"
+  },
+  {
+   "nome": "cefalexina",
+   "apresentacao": "500 mg cápsula",
+   "componente": "Básico",
+   "atc": "J01DB01",
+   "pagina": 63,
+   "chave": "cefalexina"
+  },
+  {
+   "nome": "cefalexina",
+   "apresentacao": "500 mg comprimido",
+   "componente": "Básico",
+   "atc": "J01DB01",
+   "pagina": 63,
+   "chave": "cefalexina"
+  },
+  {
+   "nome": "cefalexina",
+   "apresentacao": "50 mg/mL suspensão oral",
+   "componente": "Básico",
+   "atc": "J01DB01",
+   "pagina": 63,
+   "chave": "cefalexina"
+  },
+  {
+   "nome": "cefotaxima sódica",
+   "apresentacao": "500 mg pó para solução injetável",
+   "componente": "Básico",
+   "atc": "J01DD01",
+   "pagina": 63,
+   "chave": "cefotaxima"
+  },
+  {
+   "nome": "ceftriaxona",
+   "apresentacao": "250 mg pó para solução injetável",
+   "componente": "Básico",
+   "atc": "J01DD04",
+   "pagina": 63,
+   "chave": "ceftriaxona"
+  },
+  {
+   "nome": "ceftriaxona",
+   "apresentacao": "500 mg pó para solução injetável",
+   "componente": "Básico",
+   "atc": "J01DD04",
+   "pagina": 63,
+   "chave": "ceftriaxona"
+  },
+  {
+   "nome": "ceftriaxona",
+   "apresentacao": "1 g pó para solução injetável",
+   "componente": "Básico",
+   "atc": "J01DD04",
+   "pagina": 64,
+   "chave": "ceftriaxona"
+  },
+  {
+   "nome": "ciprofloxacino",
+   "apresentacao": "250 mg comprimido",
+   "componente": "Básico",
+   "atc": "J01MA02",
+   "pagina": 64,
+   "chave": "ciprofloxacino"
+  },
+  {
+   "nome": "ciprofloxacino",
+   "apresentacao": "500 mg comprimido",
+   "componente": "Básico",
+   "atc": "J01MA02",
+   "pagina": 64,
+   "chave": "ciprofloxacino"
+  },
+  {
+   "nome": "claritromicina",
+   "apresentacao": "50 mg/mL grânulo para suspensão oral",
+   "componente": "Básico",
+   "atc": "J01FA09",
+   "pagina": 64,
+   "chave": "claritromicina"
+  },
+  {
+   "nome": "claritromicina",
+   "apresentacao": "500 mg cápsula",
+   "componente": "Básico e Estratégico",
+   "atc": "J01FA09",
+   "pagina": 64,
+   "chave": "claritromicina"
+  },
+  {
+   "nome": "claritromicina",
+   "apresentacao": "250 mg comprimido",
+   "componente": "Básico",
+   "atc": "J01FA09",
+   "pagina": 64,
+   "chave": "claritromicina"
+  },
+  {
+   "nome": "claritromicina",
+   "apresentacao": "500 mg comprimido",
+   "componente": "Básico e Estratégico",
+   "atc": "J01FA09",
+   "pagina": 64,
+   "chave": "claritromicina"
+  },
+  {
+   "nome": "clofazimina",
+   "apresentacao": "50 mg* cápsula",
+   "componente": "Estratégico",
+   "atc": "J04BA01",
+   "pagina": 64,
+   "chave": "clofazimina"
+  },
+  {
+   "nome": "clofazimina",
+   "apresentacao": "100 mg* cápsula",
+   "componente": "Estratégico",
+   "atc": "J04BA01",
+   "pagina": 64,
+   "chave": "clofazimina"
+  },
+  {
+   "nome": "cloranfenicol",
+   "apresentacao": "250 mg cápsula",
+   "componente": "Básico",
+   "atc": "J01BA01",
+   "pagina": 65,
+   "chave": "cloranfenicol"
+  },
+  {
+   "nome": "cloranfenicol",
+   "apresentacao": "250 mg comprimido",
+   "componente": "Básico",
+   "atc": "J01BA01",
+   "pagina": 65,
+   "chave": "cloranfenicol"
+  },
+  {
+   "nome": "cloranfenicol",
+   "apresentacao": "25 mg/mL suspensão oral",
+   "componente": "Estratégico",
+   "atc": "J01BA01",
+   "pagina": 65,
+   "chave": "cloranfenicol"
+  },
+  {
+   "nome": "cloridrato de clindamicina",
+   "apresentacao": "150 mg cápsula",
+   "componente": "Básico",
+   "atc": "J01FF01",
+   "pagina": 65,
+   "chave": "clindamicina"
+  },
+  {
+   "nome": "cloridrato de clindamicina",
+   "apresentacao": "300 mg cápsula",
+   "componente": "Básico",
+   "atc": "J01FF01",
+   "pagina": 65,
+   "chave": "clindamicina"
+  },
+  {
+   "nome": "cloridrato de etambutol",
+   "apresentacao": "400 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J04AK02",
+   "pagina": 65,
+   "chave": "etambutol"
+  },
+  {
+   "nome": "cloridrato de minociclina",
+   "apresentacao": "100 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J01AA08",
+   "pagina": 65,
+   "chave": "minociclina"
+  },
+  {
+   "nome": "cloridrato de moxifloxacino",
+   "apresentacao": "400 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J01MA14",
+   "pagina": 65,
+   "chave": "moxifloxacino"
+  },
+  {
+   "nome": "cloridrato de tetraciclina",
+   "apresentacao": "500 mg cápsula",
+   "componente": "Básico",
+   "atc": "J01AA07",
+   "pagina": 65,
+   "chave": "tetraciclina"
+  },
+  {
+   "nome": "colistimetato de sódio",
+   "apresentacao": "1.000.000 UI (80 mg) pó para solução para infusão e inalação",
+   "componente": "Especializado",
+   "atc": "J01XB01",
+   "pagina": 65,
+   "chave": "colistimetato de sodio"
+  },
+  {
+   "nome": "colistimetato de sódio",
+   "apresentacao": "2.000.000 UI (160 mg) pó para solução para infusão e inalação",
+   "componente": "Especializado",
+   "atc": "J01XB01",
+   "pagina": 66,
+   "chave": "colistimetato de sodio"
+  },
+  {
+   "nome": "Reservado daclatasvir",
+   "apresentacao": "30 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AP07",
+   "pagina": 66,
+   "chave": "reservado daclatasvir"
+  },
+  {
+   "nome": "Reservado daclatasvir",
+   "apresentacao": "60 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AP07",
+   "pagina": 66,
+   "chave": "reservado daclatasvir"
+  },
+  {
+   "nome": "dapsona*",
+   "apresentacao": "50 mg* comprimido",
+   "componente": "Estratégico",
+   "atc": "J04BA02",
+   "pagina": 66,
+   "chave": "dapsona"
+  },
+  {
+   "nome": "dapsona*",
+   "apresentacao": "100 mg* comprimido",
+   "componente": "Estratégico",
+   "atc": "J04BA02",
+   "pagina": 66,
+   "chave": "dapsona"
+  },
+  {
+   "nome": "darunavir",
+   "apresentacao": "75 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AE10",
+   "pagina": 66,
+   "chave": "darunavir"
+  },
+  {
+   "nome": "darunavir",
+   "apresentacao": "150 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AE10",
+   "pagina": 66,
+   "chave": "darunavir"
+  },
+  {
+   "nome": "darunavir",
+   "apresentacao": "600 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AE10",
+   "pagina": 66,
+   "chave": "darunavir"
+  },
+  {
+   "nome": "darunavir",
+   "apresentacao": "800 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AE10",
+   "pagina": 66,
+   "chave": "darunavir"
+  },
+  {
+   "nome": "delamanida",
+   "apresentacao": "50 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J04AK06",
+   "pagina": 66,
+   "chave": "delamanida"
+  },
+  {
+   "nome": "dolutegravir sódico",
+   "apresentacao": "5mg comprimidos dispersíveis",
+   "componente": "Estratégico",
+   "atc": "J05AJ03",
+   "pagina": 67,
+   "chave": "dolutegravir"
+  },
+  {
+   "nome": "dolutegravir sódico",
+   "apresentacao": "50 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AJ03",
+   "pagina": 67,
+   "chave": "dolutegravir"
+  },
+  {
+   "nome": "dolutegravir sódico + lamivudina",
+   "apresentacao": "50 mg + 300 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AR25",
+   "pagina": 67,
+   "chave": "dolutegravir sodico lamivudina"
+  },
+  {
+   "nome": "doxiciclina",
+   "apresentacao": "100 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J01AA02",
+   "pagina": 67,
+   "chave": "doxiciclina"
+  },
+  {
+   "nome": "doxiciclina",
+   "apresentacao": "100 mg pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "J01AA02",
+   "pagina": 67,
+   "chave": "doxiciclina"
+  },
+  {
+   "nome": "doxiciclina",
+   "apresentacao": "100 mg comprimido solúvel",
+   "componente": "Estratégico",
+   "atc": "J01AA02",
+   "pagina": 67,
+   "chave": "doxiciclina"
+  },
+  {
+   "nome": "efavirenz",
+   "apresentacao": "600 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AG03",
+   "pagina": 67,
+   "chave": "efavirenz"
+  },
+  {
+   "nome": "efavirenz",
+   "apresentacao": "200 mg cápsula",
+   "componente": "Estratégico",
+   "atc": "J05AG03",
+   "pagina": 67,
+   "chave": "efavirenz"
+  },
+  {
+   "nome": "efavirenz",
+   "apresentacao": "30 mg/mL solução oral",
+   "componente": "Estratégico",
+   "atc": "J05AG03",
+   "pagina": 67,
+   "chave": "efavirenz"
+  },
+  {
+   "nome": "elbasvir + grazoprevir monidratado",
+   "apresentacao": "50 mg + 100 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AP54",
+   "pagina": 67,
+   "chave": "elbasvir grazoprevir monidratado"
+  },
+  {
+   "nome": "enfuvirtida",
+   "apresentacao": "108 mg (90 mg/mL após reconstituição) pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "J05AX07",
+   "pagina": 68,
+   "chave": "enfuvirtida"
+  },
+  {
+   "nome": "entecavir",
+   "apresentacao": "0,5 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AF10",
+   "pagina": 68,
+   "chave": "entecavir"
+  },
+  {
+   "nome": "entecavir",
+   "apresentacao": "1 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AF10",
+   "pagina": 68,
+   "chave": "entecavir"
+  },
+  {
+   "nome": "espiramicina",
+   "apresentacao": "1.500.000 UI comprimido",
+   "componente": "Estratégico",
+   "atc": "J01FA02",
+   "pagina": 68,
+   "chave": "espiramicina"
+  },
+  {
+   "nome": "estolato de eritromicina",
+   "apresentacao": "25 mg/mL suspensão oral",
+   "componente": "Básico",
+   "atc": "J01FA01",
+   "pagina": 68,
+   "chave": "estolato de eritromicina"
+  },
+  {
+   "nome": "estolato de eritromicina",
+   "apresentacao": "500 mg comprimido",
+   "componente": "Básico e Estratégico",
+   "atc": "J01FA01",
+   "pagina": 68,
+   "chave": "estolato de eritromicina"
+  },
+  {
+   "nome": "estolato de eritromicina",
+   "apresentacao": "50 mg/mL suspensão oral",
+   "componente": "Básico e Estratégico",
+   "atc": "J01FA01",
+   "pagina": 68,
+   "chave": "estolato de eritromicina"
+  },
+  {
+   "nome": "etionamida",
+   "apresentacao": "250 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J04AD03",
+   "pagina": 68,
+   "chave": "etionamida"
+  },
+  {
+   "nome": "etravirina",
+   "apresentacao": "100 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AG04",
+   "pagina": 68,
+   "chave": "etravirina"
+  },
+  {
+   "nome": "etravirina",
+   "apresentacao": "200 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AG04",
+   "pagina": 68,
+   "chave": "etravirina"
+  },
+  {
+   "nome": "fenoximetilpenicilina potássica",
+   "apresentacao": "80.000 UI/mL pó para solução oral",
+   "componente": "Estratégico",
+   "atc": "J01CE02",
+   "pagina": 68,
+   "chave": "fenoximetilpenicilina"
+  },
+  {
+   "nome": "flucitosina",
+   "apresentacao": "500 mg cápsula",
+   "componente": "Estratégico",
+   "atc": "J02AX01",
+   "pagina": 68,
+   "chave": "flucitosina"
+  },
+  {
+   "nome": "fluconazol",
+   "apresentacao": "150 mg cápsula",
+   "componente": "Básico",
+   "atc": "J02AC01",
+   "pagina": 69,
+   "chave": "fluconazol"
+  },
+  {
+   "nome": "fluconazol",
+   "apresentacao": "10 mg/mL suspensão oral",
+   "componente": "Básico",
+   "atc": "J02AC01",
+   "pagina": 69,
+   "chave": "fluconazol"
+  },
+  {
+   "nome": "fluconazol",
+   "apresentacao": "100 mg cápsula",
+   "componente": "Básico",
+   "atc": "J02AC01",
+   "pagina": 69,
+   "chave": "fluconazol"
+  },
+  {
+   "nome": "fluconazol",
+   "apresentacao": "2 mg/mL solução injetável",
+   "componente": "Estratégico",
+   "atc": "J02AC01",
+   "pagina": 69,
+   "chave": "fluconazol"
+  },
+  {
+   "nome": "fosamprenavir",
+   "apresentacao": "50 mg/mL suspensão oral",
+   "componente": "Estratégico",
+   "atc": "J05AE07",
+   "pagina": 69,
+   "chave": "fosamprenavir"
+  },
+  {
+   "nome": "fosfato de oseltamivir",
+   "apresentacao": "30 mg cápsula",
+   "componente": "Estratégico",
+   "atc": "J05AH02",
+   "pagina": 69,
+   "chave": "oseltamivir"
+  },
+  {
+   "nome": "fosfato de oseltamivir",
+   "apresentacao": "45 mg cápsula",
+   "componente": "Estratégico",
+   "atc": "J05AH02",
+   "pagina": 69,
+   "chave": "oseltamivir"
+  },
+  {
+   "nome": "fosfato de oseltamivir",
+   "apresentacao": "75 mg cápsula",
+   "componente": "Estratégico",
+   "atc": "J05AH02",
+   "pagina": 69,
+   "chave": "oseltamivir"
+  },
+  {
+   "nome": "fostensavir trometamol",
+   "apresentacao": "600 mg comprimido de liberação prolongada",
+   "componente": "Estratégico",
+   "atc": "J05AX29",
+   "pagina": 69,
+   "chave": "fostensavir trometamol"
+  },
+  {
+   "nome": "fumarato de tenofovir desoproxila",
+   "apresentacao": "300 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AF07",
+   "pagina": 69,
+   "chave": "tenofovir desoproxila"
+  },
+  {
+   "nome": "fumarato de tenofovir desoproxila + entricitabina",
+   "apresentacao": "300 mg + 200 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AR03",
+   "pagina": 69,
+   "chave": "tenofovir desoproxila entricitabina"
+  },
+  {
+   "nome": "fumarato de tenofovir desoproxila + lamivudina",
+   "apresentacao": "300 mg + 300 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AR12",
+   "pagina": 70,
+   "chave": "tenofovir desoproxila lamivudina"
+  },
+  {
+   "nome": "fumarato de tenofovir desoproxila + lamivudina + efavirenz",
+   "apresentacao": "300 mg + 300 mg + 600 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AR11",
+   "pagina": 70,
+   "chave": "tenofovir desoproxila lamivudina efavirenz"
+  },
+  {
+   "nome": "glecaprevir + pibrentasvir",
+   "apresentacao": "100 mg + 40 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AP57",
+   "pagina": 70,
+   "chave": "glecaprevir pibrentasvir"
+  },
+  {
+   "nome": "hemifumarato de tenofovir alafenamida",
+   "apresentacao": "25 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AF13",
+   "pagina": 70,
+   "chave": "tenofovir alafenamida"
+  },
+  {
+   "nome": "imunoglobulina anti-Rho (D)",
+   "apresentacao": "solução injetável",
+   "componente": "Procedimento Hospitalar",
+   "atc": "J06BB01",
+   "pagina": 70,
+   "chave": "imunoglobulina anti rho"
+  },
+  {
+   "nome": "imunoglobulina antitetânica",
+   "apresentacao": "250 UI/mL solução injetável",
+   "componente": "Estratégico",
+   "atc": "J06BB02",
+   "pagina": 70,
+   "chave": "imunoglobulina antitetanica"
+  },
+  {
+   "nome": "imunoglobulina humana",
+   "apresentacao": "0,5 g pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "J06BA02",
+   "pagina": 71,
+   "chave": "imunoglobulina humana"
+  },
+  {
+   "nome": "imunoglobulina humana",
+   "apresentacao": "0,5 g solução injetável",
+   "componente": "Especializado",
+   "atc": "J06BA02",
+   "pagina": 71,
+   "chave": "imunoglobulina humana"
+  },
+  {
+   "nome": "imunoglobulina humana",
+   "apresentacao": "2,5 g pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "J06BA02",
+   "pagina": 71,
+   "chave": "imunoglobulina humana"
+  },
+  {
+   "nome": "imunoglobulina humana",
+   "apresentacao": "2,5 g solução injetável",
+   "componente": "Especializado",
+   "atc": "J06BA02",
+   "pagina": 71,
+   "chave": "imunoglobulina humana"
+  },
+  {
+   "nome": "imunoglobulina humana",
+   "apresentacao": "5 g pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "J06BA02",
+   "pagina": 71,
+   "chave": "imunoglobulina humana"
+  },
+  {
+   "nome": "imunoglobulina humana",
+   "apresentacao": "5g solução injetável",
+   "componente": "Especializado",
+   "atc": "J06BA02",
+   "pagina": 71,
+   "chave": "imunoglobulina humana"
+  },
+  {
+   "nome": "imunoglobulina humana",
+   "apresentacao": "1 g pó para solução injetável",
+   "componente": "Especializado e Procedimento Hospitalar",
+   "atc": "J06BA02",
+   "pagina": 71,
+   "chave": "imunoglobulina humana"
+  },
+  {
+   "nome": "imunoglobulina humana",
+   "apresentacao": "1 g solução injetável",
+   "componente": "Especializado e Procedimento Hospitalar",
+   "atc": "J06BA02",
+   "pagina": 71,
+   "chave": "imunoglobulina humana"
+  },
+  {
+   "nome": "imunoglobulina humana anti- -hepatite B",
+   "apresentacao": "100 UI solução injetável",
+   "componente": "Estratégico",
+   "atc": "J06BB04",
+   "pagina": 72,
+   "chave": "imunoglobulina humana anti hepatite b"
+  },
+  {
+   "nome": "imunoglobulina humana anti- -hepatite B",
+   "apresentacao": "180 - 200 UI/mL solução injetável",
+   "componente": "Estratégico",
+   "atc": "J06BB04",
+   "pagina": 72,
+   "chave": "imunoglobulina humana anti hepatite b"
+  },
+  {
+   "nome": "imunoglobulina humana anti- -hepatite B",
+   "apresentacao": "500 UI solução injetável",
+   "componente": "Estratégico e Procedimento Hospitalar",
+   "atc": "J06BB04",
+   "pagina": 72,
+   "chave": "imunoglobulina humana anti hepatite b"
+  },
+  {
+   "nome": "imunoglobulina humana anti- -hepatite B",
+   "apresentacao": "600 UI solução injetável",
+   "componente": "Estratégico",
+   "atc": "J06BB04",
+   "pagina": 72,
+   "chave": "imunoglobulina humana anti hepatite b"
+  },
+  {
+   "nome": "imunoglobulina humana anti- -hepatite B",
+   "apresentacao": "1.000 UI solução injetável",
+   "componente": "Estratégico",
+   "atc": "J06BB04",
+   "pagina": 72,
+   "chave": "imunoglobulina humana anti hepatite b"
+  },
+  {
+   "nome": "imunoglobulina humana antirrábica",
+   "apresentacao": "150 UI/mL solução injetável",
+   "componente": "Estratégico",
+   "atc": "J06BB05",
+   "pagina": 72,
+   "chave": "imunoglobulina humana antirrabica"
+  },
+  {
+   "nome": "imunoglobulina humana antivaricela zoster",
+   "apresentacao": "125 UI/2,5 mL solução injetável",
+   "componente": "Estratégico",
+   "atc": "J06BB03",
+   "pagina": 72,
+   "chave": "imunoglobulina humana antivaricela zoster"
+  },
+  {
+   "nome": "isoniazida",
+   "apresentacao": "100 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J04AC01",
+   "pagina": 72,
+   "chave": "isoniazida"
+  },
+  {
+   "nome": "isoniazida",
+   "apresentacao": "300 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J04AC01",
+   "pagina": 72,
+   "chave": "isoniazida"
+  },
+  {
+   "nome": "itraconazol",
+   "apresentacao": "10 mg/mL solução oral",
+   "componente": "Básico",
+   "atc": "J02AC02",
+   "pagina": 72,
+   "chave": "itraconazol"
+  },
+  {
+   "nome": "itraconazol",
+   "apresentacao": "100 mg cápsula",
+   "componente": "Básico e Estratégico",
+   "atc": "J02AC02",
+   "pagina": 72,
+   "chave": "itraconazol"
+  },
+  {
+   "nome": "lamivudina",
+   "apresentacao": "10 mg/mL solução oral",
+   "componente": "Estratégico",
+   "atc": "J05AF05",
+   "pagina": 73,
+   "chave": "lamivudina"
+  },
+  {
+   "nome": "lamivudina",
+   "apresentacao": "150 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AF05",
+   "pagina": 73,
+   "chave": "lamivudina"
+  },
+  {
+   "nome": "ledipasvir + sofosbovir",
+   "apresentacao": "90 mg + 400 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AP51",
+   "pagina": 73,
+   "chave": "ledipasvir sofosbovir"
+  },
+  {
+   "nome": "levofloxacino",
+   "apresentacao": "250 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J01MA12",
+   "pagina": 73,
+   "chave": "levofloxacino"
+  },
+  {
+   "nome": "levofloxacino",
+   "apresentacao": "500 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J01MA12",
+   "pagina": 73,
+   "chave": "levofloxacino"
+  },
+  {
+   "nome": "linezolida",
+   "apresentacao": "600 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J01XX08",
+   "pagina": 73,
+   "chave": "linezolida"
+  },
+  {
+   "nome": "Reservado",
+   "apresentacao": "2 mg/mL solução para infusão",
+   "componente": "Estratégico",
+   "atc": "J01XX08",
+   "pagina": 73,
+   "chave": "reservado"
+  },
+  {
+   "nome": "Reservado lopinavir + ritonavir",
+   "apresentacao": "200 mg + 50 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AR10",
+   "pagina": 73,
+   "chave": "reservado lopinavir ritonavir"
+  },
+  {
+   "nome": "lopinavir + ritonavir",
+   "apresentacao": "80 mg/mL + 20 mg/mL solução oral",
+   "componente": "Estratégico",
+   "atc": "J05AR10",
+   "pagina": 73,
+   "chave": "lopinavir ritonavir"
+  },
+  {
+   "nome": "lopinavir + ritonavir",
+   "apresentacao": "100 mg + 25 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AR10",
+   "pagina": 73,
+   "chave": "lopinavir ritonavir"
+  },
+  {
+   "nome": "maraviroque",
+   "apresentacao": "150 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AX09",
+   "pagina": 73,
+   "chave": "maraviroque"
+  },
+  {
+   "nome": "metronidazol",
+   "apresentacao": "250 mg comprimido",
+   "componente": "Básico",
+   "atc": "J01XD01",
+   "pagina": 73,
+   "chave": "metronidazol"
+  },
+  {
+   "nome": "metronidazol",
+   "apresentacao": "400 mg comprimido",
+   "componente": "Básico",
+   "atc": "J01XD01",
+   "pagina": 73,
+   "chave": "metronidazol"
+  },
+  {
+   "nome": "nevirapina",
+   "apresentacao": "200 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AG01",
+   "pagina": 74,
+   "chave": "nevirapina"
+  },
+  {
+   "nome": "nevirapina",
+   "apresentacao": "10 mg/mL suspensão oral",
+   "componente": "Estratégico",
+   "atc": "J05AG01",
+   "pagina": 74,
+   "chave": "nevirapina"
+  },
+  {
+   "nome": "nirmatrelvir + ritonavir",
+   "apresentacao": "150 mg + 100 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AE30",
+   "pagina": 74,
+   "chave": "nirmatrelvir ritonavir"
+  },
+  {
+   "nome": "nitrofurantoína",
+   "apresentacao": "100 mg cápsula",
+   "componente": "Básico",
+   "atc": "J01XE01",
+   "pagina": 74,
+   "chave": "nitrofurantoina"
+  },
+  {
+   "nome": "nitrofurantoína",
+   "apresentacao": "5 mg/mL suspensão oral",
+   "componente": "Básico",
+   "atc": "J01XE01",
+   "pagina": 74,
+   "chave": "nitrofurantoina"
+  },
+  {
+   "nome": "ofloxacino",
+   "apresentacao": "400 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J01MA01",
+   "pagina": 74,
+   "chave": "ofloxacino"
+  },
+  {
+   "nome": "palivizumabe",
+   "apresentacao": "100 mg/mL (frasco de 0,5 mL e 1 mL) solução injetável",
+   "componente": "Estratégico",
+   "atc": "J06BD01",
+   "pagina": 74,
+   "chave": "palivizumabe"
+  },
+  {
+   "nome": "pirazinamida",
+   "apresentacao": "500 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J04AK01",
+   "pagina": 74,
+   "chave": "pirazinamida"
+  },
+  {
+   "nome": "pirazinamida",
+   "apresentacao": "30 mg/mL (3%) suspensão oral",
+   "componente": "Estratégico",
+   "atc": "J04AK01",
+   "pagina": 74,
+   "chave": "pirazinamida"
+  },
+  {
+   "nome": "pirazinamida",
+   "apresentacao": "150 mg comprimido dispersível",
+   "componente": "Estratégico",
+   "atc": "J04AK01",
+   "pagina": 74,
+   "chave": "pirazinamida"
+  },
+  {
+   "nome": "pretomanida",
+   "apresentacao": "200 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J04AK08",
+   "pagina": 74,
+   "chave": "pretomanida"
+  },
+  {
+   "nome": "raltegravir potássico",
+   "apresentacao": "100 mg granulado para suspensão oral",
+   "componente": "Estratégico",
+   "atc": "J05AJ01",
+   "pagina": 75,
+   "chave": "raltegravir"
+  },
+  {
+   "nome": "raltegravir potássico",
+   "apresentacao": "100 mg comprimido mastigável",
+   "componente": "Estratégico",
+   "atc": "J05AJ01",
+   "pagina": 75,
+   "chave": "raltegravir"
+  },
+  {
+   "nome": "raltegravir potássico",
+   "apresentacao": "400 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AJ01",
+   "pagina": 75,
+   "chave": "raltegravir"
+  },
+  {
+   "nome": "ribavirina",
+   "apresentacao": "250 mg cápsula",
+   "componente": "Estratégico",
+   "atc": "J05AP01",
+   "pagina": 75,
+   "chave": "ribavirina"
+  },
+  {
+   "nome": "rifabutina",
+   "apresentacao": "150 mg cápsula",
+   "componente": "Estratégico",
+   "atc": "J04AB04",
+   "pagina": 75,
+   "chave": "rifabutina"
+  },
+  {
+   "nome": "rifampicina*",
+   "apresentacao": "300 mg* cápsula",
+   "componente": "Básico e Estratégico",
+   "atc": "J04AB02",
+   "pagina": 75,
+   "chave": "rifampicina"
+  },
+  {
+   "nome": "rifampicina*",
+   "apresentacao": "150 mg* cápsula",
+   "componente": "Estratégico",
+   "atc": "J04AB02",
+   "pagina": 75,
+   "chave": "rifampicina"
+  },
+  {
+   "nome": "rifampicina*",
+   "apresentacao": "20mg/mL suspensão oral",
+   "componente": "Estratégico",
+   "atc": "J04AB02",
+   "pagina": 75,
+   "chave": "rifampicina"
+  },
+  {
+   "nome": "rifampicina + isoniazida",
+   "apresentacao": "150 mg + 75 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J04AM02",
+   "pagina": 75,
+   "chave": "rifampicina isoniazida"
+  },
+  {
+   "nome": "rifampicina + isoniazida",
+   "apresentacao": "300 mg + 150 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J04AM02",
+   "pagina": 75,
+   "chave": "rifampicina isoniazida"
+  },
+  {
+   "nome": "rifampicina + isoniazida",
+   "apresentacao": "75 mg + 50 mg comprimidos dispersíveis",
+   "componente": "Estratégico",
+   "atc": "J04AM02",
+   "pagina": 75,
+   "chave": "rifampicina isoniazida"
+  },
+  {
+   "nome": "rifampicina + isoniazida + pirazinamida",
+   "apresentacao": "75 mg + 50 mg + 150 mg comprimidos dispersíveis",
+   "componente": "Estratégico",
+   "atc": "J04AM05",
+   "pagina": 76,
+   "chave": "rifampicina isoniazida pirazinamida"
+  },
+  {
+   "nome": "rifampicina + isoniazida + pirazinamida + cloridrato de etambutol",
+   "apresentacao": "150 mg + 75 mg + 400 mg + 275 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J04AM06",
+   "pagina": 76,
+   "chave": "rifampicina isoniazida pirazinamida cloridrato de etambutol"
+  },
+  {
+   "nome": "rifapentina",
+   "apresentacao": "150 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J04AB05",
+   "pagina": 76,
+   "chave": "rifapentina"
+  },
+  {
+   "nome": "rifapentina + isoniazida",
+   "apresentacao": "300 mg + 300 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J04AB05",
+   "pagina": 76,
+   "chave": "rifapentina isoniazida"
+  },
+  {
+   "nome": "ritonavir",
+   "apresentacao": "100 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AE03",
+   "pagina": 76,
+   "chave": "ritonavir"
+  },
+  {
+   "nome": "sofosbuvir",
+   "apresentacao": "400 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AP08",
+   "pagina": 76,
+   "chave": "sofosbuvir"
+  },
+  {
+   "nome": "sofosbuvir + velpatasvir",
+   "apresentacao": "400 mg + 100 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AP55",
+   "pagina": 76,
+   "chave": "sofosbuvir velpatasvir"
+  },
+  {
+   "nome": "sofosbuvir + velpatasvir + voxilaprevir",
+   "apresentacao": "400 mg + 100 mg + 100 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AP56",
+   "pagina": 76,
+   "chave": "sofosbuvir velpatasvir voxilaprevir"
+  },
+  {
+   "nome": "soro antiaracnídico (Loxosceles, Phoneutria e Tityus)",
+   "apresentacao": "cada mL contém imunoglobulinas que neutralizam, no mínimo, 1,5 Dose Mínima Mortal (DMM) de veneno de Tityus serrulatus (1,5 DMM/ mL), 1,5 DMM de veneno de Phoneutria nigriventer (1,5 DMM/mL) e 15 DMN (Dose Mínima Necrosante) de veneno de Loxosceles gaucho (15 DMN/mL) solução injetável",
+   "componente": "Estratégico",
+   "atc": "J06AA",
+   "pagina": 77,
+   "chave": "soro antiaracnidico"
+  },
+  {
+   "nome": "soro antibotrópico (pentavalente)",
+   "apresentacao": "cada mL contém imunoglobulinas (IgG) que neutralizam, no mínimo, 5 mg de veneno de Bothrops jararaca (5 mg/mL) solução injetável",
+   "componente": "Estratégico",
+   "atc": "J06AA03",
+   "pagina": 77,
+   "chave": "soro antibotropico"
+  },
+  {
+   "nome": "soro antibotrópico (pentavalente) e anticrotálico",
+   "apresentacao": "cada mL contém imunoglobulinas que neutralizam, no mínimo, 5 mg de veneno de Bothrops jararaca e a 1,5 mg de veneno de Crotalus durissus terrifcus (5 mg/ mL e 1,5 mg/mL) solução injetável",
+   "componente": "Estratégico",
+   "atc": "J06AA03",
+   "pagina": 78,
+   "chave": "soro antibotropico e anticrotalico"
+  },
+  {
+   "nome": "soro antibotrópico (pentavalente) e antilaquético",
+   "apresentacao": "cada mL contém imunoglobulinas que neutralizam, no mínimo, 5 mg de veneno de Bothrops jararaca e 3 mg de veneno de Lachesis muta (5 mg/mL e 3 mg/mL) solução injetável",
+   "componente": "Estratégico",
+   "atc": "J06AA03",
+   "pagina": 78,
+   "chave": "soro antibotropico e antilaquetico"
+  },
+  {
+   "nome": "soro antibotulínico AB (bivalente)",
+   "apresentacao": "cada mL contém imunoglobulinas que neutralizam, no mínimo, 375 UI de toxina botulínica tipo A e 275 UI de toxina botulínica tipo B (375 UI/mL e 275 UI/mL) solução injetável",
+   "componente": "Estratégico",
+   "atc": "J06AA04",
+   "pagina": 79,
+   "chave": "soro antibotulinico ab"
+  },
+  {
+   "nome": "soro anticrotálico",
+   "apresentacao": "cada mL contém imunoglobulinas que neutralizam, no mínimo, 1,5 mg de veneno Crotalus durissus terrificus (1,5 mg/mL) solução injetável",
+   "componente": "Estratégico",
+   "atc": "J06AA03",
+   "pagina": 79,
+   "chave": "soro anticrotalico"
+  },
+  {
+   "nome": "soro antidiftérico",
+   "apresentacao": "cada mL contém imunoglobulinas que neutralizam, no mínimo, 1.000 UI de toxina diftérica (1.000 UI/mL) solução injetável",
+   "componente": "Estratégico",
+   "atc": "J06AA01",
+   "pagina": 79,
+   "chave": "soro antidifterico"
+  },
+  {
+   "nome": "soro antielapídico (bivalente)",
+   "apresentacao": "cada mL contém imunoglobulinas que neutralizam, no mínimo, 1,5 mg de veneno de Micrurus frontalis (1,5 mg/mL) solução injetável",
+   "componente": "Estratégico",
+   "atc": "J06AA03",
+   "pagina": 80,
+   "chave": "soro antielapidico"
+  },
+  {
+   "nome": "soro antiescorpiônico",
+   "apresentacao": "cada mL contém imunoglobulinas que neutralizam, no mínimo 1,5 DMM (Dose Mínima Mortal) de veneno de Tityus serrulatus (1,5 DMM/mL) solução injetável",
+   "componente": "Estratégico",
+   "atc": "J06AA",
+   "pagina": 80,
+   "chave": "soro antiescorpionico"
+  },
+  {
+   "nome": "soro antilonômico",
+   "apresentacao": "cada mL contém imunoglobulinas que neutralizam, no mínimo, 0,35 mg de veneno de Lonomia obliqua (0,35 mg/mL) solução injetável",
+   "componente": "Estratégico",
+   "atc": "J06AA",
+   "pagina": 80,
+   "chave": "soro antilonomico"
+  },
+  {
+   "nome": "soro antiloxoscélico (trivalente)",
+   "apresentacao": "cada mL contém imunoglobulinas que neutralizam, no mínimo, 15 DMN (Dose Mínima Necrosante) de veneno de aranhas das espécies Loxosceles laeta, Loxosceles gaucho e Loxosceles intermedia (15 DMN/mL) solução injetável",
+   "componente": "Estratégico",
+   "atc": "J06AA",
+   "pagina": 81,
+   "chave": "soro antiloxoscelico"
+  },
+  {
+   "nome": "soro antirrábico",
+   "apresentacao": "cada mL contém imonoglobulinas que neutralizam, no mínimo, 200 UI de vírus da raiva (200 UI/mL) solução injetável",
+   "componente": "Estratégico",
+   "atc": "J06AA06",
+   "pagina": 81,
+   "chave": "soro antirrabico"
+  },
+  {
+   "nome": "soro antitetânico",
+   "apresentacao": "cada mL contém imunoglobulinas que neutralizam, no mínimo, 1.000 UI de toxina tetânica solução injetável",
+   "componente": "Estratégico",
+   "atc": "J06AA02",
+   "pagina": 81,
+   "chave": "soro antitetanico"
+  },
+  {
+   "nome": "sulfadiazina",
+   "apresentacao": "500 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J01EC02",
+   "pagina": 81,
+   "chave": "sulfadiazina"
+  },
+  {
+   "nome": "sulfametoxazol + trimetoprima",
+   "apresentacao": "40 mg/mL + 8 mg/mL suspensão oral",
+   "componente": "Básico",
+   "atc": "J01EE01",
+   "pagina": 82,
+   "chave": "sulfametoxazol trimetoprima"
+  },
+  {
+   "nome": "sulfametoxazol + trimetoprima",
+   "apresentacao": "80 mg/mL + 16 mg/mL solução injetável",
+   "componente": "Básico",
+   "atc": "J01EE01",
+   "pagina": 82,
+   "chave": "sulfametoxazol trimetoprima"
+  },
+  {
+   "nome": "sulfametoxazol + trimetoprima",
+   "apresentacao": "400 mg + 80 mg comprimido",
+   "componente": "Básico",
+   "atc": "J01EE01",
+   "pagina": 82,
+   "chave": "sulfametoxazol trimetoprima"
+  },
+  {
+   "nome": "sulfato de abacavir",
+   "apresentacao": "20 mg/mL solução oral",
+   "componente": "Estratégico",
+   "atc": "J05AF06",
+   "pagina": 82,
+   "chave": "abacavir"
+  },
+  {
+   "nome": "sulfato de abacavir",
+   "apresentacao": "300 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AF06",
+   "pagina": 82,
+   "chave": "abacavir"
+  },
+  {
+   "nome": "sulfato de amicacina",
+   "apresentacao": "250 mg/mL solução injetável",
+   "componente": "Estratégico",
+   "atc": "J01GB06",
+   "pagina": 82,
+   "chave": "amicacina"
+  },
+  {
+   "nome": "sulfato de atazanavir",
+   "apresentacao": "300 mg cápsula",
+   "componente": "Estratégico",
+   "atc": "J05AE08",
+   "pagina": 82,
+   "chave": "atazanavir"
+  },
+  {
+   "nome": "sulfato de estreptomicina",
+   "apresentacao": "1 g pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "J01GA01",
+   "pagina": 82,
+   "chave": "estreptomicina"
+  },
+  {
+   "nome": "sulfato de gentamicina",
+   "apresentacao": "40 mg/mL solução injetável",
+   "componente": "Estratégico",
+   "atc": "J01GB03",
+   "pagina": 82,
+   "chave": "gentamicina"
+  },
+  {
+   "nome": "sulfato de Isavuconazônio",
+   "apresentacao": "100 mg cápsula",
+   "componente": "Estratégico",
+   "atc": "J02AC05",
+   "pagina": 82,
+   "chave": "isavuconazonio"
+  },
+  {
+   "nome": "sulfato de Isavuconazônio",
+   "apresentacao": "200 mg pó liofilizado para solução injetável",
+   "componente": "Estratégico",
+   "atc": "J02AC05",
+   "pagina": 82,
+   "chave": "isavuconazonio"
+  },
+  {
+   "nome": "terizidona",
+   "apresentacao": "250 mg cápsula",
+   "componente": "Estratégico",
+   "atc": "J04AK03",
+   "pagina": 83,
+   "chave": "terizidona"
+  },
+  {
+   "nome": "tipranavir",
+   "apresentacao": "250 mg cápsula",
+   "componente": "Estratégico",
+   "atc": "J05AE09",
+   "pagina": 83,
+   "chave": "tipranavir"
+  },
+  {
+   "nome": "tipranavir",
+   "apresentacao": "100 mg/mL solução oral",
+   "componente": "Estratégico",
+   "atc": "J05AE09",
+   "pagina": 83,
+   "chave": "tipranavir"
+  },
+  {
+   "nome": "tobramicina",
+   "apresentacao": "300 mg solução inalatória",
+   "componente": "Especializado",
+   "atc": "J01GB01",
+   "pagina": 83,
+   "chave": "tobramicina"
+  },
+  {
+   "nome": "vacina adsorvida difteria e tétano adulto",
+   "apresentacao": "suspensão injetável",
+   "componente": "Estratégico",
+   "atc": "J07AM51",
+   "pagina": 83,
+   "chave": "vacina adsorvida difteria e tetano adulto"
+  },
+  {
+   "nome": "vacina adsorvida difteria e tétano infantil",
+   "apresentacao": "suspensão injetável",
+   "componente": "Estratégico",
+   "atc": "J07AM51",
+   "pagina": 83,
+   "chave": "vacina adsorvida difteria e tetano infantil"
+  },
+  {
+   "nome": "vacina adsorvida difteria, tétano e pertussis",
+   "apresentacao": "suspensão injetável",
+   "componente": "Estratégico",
+   "atc": "J07AJ51",
+   "pagina": 83,
+   "chave": "vacina adsorvida difteria tetano e pertussis"
+  },
+  {
+   "nome": "vacina adsorvida difteria, tétano e pertussis (acelular) adulto",
+   "apresentacao": "suspensão injetável",
+   "componente": "Estratégico",
+   "atc": "J07AJ51",
+   "pagina": 83,
+   "chave": "vacina adsorvida difteria tetano e pertussis adulto"
+  },
+  {
+   "nome": "vacina adsorvida difteria, tétano e pertussis (acelular) infantil",
+   "apresentacao": "suspensão injetável",
+   "componente": "Estratégico",
+   "atc": "J07AJ51",
+   "pagina": 84,
+   "chave": "vacina adsorvida difteria tetano e pertussis infantil"
+  },
+  {
+   "nome": "vacina adsorvida difteria, tétano, pertussis, hepatite B (recombinante) e Haemophilus influenzae B (conjugada)",
+   "apresentacao": "suspensão injetável",
+   "componente": "Estratégico",
+   "atc": "J07CA11",
+   "pagina": 84,
+   "chave": "vacina adsorvida difteria tetano pertussis hepatite b e haemophilus influenzae b"
+  },
+  {
+   "nome": "vacina adsorvida hepatite A (inativada) adulto",
+   "apresentacao": "suspensão injetável",
+   "componente": "Estratégico",
+   "atc": "J07BC02",
+   "pagina": 84,
+   "chave": "vacina adsorvida hepatite a adulto"
+  },
+  {
+   "nome": "vacina adsorvida hepatite A (inativada) infantil",
+   "apresentacao": "suspensão injetável",
+   "componente": "Estratégico",
+   "atc": "J07BC02",
+   "pagina": 84,
+   "chave": "vacina adsorvida hepatite a infantil"
+  },
+  {
+   "nome": "vacina BCG",
+   "apresentacao": "pó para suspensão injetável",
+   "componente": "Estratégico",
+   "atc": "J07AN01",
+   "pagina": 84,
+   "chave": "vacina bcg"
+  },
+  {
+   "nome": "vacina cólera (inativada)",
+   "apresentacao": "suspensão oral",
+   "componente": "Estratégico",
+   "atc": "J07AE01",
+   "pagina": 85,
+   "chave": "vacina colera"
+  },
+  {
+   "nome": "vacina febre amarela (atenuada)",
+   "apresentacao": "pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "J07BL01",
+   "pagina": 85,
+   "chave": "vacina febre amarela"
+  },
+  {
+   "nome": "vacina febre tifoide (polissacarídica)",
+   "apresentacao": "solução injetável",
+   "componente": "Estratégico",
+   "atc": "J07AP03",
+   "pagina": 85,
+   "chave": "vacina febre tifoide"
+  },
+  {
+   "nome": "vacina Haemophilus influenzae B (conjugada)",
+   "apresentacao": "pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "J07AG01",
+   "pagina": 85,
+   "chave": "vacina haemophilus influenzae b"
+  },
+  {
+   "nome": "vacina hepatite B (recombinante)",
+   "apresentacao": "suspensão injetável",
+   "componente": "Estratégico",
+   "atc": "J07BC01",
+   "pagina": 85,
+   "chave": "vacina hepatite b"
+  },
+  {
+   "nome": "vacina influenza trivalente (fragmentada, inativada)",
+   "apresentacao": "suspensão injetável",
+   "componente": "Estratégico",
+   "atc": "J07BB02",
+   "pagina": 85,
+   "chave": "vacina influenza trivalente"
+  },
+  {
+   "nome": "vacina meningocócica ACWY (conjugada)",
+   "apresentacao": "solução injetável",
+   "componente": "Estratégico",
+   "atc": "J07AH08",
+   "pagina": 85,
+   "chave": "vacina meningococica acwy"
+  },
+  {
+   "nome": "vacina meningocócica C (conjugada)",
+   "apresentacao": "pó para suspensão injetável",
+   "componente": "Estratégico",
+   "atc": "J07AH07",
+   "pagina": 86,
+   "chave": "vacina meningococica c"
+  },
+  {
+   "nome": "vacina papilomavírus humano",
+   "apresentacao": "6, 11, 16 e 18 (recombinante) - suspensão injetável",
+   "componente": "Estratégico",
+   "atc": "J07BM01",
+   "pagina": 86,
+   "chave": "vacina papilomavirus humano"
+  },
+  {
+   "nome": "vacina pneumocócica",
+   "apresentacao": "10-valente (conjugada) - suspensão injetável",
+   "componente": "Estratégico",
+   "atc": "J07AL02",
+   "pagina": 86,
+   "chave": "vacina pneumococica"
+  },
+  {
+   "nome": "vacina pneumocócica",
+   "apresentacao": "13-valente (conjugada) - solução injetável",
+   "componente": "Estratégico",
+   "atc": "J07AL02",
+   "pagina": 86,
+   "chave": "vacina pneumococica"
+  },
+  {
+   "nome": "vacina pneumocócica",
+   "apresentacao": "23-valente (polissacarídica) - solução injetável",
+   "componente": "Estratégico",
+   "atc": "J07AL01",
+   "pagina": 86,
+   "chave": "vacina pneumococica"
+  },
+  {
+   "nome": "vacina poliomielite",
+   "apresentacao": "1 e 3 (atenuada) - solução oral",
+   "componente": "Estratégico",
+   "atc": "J07BF02",
+   "pagina": 87,
+   "chave": "vacina poliomielite"
+  },
+  {
+   "nome": "vacina poliomielite",
+   "apresentacao": "1, 2 e 3 (inativada) - solução injetável",
+   "componente": "Estratégico",
+   "atc": "J07BF03",
+   "pagina": 87,
+   "chave": "vacina poliomielite"
+  },
+  {
+   "nome": "vacina raiva (inativada)",
+   "apresentacao": "pó para suspensão injetável",
+   "componente": "Estratégico",
+   "atc": "J07BG01",
+   "pagina": 87,
+   "chave": "vacina raiva"
+  },
+  {
+   "nome": "vacina rotavírus humano G1P [8] (atenuada)",
+   "apresentacao": "suspensão oral",
+   "componente": "Estratégico",
+   "atc": "J07BH01",
+   "pagina": 87,
+   "chave": "vacina rotavirus humano g1p 8"
+  },
+  {
+   "nome": "vacina sarampo, caxumba, rubéola",
+   "apresentacao": "pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "J07BD52",
+   "pagina": 87,
+   "chave": "vacina sarampo caxumba rubeola"
+  },
+  {
+   "nome": "vacina sarampo, caxumba, rubéola e varicela (atenuada)",
+   "apresentacao": "pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "J07BD54",
+   "pagina": 87,
+   "chave": "vacina sarampo caxumba rubeola e varicela"
+  },
+  {
+   "nome": "vacina varicela (atenuada)",
+   "apresentacao": "pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "J07BK01",
+   "pagina": 87,
+   "chave": "vacina varicela"
+  },
+  {
+   "nome": "voriconazol",
+   "apresentacao": "200 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J02AC03",
+   "pagina": 88,
+   "chave": "voriconazol"
+  },
+  {
+   "nome": "voriconazol",
+   "apresentacao": "200 mg pó liófilizado para injetável",
+   "componente": "Estratégico",
+   "atc": "J02AC03",
+   "pagina": 88,
+   "chave": "voriconazol"
+  },
+  {
+   "nome": "zanamivir",
+   "apresentacao": "5 mg pó para inalação oral",
+   "componente": "Estratégico",
+   "atc": "J05AH01",
+   "pagina": 88,
+   "chave": "zanamivir"
+  },
+  {
+   "nome": "zidovudina",
+   "apresentacao": "100 mg cápsula",
+   "componente": "Estratégico",
+   "atc": "J05AF01",
+   "pagina": 88,
+   "chave": "zidovudina"
+  },
+  {
+   "nome": "zidovudina",
+   "apresentacao": "10 mg/mL solução injetável",
+   "componente": "Estratégico",
+   "atc": "J05AF01",
+   "pagina": 88,
+   "chave": "zidovudina"
+  },
+  {
+   "nome": "zidovudina",
+   "apresentacao": "10 mg/mL solução oral",
+   "componente": "Estratégico",
+   "atc": "J05AF01",
+   "pagina": 88,
+   "chave": "zidovudina"
+  },
+  {
+   "nome": "zidovudina + lamivudina",
+   "apresentacao": "300 mg + 150 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "J05AR01",
+   "pagina": 88,
+   "chave": "zidovudina lamivudina"
+  },
+  {
+   "nome": "abatacepte",
+   "apresentacao": "250 mg pó para solução para infusão",
+   "componente": "Especializado",
+   "atc": "L04AA24",
+   "pagina": 89,
+   "chave": "abatacepte"
+  },
+  {
+   "nome": "abatacepte",
+   "apresentacao": "125 mg/mL solução injetável",
+   "componente": "Especializado",
+   "atc": "L04AA24",
+   "pagina": 89,
+   "chave": "abatacepte"
+  },
+  {
+   "nome": "acetato de glatirâmer",
+   "apresentacao": "20 mg/mL solução injetável",
+   "componente": "Especializado",
+   "atc": "L03AX13",
+   "pagina": 89,
+   "chave": "glatiramer"
+  },
+  {
+   "nome": "acetato de glatirâmer",
+   "apresentacao": "40 mg/mL solução injetável",
+   "componente": "Especializado",
+   "atc": "L03AX13",
+   "pagina": 89,
+   "chave": "glatiramer"
+  },
+  {
+   "nome": "acetato de gosserrelina",
+   "apresentacao": "3,6 mg implante",
+   "componente": "Especializado",
+   "atc": "L02AE03",
+   "pagina": 89,
+   "chave": "gosserrelina"
+  },
+  {
+   "nome": "acetato de gosserrelina",
+   "apresentacao": "10,8 mg implante",
+   "componente": "Especializado",
+   "atc": "L02AE03",
+   "pagina": 89,
+   "chave": "gosserrelina"
+  },
+  {
+   "nome": "acetato de leuprorrelina",
+   "apresentacao": "3,75 mg pó para suspensão injetável de liberação prolongada",
+   "componente": "Especializado",
+   "atc": "L02AE02",
+   "pagina": 89,
+   "chave": "leuprorrelina"
+  },
+  {
+   "nome": "acetato de leuprorrelina",
+   "apresentacao": "11,25 mg pó para suspensão injetável",
+   "componente": "Especializado",
+   "atc": "L02AE02",
+   "pagina": 89,
+   "chave": "leuprorrelina"
+  },
+  {
+   "nome": "acetato de leuprorrelina",
+   "apresentacao": "45 mg pó para suspensão injetável de liberação prolongada",
+   "componente": "Especializado",
+   "atc": "L02AE02",
+   "pagina": 89,
+   "chave": "leuprorrelina"
+  },
+  {
+   "nome": "adalimumabe",
+   "apresentacao": "40 mg solução injetável",
+   "componente": "Especializado",
+   "atc": "L04AB04",
+   "pagina": 90,
+   "chave": "adalimumabe"
+  },
+  {
+   "nome": "alentuzumabe",
+   "apresentacao": "10 mg/mL solução para diluição para infusão",
+   "componente": "Especializado",
+   "atc": "L04AG06",
+   "pagina": 90,
+   "chave": "alentuzumabe"
+  },
+  {
+   "nome": "alfainterferona",
+   "apresentacao": "2b 3.000.000 UI pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "L03AB05",
+   "pagina": 90,
+   "chave": "alfainterferona"
+  },
+  {
+   "nome": "alfainterferona",
+   "apresentacao": "5.000.000 UI pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "L03AB05",
+   "pagina": 90,
+   "chave": "alfainterferona"
+  },
+  {
+   "nome": "alfainterferona",
+   "apresentacao": "10.000.000 UI pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "L03AB05",
+   "pagina": 90,
+   "chave": "alfainterferona"
+  },
+  {
+   "nome": "alfapeginterferona",
+   "apresentacao": "2a 180 mcg solução injetável",
+   "componente": "Estratégico",
+   "atc": "L03AB11",
+   "pagina": 90,
+   "chave": "alfapeginterferona"
+  },
+  {
+   "nome": "alfapeginterferona",
+   "apresentacao": "2b 118,4 microgramas (80 microgramas/ 0,5 mL após reconstituição) pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "L03AB10",
+   "pagina": 90,
+   "chave": "alfapeginterferona"
+  },
+  {
+   "nome": "alfapeginterferona",
+   "apresentacao": "148 microgramas (100 microgramas/ 0,5 mL após reconstituição) pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "L03AB10",
+   "pagina": 90,
+   "chave": "alfapeginterferona"
+  },
+  {
+   "nome": "alfapeginterferona",
+   "apresentacao": "177,6 microgramas (120 microgramas/ 0,5 mL após reconstituição) pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "L03AB10",
+   "pagina": 90,
+   "chave": "alfapeginterferona"
+  },
+  {
+   "nome": "azatioprina",
+   "apresentacao": "50 mg comprimido",
+   "componente": "Especializado",
+   "atc": "L04AX01",
+   "pagina": 91,
+   "chave": "azatioprina"
+  },
+  {
+   "nome": "baricitinibe",
+   "apresentacao": "2 mg comprimido",
+   "componente": "Especializado",
+   "atc": "L04AF02",
+   "pagina": 91,
+   "chave": "baricitinibe"
+  },
+  {
+   "nome": "baricitinibe",
+   "apresentacao": "4 mg comprimido",
+   "componente": "Especializado",
+   "atc": "L04AF02",
+   "pagina": 91,
+   "chave": "baricitinibe"
+  },
+  {
+   "nome": "basiliximabe",
+   "apresentacao": "20 mg pó para solução injetável",
+   "componente": "Procedimento Hospitalar",
+   "atc": "L04AC02",
+   "pagina": 91,
+   "chave": "basiliximabe"
+  },
+  {
+   "nome": "betainterferona",
+   "apresentacao": "1a 22 mcg (6.000.000 UI) solução injetável",
+   "componente": "Especializado",
+   "atc": "L03AB07",
+   "pagina": 91,
+   "chave": "betainterferona"
+  },
+  {
+   "nome": "betainterferona",
+   "apresentacao": "30 mcg (6.000.000 UI) solução injetável",
+   "componente": "Especializado",
+   "atc": "L03AB07",
+   "pagina": 91,
+   "chave": "betainterferona"
+  },
+  {
+   "nome": "betainterferona",
+   "apresentacao": "44 mcg (12.000.000 UI) solução injetável",
+   "componente": "Especializado",
+   "atc": "L03AB07",
+   "pagina": 91,
+   "chave": "betainterferona"
+  },
+  {
+   "nome": "betainterferona",
+   "apresentacao": "1b 300 mcg (9.600.000 UI) pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "L03AB08",
+   "pagina": 91,
+   "chave": "betainterferona"
+  },
+  {
+   "nome": "certolizumabe pegol",
+   "apresentacao": "200 mg/mL solução injetável",
+   "componente": "Especializado",
+   "atc": "L04AB05",
+   "pagina": 91,
+   "chave": "certolizumabe pegol"
+  },
+  {
+   "nome": "ciclofosfamida",
+   "apresentacao": "50 mg comprimido de liberação retardada",
+   "componente": "Especializado",
+   "atc": "L01AA01",
+   "pagina": 91,
+   "chave": "ciclofosfamida"
+  },
+  {
+   "nome": "ciclosporina",
+   "apresentacao": "10 mg cápsula",
+   "componente": "Especializado e Procedimento Hospitalar",
+   "atc": "L04AD01",
+   "pagina": 92,
+   "chave": "ciclosporina"
+  },
+  {
+   "nome": "ciclosporina",
+   "apresentacao": "25 mg cápsula",
+   "componente": "Especializado e Procedimento Hospitalar",
+   "atc": "L04AD01",
+   "pagina": 92,
+   "chave": "ciclosporina"
+  },
+  {
+   "nome": "ciclosporina",
+   "apresentacao": "50 mg cápsula",
+   "componente": "Especializado e Procedimento Hospitalar",
+   "atc": "L04AD01",
+   "pagina": 92,
+   "chave": "ciclosporina"
+  },
+  {
+   "nome": "ciclosporina",
+   "apresentacao": "100 mg cápsula",
+   "componente": "Especializado e Procedimento Hospitalar",
+   "atc": "L04AD01",
+   "pagina": 92,
+   "chave": "ciclosporina"
+  },
+  {
+   "nome": "ciclosporina",
+   "apresentacao": "50 mg solução injetável",
+   "componente": "Procedimento Hospitalar",
+   "atc": "L04AD01",
+   "pagina": 92,
+   "chave": "ciclosporina"
+  },
+  {
+   "nome": "ciclosporina",
+   "apresentacao": "100 mg/mL solução oral",
+   "componente": "Especializado e Procedimento Hospitalar",
+   "atc": "L04AD01",
+   "pagina": 92,
+   "chave": "ciclosporina"
+  },
+  {
+   "nome": "cladribina",
+   "apresentacao": "10 mg comprimido",
+   "componente": "Especializado",
+   "atc": "L04AA40",
+   "pagina": 92,
+   "chave": "cladribina"
+  },
+  {
+   "nome": "cloridrato de fingolimode",
+   "apresentacao": "0,5 mg cápsula",
+   "componente": "Especializado",
+   "atc": "L04AE01",
+   "pagina": 93,
+   "chave": "fingolimode"
+  },
+  {
+   "nome": "daclizumabe",
+   "apresentacao": "5 mg/mL solução injetável",
+   "componente": "Procedimento Hospitalar",
+   "atc": "L04AC01",
+   "pagina": 93,
+   "chave": "daclizumabe"
+  },
+  {
+   "nome": "eculizumabe",
+   "apresentacao": "10 mg/mL solução para diluição para infusão",
+   "componente": "Especializado",
+   "atc": "L04AJ01",
+   "pagina": 93,
+   "chave": "eculizumabe"
+  },
+  {
+   "nome": "embonato de triptorrelina",
+   "apresentacao": "11,25 mg pó para suspensão injetável de liberação prolongada",
+   "componente": "Especializado",
+   "atc": "L02AE04",
+   "pagina": 93,
+   "chave": "embonato de triptorrelina"
+  },
+  {
+   "nome": "embonato de triptorrelina",
+   "apresentacao": "22,5 mg pó para suspensão injetável de liberação prolongada",
+   "componente": "Especializado",
+   "atc": "L02AE04",
+   "pagina": 93,
+   "chave": "embonato de triptorrelina"
+  },
+  {
+   "nome": "etanercepte",
+   "apresentacao": "25 mg solução injetável",
+   "componente": "Especializado",
+   "atc": "L04AB01",
+   "pagina": 93,
+   "chave": "etanercepte"
+  },
+  {
+   "nome": "etanercepte",
+   "apresentacao": "50 mg solução injetável",
+   "componente": "Especializado",
+   "atc": "L04AB01",
+   "pagina": 93,
+   "chave": "etanercepte"
+  },
+  {
+   "nome": "everolimo",
+   "apresentacao": "0,5 mg comprimido",
+   "componente": "Especializado e Procedimento Hospitalar",
+   "atc": "L04AH02",
+   "pagina": 94,
+   "chave": "everolimo"
+  },
+  {
+   "nome": "everolimo",
+   "apresentacao": "0,75 mg comprimido",
+   "componente": "Especializado e Procedimento Hospitalar",
+   "atc": "L04AH02",
+   "pagina": 94,
+   "chave": "everolimo"
+  },
+  {
+   "nome": "everolimo",
+   "apresentacao": "1 mg comprimido",
+   "componente": "Especializado e Procedimento Hospitalar",
+   "atc": "L04AH02",
+   "pagina": 94,
+   "chave": "everolimo"
+  },
+  {
+   "nome": "filgrastim",
+   "apresentacao": "300 mcg solução injetável",
+   "componente": "Especializado",
+   "atc": "L03AA02",
+   "pagina": 94,
+   "chave": "filgrastim"
+  },
+  {
+   "nome": "fumarato de dimetila",
+   "apresentacao": "120 mg cápsula de liberação retardada",
+   "componente": "Especializado",
+   "atc": "L04AX07",
+   "pagina": 94,
+   "chave": "dimetila"
+  },
+  {
+   "nome": "fumarato de dimetila",
+   "apresentacao": "240 mg cápsula de liberação retardada",
+   "componente": "Especializado",
+   "atc": "L04AX07",
+   "pagina": 94,
+   "chave": "dimetila"
+  },
+  {
+   "nome": "golimumabe",
+   "apresentacao": "50 mg solução injetável",
+   "componente": "Especializado",
+   "atc": "L04AB06",
+   "pagina": 94,
+   "chave": "golimumabe"
+  },
+  {
+   "nome": "hidroxiureia",
+   "apresentacao": "100 mg comprimido",
+   "componente": "Especializado",
+   "atc": "L01XX05",
+   "pagina": 95,
+   "chave": "hidroxiureia"
+  },
+  {
+   "nome": "hidroxiureia",
+   "apresentacao": "500 mg cápsula",
+   "componente": "Especializado",
+   "atc": "L01XX05",
+   "pagina": 95,
+   "chave": "hidroxiureia"
+  },
+  {
+   "nome": "imunoglobulina antitimócitos humanos (coelho)",
+   "apresentacao": "25 mg pó para solução injetável",
+   "componente": "Procedimento Hospitalar",
+   "atc": "L04AA04",
+   "pagina": 95,
+   "chave": "imunoglobulina antitimocitos humanos"
+  },
+  {
+   "nome": "infliximabe",
+   "apresentacao": "100 mg pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "L04AB02",
+   "pagina": 95,
+   "chave": "infliximabe"
+  },
+  {
+   "nome": "leflunomida",
+   "apresentacao": "20 mg comprimido",
+   "componente": "Especializado",
+   "atc": "L04AK01",
+   "pagina": 95,
+   "chave": "leflunomida"
+  },
+  {
+   "nome": "metotrexato",
+   "apresentacao": "2,5 mg comprimido",
+   "componente": "Especializado",
+   "atc": "L04AX03",
+   "pagina": 95,
+   "chave": "metotrexato"
+  },
+  {
+   "nome": "metotrexato",
+   "apresentacao": "25 mg/mL solução injetável",
+   "componente": "Especializado",
+   "atc": "L04AX03",
+   "pagina": 95,
+   "chave": "metotrexato"
+  },
+  {
+   "nome": "micofenolato de mofetila",
+   "apresentacao": "500 mg comprimido",
+   "componente": "Especializado e Procedimento Hospitalar",
+   "atc": "L04AA06",
+   "pagina": 95,
+   "chave": "micofenolato de mofetila"
+  },
+  {
+   "nome": "micofenolato de sódio",
+   "apresentacao": "180 mg comprimido",
+   "componente": "Especializado e Procedimento Hospitalar",
+   "atc": "L04AA06",
+   "pagina": 96,
+   "chave": "micofenolato de sodio"
+  },
+  {
+   "nome": "micofenolato de sódio",
+   "apresentacao": "360 mg comprimido",
+   "componente": "Especializado e Procedimento Hospitalar",
+   "atc": "L04AA06",
+   "pagina": 96,
+   "chave": "micofenolato de sodio"
+  },
+  {
+   "nome": "natalizumabe",
+   "apresentacao": "20 mg/mL solução injetável",
+   "componente": "Especializado",
+   "atc": "L04AG03",
+   "pagina": 96,
+   "chave": "natalizumabe"
+  },
+  {
+   "nome": "ravulizumabe",
+   "apresentacao": "100 mg/mL solução para diluição para infusão",
+   "componente": "Especializado",
+   "atc": "L04AJ02",
+   "pagina": 96,
+   "chave": "ravulizumabe"
+  },
+  {
+   "nome": "risanquizumabe",
+   "apresentacao": "75 mg/ 0,83 mL solução injetável",
+   "componente": "Especializado",
+   "atc": "L04AC18",
+   "pagina": 96,
+   "chave": "risanquizumabe"
+  },
+  {
+   "nome": "rituximabe",
+   "apresentacao": "10 mg/mL solução para diluição para infusão",
+   "componente": "Especializado",
+   "atc": "L01FA01",
+   "pagina": 96,
+   "chave": "rituximabe"
+  },
+  {
+   "nome": "secuquinumabe",
+   "apresentacao": "150 mg/mL solução injetável",
+   "componente": "Especializado",
+   "atc": "L04AC10",
+   "pagina": 96,
+   "chave": "secuquinumabe"
+  },
+  {
+   "nome": "sirolimo",
+   "apresentacao": "1 mg comprimido",
+   "componente": "Especializado e Procedimento Hospitalar",
+   "atc": "L04AH01",
+   "pagina": 97,
+   "chave": "sirolimo"
+  },
+  {
+   "nome": "sirolimo",
+   "apresentacao": "1 mg/mL solução oral",
+   "componente": "Procedimento Hospitalar",
+   "atc": "L04AH01",
+   "pagina": 97,
+   "chave": "sirolimo"
+  },
+  {
+   "nome": "sirolimo",
+   "apresentacao": "2 mg comprimido",
+   "componente": "Especializado e Procedimento Hospitalar",
+   "atc": "L04AH01",
+   "pagina": 97,
+   "chave": "sirolimo"
+  },
+  {
+   "nome": "tacrolimo",
+   "apresentacao": "1 mg cápsula",
+   "componente": "Especializado e Procedimento Hospitalar",
+   "atc": "L04AD02",
+   "pagina": 97,
+   "chave": "tacrolimo"
+  },
+  {
+   "nome": "tacrolimo",
+   "apresentacao": "5 mg cápsula",
+   "componente": "Especializado e Procedimento Hospitalar",
+   "atc": "L04AD02",
+   "pagina": 97,
+   "chave": "tacrolimo"
+  },
+  {
+   "nome": "tacrolimo",
+   "apresentacao": "5 mg/mL solução injetável",
+   "componente": "Procedimento Hospitalar",
+   "atc": "L04AD02",
+   "pagina": 97,
+   "chave": "tacrolimo"
+  },
+  {
+   "nome": "talidomida",
+   "apresentacao": "100 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "L04AX02",
+   "pagina": 98,
+   "chave": "talidomida"
+  },
+  {
+   "nome": "teriflunomida",
+   "apresentacao": "14 mg comprimido",
+   "componente": "Especializado",
+   "atc": "L04AK02",
+   "pagina": 98,
+   "chave": "teriflunomida"
+  },
+  {
+   "nome": "tocilizumabe",
+   "apresentacao": "20 mg/mL solução injetável",
+   "componente": "Especializado",
+   "atc": "L04AC07",
+   "pagina": 98,
+   "chave": "tocilizumabe"
+  },
+  {
+   "nome": "tofacitinibe",
+   "apresentacao": "5 mg comprimido",
+   "componente": "Especializado",
+   "atc": "L04AF01",
+   "pagina": 98,
+   "chave": "tofacitinibe"
+  },
+  {
+   "nome": "triptorrelina",
+   "apresentacao": "3,75 mg pó para suspensão injetável de liberação prolongada",
+   "componente": "Especializado",
+   "atc": "L02AE04",
+   "pagina": 98,
+   "chave": "triptorrelina"
+  },
+  {
+   "nome": "upadacitinibe",
+   "apresentacao": "15 mg comprimido de liberação prolongada",
+   "componente": "Especializado",
+   "atc": "L04AF03",
+   "pagina": 98,
+   "chave": "upadacitinibe"
+  },
+  {
+   "nome": "ustequinumabe",
+   "apresentacao": "45 mg solução injetável",
+   "componente": "Especializado",
+   "atc": "L04AC05",
+   "pagina": 98,
+   "chave": "ustequinumabe"
+  },
+  {
+   "nome": "ustequinumabe",
+   "apresentacao": "130 mg solução injetável",
+   "componente": "Especializado",
+   "atc": "L04AC05",
+   "pagina": 98,
+   "chave": "ustequinumabe"
+  },
+  {
+   "nome": "vedolizumabe",
+   "apresentacao": "300 mg pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "L04AG05",
+   "pagina": 98,
+   "chave": "vedolizumabe"
+  },
+  {
+   "nome": "ácido zoledrônico",
+   "apresentacao": "0,05 mg/mL solução para infusão",
+   "componente": "Especializado",
+   "atc": "M05BA08",
+   "pagina": 99,
+   "chave": "acido zoledronico"
+  },
+  {
+   "nome": "alendronato de sódio",
+   "apresentacao": "10 mg comprimido",
+   "componente": "Básico",
+   "atc": "M05BA04",
+   "pagina": 99,
+   "chave": "alendronato de sodio"
+  },
+  {
+   "nome": "alendronato de sódio",
+   "apresentacao": "70 mg comprimido",
+   "componente": "Básico",
+   "atc": "M05BA04",
+   "pagina": 99,
+   "chave": "alendronato de sodio"
+  },
+  {
+   "nome": "alopurinol",
+   "apresentacao": "100 mg comprimido",
+   "componente": "Básico",
+   "atc": "M04AA01",
+   "pagina": 99,
+   "chave": "alopurinol"
+  },
+  {
+   "nome": "alopurinol",
+   "apresentacao": "300 mg comprimido",
+   "componente": "Básico",
+   "atc": "M04AA01",
+   "pagina": 99,
+   "chave": "alopurinol"
+  },
+  {
+   "nome": "burosumabe",
+   "apresentacao": "10 mg/mL solução injetável",
+   "componente": "Especializado",
+   "atc": "M05BX05",
+   "pagina": 99,
+   "chave": "burosumabe"
+  },
+  {
+   "nome": "burosumabe",
+   "apresentacao": "20 mg/mL solução injetável",
+   "componente": "Especializado",
+   "atc": "M05BX05",
+   "pagina": 99,
+   "chave": "burosumabe"
+  },
+  {
+   "nome": "burosumabe",
+   "apresentacao": "30 mg/mL solução injetável",
+   "componente": "Especializado",
+   "atc": "M05BX05",
+   "pagina": 99,
+   "chave": "burosumabe"
+  },
+  {
+   "nome": "ibuprofeno",
+   "apresentacao": "200 mg comprimido",
+   "componente": "Básico",
+   "atc": "M01AE01",
+   "pagina": 99,
+   "chave": "ibuprofeno"
+  },
+  {
+   "nome": "ibuprofeno",
+   "apresentacao": "300 mg comprimido",
+   "componente": "Básico",
+   "atc": "M01AE01",
+   "pagina": 99,
+   "chave": "ibuprofeno"
+  },
+  {
+   "nome": "ibuprofeno",
+   "apresentacao": "600 mg cápsula",
+   "componente": "Básico",
+   "atc": "M01AE01",
+   "pagina": 99,
+   "chave": "ibuprofeno"
+  },
+  {
+   "nome": "ibuprofeno",
+   "apresentacao": "600 mg comprimido",
+   "componente": "Básico",
+   "atc": "M01AE01",
+   "pagina": 99,
+   "chave": "ibuprofeno"
+  },
+  {
+   "nome": "ibuprofeno",
+   "apresentacao": "50 mg/mL suspensão oral",
+   "componente": "Básico",
+   "atc": "M01AE01",
+   "pagina": 99,
+   "chave": "ibuprofeno"
+  },
+  {
+   "nome": "naproxeno",
+   "apresentacao": "250 mg comprimido",
+   "componente": "Especializado",
+   "atc": "M01AE02",
+   "pagina": 100,
+   "chave": "naproxeno"
+  },
+  {
+   "nome": "naproxeno",
+   "apresentacao": "500 mg comprimido",
+   "componente": "Especializado",
+   "atc": "M01AE02",
+   "pagina": 100,
+   "chave": "naproxeno"
+  },
+  {
+   "nome": "nusinersena",
+   "apresentacao": "2,4 mg/mL solução injetável",
+   "componente": "Especializado",
+   "atc": "M09AX07",
+   "pagina": 100,
+   "chave": "nusinersena"
+  },
+  {
+   "nome": "onasemnogeno abeparvoveque",
+   "apresentacao": "2,0 x 1013 gv/mL suspensão injetável",
+   "componente": "Especializado",
+   "atc": "M09AX09",
+   "pagina": 100,
+   "chave": "onasemnogeno abeparvoveque"
+  },
+  {
+   "nome": "pamidronato dissódico",
+   "apresentacao": "60 mg pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "M05BA03",
+   "pagina": 100,
+   "chave": "pamidronato dissodico"
+  },
+  {
+   "nome": "penicilamina",
+   "apresentacao": "250 mg cápsula",
+   "componente": "Especializado",
+   "atc": "M01CC01",
+   "pagina": 100,
+   "chave": "penicilamina"
+  },
+  {
+   "nome": "risdiplam",
+   "apresentacao": "0,75 mg/mL pó para solução oral",
+   "componente": "Especializado",
+   "atc": "M09AX10",
+   "pagina": 100,
+   "chave": "risdiplam"
+  },
+  {
+   "nome": "risedronato sódico",
+   "apresentacao": "35 mg comprimido",
+   "componente": "Especializado",
+   "atc": "M05BA07",
+   "pagina": 100,
+   "chave": "risedronato"
+  },
+  {
+   "nome": "romosozumabe",
+   "apresentacao": "90 mg/mL solução injetável",
+   "componente": "Especializado",
+   "atc": "M05BX06",
+   "pagina": 100,
+   "chave": "romosozumabe"
+  },
+  {
+   "nome": "toxina botulínica A",
+   "apresentacao": "100 U pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "M03AX01",
+   "pagina": 100,
+   "chave": "toxina botulinica a"
+  },
+  {
+   "nome": "toxina botulínica A",
+   "apresentacao": "500 U pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "M03AX01",
+   "pagina": 100,
+   "chave": "toxina botulinica a"
+  },
+  {
+   "nome": "ácido acetilsalicílico",
+   "apresentacao": "500 mg comprimido",
+   "componente": "Básico",
+   "atc": "N02BA01",
+   "pagina": 101,
+   "chave": "acido acetilsalicilico"
+  },
+  {
+   "nome": "ácido valproico",
+   "apresentacao": "250 mg cápsula",
+   "componente": "Básico",
+   "atc": "N03AG01",
+   "pagina": 101,
+   "chave": "acido valproico"
+  },
+  {
+   "nome": "ácido valproico",
+   "apresentacao": "250 mg comprimido",
+   "componente": "Básico",
+   "atc": "N03AG01",
+   "pagina": 101,
+   "chave": "acido valproico"
+  },
+  {
+   "nome": "ácido valproico",
+   "apresentacao": "300 mg comprimido",
+   "componente": "Básico",
+   "atc": "N03AG01",
+   "pagina": 101,
+   "chave": "acido valproico"
+  },
+  {
+   "nome": "ácido valproico",
+   "apresentacao": "500 mg comprimido",
+   "componente": "Básico",
+   "atc": "N03AG01",
+   "pagina": 101,
+   "chave": "acido valproico"
+  },
+  {
+   "nome": "ácido valproico",
+   "apresentacao": "50 mg/mL solução oral",
+   "componente": "Básico",
+   "atc": "N03AG01",
+   "pagina": 101,
+   "chave": "acido valproico"
+  },
+  {
+   "nome": "ácido valproico",
+   "apresentacao": "50 mg/mL xarope",
+   "componente": "Básico",
+   "atc": "N03AG01",
+   "pagina": 101,
+   "chave": "acido valproico"
+  },
+  {
+   "nome": "brometo de piridostigmina",
+   "apresentacao": "60 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N07AA02",
+   "pagina": 101,
+   "chave": "piridostigmina"
+  },
+  {
+   "nome": "bromidrato de galantamina",
+   "apresentacao": "8 mg cápsula de liberação prolongada",
+   "componente": "Especializado",
+   "atc": "N06DA04",
+   "pagina": 101,
+   "chave": "galantamina"
+  },
+  {
+   "nome": "bromidrato de galantamina",
+   "apresentacao": "16 mg cápsula de liberação prolongada",
+   "componente": "Especializado",
+   "atc": "N06DA04",
+   "pagina": 101,
+   "chave": "galantamina"
+  },
+  {
+   "nome": "bromidrato de galantamina",
+   "apresentacao": "24 mg cápsula de liberação prolongada",
+   "componente": "Especializado",
+   "atc": "N06DA04",
+   "pagina": 101,
+   "chave": "galantamina"
+  },
+  {
+   "nome": "carbamazepina",
+   "apresentacao": "200 mg comprimido",
+   "componente": "Básico",
+   "atc": "N03AF01",
+   "pagina": 102,
+   "chave": "carbamazepina"
+  },
+  {
+   "nome": "carbamazepina",
+   "apresentacao": "400 mg comprimido",
+   "componente": "Básico",
+   "atc": "N03AF01",
+   "pagina": 102,
+   "chave": "carbamazepina"
+  },
+  {
+   "nome": "carbamazepina",
+   "apresentacao": "20 mg/mL suspensão oral",
+   "componente": "Básico",
+   "atc": "N03AF01",
+   "pagina": 102,
+   "chave": "carbamazepina"
+  },
+  {
+   "nome": "carbonato de lítio",
+   "apresentacao": "300 mg comprimido",
+   "componente": "Básico",
+   "atc": "N05AN01",
+   "pagina": 102,
+   "chave": "carbonato de litio"
+  },
+  {
+   "nome": "clobazam",
+   "apresentacao": "10 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N05BA09",
+   "pagina": 102,
+   "chave": "clobazam"
+  },
+  {
+   "nome": "clobazam",
+   "apresentacao": "20 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N05BA09",
+   "pagina": 102,
+   "chave": "clobazam"
+  },
+  {
+   "nome": "clonazepam",
+   "apresentacao": "2,5 mg/mL solução oral",
+   "componente": "Básico",
+   "atc": "N03AE01",
+   "pagina": 102,
+   "chave": "clonazepam"
+  },
+  {
+   "nome": "cloridrato de amantadina",
+   "apresentacao": "100 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N04BB01",
+   "pagina": 102,
+   "chave": "amantadina"
+  },
+  {
+   "nome": "cloridrato de amitriptilina",
+   "apresentacao": "25 mg comprimido",
+   "componente": "Básico",
+   "atc": "N06AA09",
+   "pagina": 102,
+   "chave": "amitriptilina"
+  },
+  {
+   "nome": "cloridrato de amitriptilina",
+   "apresentacao": "75 mg comprimido",
+   "componente": "Básico",
+   "atc": "N06AA09",
+   "pagina": 102,
+   "chave": "amitriptilina"
+  },
+  {
+   "nome": "cloridrato de biperideno",
+   "apresentacao": "4 mg comprimido de liberação prolongada",
+   "componente": "Básico",
+   "atc": "N04AA02",
+   "pagina": 102,
+   "chave": "biperideno"
+  },
+  {
+   "nome": "cloridrato de biperideno",
+   "apresentacao": "2 mg comprimido",
+   "componente": "Básico",
+   "atc": "N04AA02",
+   "pagina": 102,
+   "chave": "biperideno"
+  },
+  {
+   "nome": "cloridrato de bupivacaína",
+   "apresentacao": "2,5 mg/mL (0,25%) solução injetável",
+   "componente": "Básico",
+   "atc": "N01BB01",
+   "pagina": 102,
+   "chave": "bupivacaina"
+  },
+  {
+   "nome": "cloridrato de bupivacaína",
+   "apresentacao": "5 mg/mL (0,50%) solução injetável",
+   "componente": "Básico",
+   "atc": "N01BB01",
+   "pagina": 102,
+   "chave": "bupivacaina"
+  },
+  {
+   "nome": "cloridrato de bupropiona",
+   "apresentacao": "150 mg comprimido de liberação prolongada",
+   "componente": "Estratégico",
+   "atc": "N06AX12",
+   "pagina": 103,
+   "chave": "bupropiona"
+  },
+  {
+   "nome": "cloridrato de clomipramina",
+   "apresentacao": "10 mg comprimido",
+   "componente": "Básico",
+   "atc": "N06AA04",
+   "pagina": 103,
+   "chave": "clomipramina"
+  },
+  {
+   "nome": "cloridrato de clomipramina",
+   "apresentacao": "25 mg comprimido",
+   "componente": "Básico",
+   "atc": "N06AA04",
+   "pagina": 103,
+   "chave": "clomipramina"
+  },
+  {
+   "nome": "cloridrato de clorpromazina",
+   "apresentacao": "5 mg/mL solução injetável",
+   "componente": "Básico",
+   "atc": "N05AA01",
+   "pagina": 103,
+   "chave": "clorpromazina"
+  },
+  {
+   "nome": "cloridrato de clorpromazina",
+   "apresentacao": "40 mg/mL solução oral",
+   "componente": "Básico",
+   "atc": "N05AA01",
+   "pagina": 103,
+   "chave": "clorpromazina"
+  },
+  {
+   "nome": "cloridrato de clorpromazina",
+   "apresentacao": "25 mg comprimido",
+   "componente": "Básico",
+   "atc": "N05AA01",
+   "pagina": 103,
+   "chave": "clorpromazina"
+  },
+  {
+   "nome": "cloridrato de clorpromazina",
+   "apresentacao": "100 mg comprimido",
+   "componente": "Básico",
+   "atc": "N05AA01",
+   "pagina": 103,
+   "chave": "clorpromazina"
+  },
+  {
+   "nome": "cloridrato de donepezila",
+   "apresentacao": "5 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N06DA02",
+   "pagina": 103,
+   "chave": "donepezila"
+  },
+  {
+   "nome": "cloridrato de donepezila",
+   "apresentacao": "10 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N06DA02",
+   "pagina": 103,
+   "chave": "donepezila"
+  },
+  {
+   "nome": "cloridrato de fluoxetina",
+   "apresentacao": "20 mg cápsula",
+   "componente": "Básico",
+   "atc": "N06AB03",
+   "pagina": 103,
+   "chave": "fluoxetina"
+  },
+  {
+   "nome": "cloridrato de fluoxetina",
+   "apresentacao": "20 mg comprimido",
+   "componente": "Básico",
+   "atc": "N06AB03",
+   "pagina": 103,
+   "chave": "fluoxetina"
+  },
+  {
+   "nome": "cloridrato de lidocaína",
+   "apresentacao": "100 mg/mL (10%) solução spray",
+   "componente": "Básico",
+   "atc": "N01BB02",
+   "pagina": 103,
+   "chave": "lidocaina"
+  },
+  {
+   "nome": "cloridrato de lidocaína + glicose",
+   "apresentacao": "50 mg/mL + 75 mg/mL (5% + 7,5%) solução injetável",
+   "componente": "Básico",
+   "atc": "N01BB52",
+   "pagina": 103,
+   "chave": "lidocaina glicose"
+  },
+  {
+   "nome": "cloridrato de lidocaína + hemitartarato de epinefrina",
+   "apresentacao": "2% + 1:200.000 (20 mg + 20 mcg/mL) solução injetável",
+   "componente": "Básico",
+   "atc": "N01BB52",
+   "pagina": 104,
+   "chave": "lidocaina hemitartarato de epinefrina"
+  },
+  {
+   "nome": "cloridrato de lidocaína + hemitartarato de epinefrina",
+   "apresentacao": "2% + 1:80.000 (20 mg + 12,5 mcg/mL) solução injetável",
+   "componente": "Básico",
+   "atc": "N01BB52",
+   "pagina": 104,
+   "chave": "lidocaina hemitartarato de epinefrina"
+  },
+  {
+   "nome": "cloridrato de lidocaína + hemitartarato de epinefrina",
+   "apresentacao": "1% + 1:200.000 (10 mg + 20 mcg/mL) solução injetável",
+   "componente": "Básico",
+   "atc": "N01BB52",
+   "pagina": 104,
+   "chave": "lidocaina hemitartarato de epinefrina"
+  },
+  {
+   "nome": "cloridrato de memantina",
+   "apresentacao": "10 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N06DX01",
+   "pagina": 104,
+   "chave": "memantina"
+  },
+  {
+   "nome": "cloridrato de metadona",
+   "apresentacao": "5 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N07BC02",
+   "pagina": 104,
+   "chave": "metadona"
+  },
+  {
+   "nome": "cloridrato de metadona",
+   "apresentacao": "10 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N07BC02",
+   "pagina": 104,
+   "chave": "metadona"
+  },
+  {
+   "nome": "cloridrato de metadona",
+   "apresentacao": "10 mg/mL solução injetável",
+   "componente": "Especializado",
+   "atc": "N07BC02",
+   "pagina": 104,
+   "chave": "metadona"
+  },
+  {
+   "nome": "cloridrato de nortriptilina",
+   "apresentacao": "10 mg cápsula",
+   "componente": "Básico",
+   "atc": "N06AA10",
+   "pagina": 104,
+   "chave": "nortriptilina"
+  },
+  {
+   "nome": "cloridrato de nortriptilina",
+   "apresentacao": "25 mg cápsula",
+   "componente": "Básico",
+   "atc": "N06AA10",
+   "pagina": 104,
+   "chave": "nortriptilina"
+  },
+  {
+   "nome": "cloridrato de nortriptilina",
+   "apresentacao": "50 mg cápsula",
+   "componente": "Básico",
+   "atc": "N06AA10",
+   "pagina": 104,
+   "chave": "nortriptilina"
+  },
+  {
+   "nome": "cloridrato de nortriptilina",
+   "apresentacao": "75 mg cápsula",
+   "componente": "Básico",
+   "atc": "N06AA10",
+   "pagina": 104,
+   "chave": "nortriptilina"
+  },
+  {
+   "nome": "cloridrato de prilocaína + felipressina",
+   "apresentacao": "30 mg/mL (3%) + 0,03 UI/mL solução injetável",
+   "componente": "Básico",
+   "atc": "N01BB54",
+   "pagina": 105,
+   "chave": "prilocaina felipressina"
+  },
+  {
+   "nome": "cloridrato de selegilina",
+   "apresentacao": "5 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N04BD01",
+   "pagina": 105,
+   "chave": "selegilina"
+  },
+  {
+   "nome": "cloridrato de triexifenidil",
+   "apresentacao": "5 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N04AA01",
+   "pagina": 105,
+   "chave": "triexifenidil"
+  },
+  {
+   "nome": "cloridrato de ziprasidona",
+   "apresentacao": "40 mg cápsula",
+   "componente": "Especializado",
+   "atc": "N05AE04",
+   "pagina": 105,
+   "chave": "ziprasidona"
+  },
+  {
+   "nome": "cloridrato de ziprasidona",
+   "apresentacao": "80 mg cápsula",
+   "componente": "Especializado",
+   "atc": "N05AE04",
+   "pagina": 105,
+   "chave": "ziprasidona"
+  },
+  {
+   "nome": "clozapina",
+   "apresentacao": "25 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N05AH02",
+   "pagina": 105,
+   "chave": "clozapina"
+  },
+  {
+   "nome": "clozapina",
+   "apresentacao": "100 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N05AH02",
+   "pagina": 105,
+   "chave": "clozapina"
+  },
+  {
+   "nome": "diazepam",
+   "apresentacao": "5 mg/mL solução injetável",
+   "componente": "Básico",
+   "atc": "N05BA01",
+   "pagina": 105,
+   "chave": "diazepam"
+  },
+  {
+   "nome": "diazepam",
+   "apresentacao": "5 mg comprimido",
+   "componente": "Básico",
+   "atc": "N05BA01",
+   "pagina": 105,
+   "chave": "diazepam"
+  },
+  {
+   "nome": "diazepam",
+   "apresentacao": "10 mg comprimido",
+   "componente": "Básico",
+   "atc": "N05BA01",
+   "pagina": 105,
+   "chave": "diazepam"
+  },
+  {
+   "nome": "dicloridrato de pramipexol",
+   "apresentacao": "0,125 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N04BC05",
+   "pagina": 105,
+   "chave": "pramipexol"
+  },
+  {
+   "nome": "dicloridrato de pramipexol",
+   "apresentacao": "0,25 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N04BC05",
+   "pagina": 105,
+   "chave": "pramipexol"
+  },
+  {
+   "nome": "dicloridrato de pramipexol",
+   "apresentacao": "1 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N04BC05",
+   "pagina": 105,
+   "chave": "pramipexol"
+  },
+  {
+   "nome": "dipirona",
+   "apresentacao": "500 mg comprimido",
+   "componente": "Básico",
+   "atc": "N02BB02",
+   "pagina": 106,
+   "chave": "dipirona"
+  },
+  {
+   "nome": "dipirona",
+   "apresentacao": "500 mg/mL solução oral",
+   "componente": "Básico",
+   "atc": "N02BB02",
+   "pagina": 106,
+   "chave": "dipirona"
+  },
+  {
+   "nome": "dipirona",
+   "apresentacao": "500 mg/mL solução injetável",
+   "componente": "Básico",
+   "atc": "N02BB02",
+   "pagina": 106,
+   "chave": "dipirona"
+  },
+  {
+   "nome": "entacapona",
+   "apresentacao": "200 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N04BX02",
+   "pagina": 106,
+   "chave": "entacapona"
+  },
+  {
+   "nome": "etossuximida",
+   "apresentacao": "50 mg/mL xarope",
+   "componente": "Especializado",
+   "atc": "N03AD01",
+   "pagina": 106,
+   "chave": "etossuximida"
+  },
+  {
+   "nome": "fenitoína",
+   "apresentacao": "100 mg comprimido",
+   "componente": "Básico",
+   "atc": "N03AB02",
+   "pagina": 106,
+   "chave": "fenitoina"
+  },
+  {
+   "nome": "fenitoína",
+   "apresentacao": "20 mg/mL suspensão oral",
+   "componente": "Básico",
+   "atc": "N03AB02",
+   "pagina": 106,
+   "chave": "fenitoina"
+  },
+  {
+   "nome": "fenitoína",
+   "apresentacao": "50 mg/mL solução injetável",
+   "componente": "Básico",
+   "atc": "N03AB02",
+   "pagina": 106,
+   "chave": "fenitoina"
+  },
+  {
+   "nome": "fenobarbital",
+   "apresentacao": "100 mg/mL solução injetável",
+   "componente": "Básico",
+   "atc": "N03AA02",
+   "pagina": 106,
+   "chave": "fenobarbital"
+  },
+  {
+   "nome": "fenobarbital",
+   "apresentacao": "100 mg comprimido",
+   "componente": "Básico",
+   "atc": "N03AA02",
+   "pagina": 106,
+   "chave": "fenobarbital"
+  },
+  {
+   "nome": "fenobarbital",
+   "apresentacao": "40 mg/mL solução oral",
+   "componente": "Básico",
+   "atc": "N03AA02",
+   "pagina": 106,
+   "chave": "fenobarbital"
+  },
+  {
+   "nome": "gabapentina",
+   "apresentacao": "300 mg cápsula",
+   "componente": "Especializado",
+   "atc": "N02BF01",
+   "pagina": 106,
+   "chave": "gabapentina"
+  },
+  {
+   "nome": "gabapentina",
+   "apresentacao": "400 mg cápsula",
+   "componente": "Especializado",
+   "atc": "N02BF01",
+   "pagina": 106,
+   "chave": "gabapentina"
+  },
+  {
+   "nome": "haloperidol",
+   "apresentacao": "1 mg comprimido",
+   "componente": "Básico",
+   "atc": "N05AD01",
+   "pagina": 107,
+   "chave": "haloperidol"
+  },
+  {
+   "nome": "haloperidol",
+   "apresentacao": "5 mg comprimido",
+   "componente": "Básico",
+   "atc": "N05AD01",
+   "pagina": 107,
+   "chave": "haloperidol"
+  },
+  {
+   "nome": "haloperidol",
+   "apresentacao": "50 mg/mL solução injetável",
+   "componente": "Básico",
+   "atc": "N05AD01",
+   "pagina": 107,
+   "chave": "haloperidol"
+  },
+  {
+   "nome": "haloperidol",
+   "apresentacao": "2 mg/mL solução oral",
+   "componente": "Básico",
+   "atc": "N05AD01",
+   "pagina": 107,
+   "chave": "haloperidol"
+  },
+  {
+   "nome": "haloperidol",
+   "apresentacao": "5 mg/mL solução injetável",
+   "componente": "Básico",
+   "atc": "N05AD01",
+   "pagina": 107,
+   "chave": "haloperidol"
+  },
+  {
+   "nome": "hemifumarato de quetiapina",
+   "apresentacao": "25 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N05AH04",
+   "pagina": 107,
+   "chave": "quetiapina"
+  },
+  {
+   "nome": "hemifumarato de quetiapina",
+   "apresentacao": "100 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N05AH04",
+   "pagina": 107,
+   "chave": "quetiapina"
+  },
+  {
+   "nome": "hemifumarato de quetiapina",
+   "apresentacao": "200 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N05AH04",
+   "pagina": 107,
+   "chave": "quetiapina"
+  },
+  {
+   "nome": "hemifumarato de quetiapina",
+   "apresentacao": "300 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N05AH04",
+   "pagina": 107,
+   "chave": "quetiapina"
+  },
+  {
+   "nome": "lactato de biperideno",
+   "apresentacao": "5 mg/mL solução injetável",
+   "componente": "Básico",
+   "atc": "N04AA02",
+   "pagina": 107,
+   "chave": "biperideno"
+  },
+  {
+   "nome": "lamotrigina",
+   "apresentacao": "25 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N03AX09",
+   "pagina": 107,
+   "chave": "lamotrigina"
+  },
+  {
+   "nome": "lamotrigina",
+   "apresentacao": "50 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N03AX09",
+   "pagina": 107,
+   "chave": "lamotrigina"
+  },
+  {
+   "nome": "lamotrigina",
+   "apresentacao": "100 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N03AX09",
+   "pagina": 107,
+   "chave": "lamotrigina"
+  },
+  {
+   "nome": "levetiracetam",
+   "apresentacao": "250 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N03AX14",
+   "pagina": 108,
+   "chave": "levetiracetam"
+  },
+  {
+   "nome": "levetiracetam",
+   "apresentacao": "500 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N03AX14",
+   "pagina": 108,
+   "chave": "levetiracetam"
+  },
+  {
+   "nome": "levetiracetam",
+   "apresentacao": "750 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N03AX14",
+   "pagina": 108,
+   "chave": "levetiracetam"
+  },
+  {
+   "nome": "levetiracetam",
+   "apresentacao": "1.000 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N03AX14",
+   "pagina": 108,
+   "chave": "levetiracetam"
+  },
+  {
+   "nome": "levetiracetam",
+   "apresentacao": "100 mg/mL solução oral",
+   "componente": "Especializado",
+   "atc": "N03AX14",
+   "pagina": 108,
+   "chave": "levetiracetam"
+  },
+  {
+   "nome": "levodopa + benserazida",
+   "apresentacao": "100 mg + 25 mg cápsula",
+   "componente": "Básico",
+   "atc": "N04BA02",
+   "pagina": 108,
+   "chave": "levodopa benserazida"
+  },
+  {
+   "nome": "levodopa + benserazida",
+   "apresentacao": "100 mg + 25 mg comprimido",
+   "componente": "Básico",
+   "atc": "N04BA02",
+   "pagina": 108,
+   "chave": "levodopa benserazida"
+  },
+  {
+   "nome": "levodopa + benserazida",
+   "apresentacao": "200 mg + 50 mg comprimido",
+   "componente": "Básico",
+   "atc": "N04BA02",
+   "pagina": 108,
+   "chave": "levodopa benserazida"
+  },
+  {
+   "nome": "levodopa + carbidopa",
+   "apresentacao": "200 mg + 50 mg comprimido",
+   "componente": "Básico",
+   "atc": "N04BA02",
+   "pagina": 108,
+   "chave": "levodopa carbidopa"
+  },
+  {
+   "nome": "levodopa + carbidopa",
+   "apresentacao": "250 mg + 25 mg comprimido",
+   "componente": "Básico",
+   "atc": "N04BA02",
+   "pagina": 108,
+   "chave": "levodopa carbidopa"
+  },
+  {
+   "nome": "mesilato de rasagilina",
+   "apresentacao": "1 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N04BD02",
+   "pagina": 108,
+   "chave": "rasagilina"
+  },
+  {
+   "nome": "midazolam",
+   "apresentacao": "2 mg/mL solução oral",
+   "componente": "Básico",
+   "atc": "N05CD08",
+   "pagina": 108,
+   "chave": "midazolam"
+  },
+  {
+   "nome": "nicotina",
+   "apresentacao": "7 mg adesivo transdérmico",
+   "componente": "Estratégico",
+   "atc": "N07BA01",
+   "pagina": 109,
+   "chave": "nicotina"
+  },
+  {
+   "nome": "nicotina",
+   "apresentacao": "14 mg adesivo transdérmico",
+   "componente": "Estratégico",
+   "atc": "N07BA01",
+   "pagina": 109,
+   "chave": "nicotina"
+  },
+  {
+   "nome": "nicotina",
+   "apresentacao": "21 mg adesivo transdérmico",
+   "componente": "Estratégico",
+   "atc": "N07BA01",
+   "pagina": 109,
+   "chave": "nicotina"
+  },
+  {
+   "nome": "nicotina",
+   "apresentacao": "2 mg goma de mascar",
+   "componente": "Estratégico",
+   "atc": "N07BA01",
+   "pagina": 109,
+   "chave": "nicotina"
+  },
+  {
+   "nome": "nicotina",
+   "apresentacao": "2 mg pastilha",
+   "componente": "Estratégico",
+   "atc": "N07BA01",
+   "pagina": 109,
+   "chave": "nicotina"
+  },
+  {
+   "nome": "olanzapina",
+   "apresentacao": "5 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N05AH03",
+   "pagina": 109,
+   "chave": "olanzapina"
+  },
+  {
+   "nome": "olanzapina",
+   "apresentacao": "10 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N05AH03",
+   "pagina": 109,
+   "chave": "olanzapina"
+  },
+  {
+   "nome": "paracetamol",
+   "apresentacao": "200 mg/mL solução oral",
+   "componente": "Básico",
+   "atc": "N02BE01",
+   "pagina": 109,
+   "chave": "paracetamol"
+  },
+  {
+   "nome": "paracetamol",
+   "apresentacao": "500 mg comprimido",
+   "componente": "Básico",
+   "atc": "N02BE01",
+   "pagina": 109,
+   "chave": "paracetamol"
+  },
+  {
+   "nome": "primidona",
+   "apresentacao": "100 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N03AA03",
+   "pagina": 109,
+   "chave": "primidona"
+  },
+  {
+   "nome": "primidona",
+   "apresentacao": "250 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N03AA03",
+   "pagina": 109,
+   "chave": "primidona"
+  },
+  {
+   "nome": "riluzol",
+   "apresentacao": "50 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N07XX02",
+   "pagina": 109,
+   "chave": "riluzol"
+  },
+  {
+   "nome": "risperidona",
+   "apresentacao": "1 mg/mL solução oral",
+   "componente": "Especializado",
+   "atc": "N05AX08",
+   "pagina": 110,
+   "chave": "risperidona"
+  },
+  {
+   "nome": "risperidona",
+   "apresentacao": "1 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N05AX08",
+   "pagina": 110,
+   "chave": "risperidona"
+  },
+  {
+   "nome": "risperidona",
+   "apresentacao": "2 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N05AX08",
+   "pagina": 110,
+   "chave": "risperidona"
+  },
+  {
+   "nome": "risperidona",
+   "apresentacao": "3 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N05AX08",
+   "pagina": 110,
+   "chave": "risperidona"
+  },
+  {
+   "nome": "rivastigmina",
+   "apresentacao": "1,5 mg cápsula",
+   "componente": "Especializado",
+   "atc": "N06DA03",
+   "pagina": 110,
+   "chave": "rivastigmina"
+  },
+  {
+   "nome": "rivastigmina",
+   "apresentacao": "3 mg cápsula",
+   "componente": "Especializado",
+   "atc": "N06DA03",
+   "pagina": 110,
+   "chave": "rivastigmina"
+  },
+  {
+   "nome": "rivastigmina",
+   "apresentacao": "4,5 mg cápsula",
+   "componente": "Especializado",
+   "atc": "N06DA03",
+   "pagina": 110,
+   "chave": "rivastigmina"
+  },
+  {
+   "nome": "rivastigmina",
+   "apresentacao": "6 mg cápsula",
+   "componente": "Especializado",
+   "atc": "N06DA03",
+   "pagina": 110,
+   "chave": "rivastigmina"
+  },
+  {
+   "nome": "rivastigmina",
+   "apresentacao": "2 mg/mL solução oral",
+   "componente": "Especializado",
+   "atc": "N06DA03",
+   "pagina": 110,
+   "chave": "rivastigmina"
+  },
+  {
+   "nome": "rivastigmina",
+   "apresentacao": "9 mg adesivo transdérmico",
+   "componente": "Especializado",
+   "atc": "N06DA03",
+   "pagina": 110,
+   "chave": "rivastigmina"
+  },
+  {
+   "nome": "rivastigmina",
+   "apresentacao": "18 mg adesivo transdérmico",
+   "componente": "Especializado",
+   "atc": "N06DA03",
+   "pagina": 110,
+   "chave": "rivastigmina"
+  },
+  {
+   "nome": "sulfato de morfina",
+   "apresentacao": "10 mg/mL solução injetável",
+   "componente": "Especializado",
+   "atc": "N02AA01",
+   "pagina": 111,
+   "chave": "morfina"
+  },
+  {
+   "nome": "sulfato de morfina",
+   "apresentacao": "10 mg/mL solução oral",
+   "componente": "Especializado",
+   "atc": "N02AA01",
+   "pagina": 111,
+   "chave": "morfina"
+  },
+  {
+   "nome": "sulfato de morfina",
+   "apresentacao": "10 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N02AA01",
+   "pagina": 111,
+   "chave": "morfina"
+  },
+  {
+   "nome": "sulfato de morfina",
+   "apresentacao": "30 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N02AA01",
+   "pagina": 111,
+   "chave": "morfina"
+  },
+  {
+   "nome": "sulfato de morfina",
+   "apresentacao": "30 mg cápsula de liberação prolongada",
+   "componente": "Especializado",
+   "atc": "N02AA01",
+   "pagina": 111,
+   "chave": "morfina"
+  },
+  {
+   "nome": "sulfato de morfina",
+   "apresentacao": "60 mg cápsula de liberação prolongada",
+   "componente": "Especializado",
+   "atc": "N02AA01",
+   "pagina": 111,
+   "chave": "morfina"
+  },
+  {
+   "nome": "sulfato de morfina",
+   "apresentacao": "100 mg cápsula de liberação prolongada",
+   "componente": "Especializado",
+   "atc": "N02AA01",
+   "pagina": 111,
+   "chave": "morfina"
+  },
+  {
+   "nome": "tafamidis",
+   "apresentacao": "61 mg cápsula",
+   "componente": "Especializado",
+   "atc": "N07XX08",
+   "pagina": 111,
+   "chave": "tafamidis"
+  },
+  {
+   "nome": "tafamidis meglumina",
+   "apresentacao": "20 mg cápsula",
+   "componente": "Especializado",
+   "atc": "N07XX08",
+   "pagina": 111,
+   "chave": "tafamidis meglumina"
+  },
+  {
+   "nome": "topiramato",
+   "apresentacao": "25 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N03AX11",
+   "pagina": 112,
+   "chave": "topiramato"
+  },
+  {
+   "nome": "topiramato",
+   "apresentacao": "50 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N03AX11",
+   "pagina": 112,
+   "chave": "topiramato"
+  },
+  {
+   "nome": "topiramato",
+   "apresentacao": "100 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N03AX11",
+   "pagina": 112,
+   "chave": "topiramato"
+  },
+  {
+   "nome": "valproato de sódio",
+   "apresentacao": "250 mg cápsula",
+   "componente": "Básico",
+   "atc": "N03AG01",
+   "pagina": 112,
+   "chave": "valproato de sodio"
+  },
+  {
+   "nome": "valproato de sódio",
+   "apresentacao": "250 mg comprimido",
+   "componente": "Básico",
+   "atc": "N03AG01",
+   "pagina": 112,
+   "chave": "valproato de sodio"
+  },
+  {
+   "nome": "valproato de sódio",
+   "apresentacao": "50mg/ml solução oral",
+   "componente": "Básico",
+   "atc": "N03AG01",
+   "pagina": 112,
+   "chave": "valproato de sodio"
+  },
+  {
+   "nome": "valproato de sódio",
+   "apresentacao": "50 mg/mL xarope",
+   "componente": "Básico",
+   "atc": "N03AG01",
+   "pagina": 112,
+   "chave": "valproato de sodio"
+  },
+  {
+   "nome": "valproato de sódio",
+   "apresentacao": "500 mg comprimido",
+   "componente": "Básico",
+   "atc": "N03AG01",
+   "pagina": 112,
+   "chave": "valproato de sodio"
+  },
+  {
+   "nome": "vigabatrina",
+   "apresentacao": "500 mg comprimido",
+   "componente": "Especializado",
+   "atc": "N03AG04",
+   "pagina": 112,
+   "chave": "vigabatrina"
+  },
+  {
+   "nome": "albendazol",
+   "apresentacao": "40 mg/mL suspensão oral",
+   "componente": "Básico",
+   "atc": "P02CA03",
+   "pagina": 113,
+   "chave": "albendazol"
+  },
+  {
+   "nome": "albendazol",
+   "apresentacao": "400 mg comprimido mastigável",
+   "componente": "Básico e Estratégico",
+   "atc": "P02CA03",
+   "pagina": 113,
+   "chave": "albendazol"
+  },
+  {
+   "nome": "antimoniato de meglumina",
+   "apresentacao": "300 mg/mL solução injetável",
+   "componente": "Estratégico",
+   "atc": "P01CB01",
+   "pagina": 113,
+   "chave": "antimoniato de meglumina"
+  },
+  {
+   "nome": "arteméter + lumefantrina",
+   "apresentacao": "20 mg + 120 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "P01BF01",
+   "pagina": 113,
+   "chave": "artemeter lumefantrina"
+  },
+  {
+   "nome": "artesunato",
+   "apresentacao": "60 mg/mL pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "P01BE03",
+   "pagina": 113,
+   "chave": "artesunato"
+  },
+  {
+   "nome": "artesunato + mefloquina",
+   "apresentacao": "25 mg + 50 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "P01BF02",
+   "pagina": 113,
+   "chave": "artesunato mefloquina"
+  },
+  {
+   "nome": "artesunato + mefloquina",
+   "apresentacao": "100 mg + 220 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "P01BF02",
+   "pagina": 113,
+   "chave": "artesunato mefloquina"
+  },
+  {
+   "nome": "benznidazol",
+   "apresentacao": "12,5 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "P01CA02",
+   "pagina": 113,
+   "chave": "benznidazol"
+  },
+  {
+   "nome": "benznidazol",
+   "apresentacao": "100 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "P01CA02",
+   "pagina": 113,
+   "chave": "benznidazol"
+  },
+  {
+   "nome": "benzoilmetronidazol",
+   "apresentacao": "40 mg/mL suspensão oral",
+   "componente": "Básico",
+   "atc": "P01AB01",
+   "pagina": 113,
+   "chave": "benzoilmetronidazol"
+  },
+  {
+   "nome": "citrato de dietilcarbamazina",
+   "apresentacao": "50 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "P02CB02",
+   "pagina": 113,
+   "chave": "dietilcarbamazina"
+  },
+  {
+   "nome": "difosfato de cloroquina",
+   "apresentacao": "150 mg comprimido",
+   "componente": "Estratégico e Especializado",
+   "atc": "P01BA01",
+   "pagina": 114,
+   "chave": "cloroquina"
+  },
+  {
+   "nome": "difosfato de primaquina",
+   "apresentacao": "15 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "P01BA03",
+   "pagina": 114,
+   "chave": "primaquina"
+  },
+  {
+   "nome": "difosfato de primaquina",
+   "apresentacao": "5 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "P01BA03",
+   "pagina": 114,
+   "chave": "primaquina"
+  },
+  {
+   "nome": "isetionato de pentamidina",
+   "apresentacao": "300 mg pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "P01CX01",
+   "pagina": 114,
+   "chave": "isetionato de pentamidina"
+  },
+  {
+   "nome": "miltefosina",
+   "apresentacao": "10 mg cápsula",
+   "componente": "Estratégico",
+   "atc": "P01CX04",
+   "pagina": 114,
+   "chave": "miltefosina"
+  },
+  {
+   "nome": "miltefosina",
+   "apresentacao": "50 mg cápsula",
+   "componente": "Estratégico",
+   "atc": "P01CX04",
+   "pagina": 114,
+   "chave": "miltefosina"
+  },
+  {
+   "nome": "ivermectina",
+   "apresentacao": "6 mg comprimido",
+   "componente": "Básico",
+   "atc": "P02CF01",
+   "pagina": 114,
+   "chave": "ivermectina"
+  },
+  {
+   "nome": "nifurtimox",
+   "apresentacao": "120 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "P01CC01",
+   "pagina": 114,
+   "chave": "nifurtimox"
+  },
+  {
+   "nome": "permetrina",
+   "apresentacao": "10 mg/g (1%) 10 mg/mL (1%) loção",
+   "componente": "Básico",
+   "atc": "P03AC04",
+   "pagina": 114,
+   "chave": "permetrina"
+  },
+  {
+   "nome": "permetrina",
+   "apresentacao": "50 mg/g (5%) 50 mg/mL (5%) loção",
+   "componente": "Básico",
+   "atc": "P03AC04",
+   "pagina": 114,
+   "chave": "permetrina"
+  },
+  {
+   "nome": "pirimetamina",
+   "apresentacao": "25 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "P01BD01",
+   "pagina": 115,
+   "chave": "pirimetamina"
+  },
+  {
+   "nome": "praziquantel",
+   "apresentacao": "600 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "P02BA01",
+   "pagina": 115,
+   "chave": "praziquantel"
+  },
+  {
+   "nome": "succinato de tafenoquina",
+   "apresentacao": "150 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "P01BA07",
+   "pagina": 115,
+   "chave": "tafenoquina"
+  },
+  {
+   "nome": "sulfato de hidroxicloroquina",
+   "apresentacao": "400 mg comprimido",
+   "componente": "Especializado",
+   "atc": "P01BA02",
+   "pagina": 115,
+   "chave": "hidroxicloroquina"
+  },
+  {
+   "nome": "teclozana",
+   "apresentacao": "500 mg comprimido",
+   "componente": "Básico",
+   "atc": "P01AC04",
+   "pagina": 115,
+   "chave": "teclozana"
+  },
+  {
+   "nome": "teclozana",
+   "apresentacao": "10 mg/mL suspensão oral",
+   "componente": "Básico",
+   "atc": "P01AC04",
+   "pagina": 115,
+   "chave": "teclozana"
+  },
+  {
+   "nome": "alfadornase",
+   "apresentacao": "1 mg/mL solução inalatória",
+   "componente": "Especializado",
+   "atc": "R05CB13",
+   "pagina": 116,
+   "chave": "alfadornase"
+  },
+  {
+   "nome": "alfaporactanto (surfactante pulmonar)",
+   "apresentacao": "80 mg/mL suspensão injetável intratecal ou intrabronquica",
+   "componente": "Procedimento Hospitalar",
+   "atc": "R07AA",
+   "pagina": 116,
+   "chave": "alfaporactanto"
+  },
+  {
+   "nome": "beractanto (surfactante pulmonar)",
+   "apresentacao": "25 mg/mL solução injetável intratecal ou intrabronquica",
+   "componente": "Procedimento Hospitalar",
+   "atc": "R07AA",
+   "pagina": 116,
+   "chave": "beractanto"
+  },
+  {
+   "nome": "brometo de ipratrópio",
+   "apresentacao": "0,25 mg/mL solução para inalação",
+   "componente": "Básico",
+   "atc": "R03BB01",
+   "pagina": 116,
+   "chave": "ipratropio"
+  },
+  {
+   "nome": "brometo de ipratrópio",
+   "apresentacao": "20 mcg/dose solução aerossol",
+   "componente": "Básico",
+   "atc": "R03BB01",
+   "pagina": 116,
+   "chave": "ipratropio"
+  },
+  {
+   "nome": "brometo de tiotrópio monoidratado + cloridrato de olodaterol",
+   "apresentacao": "2,5 mcg + 2,5 mcg solução inalatória",
+   "componente": "Especializado",
+   "atc": "R03AL06",
+   "pagina": 116,
+   "chave": "tiotropio monoidratado cloridrato de olodaterol"
+  },
+  {
+   "nome": "brometo de umeclidínio + trifenatato de vilanterol",
+   "apresentacao": "62,5 mcg + 25 mcg pó inalatório",
+   "componente": "Especializado",
+   "atc": "R03AL03",
+   "pagina": 116,
+   "chave": "umeclidinio trifenatato de vilanterol"
+  },
+  {
+   "nome": "bromidrato de fenoterol",
+   "apresentacao": "100 mcg/dose solução aerossol",
+   "componente": "Especializado",
+   "atc": "R03AC04",
+   "pagina": 116,
+   "chave": "fenoterol"
+  },
+  {
+   "nome": "budesonida",
+   "apresentacao": "32 mcg suspensão para inalação nasal",
+   "componente": "Básico",
+   "atc": "R01AD05",
+   "pagina": 117,
+   "chave": "budesonida"
+  },
+  {
+   "nome": "budesonida",
+   "apresentacao": "50 mcg suspensão para inalação nasal",
+   "componente": "Básico",
+   "atc": "R01AD05",
+   "pagina": 117,
+   "chave": "budesonida"
+  },
+  {
+   "nome": "budesonida",
+   "apresentacao": "64 mcg suspensão para inalação nasal",
+   "componente": "Básico",
+   "atc": "R01AD05",
+   "pagina": 117,
+   "chave": "budesonida"
+  },
+  {
+   "nome": "budesonida",
+   "apresentacao": "200 mcg aerossol oral",
+   "componente": "Especializado",
+   "atc": "R03BA02",
+   "pagina": 117,
+   "chave": "budesonida"
+  },
+  {
+   "nome": "budesonida",
+   "apresentacao": "200 mcg cápsula inalatória",
+   "componente": "Especializado",
+   "atc": "R03BA02",
+   "pagina": 117,
+   "chave": "budesonida"
+  },
+  {
+   "nome": "budesonida",
+   "apresentacao": "200 mcg pó inalatório",
+   "componente": "Especializado",
+   "atc": "R03BA02",
+   "pagina": 117,
+   "chave": "budesonida"
+  },
+  {
+   "nome": "budesonida",
+   "apresentacao": "400 mcg cápsula inalatória",
+   "componente": "Especializado",
+   "atc": "R03BA02",
+   "pagina": 117,
+   "chave": "budesonida"
+  },
+  {
+   "nome": "cloreto de sódio",
+   "apresentacao": "9 mg/mL (0,9%) solução nasal",
+   "componente": "Básico",
+   "atc": "R01AX10",
+   "pagina": 117,
+   "chave": "cloreto de sodio"
+  },
+  {
+   "nome": "cloridrato de prometazina",
+   "apresentacao": "25 mg comprimido",
+   "componente": "Básico",
+   "atc": "R06AD02",
+   "pagina": 117,
+   "chave": "prometazina"
+  },
+  {
+   "nome": "cloridrato de prometazina",
+   "apresentacao": "25 mg/mL solução injetável",
+   "componente": "Básico",
+   "atc": "R06AD02",
+   "pagina": 117,
+   "chave": "prometazina"
+  },
+  {
+   "nome": "dipropionato de beclometasona",
+   "apresentacao": "50 mcg/dose solução aerossol",
+   "componente": "Básico",
+   "atc": "R03BA01",
+   "pagina": 118,
+   "chave": "beclometasona"
+  },
+  {
+   "nome": "dipropionato de beclometasona",
+   "apresentacao": "50 mcg/dose suspensão para inalação nasal",
+   "componente": "Básico",
+   "atc": "R03BA01",
+   "pagina": 118,
+   "chave": "beclometasona"
+  },
+  {
+   "nome": "dipropionato de beclometasona",
+   "apresentacao": "200 mcg/dose pó para inalação oral",
+   "componente": "Básico",
+   "atc": "R03BA01",
+   "pagina": 118,
+   "chave": "beclometasona"
+  },
+  {
+   "nome": "dipropionato de beclometasona",
+   "apresentacao": "200 mcg/dose solução aerossol",
+   "componente": "Básico",
+   "atc": "R03BA01",
+   "pagina": 118,
+   "chave": "beclometasona"
+  },
+  {
+   "nome": "dipropionato de beclometasona",
+   "apresentacao": "250 mcg/dose solução aerossol",
+   "componente": "Básico",
+   "atc": "R03BA01",
+   "pagina": 118,
+   "chave": "beclometasona"
+  },
+  {
+   "nome": "dipropionato de beclometasona",
+   "apresentacao": "200 mcg/dose cápsula para inalação oral",
+   "componente": "Básico",
+   "atc": "R03BA01",
+   "pagina": 118,
+   "chave": "beclometasona"
+  },
+  {
+   "nome": "dipropionato de beclometasona",
+   "apresentacao": "400 mcg/dose pó para inalação oral",
+   "componente": "Básico",
+   "atc": "R03BA01",
+   "pagina": 118,
+   "chave": "beclometasona"
+  },
+  {
+   "nome": "dipropionato de beclometasona",
+   "apresentacao": "400 mcg/dose cápsula para inalação oral",
+   "componente": "Básico",
+   "atc": "R03BA01",
+   "pagina": 118,
+   "chave": "beclometasona"
+  },
+  {
+   "nome": "elexacaftor/tezacaftor/ ivacaftor + ivacaftor",
+   "apresentacao": "50 mg/25 mg/37,5 mg + 75 mg comprimido",
+   "componente": "Especializado",
+   "atc": "R07AX32",
+   "pagina": 118,
+   "chave": "elexacaftor tezacaftor ivacaftor ivacaftor"
+  },
+  {
+   "nome": "elexacaftor/tezacaftor/ ivacaftor + ivacaftor",
+   "apresentacao": "100 mg/50 mg/75 mg + 150 mg comprimido",
+   "componente": "Especializado",
+   "atc": "R07AX32",
+   "pagina": 118,
+   "chave": "elexacaftor tezacaftor ivacaftor ivacaftor"
+  },
+  {
+   "nome": "fosfato de codeína",
+   "apresentacao": "3 mg/mL solução oral",
+   "componente": "Especializado",
+   "atc": "R05DA04",
+   "pagina": 119,
+   "chave": "codeina"
+  },
+  {
+   "nome": "fosfato de codeína",
+   "apresentacao": "30 mg comprimido",
+   "componente": "Especializado",
+   "atc": "R05DA04",
+   "pagina": 119,
+   "chave": "codeina"
+  },
+  {
+   "nome": "fosfato de codeína",
+   "apresentacao": "60 mg comprimido",
+   "componente": "Especializado",
+   "atc": "R05DA04",
+   "pagina": 119,
+   "chave": "codeina"
+  },
+  {
+   "nome": "fosfato de codeína",
+   "apresentacao": "30 mg/mL solução injetável",
+   "componente": "Especializado",
+   "atc": "R05DA04",
+   "pagina": 119,
+   "chave": "codeina"
+  },
+  {
+   "nome": "fumarato de formoterol",
+   "apresentacao": "12 mcg cápsula inalatória",
+   "componente": "Especializado",
+   "atc": "R03AC13",
+   "pagina": 119,
+   "chave": "formoterol"
+  },
+  {
+   "nome": "fumarato de formoterol",
+   "apresentacao": "12 mcg pó inalatório",
+   "componente": "Especializado",
+   "atc": "R03AC13",
+   "pagina": 119,
+   "chave": "formoterol"
+  },
+  {
+   "nome": "fumarato de formoterol + budesonida",
+   "apresentacao": "6 mcg + 200 mcg cápsula inalatória",
+   "componente": "Especializado",
+   "atc": "R03AK07",
+   "pagina": 119,
+   "chave": "formoterol budesonida"
+  },
+  {
+   "nome": "fumarato de formoterol + budesonida",
+   "apresentacao": "6 mcg + 200 mcg pó inalatório",
+   "componente": "Especializado",
+   "atc": "R03AK07",
+   "pagina": 119,
+   "chave": "formoterol budesonida"
+  },
+  {
+   "nome": "fumarato de formoterol + budesonida",
+   "apresentacao": "12 mcg + 400 mcg cápsula inalatória",
+   "componente": "Especializado",
+   "atc": "R03AK07",
+   "pagina": 119,
+   "chave": "formoterol budesonida"
+  },
+  {
+   "nome": "fumarato de formoterol + budesonida",
+   "apresentacao": "12 mcg + 400 mcg pó inalatório",
+   "componente": "Especializado",
+   "atc": "R03AK07",
+   "pagina": 119,
+   "chave": "formoterol budesonida"
+  },
+  {
+   "nome": "ivacaftor",
+   "apresentacao": "150 mg comprimido",
+   "componente": "Especializado",
+   "atc": "R07AX02",
+   "pagina": 119,
+   "chave": "ivacaftor"
+  },
+  {
+   "nome": "loratadina",
+   "apresentacao": "1 mg/mL xarope",
+   "componente": "Básico",
+   "atc": "R06AX13",
+   "pagina": 119,
+   "chave": "loratadina"
+  },
+  {
+   "nome": "loratadina",
+   "apresentacao": "10 mg comprimido",
+   "componente": "Básico",
+   "atc": "R06AX13",
+   "pagina": 119,
+   "chave": "loratadina"
+  },
+  {
+   "nome": "maleato de dexclorfeniramina",
+   "apresentacao": "2 mg comprimido",
+   "componente": "Básico",
+   "atc": "R06AB02",
+   "pagina": 120,
+   "chave": "dexclorfeniramina"
+  },
+  {
+   "nome": "maleato de dexclorfeniramina",
+   "apresentacao": "0,4 mg/mL solução oral",
+   "componente": "Básico",
+   "atc": "R06AB02",
+   "pagina": 120,
+   "chave": "dexclorfeniramina"
+  },
+  {
+   "nome": "maleato de dexclorfeniramina",
+   "apresentacao": "0,4 mg/mL xarope",
+   "componente": "Básico",
+   "atc": "R06AB02",
+   "pagina": 120,
+   "chave": "dexclorfeniramina"
+  },
+  {
+   "nome": "mepolizumabe",
+   "apresentacao": "40 mg/0,4 mL solução injetável",
+   "componente": "Especializado",
+   "atc": "R03DX09",
+   "pagina": 120,
+   "chave": "mepolizumabe"
+  },
+  {
+   "nome": "mepolizumabe",
+   "apresentacao": "100 mg pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "R03DX09",
+   "pagina": 120,
+   "chave": "mepolizumabe"
+  },
+  {
+   "nome": "mepolizumabe",
+   "apresentacao": "100 mg/mL solução injetável",
+   "componente": "Especializado",
+   "atc": "R03DX09",
+   "pagina": 120,
+   "chave": "mepolizumabe"
+  },
+  {
+   "nome": "omalizumabe",
+   "apresentacao": "150 mg pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "R03DX05",
+   "pagina": 120,
+   "chave": "omalizumabe"
+  },
+  {
+   "nome": "omalizumabe",
+   "apresentacao": "150 mg solução injetável",
+   "componente": "Especializado",
+   "atc": "R03DX05",
+   "pagina": 120,
+   "chave": "omalizumabe"
+  },
+  {
+   "nome": "sulfato de salbutamol",
+   "apresentacao": "100 mcg/dose suspensão aerossol",
+   "componente": "Básico",
+   "atc": "R03AC02",
+   "pagina": 120,
+   "chave": "salbutamol"
+  },
+  {
+   "nome": "sulfato de salbutamol",
+   "apresentacao": "5 mg/mL solução para inalação",
+   "componente": "Básico",
+   "atc": "R03AC02",
+   "pagina": 120,
+   "chave": "salbutamol"
+  },
+  {
+   "nome": "sulfato de salbutamol",
+   "apresentacao": "0,5 mg/mL solução injetável",
+   "componente": "Básico",
+   "atc": "R03AC02",
+   "pagina": 120,
+   "chave": "salbutamol"
+  },
+  {
+   "nome": "xinafoato de salmeterol",
+   "apresentacao": "50 mcg pó inalatório",
+   "componente": "Especializado",
+   "atc": "R03AC12",
+   "pagina": 120,
+   "chave": "xinafoato de salmeterol"
+  },
+  {
+   "nome": "acetazolamida",
+   "apresentacao": "250 mg comprimido",
+   "componente": "Básico e Especializado",
+   "atc": "S01EC01",
+   "pagina": 121,
+   "chave": "acetazolamida"
+  },
+  {
+   "nome": "bimatoprosta",
+   "apresentacao": "0,3 mg/mL (0,03%) solução oftálmica",
+   "componente": "Especializado",
+   "atc": "S01EE03",
+   "pagina": 121,
+   "chave": "bimatoprosta"
+  },
+  {
+   "nome": "brinzolamida",
+   "apresentacao": "10 mg/mL (1%) suspensão oftálmica",
+   "componente": "Especializado",
+   "atc": "S01EC04",
+   "pagina": 121,
+   "chave": "brinzolamida"
+  },
+  {
+   "nome": "cloridrato de dorzolamida",
+   "apresentacao": "20 mg/mL solução oftálmica",
+   "componente": "Especializado",
+   "atc": "S01EC03",
+   "pagina": 121,
+   "chave": "dorzolamida"
+  },
+  {
+   "nome": "cloridrato de pilocarpina",
+   "apresentacao": "20 mg/mL (2%) solução oftálmica",
+   "componente": "Básico e Especializado",
+   "atc": "S01EB01",
+   "pagina": 121,
+   "chave": "pilocarpina"
+  },
+  {
+   "nome": "cloridrato de tetraciclina",
+   "apresentacao": "5 mg/g pomada oftálmica",
+   "componente": "Básico",
+   "atc": "S01AA09",
+   "pagina": 121,
+   "chave": "tetraciclina"
+  },
+  {
+   "nome": "dexametasona",
+   "apresentacao": "1 mg/g (0,1%) pomada oftálmica",
+   "componente": "Básico",
+   "atc": "S01BA01",
+   "pagina": 121,
+   "chave": "dexametasona"
+  },
+  {
+   "nome": "dexametasona",
+   "apresentacao": "1 mg/mL (0,1%) suspensão oftálmica",
+   "componente": "Básico",
+   "atc": "S01BA01",
+   "pagina": 121,
+   "chave": "dexametasona"
+  },
+  {
+   "nome": "gentamicina",
+   "apresentacao": "5 mg/g pomada oftálmica",
+   "componente": "Básico",
+   "atc": "S01AA11",
+   "pagina": 121,
+   "chave": "gentamicina"
+  },
+  {
+   "nome": "gentamicina",
+   "apresentacao": "5 mg/mL solução oftálmica",
+   "componente": "Básico",
+   "atc": "S01AA11",
+   "pagina": 121,
+   "chave": "gentamicina"
+  },
+  {
+   "nome": "hipromelose",
+   "apresentacao": "3 mg/mL (0,3%) solução oftálmica",
+   "componente": "Básico",
+   "atc": "S01KA02",
+   "pagina": 122,
+   "chave": "hipromelose"
+  },
+  {
+   "nome": "hipromelose",
+   "apresentacao": "5 mg/mL (0,5%) solução oftálmica",
+   "componente": "Básico",
+   "atc": "S01KA02",
+   "pagina": 122,
+   "chave": "hipromelose"
+  },
+  {
+   "nome": "latanoprosta",
+   "apresentacao": "0,05 mg/mL (0,005%) solução oftálmica",
+   "componente": "Especializado",
+   "atc": "S01EE01",
+   "pagina": 122,
+   "chave": "latanoprosta"
+  },
+  {
+   "nome": "maleato de timolol",
+   "apresentacao": "2,5 mg/mL (0,25%) solução oftálmica",
+   "componente": "Básico",
+   "atc": "S01ED01",
+   "pagina": 122,
+   "chave": "timolol"
+  },
+  {
+   "nome": "maleato de timolol",
+   "apresentacao": "5 mg/mL (0,5%) solução oftálmica",
+   "componente": "Básico e Especializado",
+   "atc": "S01ED01",
+   "pagina": 122,
+   "chave": "timolol"
+  },
+  {
+   "nome": "sulfato de polimixina B + sulfato de neomicina + fluocinolona acetonida + cloridrato de lidocaína",
+   "apresentacao": "10.000 UI/mL + 3,500 mg/mL + 0,250 mg/mL + 20 mg/mL solução otológica",
+   "componente": "Básico",
+   "atc": "S02AA30",
+   "pagina": 122,
+   "chave": "polimixina b sulfato de neomicina fluocinolona acetonida cloridrato de lidocaina"
+  },
+  {
+   "nome": "tartarato de brimonidina",
+   "apresentacao": "2 mg/mL (0,2%) solução oftálmica",
+   "componente": "Especializado",
+   "atc": "S01EA05",
+   "pagina": 122,
+   "chave": "brimonidina"
+  },
+  {
+   "nome": "travoprosta",
+   "apresentacao": "0,04 mg/mL (0,004%) solução oftálmica",
+   "componente": "Especializado",
+   "atc": "S01EE04",
+   "pagina": 122,
+   "chave": "travoprosta"
+  },
+  {
+   "nome": "ácido folínico",
+   "apresentacao": "15 mg comprimido",
+   "componente": "Básico e Estratégico",
+   "atc": "V03AF03",
+   "pagina": 123,
+   "chave": "acido folinico"
+  },
+  {
+   "nome": "cloridrato de hidroxocobalamina",
+   "apresentacao": "5 g pó para solução injetável",
+   "componente": "Estratégico",
+   "atc": "V03AB33",
+   "pagina": 123,
+   "chave": "hidroxocobalamina"
+  },
+  {
+   "nome": "cloridrato de naloxona",
+   "apresentacao": "0,4 mg/mL solução injetável",
+   "componente": "Básico",
+   "atc": "V03AB15",
+   "pagina": 124,
+   "chave": "naloxona"
+  },
+  {
+   "nome": "cloridrato de protamina",
+   "apresentacao": "10 mg/mL solução injetável",
+   "componente": "Básico",
+   "atc": "V03AB14",
+   "pagina": 124,
+   "chave": "protamina"
+  },
+  {
+   "nome": "cloridrato de sevelâmer",
+   "apresentacao": "800 mg comprimido",
+   "componente": "Especializado",
+   "atc": "V03AE02",
+   "pagina": 124,
+   "chave": "sevelamer"
+  },
+  {
+   "nome": "complemento alimentar para paciente fenilcetonúrico maior de",
+   "apresentacao": "1 ano (fórmula de aminoácidos isenta de fenilalanina) - pó",
+   "componente": "Especializado",
+   "atc": "V06CA",
+   "pagina": 124,
+   "chave": "complemento alimentar para paciente fenilcetonurico maior de"
+  },
+  {
+   "nome": "complemento alimentar para paciente fenilcetonúrico menor de",
+   "apresentacao": "1 ano (fórmula de aminoácidos isenta de fenilalanina) - pó",
+   "componente": "Especializado",
+   "atc": "V06CA",
+   "pagina": 124,
+   "chave": "complemento alimentar para paciente fenilcetonurico menor de"
+  },
+  {
+   "nome": "deferasirox",
+   "apresentacao": "125 mg comprimido para suspensão",
+   "componente": "Especializado",
+   "atc": "V03AC03",
+   "pagina": 125,
+   "chave": "deferasirox"
+  },
+  {
+   "nome": "deferasirox",
+   "apresentacao": "250 mg comprimido para suspensão",
+   "componente": "Especializado",
+   "atc": "V03AC03",
+   "pagina": 125,
+   "chave": "deferasirox"
+  },
+  {
+   "nome": "deferasirox",
+   "apresentacao": "500 mg comprimido para suspensão",
+   "componente": "Especializado",
+   "atc": "V03AC03",
+   "pagina": 125,
+   "chave": "deferasirox"
+  },
+  {
+   "nome": "deferiprona",
+   "apresentacao": "500 mg comprimido",
+   "componente": "Especializado",
+   "atc": "V03AC02",
+   "pagina": 125,
+   "chave": "deferiprona"
+  },
+  {
+   "nome": "flumazenil",
+   "apresentacao": "0,1 mg/mL solução injetável",
+   "componente": "Básico",
+   "atc": "V03AB25",
+   "pagina": 125,
+   "chave": "flumazenil"
+  },
+  {
+   "nome": "folinato de cálcio",
+   "apresentacao": "15 mg comprimido",
+   "componente": "Básico e Estratégico",
+   "atc": "V03AF03",
+   "pagina": 126,
+   "chave": "folinato de calcio"
+  },
+  {
+   "nome": "glicose",
+   "apresentacao": "50 mg/mL (5%) solução injetável",
+   "componente": "Básico",
+   "atc": "V06DC01",
+   "pagina": 126,
+   "chave": "glicose"
+  },
+  {
+   "nome": "glicose",
+   "apresentacao": "100 mg/mL (10%) solução injetável",
+   "componente": "Básico",
+   "atc": "V06DC01",
+   "pagina": 126,
+   "chave": "glicose"
+  },
+  {
+   "nome": "glicose",
+   "apresentacao": "500 mg/mL (50%) solução injetável",
+   "componente": "Básico",
+   "atc": "V06DC01",
+   "pagina": 126,
+   "chave": "glicose"
+  },
+  {
+   "nome": "Iodeto de potássio",
+   "apresentacao": "130 mg comprimido",
+   "componente": "Estratégico",
+   "atc": "V03AB21",
+   "pagina": 126,
+   "chave": "iodeto de potassio"
+  },
+  {
+   "nome": "Iodeto de potássio",
+   "apresentacao": "20 mg/mL xarope",
+   "componente": "Estratégico",
+   "atc": "V03AB21",
+   "pagina": 126,
+   "chave": "iodeto de potassio"
+  },
+  {
+   "nome": "lancetas para punção digital",
+   "apresentacao": "medicamentos homeopáticos Conforme Farmacopeia Homeopática Brasileira vigente Conforme Farmacopeia Homeopática Brasileira vigente",
+   "componente": "Básico",
+   "atc": "NC",
+   "pagina": 126,
+   "chave": "lancetas para puncao digital"
+  },
+  {
+   "nome": "mesilato de desferroxamina",
+   "apresentacao": "500 mg pó para solução injetável",
+   "componente": "Especializado",
+   "atc": "V03AC01",
+   "pagina": 127,
+   "chave": "desferroxamina"
+  },
+  {
+   "nome": "metilsulfato de pralidoxima",
+   "apresentacao": "200 mg solução injetável",
+   "componente": "Básico",
+   "atc": "V03AB04",
+   "pagina": 127,
+   "chave": "metilsulfato de pralidoxima"
+  },
+  {
+   "nome": "micronutrientes",
+   "apresentacao": "cada sachê de 1 g contém: vitamina A 400 mcg, vitamina D 5 mcg, vitamina E 5 mg, vitamina C 30 mg, vitamina B1 0,5 mg, vitamina B2 0,5 mg, vitamina B6 0,5 mg, vitamina PP 6 mg, vitamina B9 150 mcg, vitamina B12 0,9 mcg, ferro 10 mg, zinco 4,1 mg, cobre 560 mcg, selênio 17 mcg, iodo 90 mcg pó",
+   "componente": "Estratégico",
+   "atc": "V06DX",
+   "pagina": 127,
+   "chave": "micronutrientes"
+  },
+  {
+   "nome": "alcachofra (Cynara scolymus L.)",
+   "apresentacao": "24 a 48 mg de derivados de ácido cafeoilquínico expressos em ácido clorogênico (dose diária) cápsula",
+   "componente": "Básico",
+   "atc": "C10AW5006",
+   "pagina": 129,
+   "chave": "alcachofra"
+  },
+  {
+   "nome": "alcachofra (Cynara scolymus L.)",
+   "apresentacao": "24 a 48 mg de derivados de ácido cafeoilquínico expressos em ácido clorogênico (dose diária) comprimido",
+   "componente": "Básico",
+   "atc": "C10AW5006",
+   "pagina": 129,
+   "chave": "alcachofra"
+  },
+  {
+   "nome": "alcachofra (Cynara scolymus L.)",
+   "apresentacao": "24 a 48 mg de derivados de ácido cafeoilquínico expressos em ácido clorogênico (dose diária) solução oral",
+   "componente": "Básico",
+   "atc": "C10AW5006",
+   "pagina": 129,
+   "chave": "alcachofra"
+  },
+  {
+   "nome": "alcachofra (Cynara scolymus L.)",
+   "apresentacao": "24 a 48 mg de derivados de ácido cafeoilquínico expressos em ácido clorogênico (dose diária) tintura",
+   "componente": "Básico",
+   "atc": "C10AW5006",
+   "pagina": 129,
+   "chave": "alcachofra"
+  },
+  {
+   "nome": "aroeira (Schinus terebinthifolia Raddi)",
+   "apresentacao": "1,932 mg de ácido gálico (dose diária) gel vaginal",
+   "componente": "Básico",
+   "atc": "NC",
+   "pagina": 129,
+   "chave": "aroeira"
+  },
+  {
+   "nome": "aroeira (Schinus terebinthifolia Raddi)",
+   "apresentacao": "1,932 mg de ácido gálico (dose diária) óvulo vaginal",
+   "componente": "Básico",
+   "atc": "NC",
+   "pagina": 129,
+   "chave": "aroeira"
+  },
+  {
+   "nome": "babosa (Aloe vera (L.) Burm. f.)",
+   "apresentacao": "10%-70% gel fresco creme",
+   "componente": "Básico",
+   "atc": "D02WA5001",
+   "pagina": 130,
+   "chave": "babosa burm f"
+  },
+  {
+   "nome": "babosa (Aloe vera (L.) Burm. f.)",
+   "apresentacao": "10%-70% gel fresco gel",
+   "componente": "Básico",
+   "atc": "D02WA5001",
+   "pagina": 130,
+   "chave": "babosa burm f"
+  },
+  {
+   "nome": "cáscara-sagrada (Rhamnus purshiana)",
+   "apresentacao": "20 a 30 mg de derivados hidroxiantracênicos expressos em cascarosídeo A (dose diária) cápsula",
+   "componente": "Básico",
+   "atc": "A06AB5014",
+   "pagina": 130,
+   "chave": "cascara sagrada"
+  },
+  {
+   "nome": "cáscara-sagrada (Rhamnus purshiana)",
+   "apresentacao": "20 a 30 mg de derivados hidroxiantracênicos expressos em cascarosídeo A (dose diária) tintura",
+   "componente": "Básico",
+   "atc": "A06AB5014",
+   "pagina": 130,
+   "chave": "cascara sagrada"
+  },
+  {
+   "nome": "espinheira-santa (Maytenus ilicifolia Mart. ex Reissek e/ou Monteverdia ilicifolia (Mart. ex Reissek) Biral )",
+   "apresentacao": "60 a 90 mg taninos totais expressos em pirogalol (dose diária) cápsula",
+   "componente": "Básico",
+   "atc": "NC",
+   "pagina": 130,
+   "chave": "espinheira santa biral"
+  },
+  {
+   "nome": "espinheira-santa (Maytenus ilicifolia Mart. ex Reissek e/ou Monteverdia ilicifolia (Mart. ex Reissek) Biral )",
+   "apresentacao": "60 a 90 mg taninos totais expressos em pirogalol (dose diária) tintura",
+   "componente": "Básico",
+   "atc": "NC",
+   "pagina": 130,
+   "chave": "espinheira santa biral"
+  },
+  {
+   "nome": "espinheira-santa (Maytenus ilicifolia Mart. ex Reissek e/ou Monteverdia ilicifolia (Mart. ex Reissek) Biral )",
+   "apresentacao": "60 a 90 mg taninos totais expressos em pirogalol (dose diária) suspensão oral",
+   "componente": "Básico",
+   "atc": "NC",
+   "pagina": 130,
+   "chave": "espinheira santa biral"
+  },
+  {
+   "nome": "espinheira-santa (Maytenus ilicifolia Mart. ex Reissek e/ou Monteverdia ilicifolia (Mart. ex Reissek) Biral )",
+   "apresentacao": "60 a 90 mg taninos totais expressos em pirogalol (dose diária) emulsão oral",
+   "componente": "Básico",
+   "atc": "NC",
+   "pagina": 130,
+   "chave": "espinheira santa biral"
+  },
+  {
+   "nome": "garra-do-diabo (Harpagophytum procumbens DC. ex Meissn.)",
+   "apresentacao": "30 a 100 mg de harpagosídeo ou 45 a 150 mg de iridoides totais expressos em harpagosídeos (dose diária) cápsula",
+   "componente": "Básico",
+   "atc": "M01AW5009",
+   "pagina": 131,
+   "chave": "garra do diabo"
+  },
+  {
+   "nome": "garra-do-diabo (Harpagophytum procumbens DC. ex Meissn.)",
+   "apresentacao": "30 a 100 mg de harpagosídeo ou 45 a 150 mg de iridoides totais expressos em harpagosídeos (dose diária) comprimido",
+   "componente": "Básico",
+   "atc": "M01AW5009",
+   "pagina": 131,
+   "chave": "garra do diabo"
+  },
+  {
+   "nome": "garra-do-diabo (Harpagophytum procumbens DC. ex Meissn.)",
+   "apresentacao": "30 a 100 mg de harpagosídeo ou 45 a 150 mg de iridoides totais expressos em harpagosídeos (dose diária) comprimido de liberação retardada",
+   "componente": "Básico",
+   "atc": "M01AW5009",
+   "pagina": 131,
+   "chave": "garra do diabo"
+  },
+  {
+   "nome": "guaco (Mikania glomerata Spreng.)",
+   "apresentacao": "0,5 a 5 mg de cumarina (dose diária) tintura",
+   "componente": "Básico",
+   "atc": "NC",
+   "pagina": 131,
+   "chave": "guaco"
+  },
+  {
+   "nome": "guaco (Mikania glomerata Spreng.)",
+   "apresentacao": "0,5 a 5 mg de cumarina (dose diária) xarope",
+   "componente": "Básico",
+   "atc": "NC",
+   "pagina": 131,
+   "chave": "guaco"
+  },
+  {
+   "nome": "guaco (Mikania glomerata Spreng.)",
+   "apresentacao": "0,5 a 5 mg de cumarina (dose diária) solução oral",
+   "componente": "Básico",
+   "atc": "NC",
+   "pagina": 131,
+   "chave": "guaco"
+  },
+  {
+   "nome": "hortelã (Mentha x piperita L.)",
+   "apresentacao": "60 a 440 mg de mentol e 28 a 256 mg de mentona (dose diária) cápsula",
+   "componente": "Básico",
+   "atc": "A03AW5039",
+   "pagina": 131,
+   "chave": "hortela"
+  },
+  {
+   "nome": "isoflavona-de-soja (Glycine max (L.) Merr.)",
+   "apresentacao": "50 a 120 mg de isoflavonas (dose diária) cápsula",
+   "componente": "Básico",
+   "atc": "NC",
+   "pagina": 131,
+   "chave": "isoflavona de soja merr"
+  },
+  {
+   "nome": "isoflavona-de-soja (Glycine max (L.) Merr.)",
+   "apresentacao": "50 a 120 mg de isoflavonas (dose diária) comprimido",
+   "componente": "Básico",
+   "atc": "NC",
+   "pagina": 131,
+   "chave": "isoflavona de soja merr"
+  },
+  {
+   "nome": "plantago (Plantago ovata Forssk.)",
+   "apresentacao": "3 a 30 g (dose diária) pó para dispersão oral",
+   "componente": "Básico",
+   "atc": "A06AC9001",
+   "pagina": 132,
+   "chave": "plantago"
+  },
+  {
+   "nome": "salgueiro (Salix alba L.)",
+   "apresentacao": "60 a 240 mg de salicina (dose diária) comprimido",
+   "componente": "Básico",
+   "atc": "N02BA5008",
+   "pagina": 132,
+   "chave": "salgueiro"
+  },
+  {
+   "nome": "salgueiro (Salix alba L.)",
+   "apresentacao": "60 a 240 mg de salicina (dose diária) elixir",
+   "componente": "Básico",
+   "atc": "N02BA5008",
+   "pagina": 132,
+   "chave": "salgueiro"
+  },
+  {
+   "nome": "salgueiro (Salix alba L.)",
+   "apresentacao": "60 a 240 mg de salicina (dose diária) solução oral",
+   "componente": "Básico",
+   "atc": "N02BA5008",
+   "pagina": 132,
+   "chave": "salgueiro"
+  },
+  {
+   "nome": "unha-de-gato (Uncaria tomentosa (Willd. ex Roem. & Schult.))",
+   "apresentacao": "0,9 mg de alcaloides oxindólicos pentaclíclicos cápsula",
+   "componente": "Básico",
+   "atc": "NC",
+   "pagina": 132,
+   "chave": "unha de gato"
+  },
+  {
+   "nome": "unha-de-gato (Uncaria tomentosa (Willd. ex Roem. & Schult.))",
+   "apresentacao": "0,9 mg de alcaloides oxindólicos pentaclíclicos comprimido",
+   "componente": "Básico",
+   "atc": "NC",
+   "pagina": 132,
+   "chave": "unha de gato"
+  },
+  {
+   "nome": "unha-de-gato (Uncaria tomentosa (Willd. ex Roem. & Schult.))",
+   "apresentacao": "0,9 mg de alcaloides oxindólicos pentaclíclicos gel",
+   "componente": "Básico",
+   "atc": "NC",
+   "pagina": 132,
+   "chave": "unha de gato"
+  }
+ ]
+}

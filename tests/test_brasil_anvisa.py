@@ -209,7 +209,7 @@ def test_article_route_combines_anvisa_and_conitec_per_candidate(client):
     assert met["en"] == "metformin" and met["metodo"] == "cognato" and met["anvisa"][0]["key"] == "metformina"
     assert met["anvisa"][0]["active"] > 100 and set(met["anvisa"][0]) >= {"inactive", "activeAlone", "categories", "classes", "companies", "validUntil"}
     assert by_pt["dapagliflozina"]["conitec"] and by_pt["ácido acetilsalicílico"]["anvisa"]
-    assert set(data["meta"]) == {"anvisa", "conitec"} and data["meta"]["anvisa"]["arquivoUrl"].startswith("https://dados.anvisa.gov.br/")
+    assert set(data["meta"]) == {"anvisa", "conitec", "rename"} and data["meta"]["anvisa"]["arquivoUrl"].startswith("https://dados.anvisa.gov.br/")
     assert client.get("/api/discover/brasil", params={"ref": "2"}).json()["candidatos"] == []
 
 

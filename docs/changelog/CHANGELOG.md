@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 2026-10 — Dados reais do Brasil, fase 3: Rename
+
+### Adicionado
+- O cartão **Situação no Brasil** agora mostra se a substância **consta na Rename 2024** (componente básico, estratégico ou especializado; apresentações com a página do PDF), junto do registro na ANVISA e das decisões da Conitec. Rota nova de dados em `GET /api/brasil/medicamento` e `GET /api/discover/brasil` (campo `rename`).
+- Instantâneo `dados_brasil/rename.json` (968 apresentações, 514 substâncias, 267 páginas) gerado por `scripts/atualizar_rename.py` a partir do PDF oficial da 2ª edição (BVS/Ministério da Saúde). A leitura do PDF usa `pypdf` (só desenvolvimento) e guarda a página de origem de cada item.
+- Conferência: todos os itens foram localizados, por texto e código ATC, na página citada do PDF (2 divergências eram só hifenização/nome corrigido), e uma amostra de 50 itens foi lida contra o PDF.
+
+### Observações
+- Licença do PDF: CC BY-NC-SA 4.0 (uso não comercial, com atribuição e mesma licença). Se o projeto for monetizado, rever.
+- Insumos (Anexo IV) e as listas de inclusões, exclusões e ampliações não entram nesta fase. "Constar na Rename" não é "disponível na sua unidade", e a tela diz isso. O rótulo "pendente de revisão por especialista" continua até um farmacêutico ou médico revisar os dados.
+
 ## 2026-10 — Dados reais do Brasil, fase 2: ANVISA
 
 ### Adicionado
