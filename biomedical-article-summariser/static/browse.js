@@ -796,10 +796,12 @@
         h("a", { class: "btn btn-sm btn-outline", href: Lib.aiLabHref(work.pmid || work.ref) }, "Abrir no Laboratório de IA"));
     }
 
-    // situacao no Brasil: decisoes da Conitec (dados oficiais locais, sem IA) para os medicamentos do resumo
+    // situacao no Brasil: registro na ANVISA e decisoes da Conitec (dados oficiais locais, sem IA) para os medicamentos do resumo
     const brasilBox = h("div", { class: "stack" }, loading("Consultando dados oficiais…"));
-    const METHODS = { sinonimo: "sinônimo conhecido", cognato: "nome parecido", aproximado: "grafia aproximada" };
+    const METHODS = { sinonimo: "sinônimo conhecido", cognato: "nome parecido" };
+    const CATEGORY_PLURAL = { Genérico: "genéricos", Similar: "similares", Novo: "novos", Biológico: "biológicos", Específico: "específicos", Fitoterápico: "fitoterápicos", Dinamizado: "dinamizados", Radiofármaco: "radiofármacos" };
     const fmtDate = (iso) => { const d = new Date(`${iso}T12:00:00`); return Number.isNaN(d.getTime()) ? "" : d.toLocaleDateString("pt-BR"); };
+    const fmtMonth = (ym) => (/^\d{4}-\d{2}$/.test(ym) ? `${ym.slice(5)}/${ym.slice(0, 4)}` : "");
     function conitecRows(records) {
       const rowFor = (r) => h("li", { class: "conitec-row" },
         h("div", {}, h("strong", {}, `${r.year || "—"} · ${r.recommendation || "—"}`),
@@ -811,6 +813,26 @@
       return [h("ul", { class: "plain-list" }, first.map(rowFor)),
         rest.length ? h("details", { class: "more-records" }, h("summary", {}, `Ver as outras ${rest.length} decisões`), h("ul", { class: "plain-list" }, rest.map(rowFor))) : null];
     }
+    function anvisaSummary(s) {
+      const cats = Object.entries(s.categories).slice(0, 4).map(([name, n]) => `${Lib.formatCount(n)} ${CATEGORY_PLURAL[name] || name.toLowerCase()}`).join(" · ");
+      return h("li", { class: "anvisa-row" },
+        h("div", {}, h("strong", {}, `${s.name}: ${Lib.formatCount(s.active)} ${s.active === 1 ? "registro ativo" : "registros ativos"}`),
+          s.inactive ? h("span", { class: "muted" }, ` · ${Lib.formatCount(s.inactive)} inativos`) : null),
+        h("small", { class: "muted" }, [cats, s.companies ? `${s.companies} ${s.companies === 1 ? "empresa" : "empresas"}` : "",
+          s.validUntil ? `validade mais distante ${fmtMonth(s.validUntil)}` : "", s.classes.length ? `classe: ${s.classes.join(", ")}` : ""].filter(Boolean).join(" · ")));
+    }
+    function anvisaBlock(list, key) {
+      if (!list.length) return h("p", { class: "muted" }, "ANVISA: nenhum registro de medicamento com esta substância.");
+      const exact = list.find((s) => s.key === key) || list[0];
+      const others = list.filter((s) => s !== exact);
+      return [h("h5", {}, "Registro na ANVISA"), h("ul", { class: "plain-list" }, anvisaSummary(exact)),
+        others.length ? h("details", { class: "more-records" }, h("summary", {}, `Associações e outras formas (${others.length})`), h("ul", { class: "plain-list" }, others.map(anvisaSummary))) : null];
+    }
+    function situationBlock(item, key) {
+      return [anvisaBlock(item.anvisa, key),
+        h("h5", {}, "Decisões da Conitec (incorporação ao SUS)"),
+        item.conitec.length ? conitecRows(item.conitec) : h("p", { class: "muted" }, "A Conitec não tem decisão registrada para esta substância.")];
+    }
     async function renderBrasil() {
       let data;
       try { data = await api(`/api/discover/brasil?ref=${encodeURIComponent(work.ref)}`); } catch {
@@ -818,32 +840,33 @@
         return;
       }
       const manualResult = h("div", { class: "stack" });
-      const manualInput = h("input", { type: "text", placeholder: "Outro medicamento (nome em português)", maxlength: "80", "aria-label": "Buscar medicamento na Conitec" });
+      const manualInput = h("input", { type: "text", placeholder: "Outro medicamento (nome em português)", maxlength: "80", "aria-label": "Buscar medicamento nas bases oficiais" });
       const manualButton = h("button", { type: "button", class: "btn btn-sm btn-secondary" }, "Buscar");
       const runManual = async () => {
         const term = manualInput.value.trim();
         if (term.length < 3) { manualInput.focus(); return; }
-        const found = await guarded(() => api(`/api/brasil/conitec?q=${encodeURIComponent(term)}`));
+        const found = await guarded(() => api(`/api/brasil/medicamento?q=${encodeURIComponent(term)}`));
         if (!found) return;
-        mount(manualResult, found.registros.length
-          ? [h("h4", {}, `${term}: ${found.registros.length} ${found.registros.length === 1 ? "decisão" : "decisões"}`), conitecRows(found.registros)]
-          : h("p", { class: "muted" }, `A Conitec não tem decisão registrada para "${term}". Isso não significa que o medicamento não esteja no SUS (veja a Rename).`));
+        mount(manualResult, h("h4", {}, term), situationBlock(found, term.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()));
       };
       manualButton.addEventListener("click", runManual);
       manualInput.addEventListener("keydown", (event) => { if (event.key === "Enter") { event.preventDefault(); runManual(); } });
       const meta = data.meta;
-      const source = Lib.safeHttpUrl(meta.paginaUrl);
+      const source = Lib.safeHttpUrl(meta.conitec.paginaUrl);
+      const anvisaSource = Lib.safeHttpUrl(meta.anvisa.arquivoUrl);
+      const stale = [meta.anvisa.defasado ? `ANVISA (extraída em ${fmtDate(meta.anvisa.extraidoEm)})` : "", meta.conitec.defasado ? `Conitec (extraída em ${fmtDate(meta.conitec.extraidoEm)})` : ""].filter(Boolean);
       mount(brasilBox,
         data.candidatos.length
           ? [h("p", { class: "hint" }, "Medicamentos que o resumo parece citar. A correspondência de nomes é automática: confirme."),
             data.candidatos.map((c) => h("div", { class: "conitec-drug" },
-              h("h4", {}, c.pt, h("span", { class: "muted" }, ` · no texto: ${c.en} (${METHODS[c.metodo] || c.metodo})`)), conitecRows(c.registros)))]
-          : h("p", { class: "muted" }, "Não identificamos, no resumo, medicamentos com decisão da Conitec. Busque pelo nome em português:"),
+              h("h4", {}, c.pt, h("span", { class: "muted" }, ` · no texto: ${c.en} (${METHODS[c.metodo] || c.metodo})`)),
+              situationBlock(c, c.pt.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase())))]
+          : h("p", { class: "muted" }, "Não identificamos, no resumo, medicamentos nas bases oficiais. Busque pelo nome em português:"),
         h("div", { class: "new-list" }, manualInput, manualButton), manualResult,
-        meta.defasado ? h("p", { class: "note" }, `Atenção: estes dados foram extraídos em ${fmtDate(meta.extraidoEm)} e podem estar desatualizados.`) : null,
-        h("p", { class: "note" }, "Decisões de incorporação ao SUS (Conitec), de uma lista local extraída em ", fmtDate(meta.extraidoEm),
-          source ? [" da ", h("a", { href: source, target: "_blank", rel: "noopener noreferrer" }, "planilha oficial")] : null,
-          ". Não indicam se o medicamento está disponível na sua unidade de saúde: consulte a Secretaria de Saúde. Ainda não inclui ANVISA nem Rename."));
+        stale.length ? h("p", { class: "note" }, `Atenção: dados possivelmente desatualizados: ${stale.join("; ")}.`) : null,
+        h("p", { class: "note" }, "Fontes: registros de medicamentos da ", anvisaSource ? h("a", { href: anvisaSource, target: "_blank", rel: "noopener noreferrer" }, "ANVISA (dados abertos)") : "ANVISA",
+          ` (extraídos em ${fmtDate(meta.anvisa.extraidoEm)}) e decisões da `, source ? h("a", { href: source, target: "_blank", rel: "noopener noreferrer" }, "Conitec") : "Conitec",
+          ` (extraídas em ${fmtDate(meta.conitec.extraidoEm)}). Registro ativo na ANVISA permite comercializar o medicamento; decisão da Conitec trata da incorporação ao SUS. Nenhum dos dois indica disponibilidade na sua unidade de saúde: consulte a Secretaria de Saúde. Ainda não inclui a Rename.`));
     }
 
     // artigos semelhantes: carregam depois da pagina e ficam no fim dela

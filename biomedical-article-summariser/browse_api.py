@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field
 import downloads
 import markdown_lite
 import reliability
-from brasil import conitec
+from brasil import anvisa, conitec, consulta
 from catalog import SearchQuery, Work
 from discovery import DiscoveryService
 from domain import AuthRequiredError, DiggerError, NotFoundError, RateLimitedError, SourceUnavailableError
@@ -94,6 +94,32 @@ def conitec_meta(snapshot: conitec.Instantaneo) -> dict[str, Any]:
     }
 
 
+def anvisa_meta(snapshot: anvisa.Instantaneo) -> dict[str, Any]:
+    days = anvisa.dias_desde_extracao(snapshot)
+    meta = snapshot.meta
+    return {
+        "fonte": meta.get("fonte"), "arquivoUrl": meta.get("arquivo_url"), "dicionarioUrl": meta.get("dicionario_url"),
+        "arquivoModificado": meta.get("arquivo_modificado"), "extraidoEm": meta.get("extraido_em"),
+        "substancias": meta.get("substancias"), "dias": days, "defasado": days is None or days > anvisa.STALE_AFTER_DAYS,
+    }
+
+
+def anvisa_substancia(item: anvisa.Substancia) -> dict[str, Any]:
+    return {
+        "name": item.nome, "key": item.chave, "active": item.ativos, "inactive": item.inativos, "activeAlone": item.ativos_isolado,
+        "categories": item.categorias, "classes": list(item.classes), "companies": item.empresas, "validUntil": item.validade_max,
+    }
+
+
+def situacao_payload(item: consulta.Situacao) -> dict[str, Any]:
+    payload: dict[str, Any] = {
+        "anvisa": [anvisa_substancia(s) for s in item.anvisa], "conitec": [conitec_registro(r) for r in item.conitec],
+    }
+    if item.candidato is not None:
+        payload.update({"pt": item.candidato.pt, "en": item.candidato.en, "metodo": item.candidato.metodo})
+    return payload
+
+
 def conitec_registro(item: conitec.Registro) -> dict[str, Any]:
     return {
         "year": item.ano, "technology": item.tecnologia, "indication": item.indicacao, "recommendation": item.recomendacao,
@@ -166,15 +192,18 @@ def register_browse_routes(
     shared_limiter = SlidingWindowLimiter(60, window=60.0)
     brasil_limiter = SlidingWindowLimiter(120, window=60.0)
 
-    def brasil_snapshot(request: Request) -> conitec.Instantaneo:
+    def brasil_bases(request: Request) -> tuple[anvisa.Instantaneo, conitec.Instantaneo]:
         try:
             brasil_limiter.check(identity(request))
         except RateLimitExceeded as error:
             raise RateLimitedError(str(error)) from error
         try:
-            return conitec.carregar()
+            return anvisa.carregar(), conitec.carregar()
         except (OSError, ValueError, KeyError) as error:
-            raise SourceUnavailableError("Os dados da Conitec não estão disponíveis agora.") from error
+            raise SourceUnavailableError("Os dados oficiais do Brasil não estão disponíveis agora.") from error
+
+    def brasil_meta(bases: tuple[anvisa.Instantaneo, conitec.Instantaneo]) -> dict[str, Any]:
+        return {"anvisa": anvisa_meta(bases[0]), "conitec": conitec_meta(bases[1])}
 
     def require_user(request: Request) -> str:
         user = current_user(request)
@@ -251,23 +280,24 @@ def register_browse_routes(
     @app.get("/api/brasil/conitec")
     def brasil_conitec(request: Request, q: Annotated[str, Query(min_length=3, max_length=80)]) -> dict[str, Any]:
         """Decisoes da Conitec para um medicamento (nome em portugues). Instantaneo local, sem rede e sem IA."""
-        snapshot = brasil_snapshot(request)
-        return {"consulta": q, "registros": [conitec_registro(r) for r in conitec.buscar(q, instantaneo=snapshot)], "meta": conitec_meta(snapshot)}
+        bases = brasil_bases(request)
+        return {"consulta": q, "registros": [conitec_registro(r) for r in conitec.buscar(q, instantaneo=bases[1])],
+                "meta": conitec_meta(bases[1])}
+
+    @app.get("/api/brasil/medicamento")
+    def brasil_medicamento(request: Request, q: Annotated[str, Query(min_length=3, max_length=80)]) -> dict[str, Any]:
+        """Registro na ANVISA e decisoes da Conitec para um medicamento (nome em portugues), sem IA e sem rede."""
+        bases = brasil_bases(request)
+        found = consulta.situacao(consulta.normalizar_termo(q), bases[0], bases[1])
+        return {"consulta": q, **situacao_payload(found), "meta": brasil_meta(bases)}
 
     @app.get("/api/discover/brasil")
     def brasil_artigo(request: Request, ref: Annotated[str, Query(min_length=1, max_length=MAX_REF)]) -> dict[str, Any]:
-        """Medicamentos que o resumo parece citar e as decisoes da Conitec sobre eles (correspondencia a confirmar)."""
-        snapshot = brasil_snapshot(request)
+        """Medicamentos que o resumo parece citar, com registro na ANVISA e decisoes da Conitec (a confirmar)."""
+        bases = brasil_bases(request)
         work = discovery.work(ref, client_id=identity(request))
-        found = conitec.candidatos(f"{work.title}. {work.abstract}", instantaneo=snapshot)
-        return {
-            "candidatos": [
-                {"pt": c.pt, "en": c.en, "metodo": c.metodo,
-                 "registros": [conitec_registro(r) for r in conitec.buscar(c.termo, instantaneo=snapshot)]}
-                for c in found
-            ],
-            "meta": conitec_meta(snapshot),
-        }
+        found = consulta.situacoes_do_texto(f"{work.title}. {work.abstract}", bases[0], bases[1])
+        return {"candidatos": [situacao_payload(item) for item in found], "meta": brasil_meta(bases)}
 
     @app.get("/api/discover/similar")
     def similar_route(

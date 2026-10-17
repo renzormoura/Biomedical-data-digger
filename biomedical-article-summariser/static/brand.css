@@ -541,3 +541,8 @@ input[type="text"], input[type="search"], input[type="email"], input[type="passw
 .more-records { margin-top: 8px; font-size: 0.88rem; }
 .more-records summary { cursor: pointer; color: var(--accent-text); padding: 6px 0; }
 .more-records .plain-list { margin-top: 6px; }
+
+.conitec-drug h5, .conitec-drug + h5 { margin: 10px 0 4px; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.anvisa-row { display: grid; gap: 2px; font-size: 0.9rem; }
+.anvisa-row small { display: block; }
+.article-aside > section h5 { margin: 12px 0 4px; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }

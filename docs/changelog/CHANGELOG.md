@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## 2026-10 — Dados reais do Brasil, fase 2: ANVISA
+
+### Adicionado
+- O cartão **Situação no Brasil** agora mostra, por medicamento, o **registro na ANVISA** (registros ativos e inativos, genéricos, similares e novos, empresas, classe terapêutica e validade mais distante) ao lado das decisões da Conitec. A busca manual consulta as duas bases (`GET /api/brasil/medicamento`).
+- Instantâneo `dados_brasil/anvisa.json` (3.857 substâncias, 72.824 registros ativos, 750 KB) gerado por `scripts/atualizar_anvisa.py` a partir do CSV aberto de 46 MB (dados.anvisa.gov.br, atualização diária na origem); sal e forma farmacêutica são removidos, e `cloreto de sódio` não vira `sódio`.
+- Ligação inglês-português mais completa: dobra de grafia (ph/f, th/t, ll/l, y/i), que liga ampicillin, morphine, buprenorphine e ketamine sem tabela de sinônimos. Em 207 resumos reais, 121 tiveram candidatos e todas as correspondências revisadas estavam corretas.
+
+### Removido
+- A correspondência por grafia aproximada: ela ligava valganciclovir a valaciclovir, medicamentos diferentes. Preferimos perder recall a errar a substância.
+- Exames, elementos e palavras comuns da química (glicose, sódio, fósforo, enxofre, sulfato...) nunca viram candidatos.
+
+### Limitações
+- Registro ativo permite comercializar; não indica fornecimento pelo SUS nem estoque local. A Rename (fase 3) ainda não está integrada, e a tela diz isso.
+
 ## 2026-10 — Dados reais do Brasil, fase 1: CONITEC
 
 ### Adicionado
