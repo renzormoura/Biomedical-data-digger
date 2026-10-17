@@ -257,7 +257,7 @@ def test_article_route_lists_candidates_to_confirm_or_none(client):
     names = {c["pt"]: c for c in data["candidatos"]}
     assert {"Ácido acetilsalicílico", "Dapagliflozina"} <= set(names)
     assert names["Ácido acetilsalicílico"]["en"] == "aspirin" and names["Ácido acetilsalicílico"]["metodo"] == "sinonimo"
-    assert all(c["registros"] for c in data["candidatos"])
+    assert all(c["conitec"] or c["anvisa"] for c in data["candidatos"])  # cada candidato tem algo nas bases
     assert client.get("/api/discover/brasil", params={"ref": "2"}).json()["candidatos"] == []
     assert client.get("/api/discover/brasil", params={"ref": "999"}).status_code == 404
 
@@ -265,4 +265,4 @@ def test_article_route_lists_candidates_to_confirm_or_none(client):
 def test_routes_degrade_when_the_snapshot_is_missing(client):
     with patch.object(conitec, "carregar", side_effect=FileNotFoundError("sem arquivo")):
         response = client.get("/api/brasil/conitec", params={"q": "aspirina"})
-    assert response.status_code == 503 and "Conitec" in response.json()["error"]
+    assert response.status_code == 503 and "dados oficiais do Brasil" in response.json()["error"]
