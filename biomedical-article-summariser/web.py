@@ -239,6 +239,7 @@ def create_app(
             "ia.html",
             {
                 "pages": active_pages,
+                "page_groups": pages.grouped(active_pages),
                 "help_html": help_html,
                 "models": pages.MODEL_CHOICES,
                 "default_model": pages.DEFAULT_MODEL,

@@ -83,13 +83,13 @@
       $("#panel-" + tab.dataset.target).hidden = !active;
     });
     if (focus) target.focus();
-    target.scrollIntoView({ inline: "center", block: "nearest" });
+    target.scrollIntoView({ inline: "nearest", block: "nearest" });
     history.replaceState(null, "", "#" + target.dataset.target);
   }
   tabs.forEach((tab, index) => {
     tab.addEventListener("click", () => selectTab(tab.dataset.target));
     tab.addEventListener("keydown", (event) => {
-      const moves = { ArrowRight: 1, ArrowLeft: -1 };
+      const moves = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: 1, ArrowUp: -1 };
       if (event.key in moves) {
         event.preventDefault();
         selectTab(tabs[(index + moves[event.key] + tabs.length) % tabs.length].dataset.target, true);

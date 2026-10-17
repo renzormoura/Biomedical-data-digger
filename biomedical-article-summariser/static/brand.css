@@ -40,7 +40,7 @@ svg.is-filled { fill: currentColor; }
 .brand-name { font-size: 1rem; font-weight: 400; letter-spacing: -0.01em; color: var(--muted); }
 .brand-name b, .brand-name .accent { font-weight: 700; color: var(--text); }
 .mainnav { display: flex; align-items: stretch; gap: 2px; flex: 1; overflow-x: auto; }
-.mainnav a { text-decoration: none; display: inline-flex; align-items: center; border-radius: 0; padding: 0 12px; font-size: 0.92rem; font-weight: 500; color: var(--muted); border-bottom: 2px solid transparent; background: none; }
+.mainnav a { white-space: nowrap; text-decoration: none; display: inline-flex; align-items: center; border-radius: 0; padding: 0 12px; font-size: 0.92rem; font-weight: 500; color: var(--muted); border-bottom: 2px solid transparent; background: none; }
 .mainnav a:hover { background: none; color: var(--text); }
 .mainnav a[aria-current="page"] { background: none; color: var(--text); border-bottom-color: var(--accent); }
 .topbar-actions { align-self: center; gap: 4px; flex-wrap: nowrap; }
@@ -153,11 +153,11 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 3px color-mix(in s
 .checklist .icon { color: var(--accent-text); margin-top: 3px; }
 .checklist span { color: var(--muted); }
 .checklist b { color: var(--text); font-weight: 600; }
-.panel { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
-.panel-head { display: flex; justify-content: space-between; align-items: baseline; padding: 16px 20px; border-bottom: 1px solid var(--border); }
-.panel-head h3 { font-size: 0.95rem; }
-.panel-head .muted { font-size: 0.8rem; }
-.panel-body { padding: 20px; }
+.home-section .panel { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+.home-section .panel-head { display: flex; justify-content: space-between; align-items: baseline; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+.home-section .panel-head h3 { font-size: 0.95rem; }
+.home-section .panel-head .muted { font-size: 0.8rem; }
+.home-section .panel-body { padding: 20px; }
 .score { display: flex; align-items: baseline; gap: 10px; }
 .score strong { font-size: 3rem; letter-spacing: -0.04em; line-height: 1; font-weight: 700; }
 .score span { color: var(--muted); }
@@ -288,4 +288,29 @@ mark { background: color-mix(in srgb, var(--accent) 18%, transparent); color: in
   .library-table td { border: 0; padding: 2px 0; }
   .library-table .col-year, .library-table .col-type { display: inline-block; margin-right: 12px; font-size: 0.84rem; color: var(--muted); }
   .library-table .col-actions { text-align: left; padding-top: 8px; }
+}
+
+/* ---------- Laboratório de IA: menu lateral agrupado ---------- */
+.shell { max-width: 1400px; display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 40px; align-items: start; padding-top: 28px; }
+.shell > .tabs { position: sticky; top: 76px; display: flex; flex-direction: column; align-items: stretch; gap: 0; border-bottom: 0; overflow: visible; padding: 0; max-height: calc(100vh - 96px); overflow-y: auto; }
+.tab-group { margin: 20px 0 6px; padding: 0 12px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.tab-group:first-child { margin-top: 0; }
+.shell > .tabs .tab { text-align: left; border-bottom: 0; border-left: 2px solid transparent; padding: 8px 12px; border-radius: 0; font-size: 0.92rem; white-space: normal; }
+.shell > .tabs .tab:hover { background: var(--surface-2); }
+.shell > .tabs .tab[aria-selected="true"] { background: var(--surface-2); border-left-color: var(--accent); color: var(--text); font-weight: 600; }
+.shell-body { min-width: 0; }
+.panel-head { margin: 0 0 20px; }
+.panel-head h1 { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.025em; }
+.panel-head h1::after { display: none; }
+.panel-head p { max-width: 70ch; }
+.output { border-radius: var(--radius); background: var(--surface); }
+.output .output-body, .output-body { line-height: 1.7; max-width: 76ch; }
+.group > summary { font-weight: 600; }
+
+@media (max-width: 900px) {
+  .shell { grid-template-columns: 1fr; gap: 16px; padding-top: 12px; }
+  .shell > .tabs { position: static; flex-direction: row; overflow-x: auto; max-height: none; border-bottom: 1px solid var(--border); }
+  .tab-group { display: none; }
+  .shell > .tabs .tab { flex: none; white-space: nowrap; border-left: 0; border-bottom: 2px solid transparent; }
+  .shell > .tabs .tab[aria-selected="true"] { border-bottom-color: var(--accent); background: none; }
 }

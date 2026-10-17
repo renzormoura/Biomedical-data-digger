@@ -33,15 +33,20 @@
   </header>
 
   <div class="shell">
-    <nav class="tabs" role="tablist" aria-label="Áreas de análise">
-      {% for page in pages %}
+    <nav class="tabs" role="tablist" aria-label="Áreas de análise" aria-orientation="vertical">
+      {% for group_name, group_pages in page_groups %}
+      <p class="tab-group" role="presentation">{{ group_name }}</p>
+      {% for page in group_pages %}
       <button type="button" role="tab" class="tab" id="tab-{{ page.key }}" data-target="{{ page.key }}"
               aria-controls="panel-{{ page.key }}" aria-selected="false" tabindex="-1">{{ page.tab_name }}</button>
       {% endfor %}
+      {% endfor %}
+      <p class="tab-group" role="presentation">Busca</p>
       <button type="button" role="tab" class="tab" id="tab-pesquisa" data-target="pesquisa"
               aria-controls="panel-pesquisa" aria-selected="false" tabindex="-1">Pesquisa</button>
     </nav>
 
+    <div class="shell-body">
     <main id="main" tabindex="-1">
       {% for page in pages %}
       {% set k = page.key %}
@@ -186,6 +191,7 @@
         </div>
       </section>
     </main>
+    </div>
   </div>
 
   <dialog id="auth-dialog" aria-labelledby="auth-title">

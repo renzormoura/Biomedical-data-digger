@@ -118,3 +118,10 @@ def test_production_requires_a_strong_session_secret(monkeypatch):
     monkeypatch.setenv("SESSION_SECRET", "x" * 32)
     settings = Settings.from_env()
     assert settings.production and "xxxx" not in repr(settings)
+
+
+def test_every_page_belongs_to_a_known_menu_group():
+    assert all(page.group in pages.GROUP_ORDER for page in PAGES)
+    grouped = pages.grouped(pages.ALL_PAGES)
+    assert [name for name, _ in grouped] == list(pages.GROUP_ORDER)
+    assert sum(len(items) for _, items in grouped) == len(PAGES)

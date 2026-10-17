@@ -14,6 +14,7 @@ from typing import Union
 
 import prompt_builders as pb
 
+GROUP_ORDER = ("Geral", "Saúde", "Exatas e Tecnologia", "Sociedade e Ambiente")
 MODEL_CHOICES = ("GPT-OSS 20B (Groq)", "GPT-OSS 120B (Groq)", "Qwen 3.6 27B (Groq)", "Qwen 3.8 27B (Groq)", "Llama (local)")
 DEFAULT_MODEL = "GPT-OSS 20B (Groq)"
 COMPARISON_TYPES = (
@@ -138,6 +139,7 @@ class PageSpec:
     clinical: bool = False
     elem_id: str | None = None
     title_suffix: str = ""
+    group: str = ""
 
     @property
     def title(self) -> str:
@@ -240,6 +242,7 @@ _GENERIC_PLACEHOLDER = "ex: 33984217 · PMC8234567 · 10.1038/nature · arxiv.or
 
 GENERAL_PAGE = PageSpec(
     key="geral",
+    group="Geral",
     tab_name="Geral",
     subtitle="Análise científica universal · Europe PMC · arXiv · DOI · OpenAlex",
     sections=(
@@ -267,6 +270,7 @@ GENERAL_PAGE = PageSpec(
 
 ACADEMIC_PAGE = PageSpec(
     key="academico",
+    group="Geral",
     tab_name="Acadêmico",
     subtitle="Estudar · Escrever · Referenciar · Apresentar — para estudantes de qualquer curso",
     sections=(
@@ -323,6 +327,7 @@ def _medical_page(generative_clinical: bool) -> PageSpec:
         ))
     return PageSpec(
         key="medicina",
+        group="Saúde",
         tab_name="Medicina",
         subtitle="Pronto-Socorro · Farmacologia · Segurança do Paciente · Contexto Brasileiro",
         sections=(
@@ -364,6 +369,7 @@ MEDICAL_PAGE_GENERATIVE = _medical_page(generative_clinical=True)
 
 ENVIRONMENTAL_PAGE = PageSpec(
     key="ambiental",
+    group="Sociedade e Ambiente",
     tab_name="Ambiental",
     subtitle="Impacto ambiental · Poluentes · Mitigação · Contexto regulatório brasileiro",
     sections=(
@@ -393,6 +399,7 @@ ENVIRONMENTAL_PAGE = PageSpec(
 
 PUBLIC_HEALTH_PAGE = PageSpec(
     key="saude_publica",
+    group="Saúde",
     tab_name="Saúde Pública",
     subtitle="Epidemiologia · Vigilância · SUS · Políticas de saúde",
     sections=(
@@ -430,6 +437,7 @@ PUBLIC_HEALTH_PAGE = PageSpec(
 
 TECHNOLOGY_PAGE = PageSpec(
     key="tecnologia",
+    group="Exatas e Tecnologia",
     tab_name="Tecnologia e IA",
     subtitle="Computação · Inteligência Artificial · Dados · Reprodutibilidade",
     sections=(
@@ -458,6 +466,7 @@ TECHNOLOGY_PAGE = PageSpec(
 
 ENGINEERING_PAGE = PageSpec(
     key="engenharias",
+    group="Exatas e Tecnologia",
     tab_name="Engenharias",
     subtitle="Civil · Elétrica · Química · Projeto, desempenho e normas",
     sections=(
@@ -496,6 +505,7 @@ def _overview_section() -> Section:
 
 NURSING_PAGE = PageSpec(
     key="enfermagem",
+    group="Saúde",
     tab_name="Enfermagem",
     subtitle="Cuidados descritos · Escalas e instrumentos · Prática baseada em evidências",
     sections=(
@@ -526,6 +536,7 @@ NURSING_PAGE = PageSpec(
 
 PHARMACY_PAGE = PageSpec(
     key="farmacia",
+    group="Saúde",
     tab_name="Farmácia",
     subtitle="Fármaco e mecanismo · Eficácia e segurança · Trechos de doses e interações (sem IA)",
     sections=(
@@ -561,6 +572,7 @@ PHARMACY_PAGE = PageSpec(
 
 NUTRITION_PAGE = PageSpec(
     key="nutricao",
+    group="Saúde",
     tab_name="Nutrição",
     subtitle="Intervenção alimentar · Desfechos · Limites para aplicar o resultado",
     sections=(
@@ -591,6 +603,7 @@ NUTRITION_PAGE = PageSpec(
 
 PSYCHOLOGY_PAGE = PageSpec(
     key="psicologia",
+    group="Saúde",
     tab_name="Psicologia",
     subtitle="Instrumentos e escalas · Amostra e tamanho de efeito · Generalização",
     sections=(
@@ -618,6 +631,7 @@ PSYCHOLOGY_PAGE = PageSpec(
 
 LAW_PAGE = PageSpec(
     key="direito",
+    group="Sociedade e Ambiente",
     tab_name="Direito e Políticas",
     subtitle="Política avaliada · Implicações regulatórias · Impacto social (sem parecer jurídico)",
     sections=(
@@ -643,6 +657,7 @@ LAW_PAGE = PageSpec(
 
 EDUCATION_PAGE = PageSpec(
     key="educacao",
+    group="Sociedade e Ambiente",
     tab_name="Educação",
     subtitle="Metodologia de ensino · Resultados de aprendizagem · Aplicação em sala de aula",
     sections=(
@@ -669,6 +684,7 @@ EDUCATION_PAGE = PageSpec(
 
 AGRO_PAGE = PageSpec(
     key="agro",
+    group="Sociedade e Ambiente",
     tab_name="Agro e Veterinária",
     subtitle="Cultura e espécie · Manejo e intervenção · Viabilidade e normas",
     sections=(
@@ -694,6 +710,7 @@ AGRO_PAGE = PageSpec(
 
 BIOTECH_PAGE = PageSpec(
     key="biotecnologia",
+    group="Exatas e Tecnologia",
     tab_name="Biotecnologia",
     subtitle="Organismo e método molecular · Dados e acesso · Reprodutibilidade e ética",
     sections=(
@@ -730,6 +747,7 @@ Converse com um profissional de saúde.
 
 PATIENT_PAGE = PageSpec(
     key="paciente",
+    group="Saúde",
     tab_name="Para o Paciente",
     subtitle="Linguagem simples · O que o estudo mostra e não mostra · Perguntas para levar ao profissional",
     sections=(
@@ -773,6 +791,11 @@ def pages_for(generative_clinical: bool = False) -> tuple[PageSpec, ...]:
         BIOTECH_PAGE,
         PATIENT_PAGE,
     )
+
+
+def grouped(page_list: tuple[PageSpec, ...]) -> list[tuple[str, list[PageSpec]]]:
+    """Agrupa as abas na ordem de `GROUP_ORDER` (menu lateral), mantendo a ordem dentro de cada grupo."""
+    return [(name, [p for p in page_list if p.group == name]) for name in GROUP_ORDER if any(p.group == name for p in page_list)]
 
 
 ALL_PAGES: tuple[PageSpec, ...] = pages_for(False)
