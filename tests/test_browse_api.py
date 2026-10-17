@@ -313,3 +313,12 @@ def test_work_detail_carries_the_reliability_score(env):
     assert {"score", "band", "coverage", "criteria", "disclaimer"} <= set(rel)
     assert {c["key"] for c in rel["criteria"]} >= {"integridade", "desenho", "revisao_pares", "amostra"}
     assert all(c["how"] and c["detail"] for c in rel["criteria"])
+
+
+def test_mobile_navigation_scaffolding_is_served(env):
+    home = env.client.get("/").text
+    lab = env.client.get("/ia").text
+    assert 'id="bottomnav"' in home and 'class="bottom-nav"' in lab
+    assert 'id="area-select"' in lab and lab.count("<optgroup") >= 4  # seletor de area agrupado para o celular
+    assert 'aria-current="page"' in lab.split('id="bottomnav"')[1]  # o Laboratorio marca a si mesmo na barra inferior
+    assert 'name="viewport"' in home and "width=device-width" in home

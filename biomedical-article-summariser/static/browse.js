@@ -172,7 +172,15 @@
   }
 
   // ------------------------------------------------------------------ navegação
+  function renderBottomNav(view) {
+    const items = [["#/", "Início", "", "home"], ["#/busca", "Busca", "busca", "search"], ["#/biblioteca", "Biblioteca", "biblioteca", "bookmark"], ["/ia", "Laboratório", "lab", "spark"]];
+    mount(document.getElementById("bottomnav"), items.map(([href, label, key, name]) => h("a", {
+      href, "aria-current": key === view || (key === "busca" && view === "artigo") ? "page" : null,
+    }, icon(name), h("span", {}, label))));
+  }
+
   function renderNav(view) {
+    renderBottomNav(view);
     const items = [["#/", "Início", ""], ["#/busca", "Busca", "busca"], ["#/biblioteca", "Biblioteca", "biblioteca"]];
     mount(document.getElementById("mainnav"),
       items.map(([href, label, key]) => h("a", { href, "aria-current": key === view || (key === "busca" && view === "artigo") ? "page" : null }, label)),
@@ -280,6 +288,14 @@
     });
     panel.addEventListener("keydown", (event) => { if (event.key === "Escape") { panel.hidden = true; button.setAttribute("aria-expanded", "false"); button.focus(); } });
     return wrap;
+  }
+
+  // avisos da busca: um so aviso aparece direto; varios ficam recolhidos para nao empurrar os resultados
+  function notesBlock(notes) {
+    if (!notes.length) return null;
+    if (notes.length === 1) return h("p", { class: "note" }, notes[0]);
+    return h("details", { class: "notes" }, h("summary", {}, `${notes.length} avisos sobre esta busca`),
+      h("ul", {}, notes.map((note) => h("li", {}, note))));
   }
 
   function saveButton(work, { small = true, onChange } = {}) {
@@ -470,7 +486,7 @@
     };
 
     let controller;
-    async function run() {
+    let run = async () => {
       if (controller) controller.abort();
       controller = new AbortController();
       mount(results, loading("Buscando…"));
@@ -478,9 +494,10 @@
         const data = await api(`/api/discover/search?${Lib.apiParamsFromSearchState(st, PAGE_SIZE)}`, { signal: controller.signal });
         mount(results,
           h("div", { class: "results-head" },
-            h("strong", {}, `${Lib.formatCount(data.total)} ${data.total === 1 ? "resultado" : "resultados"}`),
-            h("span", { class: "muted" }, activeSource().name)),
-          (data.notes || []).map((note) => h("p", { class: "note" }, note)),
+            h("div", {}, h("strong", {}, `${Lib.formatCount(data.total)} ${data.total === 1 ? "resultado" : "resultados"}`),
+              h("span", { class: "muted" }, ` · ${activeSource().name}`)),
+            h("label", { class: "sort-inline" }, h("span", {}, "Ordenar"), sort)),
+          notesBlock(data.notes || []),
           data.works.length
             ? h("ol", { class: "results" }, data.works.map((work) => h("li", { class: "result" },
               h("h3", {}, h("a", { href: articleHref(work) }, highlighted(work.title, st.q))),
@@ -498,7 +515,7 @@
         if (error.name === "AbortError") return;
         mount(results, errorBox(error.message));
       }
-    }
+    };
     function sync() {
       history.replaceState(null, "", Lib.buildHash("/busca", Lib.paramsFromSearchState(st)));
       run();
@@ -507,15 +524,17 @@
     const apply = () => { readControls(); st.page = 1; sync(); };
     const applyLater = Lib.debounce(apply, 350);
 
-    const filters = h("form", { class: "card filters", "aria-label": "Filtros", onsubmit: (e) => { e.preventDefault(); applyLater.cancel(); apply(); } },
-      h("div", { class: "field" }, h("label", { for: "q" }, "Buscar"), q, h("button", { type: "submit", class: "btn btn-primary" }, "Buscar")),
+    // barra de busca sempre visivel (no celular fica fixa abaixo do cabecalho)
+    const searchBar = h("form", { class: "search-bar", role: "search", onsubmit: (e) => { e.preventDefault(); applyLater.cancel(); apply(); q.blur(); } },
+      h("label", { class: "visually-hidden", for: "q" }, "Buscar artigos"), q,
+      h("button", { type: "submit", class: "btn btn-primary" }, icon("search"), h("span", { class: "btn-label" }, "Buscar")));
+
+    const filters = h("form", { class: "filters", "aria-label": "Filtros", onsubmit: (e) => { e.preventDefault(); applyLater.cancel(); apply(); } },
       source ? h("div", { class: "field" }, h("label", { for: "source" }, "Fonte"), source) : null,
       h("div", { class: "field" }, h("label", {}, "Ano de publicação"), h("div", { class: "row" }, yf, yt)),
       h("div", { class: "field" }, h("label", {}, "Tipo de estudo"), typeBox),
       h("div", { class: "field" }, h("label", { class: "check" }, oa, "Só acesso aberto")),
-      h("div", { class: "field" }, h("label", { for: "lang" }, "Idioma"), lang),
-      h("div", { class: "field" }, h("label", { for: "sort" }, "Ordenar por"), sort),
-      h("a", { class: "btn btn-ghost", href: "#/busca" }, "Limpar filtros"));
+      h("div", { class: "field" }, h("label", { for: "lang" }, "Idioma"), lang));
     filters.addEventListener("change", (event) => {
       if (event.target === source) {
         // a fonte muda os tipos de estudo oferecidos: limpa a selecao e redesenha a lista de tipos
@@ -525,14 +544,54 @@
       }
       applyLater();
     });
+    sort.addEventListener("change", () => apply());
     yf.addEventListener("input", applyLater);
     yt.addEventListener("input", applyLater);
 
-    const wide = window.matchMedia("(min-width: 901px)").matches;
-    mount($app, h("h1", {}, "Busca"),
-      h("div", { class: "layout" },
-        h("details", { class: "filters-wrap", open: wide }, h("summary", { class: "btn btn-secondary" }, "Filtros e ordenação"), filters),
-        results));
+    // filtros ativos como chips removiveis (valem no desktop e no celular)
+    const activeBox = h("div", { class: "active-filters", "aria-label": "Filtros ativos" });
+    const filterButton = h("button", { type: "button", class: "btn btn-secondary filter-toggle", "aria-haspopup": "dialog", "aria-expanded": "false" });
+    function activeFilters() {
+      const list = [];
+      if (st.yearFrom || st.yearTo) {
+        const label = st.yearFrom && st.yearTo ? `${st.yearFrom}–${st.yearTo}` : st.yearFrom ? `desde ${st.yearFrom}` : `até ${st.yearTo}`;
+        list.push([label, () => { yf.value = ""; yt.value = ""; }]);
+      }
+      st.types.forEach((type) => list.push([type, () => { [...typeBox.querySelectorAll("input")].forEach((i) => { if (i.value === type) i.checked = false; }); }]));
+      if (st.oa) list.push(["Acesso aberto", () => { oa.checked = false; }]);
+      if (st.lang) list.push([(options.languages.find((l) => l.id === st.lang) || {}).name || st.lang, () => { lang.value = ""; }]);
+      if (st.source && source) list.push([activeSource().name.split(" (")[0], () => { source.value = defaultSource.id; st.source = ""; st.types = []; renderTypes(); }]);
+      return list;
+    }
+    function renderActive() {
+      const list = activeFilters();
+      filterButton.replaceChildren(...[icon("filter"), "Filtros", list.length ? h("span", { class: "count-badge" }, String(list.length)) : null].filter(Boolean));
+      mount(activeBox, list.map(([label, clear]) => h("span", { class: "chip" }, label,
+        h("button", { type: "button", "aria-label": `Remover filtro ${label}`, onclick: () => { clear(); apply(); } }, "×"))));
+      activeBox.hidden = list.length === 0;
+    }
+    const baseRun = run;
+    run = () => { renderActive(); return baseRun(); };
+
+    // painel de filtros: coluna lateral no desktop; folha inferior no celular
+    const backdrop = h("div", { class: "sheet-backdrop", hidden: "" });
+    const sheetTitle = h("div", { class: "sheet-head" }, h("strong", {}, "Filtros"),
+      h("button", { type: "button", class: "btn btn-ghost", "aria-label": "Fechar filtros", onclick: () => closeSheet() }, "Fechar"));
+    const sheetFoot = h("div", { class: "sheet-foot" },
+      h("a", { class: "btn btn-secondary", href: "#/busca", onclick: () => closeSheet() }, "Limpar tudo"),
+      h("button", { type: "button", class: "btn btn-primary", onclick: () => closeSheet() }, "Ver resultados"));
+    const wrap = h("div", { class: "filters-wrap", role: "dialog", "aria-label": "Filtros da busca" }, sheetTitle, filters, sheetFoot);
+    function openSheet() { wrap.classList.add("open"); backdrop.hidden = false; document.body.classList.add("sheet-open"); filterButton.setAttribute("aria-expanded", "true"); }
+    function closeSheet() { wrap.classList.remove("open"); backdrop.hidden = true; document.body.classList.remove("sheet-open"); filterButton.setAttribute("aria-expanded", "false"); }
+    filterButton.addEventListener("click", () => (wrap.classList.contains("open") ? closeSheet() : openSheet()));
+    backdrop.addEventListener("click", closeSheet);
+    wrap.addEventListener("keydown", (event) => { if (event.key === "Escape") { closeSheet(); filterButton.focus(); } });
+    window.addEventListener("hashchange", closeSheet, { once: true });
+
+    mount($app, h("h1", { class: "visually-hidden" }, "Busca"), searchBar,
+      h("div", { class: "search-toolbar" }, filterButton),
+      activeBox,
+      h("div", { class: "layout" }, wrap, results), backdrop);
     run();
   }
 
@@ -730,10 +789,10 @@
           badges(work),
           h("div", { class: "row actions" },
             saveButton(work, { small: false, onChange: renderOrganize }),
-            oaHref ? h("a", { class: "btn btn-secondary", href: oaHref, target: "_blank", rel: "noopener noreferrer" }, [icon("external"), "Abrir versão aberta"])
+            oaHref ? h("a", { class: "btn btn-secondary", href: oaHref, target: "_blank", rel: "noopener noreferrer" }, [icon("external"), "Versão aberta"])
               : h("span", { class: "note" }, "Sem versão aberta conhecida"),
             downloadMenu(work),
-            h("a", { class: "btn btn-secondary", href: Lib.aiLabHref(work.pmid || work.ref), title: "Resumos e análises com IA, opcionais e com avisos" }, [icon("spark"), "Analisar com IA (opcional)"]))),
+            h("a", { class: "btn btn-secondary", href: Lib.aiLabHref(work.pmid || work.ref), title: "Resumos e análises com IA, opcionais e com avisos" }, [icon("spark"), "Analisar com IA", h("span", { class: "opt" }, " (opcional)")]))),
         h("div", { class: "article-layout" },
           h("div", { class: "article-main" },
             h("section", { class: "block" }, h("h2", {}, "Resumo, com as seções originais"),

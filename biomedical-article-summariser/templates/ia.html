@@ -33,6 +33,17 @@
   </header>
 
   <div class="shell">
+    <div class="area-picker">
+      <label for="area-select">Área de análise</label>
+      <select id="area-select">
+        {% for group_name, group_pages in page_groups %}
+        <optgroup label="{{ group_name }}">
+          {% for page in group_pages %}<option value="{{ page.key }}">{{ page.tab_name }}</option>{% endfor %}
+        </optgroup>
+        {% endfor %}
+        <optgroup label="Busca"><option value="pesquisa">Pesquisa</option></optgroup>
+      </select>
+    </div>
     <nav class="tabs" role="tablist" aria-label="Áreas de análise" aria-orientation="vertical">
       {% for group_name, group_pages in page_groups %}
       <p class="tab-group" role="presentation">{{ group_name }}</p>
@@ -225,5 +236,11 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
   {% include "_footer.html" %}
+  <nav class="bottom-nav" id="bottomnav" aria-label="Navegação principal">
+    <a href="/"><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg><span>Início</span></a>
+    <a href="/#/busca"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><span>Busca</span></a>
+    <a href="/#/biblioteca"><svg class="icon" aria-hidden="true"><use href="#i-bookmark"/></svg><span>Biblioteca</span></a>
+    <a href="/ia" aria-current="page"><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg><span>Laboratório</span></a>
+  </nav>
 </body>
 </html>

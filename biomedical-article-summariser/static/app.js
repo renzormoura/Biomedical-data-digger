@@ -82,6 +82,8 @@
       tab.tabIndex = active ? 0 : -1;
       $("#panel-" + tab.dataset.target).hidden = !active;
     });
+    const areaSelect = $("#area-select");
+    if (areaSelect) areaSelect.value = target.dataset.target;
     if (focus) target.focus();
     const activePanel = $("#panel-" + target.dataset.target);
     if (activePanel && $('[data-role="article"]', activePanel)) showArticleCard(activePanel);
@@ -99,6 +101,7 @@
       else if (event.key === "End") { event.preventDefault(); selectTab(tabs[tabs.length - 1].dataset.target, true); }
     });
   });
+  $("#area-select")?.addEventListener("change", (event) => selectTab(event.target.value));
   selectTab(location.hash.slice(1));
   window.addEventListener("hashchange", () => selectTab(location.hash.slice(1)));
 

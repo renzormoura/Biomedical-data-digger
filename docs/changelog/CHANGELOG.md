@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 2026-10 — Celular mais confortável
+
+- Busca: barra de busca sempre visível e fixa, botão **Filtros** com contador que abre uma folha inferior (com "Limpar tudo" e "Ver resultados"), filtros ativos como chips removíveis, **Ordenar** ao lado da contagem e resultados logo abaixo; avisos da busca recolhidos em um só bloco. No desktop os filtros seguem na coluna lateral, agora com os mesmos chips e a barra de busca no topo.
+- Navegação inferior (Início, Busca, Biblioteca, Laboratório) no lugar do menu em linha, e cabeçalho de uma linha.
+- Alvos de toque de 44 px, campos de 16 px (sem zoom automático no iOS) e rótulos mais curtos.
+- Artigo: a nota de confiabilidade aparece logo após as ações; ações em grade de duas colunas.
+- Laboratório: seletor "Área de análise" agrupado no lugar da faixa de 17 abas.
+
 ## 2026-10 — Laboratório ligado ao navegador
 
 ### Adicionado
