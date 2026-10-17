@@ -19,6 +19,7 @@ import reliability
 from cache import TTLCache
 from catalog import Catalog, CatalogError, SearchQuery, SearchResult, Work
 from domain import ArticleNotFoundError, DiggerError, RateLimitedError, SourceUnavailableError
+from enrichment import Enricher, Enrichment
 from extraction import AbstractSection, Finding, extract_findings, split_sections
 from ratelimit import RateLimitExceeded, SlidingWindowLimiter
 
@@ -27,7 +28,6 @@ WORK_CACHE_TTL = 3600
 CACHE_SIZE = 512
 SIMILAR_LIMIT = 4
 ALL_SOURCES = "all"
-ALL_SOURCES_NAME = "Todas as fontes"
 _NON_WORD = re.compile(r"\W+")
 Fallback = Callable[[str], Work | None]
 
@@ -121,6 +121,7 @@ class DiscoveryService:
         self._default = catalogs[0].id
         self._limiter = limiter
         self._fallback = fallback
+        self._enricher = Enricher()
         self._searches: TTLCache[SearchResult] = TTLCache(CACHE_SIZE, SEARCH_CACHE_TTL)
         self._works: TTLCache[Work] = TTLCache(CACHE_SIZE, WORK_CACHE_TTL)
 
@@ -129,14 +130,21 @@ class DiscoveryService:
     def default_source(self) -> str:
         return self._default
 
+    @property
+    def _combined(self) -> list[Catalog]:
+        """Fontes que entram na busca combinada (as principais; as demais sao escolhidas uma a uma)."""
+        return [c for c in self._catalogs.values() if getattr(c, "combined", True)]
+
     def sources(self) -> list[dict[str, object]]:
         listed: list[dict[str, object]] = [
             {"id": c.id, "name": c.name, "studyTypes": list(c.study_types()), "default": c.id == self._default}
             for c in self._catalogs.values()
         ]
-        if len(self._catalogs) > 1:
-            union = list(dict.fromkeys(t for c in self._catalogs.values() for t in c.study_types()))
-            listed.insert(0, {"id": ALL_SOURCES, "name": ALL_SOURCES_NAME, "studyTypes": union, "default": False})
+        combined = self._combined
+        if len(combined) > 1:
+            union = list(dict.fromkeys(t for c in combined for t in c.study_types()))
+            name = " + ".join(c.name.split(" (")[0] for c in combined)
+            listed.insert(0, {"id": ALL_SOURCES, "name": name, "studyTypes": union, "default": False})
         return listed
 
     def _catalog(self, source: str | None) -> Catalog:
@@ -154,7 +162,7 @@ class DiscoveryService:
     # -- busca --------------------------------------------------------------
     def search(self, query: SearchQuery, *, source: str | None = None, client_id: str = "local") -> SearchResult:
         query = query.normalized()
-        if source == ALL_SOURCES and len(self._catalogs) > 1:
+        if source == ALL_SOURCES and len(self._combined) > 1:
             return self._search_all(query, client_id)
         catalog = self._catalog(source)
         if self._searches.get(repr((catalog.id, query))) is None:  # acertos de cache nao gastam o limite
@@ -188,7 +196,7 @@ class DiscoveryService:
         self._check(client_id)
         notes: list[str] = []
         runnable: list[tuple[Catalog, SearchQuery]] = []
-        for catalog in self._catalogs.values():
+        for catalog in self._combined:
             supported = set(catalog.study_types())
             wanted = tuple(t for t in query.study_types if t in supported)
             if query.study_types and not wanted:
@@ -273,6 +281,15 @@ class DiscoveryService:
             citations={style: citations.format_citation(citation_metadata(work), style) for style in citations.FORMATTERS},
             similar=self.similar(work, client_id=client_id),
         )
+
+    def enrich(self, ref: str, *, client_id: str = "local") -> Enrichment:
+        """Registros de ensaio, citacoes e dados ligados ao artigo (fontes abertas, melhor esforco)."""
+        work = self.work(ref, client_id=client_id)
+        cached = self._enricher.cached(work)
+        if cached is not None:
+            return cached
+        self._check(client_id)
+        return self._enricher.enrich(work)
 
     def similar(self, work: Work, *, client_id: str = "local") -> tuple[Work, ...]:
         """Obras com as mesmas palavras-chave, mais citadas primeiro. Melhor esforco: falhas viram lista vazia."""

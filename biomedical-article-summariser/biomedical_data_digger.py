@@ -6,14 +6,18 @@ import os
 
 import uvicorn
 
+from arxiv_catalog import ArxivCatalog
 from catalog import Catalog
 from config import Settings
 from discovery import DiscoveryService
+from doaj_catalog import DoajCatalog
 from europepmc_catalog import EuropePmcCatalog
 from generation import GenerationPolicy
 from library_store import get_library_store
 from llm_service import get_router
+from openaire_catalog import OpenAireCatalog
 from openalex_catalog import OpenAlexCatalog
+from pubmed_catalog import PubMedCatalog
 from quota import QuotaManager
 from ratelimit import SlidingWindowLimiter
 from usage import UsageLog
@@ -36,6 +40,7 @@ def create_app():  # type: ignore[no-untyped-def]
     catalogs: list[Catalog] = [EuropePmcCatalog()]
     if settings.openalex_api_key:  # OpenAlex so entra com chave propria (sem ela o orcamento e minusculo)
         catalogs.append(OpenAlexCatalog(settings.openalex_api_key, settings.openalex_mailto))
+    catalogs += [PubMedCatalog(settings.ncbi_api_key), ArxivCatalog(), DoajCatalog(), OpenAireCatalog()]
     discovery = DiscoveryService(catalogs, SlidingWindowLimiter(settings.discovery_calls_per_minute, window=60.0))
     return create_web_app(
         service, repository, settings, usage_log=usage_log, discovery=discovery, library=get_library_store()

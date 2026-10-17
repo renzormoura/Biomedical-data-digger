@@ -45,6 +45,7 @@ class Settings:
     discovery_calls_per_minute: int = 30
     openalex_api_key: str = field(default="", repr=False)
     openalex_mailto: str = ""
+    ncbi_api_key: str = field(default="", repr=False)
     daily_token_budget_guest: int = 60_000
     daily_token_budget_user: int = 200_000
 
@@ -64,6 +65,7 @@ class Settings:
             discovery_calls_per_minute=_int_env("DISCOVERY_CALLS_PER_MINUTE", 30, minimum=1),
             openalex_api_key=os.environ.get("OPENALEX_API_KEY", "").strip(),
             openalex_mailto=os.environ.get("OPENALEX_MAILTO", "").strip(),
+            ncbi_api_key=os.environ.get("NCBI_API_KEY", "").strip(),
             generative_clinical=os.environ.get("ENABLE_GENERATIVE_CLINICAL", "").strip().lower()
             in ("1", "true", "yes", "on"),
             llm_temperature=_float_env("LLM_TEMPERATURE", 0.2, minimum=0.0, maximum=2.0),
