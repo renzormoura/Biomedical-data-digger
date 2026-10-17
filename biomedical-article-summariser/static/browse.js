@@ -7,13 +7,6 @@
   const $app = document.getElementById("app");
   const THEME_KEY = "bdd.theme"; // compartilhado com a página de IA
   const PAGE_SIZE = 10;
-  const SHORTCUTS = [
-    { title: "Sou estudante", hint: "Preciso achar artigos para o TCC e citar certo.", q: "diabetes tipo 2" },
-    { title: "Sou professor", hint: "Quero montar uma lista de leitura para a minha turma.", q: "saúde pública" },
-    { title: "Sou pesquisador", hint: "Quero comparar estudos e ver o tipo de evidência.", q: "ensaio clínico hipertensão" },
-    { title: "Sou profissional", hint: "Preciso achar rápido a evidência sobre uma pergunta.", q: "sepse" },
-  ];
-
   // ------------------------------------------------------------------ DOM
   function h(tag, attrs, ...kids) {
     const el = document.createElement(tag);
@@ -227,59 +220,100 @@
   }
 
   // ------------------------------------------------------------------ Início
-  const TOPICS = ["diabetes tipo 2", "sepse", "hipertensão", "câncer de mama", "saúde mental", "COVID-19", "inteligência artificial na saúde", "mudanças climáticas"];
+  const TOPICS = ["diabetes tipo 2", "sepse", "saúde mental", "inteligência artificial na saúde", "mudanças climáticas"];
   const STEPS = [
-    ["1", "Busque", "Digite um tema, título ou palavra-chave. Filtre por ano, tipo de estudo, idioma e acesso aberto, em uma ou em todas as fontes."],
-    ["2", "Entenda", "Veja o resumo organizado por seções, os números com a frase de origem, o tipo de estudo e a nota de confiabilidade explicada."],
-    ["3", "Organize", "Salve, etiquete, monte listas de leitura, compartilhe por link e exporte as referências em BibTeX, RIS, ABNT, APA ou Vancouver."],
+    ["01", "Busque", "Filtre por ano, tipo de estudo, idioma e acesso aberto. Combine fontes sem ver o mesmo artigo duas vezes."],
+    ["02", "Entenda", "Resumo organizado por seções, números com a frase de origem e a nota de confiabilidade explicada critério a critério."],
+    ["03", "Organize", "Salve, etiquete, monte listas de leitura, compartilhe por link e exporte as referências em BibTeX, RIS, ABNT, APA ou Vancouver."],
   ];
-  const FEATURES = [
-    ["", "Várias fontes em uma busca", "Europe PMC (ciências da vida e saúde) e OpenAlex (todas as áreas), com resultados sem repetição."],
-    ["", "Nota de confiabilidade que se explica", "Retratação, tipo de estudo, revisão por pares, amostra e estatística. Toque na nota e veja cada critério e a evidência."],
-    ["", "Leitura fiel, sem inventar", "Trechos copiados do próprio resumo. Nada é gerado nem interpretado, então não há lacunas preenchidas por palavras de um modelo."],
-    ["", "Versão aberta", "Mostramos quando existe uma cópia gratuita e legal do artigo e levamos você até ela."],
-    ["", "Biblioteca e listas", "Etiquetas, listas de leitura e link público somente leitura, que você pode revogar quando quiser."],
-    ["", "IA opcional, com cautela", "Resumos e análises no Laboratório de IA, com trava contra instruções maliciosas, checagem de números e avisos claros."],
+  const TRUST = [
+    ["Sem IA primeiro.", "Trechos copiados do resumo; nada gerado nem interpretado."],
+    ["Dado ausente não pune.", "O que a fonte não informa sai do cálculo e reduz a cobertura."],
+    ["Limites declarados.", "A nota não mede a execução do estudo nem substitui a leitura crítica."],
+  ];
+  const AUDIENCE = [
+    ["Estudantes", "Achar artigos para o TCC, entender o resumo e citar do jeito certo.", "diabetes tipo 2"],
+    ["Professores", "Montar listas de leitura e compartilhar com a turma por link.", "saúde pública"],
+    ["Pesquisadores", "Comparar estudos e ver o tipo de evidência antes de ler o texto completo.", "ensaio clínico hipertensão"],
+    ["Profissionais", "Encontrar rápido a evidência sobre uma pergunta, com os limites à vista.", "sepse"],
+  ];
+  const SAMPLE_CRITERIA = [
+    ["met", "Integridade (retratação)", "20/20"], ["met", "Desenho do estudo", "22,5/25"], ["met", "Revisão por pares", "10/10"],
+    ["unmet", "Tamanho da amostra informado", "0/10"], ["partial", "Resultado principal quantificado", "5/10"],
+    ["partial", "Precisão estatística", "5/10"], ["met", "Método descrito no resumo", "10/10"],
   ];
 
   function renderHome() {
     setTitle("Início");
-    const input = h("input", { type: "search", id: "home-q", placeholder: "Busque por tema, título ou palavra-chave", "aria-label": "Buscar artigos", maxlength: "300" });
-    const go = (q) => { location.hash = Lib.buildHash("/busca", { q }); };
+    const input = h("input", { type: "search", id: "home-q", placeholder: "Tema, título, DOI ou palavra-chave", "aria-label": "Buscar artigos", maxlength: "300", autocomplete: "off" });
+    const sourceBox = h("span", { class: "search-source" });
+    const sourceCount = h("strong", {}, "2");
+    let sourceSelect = null;
+    const go = (q) => {
+      const fonte = sourceSelect && sourceSelect.value !== "" ? sourceSelect.value : "";
+      location.hash = Lib.buildHash("/busca", { q, fonte });
+    };
+    loadOptions().then((options) => {
+      if (options.sources.length < 2) return;
+      sourceSelect = h("select", { id: "home-source", "aria-label": "Fonte" },
+        options.sources.map((src) => h("option", { value: src.default ? "" : src.id }, src.name)));
+      sourceSelect.value = options.sources.some((src) => src.id === "all") ? "all" : "";
+      mount(sourceBox, sourceSelect);
+      sourceCount.textContent = String(options.sources.filter((src) => src.id !== "all").length);
+    }).catch(() => { /* a busca funciona sem o seletor */ });
+
+    const stat = (value, label) => h("div", { class: "stat" }, value, h("span", {}, label));
     mount($app,
-      h("section", { class: "hero home-hero" },
-        h("span", { class: "eyebrow" }, "Navegador de artigos científicos"),
-        h("h1", {}, "Encontre, entenda e organize artigos científicos"),
-        h("p", { class: "lead" }, "O Biomedical Data Digger reúne milhões de artigos em um só lugar, mostra o essencial do jeito que o autor escreveu e diz, com critérios abertos, o quanto cada artigo merece confiança. Feito para estudantes, professores, pesquisadores e profissionais de saúde."),
-        h("form", { class: "searchbar", onsubmit: (e) => { e.preventDefault(); go(input.value.trim()); } },
-          input, h("button", { type: "submit", class: "btn btn-primary" }, "Buscar")),
-        h("div", { class: "chips topics", role: "group", "aria-label": "Sugestões de busca" },
-          h("span", { class: "muted topics-label" }, "Experimente:"),
-          TOPICS.map((t) => h("a", { class: "chip", href: Lib.buildHash("/busca", { q: t }) }, t)))),
+      h("section", { class: "home-hero" },
+        h("p", { class: "eyebrow" }, "Navegador de artigos científicos"),
+        h("h1", { class: "display" }, "Encontre, entenda e organize a pesquisa."),
+        h("p", { class: "lead" }, "Busque em várias fontes ao mesmo tempo, leia o resumo como o autor escreveu e veja, com critérios abertos, o quanto cada artigo merece confiança."),
+        h("form", { class: "home-search", role: "search", onsubmit: (e) => { e.preventDefault(); go(input.value.trim()); } },
+          input, sourceBox,
+          h("button", { type: "submit", class: "btn btn-primary" }, icon("search"), "Buscar")),
+        h("p", { class: "examples" }, "Exemplos: ", TOPICS.map((t) => h("a", { href: Lib.buildHash("/busca", { q: t }) }, t)))),
 
-      h("h2", {}, "Como funciona"),
-      h("ol", { class: "steps" }, STEPS.map(([n, title, text]) => h("li", { class: "card step" },
-        h("span", { class: "step-number", "aria-hidden": "true" }, n), h("h3", {}, title), h("p", { class: "muted" }, text)))),
+      h("section", { class: "stats", "aria-label": "O produto em números" },
+        stat(sourceCount, "fontes integradas, com busca combinada"),
+        stat(h("strong", {}, "8"), "critérios abertos de confiabilidade"),
+        stat(h("strong", {}, "5"), "formatos de citação e exportação"),
+        stat(h("strong", {}, "16"), "áreas de análise com IA opcional")),
 
-      h("h2", {}, "Por que usar"),
-      h("div", { class: "grid features" }, FEATURES.map(([icon, title, text]) => h("div", { class: "card feature" },
-        h("span", { class: "feature-icon", "aria-hidden": "true" }, icon), h("h3", {}, title), h("p", { class: "muted" }, text)))),
+      h("section", { class: "home-section", "aria-labelledby": "como" },
+        h("p", { class: "eyebrow" }, "Como funciona"),
+        h("h2", { id: "como" }, "Da pergunta à leitura crítica, em três passos."),
+        h("div", { class: "cols-3" }, STEPS.map(([n, title, text]) => h("div", { class: "step" },
+          h("span", { class: "num" }, n), h("h3", {}, title), h("p", { class: "muted" }, text))))),
 
-      h("h2", {}, "Por onde você quer começar?"),
-      h("div", { class: "grid" }, SHORTCUTS.map((s) => h("div", { class: "card stack" },
-        h("h3", {}, s.title), h("p", { class: "muted" }, s.hint),
-        h("a", { class: "btn btn-secondary", href: Lib.buildHash("/busca", { q: s.q }) }, `Começar com "${s.q}"`)))),
+      h("section", { class: "home-section split", "aria-labelledby": "confianca" },
+        h("div", {},
+          h("p", { class: "eyebrow" }, "Confiança e método"),
+          h("h2", { id: "confianca" }, "Uma nota que mostra o próprio cálculo."),
+          h("p", { class: "lead" }, "Cada artigo recebe uma pontuação de 0 a 100 baseada em sinais verificáveis. Abra a nota e veja o que contou, o que faltou e a evidência usada."),
+          h("ul", { class: "checklist" }, TRUST.map(([title, text]) => h("li", {}, icon("check"), h("span", {}, h("b", {}, `${title} `), text))))),
+        h("div", { class: "panel", role: "img", "aria-label": "Exemplo de nota de confiabilidade 78 de 100, com dados fictícios" },
+          h("div", { class: "panel-head" }, h("h3", {}, "Exemplo de nota"), h("span", { class: "muted" }, "dados fictícios")),
+          h("div", { class: "panel-body" },
+            h("div", { class: "score" }, h("strong", {}, "78"), h("span", {}, "/100"), h("span", { class: "band" }, "Alta")),
+            h("div", { class: "meter" }, h("i", { class: "w78" })),
+            h("ul", { class: "criteria-mini" }, SAMPLE_CRITERIA.map(([status, name, pts]) => h("li", {},
+              h("span", { class: `st-${status}` }, icon(STATUS_ICONS[status])), h("span", {}, name), h("span", { class: "pts" }, pts))))))),
 
-      h("section", { class: "card cta" },
-        h("div", {}, h("h2", {}, "Sua biblioteca, no seu ritmo"),
+      h("section", { class: "home-section", "aria-labelledby": "para-quem" },
+        h("p", { class: "eyebrow" }, "Para quem"),
+        h("h2", { id: "para-quem" }, "Feito para quem lê ciência todos os dias."),
+        h("ul", { class: "audience" }, AUDIENCE.map(([who, what, q]) => h("li", {},
+          h("h3", {}, who), h("p", { class: "muted" }, what),
+          h("a", { href: Lib.buildHash("/busca", { q }) }, "Começar", icon("arrow")))))),
+
+      h("section", { class: "cta" },
+        h("div", {}, h("h2", {}, "Sua biblioteca, no seu ritmo."),
           h("p", { class: "muted" }, "Buscar e ler não exige conta. Crie uma para salvar artigos, montar listas e exportar referências.")),
         h("div", { class: "row" },
           session.user
             ? h("a", { class: "btn btn-primary", href: "#/biblioteca" }, "Abrir minha biblioteca")
             : h("button", { type: "button", class: "btn btn-primary", onclick: () => openAuth("Crie uma conta para salvar artigos e montar listas.") }, "Criar conta ou entrar"),
-          h("a", { class: "btn btn-outline", href: "/ia" }, "Conhecer o Laboratório de IA"))),
-
-      h("p", { class: "note" }, "As informações vêm de fontes públicas (Europe PMC e OpenAlex). A nota de confiabilidade resume sinais verificáveis no registro e no resumo; não substitui a leitura crítica do texto completo nem orientação profissional."));
+          h("a", { class: "btn btn-outline", href: "/ia" }, "Conhecer o Laboratório de IA"))));
   }
 
   // ------------------------------------------------------------------ Busca
