@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2026-10 — Busca em todas as fontes por padrão
+
+- A busca abre em "Todas as fontes" (também na página inicial); a fonte única continua a um clique. Com uma só fonte configurada, o padrão é ela.
+
 ## 2026-10 — Download de artigos
 
 ### Adicionado

@@ -144,7 +144,7 @@ def register_browse_routes(
             q=q, year_from=yf, year_to=yt, study_types=tuple(t.strip() for t in types.split(",") if t.strip()),
             open_access=oa, language=lang, sort=sort, page=page, per_page=per_page,
         )
-        result = discovery.search(query, source=source, client_id=identity(request))
+        result = discovery.search(query, source=source or discovery.search_default, client_id=identity(request))
         user = current_user(request)
         saved = library.saved_refs(user, [w.ref for w in result.works]) if user else None
         return {

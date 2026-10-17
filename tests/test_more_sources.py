@@ -352,3 +352,14 @@ def test_slow_source_is_left_out_with_a_note_but_warms_the_cache(monkeypatch):
     time.sleep(1.0)  # a fonte lenta termina sozinha e deixa o resultado no cache da fonte
     assert [w.ref for w in svc.search(SearchQuery(q="x", per_page=5), source="b").works] == ["2"]
     assert slow.per_pages == [5]  # a segunda leitura veio do cache, sem nova chamada
+
+
+def test_search_default_is_all_sources_when_there_is_more_than_one():
+    one = DiscoveryService([Stub("europepmc", "Europe PMC (x)")], SlidingWindowLimiter(100, 60), fallback=None)
+    assert one.search_default == "europepmc" and one.sources()[0]["default"] is True
+    two = DiscoveryService([Stub("europepmc", "Europe PMC (x)", works=[Work(ref="1", title="A", doi="10.1/a")]),
+                            Stub("arxiv", "arXiv (x)", works=[Work(ref="2", title="B", doi="10.1/b")])],
+                           SlidingWindowLimiter(100, 60), fallback=None)
+    listing = two.sources()
+    assert two.search_default == "all" and [s["id"] for s in listing if s["default"]] == ["all"]
+    assert {w.ref for w in two.search(SearchQuery(q="x"), source=two.search_default).works} == {"1", "2"}

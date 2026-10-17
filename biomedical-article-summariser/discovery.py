@@ -140,16 +140,22 @@ class DiscoveryService:
         """Fontes que entram na busca combinada (as principais; as demais sao escolhidas uma a uma)."""
         return [c for c in self._catalogs.values() if getattr(c, "combined", True)]
 
+    @property
+    def search_default(self) -> str:
+        """Fonte usada quando a busca nao escolhe uma: todas, se houver mais de uma fonte combinavel."""
+        return ALL_SOURCES if len(self._combined) > 1 else self._default
+
     def sources(self) -> list[dict[str, object]]:
+        combined = self._combined
+        has_all = len(combined) > 1
         listed: list[dict[str, object]] = [
-            {"id": c.id, "name": c.name, "studyTypes": list(c.study_types()), "default": c.id == self._default}
+            {"id": c.id, "name": c.name, "studyTypes": list(c.study_types()), "default": c.id == self._default and not has_all}
             for c in self._catalogs.values()
         ]
-        combined = self._combined
-        if len(combined) > 1:
+        if has_all:
             union = list(dict.fromkeys(t for c in combined for t in c.study_types()))
             name = ALL_SOURCES_NAME if len(combined) == len(self._catalogs) else " + ".join(c.name.split(" (")[0] for c in combined)
-            listed.insert(0, {"id": ALL_SOURCES, "name": name, "studyTypes": union, "default": False})
+            listed.insert(0, {"id": ALL_SOURCES, "name": name, "studyTypes": union, "default": True})
         return listed
 
     def _catalog(self, source: str | None) -> Catalog:

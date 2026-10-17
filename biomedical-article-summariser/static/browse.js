@@ -338,7 +338,7 @@
       if (options.sources.length < 2) return;
       sourceSelect = h("select", { id: "home-source", "aria-label": "Fonte" },
         options.sources.map((src) => h("option", { value: src.default ? "" : src.id }, src.name)));
-      sourceSelect.value = options.sources.some((src) => src.id === "all") ? "all" : "";
+      sourceSelect.value = "";  // a primeira opcao ("Todas as fontes") e a padrao
       mount(sourceBox, sourceSelect);
       sourceCount.textContent = String(options.sources.filter((src) => src.id !== "all").length);
     }).catch(() => { /* a busca funciona sem o seletor */ });

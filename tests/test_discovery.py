@@ -89,7 +89,7 @@ def test_sources_listing_and_unknown_source():
     svc = service(FakeCatalog(), FakeCatalog(id="openalex", name="OpenAlex (todas as áreas)"))
     listing = svc.sources()
     assert [s["id"] for s in listing] == ["all", "europepmc", "openalex"]
-    assert listing[0]["name"] == "Todas as fontes" and listing[0]["default"] is False and listing[1]["default"] is True
+    assert listing[0]["name"] == "Todas as fontes" and listing[0]["default"] is True and listing[1]["default"] is False
     assert svc.default_source == "europepmc"
     with pytest.raises(DiggerError, match="desconhecida"):
         svc.search(SearchQuery(q="x"), source="google")
