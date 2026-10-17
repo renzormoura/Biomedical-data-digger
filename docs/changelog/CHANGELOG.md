@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 2026-10 — Contexto do Brasil: correções de honestidade
+
+### Corrigido
+- O contexto do SUS não é mais injetado em artigos sem relação com o Brasil: o casamento passou a ser por palavra inteira e sem acento ("versus" e "susceptible" continham "sus"; "adrenal" continha "renal"), com sinônimos em inglês para vigilância, genéricos e populações especiais.
+- CONASS descrito corretamente (Conselho Nacional de **Secretários** de Saúde) e erro de grafia ("radiao") corrigido.
+- O anexo de verificação agora diz apenas que o site oficial respondeu e que isso **não confirma** o conteúdo da análise; deixou de exibir "revisão 2026-09" e "acessível", que sugeriam checagem.
+- Os textos do contexto curado e do catálogo carregam "pendente de revisão por especialista", e o módulo deixou de afirmar que são mantidos por especialistas.
+
+### Limitação conhecida
+- O contexto curado traz orientações gerais, sem dados específicos (RENAME, CONITEC, registros da ANVISA). Disponibilidade, registro e regulação continuam "não verificáveis" até integrarmos essas bases por consulta direta, sem IA.
+
 ## 2026-10 — Listas recolhíveis na biblioteca
 
 - Em "Listas de leitura" aparecem só os nomes (com a contagem de artigos); ao tocar no nome, a lista abre com os artigos, o link de compartilhamento e as exportações. A lista aberta continua aberta depois de tirar um artigo ou compartilhar.

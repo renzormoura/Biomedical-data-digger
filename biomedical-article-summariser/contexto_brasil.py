@@ -1,9 +1,11 @@
 """Contexto curado e verificável do Brasil, usado para complementar analises.
 
-Este modulo nao substitui a leitura do artigo. Ele fornece informacoes publicas
-estruturadas (instituicoes, regulamentacao, medicamentos, vigilancia sanitaria)
-com ponto de origem e versao de atualizacao. Valores sao mantidos por
-especialistas ou atualizacao manual, nao por inferencia automatica.
+Este modulo nao substitui a leitura do artigo. Ele fornece orientacoes gerais e
+estruturadas sobre instituicoes e regulacao (SUS, ANVISA, vigilancia sanitaria), com
+ponto de origem. Os textos sao mantidos manualmente pelo desenvolvedor, ainda SEM revisao
+por especialista (por isso carregam o aviso "pendente de revisao"), e NAO trazem dados
+especificos como listas de medicamentos ou recomendacoes de incorporacao: o que depende
+disso deve ser respondido como "nao verificavel".
 
 Tambem expoe uma camada de verificacao de fontes externas: consultas HTTP
 limitadas (timeout, limite de bytes, falha convertida em status explicito).
@@ -16,6 +18,7 @@ from __future__ import annotations
 import os
 import re
 import time
+import unicodedata
 from dataclasses import dataclass
 from typing import Optional
 from urllib.parse import urlparse
@@ -34,25 +37,25 @@ VERIFICATION_SOURCES: dict[str, dict] = {
         "name": "BVS-MS / Biblioteca Virtual em Saúde (Min. Saúde)",
         "catalog_url": "https://bvsms.saude.gov.br/",
         "note": "Base oficial do Ministério da Saúde: medicamentos, documentos e diretrizes.",
-        "updated": "2026-09",
+        "updated": "2026-09 (pendente de revisão por especialista)",
     },
     "anvisa": {
         "name": "ANVISA",
         "catalog_url": "https://www.gov.br/anvisa/pt-br",
         "note": "Registro de produtos, medicamentos, bulas e vigilancia sanitaria.",
-        "updated": "2026-09",
+        "updated": "2026-09 (pendente de revisão por especialista)",
     },
     "minsaude": {
         "name": "Ministério da Saúde",
         "catalog_url": "https://www.gov.br/saude/pt-br",
         "note": "Politicas de saude, SUS, vigilancia epidemiologica, normas e diretrizes.",
-        "updated": "2026-09",
+        "updated": "2026-09 (pendente de revisão por especialista)",
     },
     "conass": {
-        "name": "CONASS",
+        "name": "CONASS (Conselho Nacional de Secretários de Saúde)",
         "catalog_url": "https://www.conass.org.br",
-        "note": "Conselho Nacional de Saude; posicionamentos e documentos de referencia.",
-        "updated": "2026-09",
+        "note": "Conselho Nacional de Secretarios de Saude (secretarias estaduais); posicionamentos e documentos de referencia.",
+        "updated": "2026-09 (pendente de revisão por especialista)",
     },
     # Fontes ambientais: URLs de portais institucionais; a alcancabilidade e checada em
     # tempo de execucao. "updated" indica que o catalogo ainda nao foi revisado por especialista.
@@ -86,13 +89,20 @@ VERIFICATION_SOURCES: dict[str, dict] = {
 # Mapeamento de conceitos -> chaves do registro curado
 # ---------------------------------------------------------------------------
 MAPA_CONCEITOS: dict[str, list[str]] = {
-    "SUS": ["sus", "saude publica", "universalidade", "integralidade", "sus "],
-    "ANVISA": ["anvisa", "registro", "bula", "regulamentacao", "produto"],
-    "VIGILANCIA_SANITARIA": ["vigilancia", "epidemiologia", "surtos", "biosseguranca"],
-    "MEDICAMENTO_GENERICO": ["generico", "bioequivalencia"],
-    "MEDICAMENTO_OUTRO": ["medicamento", "farmaco", "insumo", "dose", "posologia"],
-    "POPULACOES_ESPECIAIS": ["gestante", "idoso", "pediatrico", "renal", "hepatico"],
+    "SUS": ["sus", "sistema unico de saude", "saude publica", "universalidade", "integralidade", "unified health system"],
+    "ANVISA": ["anvisa", "registro", "bula", "regulamentacao", "produto", "marketing authorization"],
+    "VIGILANCIA_SANITARIA": ["vigilancia", "epidemiologia", "surtos", "biosseguranca", "surveillance", "outbreak",
+                             "pharmacovigilance"],
+    "MEDICAMENTO_GENERICO": ["generico", "bioequivalencia", "generic drug", "bioequivalence"],
+    "MEDICAMENTO_OUTRO": ["medicamento", "farmaco", "insumo", "dose", "posologia", "dosage"],
+    "POPULACOES_ESPECIAIS": ["gestante", "idoso", "pediatrico", "renal", "hepatico", "pregnant", "elderly", "pediatric"],
 }
+
+
+def _normalizar(texto: str) -> str:
+    """Minusculas, sem acentos e com pontuacao virando espaco (para casar palavras inteiras)."""
+    base = unicodedata.normalize("NFKD", texto.lower()).encode("ascii", "ignore").decode()
+    return " " + re.sub(r"[^a-z0-9]+", " ", base).strip() + " "
 
 
 @dataclass(frozen=True)
@@ -129,7 +139,7 @@ CONTEXTO_REGISTRY: dict[str, ItemContexto] = {
         ),
         fonte="Ministerio da Saude / SUS",
         codigo_fonte="MIN-SAUDE-SUS",
-        atualizado="2026-09",
+        atualizado="2026-09 (pendente de revisão por especialista)",
     ),
     "ANVISA": ItemContexto(
         item="ANVISA",
@@ -143,20 +153,20 @@ CONTEXTO_REGISTRY: dict[str, ItemContexto] = {
         ),
         fonte="ANVISA",
         codigo_fonte="ANVISA-REGULACAO",
-        atualizado="2026-09",
+        atualizado="2026-09 (pendente de revisão por especialista)",
     ),
     "VIGILANCIA_SANITARIA": ItemContexto(
         item="Vigilancia Sanitaria",
         contexto=(
             "A vigilancia sanitaria acompanha riscos sanitarios, produtos, surtos, "
-            "envenenamentos, radiao, alimentos, vacinas e biosseguranca, entre outros. "
+            "envenenamentos, radiacao, alimentos, vacinas e biosseguranca, entre outros. "
             "Portais oficiais de saude e institutos de referencia sao fontes primarias; "
             "artigos cientificos podem sinalizar riscos, mas nao substituem "
             "vigilancia operacional nem comunicados oficiais."
         ),
         fonte="Ministerio da Saude / ANVISA",
         codigo_fonte="VIGILANCIA-AGENCIAS",
-        atualizado="2026-09",
+        atualizado="2026-09 (pendente de revisão por especialista)",
     ),
     "MEDICAMENTO_GENERICO": ItemContexto(
         item="Medicamento Generico",
@@ -169,7 +179,7 @@ CONTEXTO_REGISTRY: dict[str, ItemContexto] = {
         ),
         fonte="ANVISA / Ministerio da Saude",
         codigo_fonte="ANVISA-GENERICO",
-        atualizado="2026-09",
+        atualizado="2026-09 (pendente de revisão por especialista)",
     ),
     "MEDICAMENTO_OUTRO": ItemContexto(
         item="Medicamento / Insumo",
@@ -182,7 +192,7 @@ CONTEXTO_REGISTRY: dict[str, ItemContexto] = {
         ),
         fonte="ANVISA / paineis de medicamentos",
         codigo_fonte="ANVISA-DISPONIBILIDADE",
-        atualizado="2026-09",
+        atualizado="2026-09 (pendente de revisão por especialista)",
     ),
     "POPULACOES_ESPECIAIS": ItemContexto(
         item="Populacoes Especiais",
@@ -194,7 +204,7 @@ CONTEXTO_REGISTRY: dict[str, ItemContexto] = {
         ),
         fonte="Ministerio da Saude / sociedades cientificas",
         codigo_fonte="POP-ESPECIAL",
-        atualizado="2026-09",
+        atualizado="2026-09 (pendente de revisão por especialista)",
     ),
 }
 
@@ -202,14 +212,15 @@ CONTEXTO_REGISTRY: dict[str, ItemContexto] = {
 def selecionar_contexto(texto: str) -> list[ItemContexto]:
     """Retorna os itens curados relevantes para um trecho de texto.
 
-    Matching simples por conceito; nao faz inferencia, apenas filtra o registro.
+    Casamento por palavra inteira (sem acento); nao faz inferencia, apenas filtra o registro.
     """
     if not texto:
         return []
-    lowered = texto.lower()
+    normalized = _normalizar(texto)
     found: list[ItemContexto] = []
     for key, palavras in MAPA_CONCEITOS.items():
-        if any(palavra in lowered for palavra in palavras):
+        # palavra inteira: "sus" nao casa com "versus" nem "susceptible"; "renal" nao casa com "adrenal"
+        if any(f" {palavra} " in normalized for palavra in palavras):
             item = CONTEXTO_REGISTRY.get(key)
             if item and item not in found:
                 found.append(item)
