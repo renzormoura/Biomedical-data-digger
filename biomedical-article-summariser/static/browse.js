@@ -537,36 +537,42 @@
     ];
 
     mount($app,
-      h("article", { class: "stack" },
-        h("a", { href: "#/busca", class: "muted" }, "Voltar à busca"),
-        h("h1", {}, work.title),
-        h("div", { class: "meta" }, metaLine(work)),
-        badges(work),
-        reliabilityCard(data.reliability),
-        h("div", { class: "row" },
-          saveButton(work, { small: false, onChange: renderOrganize }),
-          oaHref ? h("a", { class: "btn btn-secondary", href: oaHref, target: "_blank", rel: "noopener noreferrer" }, [icon("external"), "Abrir versão aberta"])
-            : h("span", { class: "note" }, "Sem versão aberta conhecida"),
-          h("a", { class: "btn btn-outline", href: Lib.aiLabHref(work.pmid || work.ref), title: "Resumos e análises com IA, opcionais e com avisos" }, "Analisar com IA (opcional)")),
-        h("div", { class: "card stack" }, h("h3", {}, "Citar"),
-          h("div", { class: "row" }, Object.keys(data.citations).map((s) => h("button", { type: "button", class: "btn btn-secondary", onclick: () => showCitation(s) }, s))),
-          citationBox),
-        h("div", { class: "card stack" }, h("h3", {}, "Resumo organizado (texto original)"),
-          !work.abstract ? h("p", { class: "muted" }, "Este registro não traz resumo.")
-            : data.sections.length
-              ? h("dl", { class: "sections" }, data.sections.map((s) => [h("dt", {}, s.label && s.label.toLowerCase() !== s.heading.toLowerCase() ? `${s.heading} (rótulo original: ${s.label})` : s.heading), h("dd", {}, s.text)]))
-              : [h("p", { class: "note" }, "Este resumo não tem seções rotuladas; texto original completo:"), h("p", {}, work.abstract)]),
-        h("div", { class: "card stack" }, h("h3", {}, "Números e dados estatísticos (com a frase de origem)"),
-          data.findings.length
-            ? data.findings.map((f) => h("div", { class: "finding" }, h("div", { class: "tags" }, f.tags.join(" · ")), h("div", {}, f.sentence)))
-            : h("p", { class: "muted" }, "Nenhum dado estatístico foi encontrado no resumo."),
-          h("p", { class: "note" }, "Frases copiadas do resumo; nada foi gerado nem interpretado. A seleção é por palavras-chave e pode omitir frases. Lido apenas o resumo, não o texto completo.")),
-        h("div", { class: "card stack" }, h("h3", {}, "Metadados"),
-          h("table", {}, h("tbody", {}, meta.map(([k, v]) => h("tr", {}, h("th", { scope: "row" }, k), h("td", {}, v))))),
-          work.keywords.length ? h("div", { class: "kw" }, work.keywords.map((k) => h("a", { href: Lib.buildHash("/busca", { q: k }) }, k))) : null),
-        h("div", { class: "card stack" }, h("h3", {}, "Organizar"), organize),
-        data.similar.length ? h("div", { class: "card stack" }, h("h3", {}, "Artigos semelhantes"),
-          h("ul", { class: "stack" }, data.similar.map((s) => h("li", {}, h("a", { href: articleHref(s) }, s.title), h("span", { class: "muted" }, ` · ${(s.studyTypes || [])[0] || "Artigo"} · ${s.year || "—"}`))))) : null));
+      h("article", { class: "article-page" },
+        h("a", { href: "#/busca", class: "back-link" }, "Voltar à busca"),
+        h("header", { class: "article-head" },
+          h("h1", {}, work.title),
+          h("p", { class: "byline" }, metaLine(work)),
+          badges(work),
+          h("div", { class: "row actions" },
+            saveButton(work, { small: false, onChange: renderOrganize }),
+            oaHref ? h("a", { class: "btn btn-secondary", href: oaHref, target: "_blank", rel: "noopener noreferrer" }, [icon("external"), "Abrir versão aberta"])
+              : h("span", { class: "note" }, "Sem versão aberta conhecida"),
+            h("a", { class: "btn btn-secondary", href: Lib.aiLabHref(work.pmid || work.ref), title: "Resumos e análises com IA, opcionais e com avisos" }, [icon("spark"), "Analisar com IA (opcional)"]))),
+        h("div", { class: "article-layout" },
+          h("div", { class: "article-main" },
+            h("section", { class: "block" }, h("h2", {}, "Resumo, com as seções originais"),
+              !work.abstract ? h("p", { class: "muted" }, "Este registro não traz resumo.")
+                : data.sections.length
+                  ? h("dl", { class: "sections" }, data.sections.map((s) => h("div", { class: "sec" },
+                    h("dt", {}, s.label && s.label.toLowerCase() !== s.heading.toLowerCase() ? `${s.heading} (rótulo original: ${s.label})` : s.heading),
+                    h("dd", {}, s.text))))
+                  : [h("p", { class: "note" }, "Este resumo não tem seções rotuladas; texto original completo:"), h("p", {}, work.abstract)]),
+            h("section", { class: "block" }, h("h2", {}, "Números e dados estatísticos"),
+              data.findings.length
+                ? data.findings.map((f) => h("blockquote", { class: "finding" }, h("small", {}, f.tags.join(" · ")), f.sentence))
+                : h("p", { class: "muted" }, "Nenhum dado estatístico foi encontrado no resumo."),
+              h("p", { class: "note" }, "Frases copiadas do resumo; nada foi gerado nem interpretado. A seleção é por palavras-chave e pode omitir frases. Lido apenas o resumo, não o texto completo.")),
+            h("section", { class: "block" }, h("h2", {}, "Citar"),
+              h("div", { class: "row" }, Object.keys(data.citations).map((st) => h("button", { type: "button", class: "btn btn-secondary btn-sm", onclick: () => showCitation(st) }, st))),
+              citationBox)),
+          h("aside", { class: "article-aside", "aria-label": "Avaliação e detalhes" },
+            reliabilityCard(data.reliability),
+            h("section", { class: "card stack" }, h("h3", {}, "Detalhes"),
+              h("table", {}, h("tbody", {}, meta.map(([k, v]) => h("tr", {}, h("th", { scope: "row" }, k), h("td", {}, v))))),
+              work.keywords.length ? h("div", { class: "kw" }, work.keywords.map((k) => h("a", { href: Lib.buildHash("/busca", { q: k }) }, k))) : null),
+            h("section", { class: "card stack" }, h("h3", {}, "Organizar"), organize),
+            data.similar.length ? h("section", { class: "card stack" }, h("h3", {}, "Artigos semelhantes"),
+              h("ul", { class: "similar" }, data.similar.map((sim) => h("li", {}, h("a", { href: articleHref(sim) }, sim.title), h("small", { class: "muted" }, `${(sim.studyTypes || [])[0] || "Artigo"} · ${sim.year || "—"}`))))) : null))));
     renderOrganize();
   }
 
