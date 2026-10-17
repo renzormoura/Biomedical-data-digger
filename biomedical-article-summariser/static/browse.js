@@ -198,12 +198,48 @@
   const metaLine = (work) => [work.authors, work.journal, work.year].filter(Boolean).join(" · ");
   const articleHref = (work) => Lib.buildHash("/artigo", { ref: work.ref });
 
+  // um unico ouvinte fecha qualquer seletor de lista aberto quando o clique cai fora dele
+  document.addEventListener("click", (event) => {
+    document.querySelectorAll(".save-picker:not([hidden])").forEach((picker) => {
+      if (!picker.parentElement.contains(event.target)) { picker.hidden = true; picker.replaceChildren(); }
+    });
+  });
+
   function saveButton(work, { small = true, onChange } = {}) {
     const button = h("button", { type: "button", class: `btn ${small ? "btn-sm " : ""}btn-secondary` });
+    const picker = h("div", { class: "save-picker", role: "group", "aria-label": "Adicionar a uma lista", hidden: "" });
+    const wrap = h("span", { class: "save-wrap" }, button, picker);
     const refresh = () => { button.setAttribute("aria-pressed", String(Boolean(work.saved))); button.replaceChildren(icon("bookmark", work.saved), work.saved ? "Salvo" : "Salvar"); };
+
+    const closePicker = () => { picker.hidden = true; picker.replaceChildren(); };
+    // depois de salvar na biblioteca, oferece colocar o artigo em uma lista (so se o usuario tiver listas)
+    async function offerLists() {
+      const data = await guarded(() => api("/api/lists"));
+      if (!data || !data.lists.length) return;
+      const select = h("select", { "aria-label": "Lista" }, data.lists.map((l) => h("option", { value: l.id }, `${l.name} (${l.works.length})`)));
+      const add = h("button", { type: "button", class: "btn btn-sm btn-primary" }, "Adicionar");
+      add.addEventListener("click", async () => {
+        add.disabled = true;
+        const ok = await guarded(() => api(`/api/lists/${select.value}/items`, { method: "POST", body: { ref: work.ref } }));
+        if (ok) {
+          toast(`Adicionado à lista "${select.options[select.selectedIndex].text.replace(/ \(\d+\)$/, "")}"`);
+          closePicker();
+          if (onChange) onChange();
+        } else add.disabled = false;
+      });
+      const skip = h("button", { type: "button", class: "btn btn-sm btn-ghost" }, "Agora não");
+      skip.addEventListener("click", () => { closePicker(); button.focus(); });
+      mount(picker, h("p", { class: "save-picker-title" }, "Salvo na biblioteca. Adicionar também a uma lista?"),
+        select, h("div", { class: "row" }, add, skip));
+      picker.hidden = false;
+      select.focus();
+    }
+    picker.addEventListener("keydown", (event) => { if (event.key === "Escape") { closePicker(); button.focus(); } });
+
     button.addEventListener("click", async () => {
       if (!requireUser("Entre para salvar artigos na sua biblioteca.")) return;
       button.disabled = true;
+      closePicker();
       const done = await guarded(async () => {
         if (work.saved) await api(`/api/library?ref=${encodeURIComponent(work.ref)}`, { method: "DELETE" });
         else await api("/api/library", { method: "POST", body: { ref: work.ref } });
@@ -214,9 +250,10 @@
       button.disabled = false;
       refresh();
       if (done && onChange) onChange();
+      if (done && work.saved) await offerLists();
     });
     refresh();
-    return button;
+    return wrap;
   }
 
   // ------------------------------------------------------------------ Início
