@@ -147,3 +147,25 @@ Cada fase vira um commit atômico; nenhuma muda comportamento, API nem banco. Te
 3. Nome e logotipo: manter "Biomedical Data Digger" com novo monograma, ou aproveitar para renomear?
 4. Faixa de números: vale aparecer só com dados que podemos garantir (itens acima)?
 5. Começo pela maquete estática (recomendado) ou direto para a fase 1?
+
+## 10. Status da execução
+
+| Fase | Estado |
+|---|---|
+| 1. Fundação (tokens, cabeçalho, rodapé, sem emoji) | Concluída |
+| 2. Início | Concluída |
+| 3. Busca e artigo | Concluída |
+| 4. Biblioteca e listas | Concluída |
+| 5. Laboratório de IA (menu lateral agrupado) | Concluída |
+| 6. Acabamento | Concluída |
+
+Medições da fase 6 (razão de contraste, WCAG 2.x):
+
+- Texto principal e de apoio: 6,4 a 19,2 nos dois temas (mínimo exigido 4,5).
+- Texto de destaque laranja sobre fundo: 8,2 no escuro e 5,2 no claro.
+- Texto escuro sobre botão laranja: 6,9 no escuro e 5,4 no claro (antes, texto branco no claro dava 3,6 e foi trocado).
+- Borda de campos e botões secundários: 4,0 no escuro e 3,4 no claro (mínimo 3,0; antes 1,6 a 1,8).
+- Divisórias decorativas seguem finas e discretas, por serem apenas separadores.
+
+Impressão: cabeçalho, filtros, abas, ações e rodapé de links ficam ocultos; artigo e nota saem em uma coluna, em preto sobre branco, com a explicação da nota expandida.
+Pendências deliberadas: fonte hospedada (Inter) e logotipo definitivo dependem de decisão sua.
