@@ -198,12 +198,56 @@
   const metaLine = (work) => [work.authors, work.journal, work.year].filter(Boolean).join(" · ");
   const articleHref = (work) => Lib.buildHash("/artigo", { ref: work.ref });
 
-  // um unico ouvinte fecha qualquer seletor de lista aberto quando o clique cai fora dele
+  // um unico ouvinte fecha qualquer seletor de lista ou painel de download aberto quando o clique cai fora dele
   document.addEventListener("click", (event) => {
     document.querySelectorAll(".save-picker:not([hidden])").forEach((picker) => {
       if (!picker.parentElement.contains(event.target)) { picker.hidden = true; picker.replaceChildren(); }
     });
+    document.querySelectorAll(".download-panel:not([hidden])").forEach((panel) => {
+      if (!panel.parentElement.contains(event.target)) { panel.hidden = true; panel.parentElement.querySelector("button")?.setAttribute("aria-expanded", "false"); }
+    });
   });
+
+  // menu "Baixar": resumo, ficha, referencia e texto completo aberto; links abertos da fonte; impressao
+  function downloadMenu(work) {
+    const panel = h("div", { class: "download-panel", hidden: "", role: "region", "aria-label": "Opções de download" });
+    const button = h("button", { type: "button", class: "btn btn-secondary", "aria-expanded": "false" }, icon("download"), "Baixar");
+    const wrap = h("span", { class: "download-wrap" }, button, panel);
+    let loaded = false;
+    const fileHref = (kind, format) => `/api/discover/download?${new URLSearchParams({ ref: work.ref, kind, format })}`;
+    async function load() {
+      mount(panel, loading("Verificando o que há para baixar…"));
+      let data;
+      try { data = await api(`/api/discover/downloads?ref=${encodeURIComponent(work.ref)}`); } catch (error) {
+        mount(panel, errorBox(error.message));
+        return;
+      }
+      loaded = true;
+      mount(panel,
+        data.options.map((option) => h("section", { class: `download-option${option.available ? "" : " is-off"}` },
+          h("h4", {}, option.label), h("p", { class: "hint" }, option.description),
+          option.available
+            ? h("div", { class: "row" }, option.formats.map((f) => h("a", { class: "btn btn-sm btn-secondary", href: fileHref(option.kind, f.id), download: "" }, f.label)))
+            : null)),
+        data.links.length ? h("section", { class: "download-option" }, h("h4", {}, "PDF e páginas abertas"),
+          h("div", { class: "row" }, data.links.map((l) => {
+            const safe = Lib.safeHttpUrl(l.url);
+            return safe ? h("a", { class: "btn btn-sm btn-secondary", href: safe, target: "_blank", rel: "noopener noreferrer" }, [icon("external"), l.label]) : null;
+          }))) : null,
+        h("section", { class: "download-option" }, h("h4", {}, "Imprimir ou salvar como PDF"),
+          h("p", { class: "hint" }, "Abre a impressão do navegador com o layout limpo desta página."),
+          h("button", { type: "button", class: "btn btn-sm btn-secondary", onclick: () => window.print() }, "Imprimir esta página")),
+        h("p", { class: "note" }, data.note));
+    }
+    button.addEventListener("click", () => {
+      const open = panel.hidden;
+      panel.hidden = !open;
+      button.setAttribute("aria-expanded", String(open));
+      if (open && !loaded) load();
+    });
+    panel.addEventListener("keydown", (event) => { if (event.key === "Escape") { panel.hidden = true; button.setAttribute("aria-expanded", "false"); button.focus(); } });
+    return wrap;
+  }
 
   function saveButton(work, { small = true, onChange } = {}) {
     const button = h("button", { type: "button", class: `btn ${small ? "btn-sm " : ""}btn-secondary` });
@@ -618,6 +662,7 @@
             saveButton(work, { small: false, onChange: renderOrganize }),
             oaHref ? h("a", { class: "btn btn-secondary", href: oaHref, target: "_blank", rel: "noopener noreferrer" }, [icon("external"), "Abrir versão aberta"])
               : h("span", { class: "note" }, "Sem versão aberta conhecida"),
+            downloadMenu(work),
             h("a", { class: "btn btn-secondary", href: Lib.aiLabHref(work.pmid || work.ref), title: "Resumos e análises com IA, opcionais e com avisos" }, [icon("spark"), "Analisar com IA (opcional)"]))),
         h("div", { class: "article-layout" },
           h("div", { class: "article-main" },
@@ -667,7 +712,7 @@
     const exportLink = (label, format, listId) => h("a", {
       class: "btn btn-secondary btn-sm", download: "", href: `/api/library/export?${new URLSearchParams({ format, ...(listId ? { list_id: listId } : {}) })}`,
     }, label);
-    const formats = [["BibTeX", "bibtex"], ["RIS", "ris"], ["ABNT", "abnt"], ["APA", "apa"], ["Vancouver", "vancouver"]];
+    const formats = [["BibTeX", "bibtex"], ["RIS", "ris"], ["ABNT", "abnt"], ["APA", "apa"], ["Vancouver", "vancouver"], ["Planilha (CSV)", "csv"], ["Dados (JSON)", "json"], ["Resumos (MD)", "resumos"]];
 
     const listName = h("input", { type: "text", id: "list-name", placeholder: "nome da lista (ex.: Leituras da semana 3)", maxlength: "80" });
     const createList = async () => {

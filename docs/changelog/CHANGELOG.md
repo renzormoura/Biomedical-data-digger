@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 2026-10 — Download de artigos
+
+### Adicionado
+- Menu **Baixar** no artigo: resumo, ficha de leitura, referência e texto completo aberto, em TXT, Markdown, HTML, DOCX e JSON (texto completo também em XML JATS). `GET /api/discover/downloads` e `GET /api/discover/download`.
+- Texto completo vem da Europe PMC apenas para artigos de acesso aberto (PMC), com a licença no cabeçalho; sem acesso aberto, o menu explica e oferece os links abertos de PDF informados pela fonte.
+- Exportação em lote da biblioteca e das listas: planilha CSV (protegida contra fórmulas), JSON e todos os resumos em Markdown.
+- Documentos com cabeçalhos `attachment` e `nosniff`; HTML gerado com todo o texto escapado; DOCX gerado sem dependências externas.
+
+### Limitações conhecidas
+- PDFs de editoras não são baixados pelo servidor: a interface só leva ao link aberto da fonte.
+- Texto completo depende de a Europe PMC ter o artigo no subconjunto aberto; artigos do arXiv têm o PDF como link, sem conversão.
+
 ## 2026-10 — Mais fontes e registros abertos
 
 ### Adicionado

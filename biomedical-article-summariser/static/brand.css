@@ -351,3 +351,16 @@ input[type="text"], input[type="search"], input[type="email"], input[type="passw
 .save-picker { position: absolute; z-index: 30; top: calc(100% + 8px); left: 0; width: min(300px, 80vw); display: grid; gap: 10px; padding: 14px; background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--radius); box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35); }
 .save-picker-title { margin: 0; font-size: 0.88rem; }
 .save-picker .row { gap: 8px; }
+
+/* ---------- Menu Baixar ---------- */
+.download-wrap { position: relative; display: inline-block; }
+.download-panel { position: absolute; z-index: 40; top: calc(100% + 8px); left: 0; width: min(440px, 88vw); max-height: min(70vh, 560px); overflow-y: auto; display: grid; gap: 0; padding: 4px 16px 14px; background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--radius); box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35); }
+.download-option { padding: 14px 0; border-top: 1px solid var(--border); }
+.download-option:first-child { border-top: 0; }
+.download-option h4 { margin: 0 0 4px; font-size: 0.95rem; }
+.download-option .hint { margin: 0 0 8px; }
+.download-option .row { gap: 6px; }
+.download-option.is-off h4 { color: var(--muted); }
+.download-panel .note { margin: 6px 0 0; }
+@media (max-width: 560px) { .download-panel { position: fixed; left: 8px; right: 8px; top: auto; bottom: 8px; width: auto; max-height: 75vh; } }
+@media print { .download-wrap, .save-wrap { display: none !important; } }
