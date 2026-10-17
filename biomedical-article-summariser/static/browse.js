@@ -37,6 +37,16 @@
   }
   const loading = (text = "Carregando…") => h("div", { class: "loading" }, h("div", { class: "spinner", "aria-hidden": "true" }), h("span", {}, text));
   const errorBox = (message) => h("div", { class: "error-box", role: "alert" }, h("strong", {}, "Não foi possível concluir. "), message);
+  const SVG_NS = "http://www.w3.org/2000/svg";
+  function icon(name, filled = false) {
+    const svg = document.createElementNS(SVG_NS, "svg");
+    svg.setAttribute("class", `icon${filled ? " is-filled" : ""}`);
+    svg.setAttribute("aria-hidden", "true");
+    const use = document.createElementNS(SVG_NS, "use");
+    use.setAttribute("href", `#i-${name}`);
+    svg.append(use);
+    return svg;
+  }
   const setTitle = (text) => { document.title = `${text} — Biomedical Data Digger`; };
 
   let toastTimer;
@@ -87,10 +97,13 @@
   };
 
   // ------------------------------------------------------------------ tema
-  const readTheme = () => { try { return JSON.parse(localStorage.getItem(THEME_KEY)) || "dark"; } catch { return "dark"; } };
+  const systemTheme = () => (window.matchMedia && matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+  const readTheme = () => { try { return JSON.parse(localStorage.getItem(THEME_KEY)) || systemTheme(); } catch { return systemTheme(); } };
   function applyTheme(theme) {
     document.documentElement.dataset.theme = theme;
-    document.getElementById("theme-toggle").textContent = theme === "dark" ? "☀️ Claro" : "🌙 Escuro";
+    const toggle = document.getElementById("theme-toggle");
+    toggle.setAttribute("aria-label", theme === "dark" ? "Mudar para o tema claro" : "Mudar para o tema escuro");
+    toggle.title = toggle.getAttribute("aria-label");
   }
   applyTheme(readTheme());
   document.getElementById("theme-toggle").addEventListener("click", () => {
@@ -108,7 +121,7 @@
 
   function setUser(user) {
     session.user = user || "";
-    accountButton.textContent = user ? `👤 ${user}` : "👤 Entrar";
+    document.getElementById("account-label").textContent = user || "Entrar";
     logoutButton.hidden = !user;
     dialog.querySelectorAll(".field, [data-auth='login'], [data-auth='register']").forEach((el) => { el.hidden = Boolean(user); });
   }
@@ -194,7 +207,7 @@
 
   function saveButton(work, { small = true, onChange } = {}) {
     const button = h("button", { type: "button", class: `btn ${small ? "btn-sm " : ""}btn-secondary` });
-    const refresh = () => { button.setAttribute("aria-pressed", String(Boolean(work.saved))); button.textContent = work.saved ? "★ Salvo" : "☆ Salvar"; };
+    const refresh = () => { button.setAttribute("aria-pressed", String(Boolean(work.saved))); button.replaceChildren(icon("bookmark", work.saved), work.saved ? "Salvo" : "Salvar"); };
     button.addEventListener("click", async () => {
       if (!requireUser("Entre para salvar artigos na sua biblioteca.")) return;
       button.disabled = true;
@@ -221,12 +234,12 @@
     ["3", "Organize", "Salve, etiquete, monte listas de leitura, compartilhe por link e exporte as referências em BibTeX, RIS, ABNT, APA ou Vancouver."],
   ];
   const FEATURES = [
-    ["🔎", "Várias fontes em uma busca", "Europe PMC (ciências da vida e saúde) e OpenAlex (todas as áreas), com resultados sem repetição."],
-    ["✅", "Nota de confiabilidade que se explica", "Retratação, tipo de estudo, revisão por pares, amostra e estatística. Toque na nota e veja cada critério e a evidência."],
-    ["📄", "Leitura fiel, sem inventar", "Trechos copiados do próprio resumo. Nada é gerado nem interpretado, então não há lacunas preenchidas por palavras de um modelo."],
-    ["🔓", "Versão aberta", "Mostramos quando existe uma cópia gratuita e legal do artigo e levamos você até ela."],
-    ["📚", "Biblioteca e listas", "Etiquetas, listas de leitura e link público somente leitura, que você pode revogar quando quiser."],
-    ["🤖", "IA opcional, com cautela", "Resumos e análises no Laboratório de IA, com trava contra instruções maliciosas, checagem de números e avisos claros."],
+    ["", "Várias fontes em uma busca", "Europe PMC (ciências da vida e saúde) e OpenAlex (todas as áreas), com resultados sem repetição."],
+    ["", "Nota de confiabilidade que se explica", "Retratação, tipo de estudo, revisão por pares, amostra e estatística. Toque na nota e veja cada critério e a evidência."],
+    ["", "Leitura fiel, sem inventar", "Trechos copiados do próprio resumo. Nada é gerado nem interpretado, então não há lacunas preenchidas por palavras de um modelo."],
+    ["", "Versão aberta", "Mostramos quando existe uma cópia gratuita e legal do artigo e levamos você até ela."],
+    ["", "Biblioteca e listas", "Etiquetas, listas de leitura e link público somente leitura, que você pode revogar quando quiser."],
+    ["", "IA opcional, com cautela", "Resumos e análises no Laboratório de IA, com trava contra instruções maliciosas, checagem de números e avisos claros."],
   ];
 
   function renderHome() {
@@ -329,10 +342,10 @@
               h("div", { class: "row" }, saveButton(work), h("a", { class: "btn btn-sm btn-ghost", href: articleHref(work) }, "Abrir")))))
             : h("div", { class: "empty card" }, h("p", {}, "Nenhum artigo encontrado."), h("p", { class: "muted" }, "Tente menos termos ou limpe os filtros.")),
           data.pages > 1 ? h("nav", { class: "pager", "aria-label": "Páginas" },
-            h("button", { type: "button", class: "btn btn-secondary btn-sm", disabled: data.page <= 1, onclick: () => goPage(data.page - 1) }, "← Anterior"),
+            h("button", { type: "button", class: "btn btn-secondary btn-sm", disabled: data.page <= 1, onclick: () => goPage(data.page - 1) }, "Anterior"),
             Lib.pageWindow(data.page, data.pages).map((p) => (p === "…" ? h("span", { class: "muted" }, "…")
               : h("button", { type: "button", class: `btn btn-secondary btn-sm${p === data.page ? " current" : ""}`, "aria-current": p === data.page ? "page" : null, onclick: () => goPage(p) }, p))),
-            h("button", { type: "button", class: "btn btn-secondary btn-sm", disabled: data.page >= data.pages, onclick: () => goPage(data.page + 1) }, "Próxima →")) : null);
+            h("button", { type: "button", class: "btn btn-secondary btn-sm", disabled: data.page >= data.pages, onclick: () => goPage(data.page + 1) }, "Próxima")) : null);
       } catch (error) {
         if (error.name === "AbortError") return;
         mount(results, errorBox(error.message));
@@ -354,7 +367,7 @@
       h("div", { class: "field" }, h("label", { class: "check" }, oa, "Só acesso aberto")),
       h("div", { class: "field" }, h("label", { for: "lang" }, "Idioma"), lang),
       h("div", { class: "field" }, h("label", { for: "sort" }, "Ordenar por"), sort),
-      h("a", { class: "btn btn-ghost", href: "#/busca" }, "↺ Limpar filtros"));
+      h("a", { class: "btn btn-ghost", href: "#/busca" }, "Limpar filtros"));
     filters.addEventListener("change", (event) => {
       if (event.target === source) {
         // a fonte muda os tipos de estudo oferecidos: limpa a selecao e redesenha a lista de tipos
@@ -377,7 +390,7 @@
 
   // ------------------------------------------------------------------ Artigo
   const STATUS_LABELS = { met: "Atendido", partial: "Parcial", unmet: "Não atendido", na: "Não se aplica", unknown: "Desconhecido" };
-  const STATUS_ICONS = { met: "✓", partial: "◐", unmet: "✗", na: "–", unknown: "?" };
+  const STATUS_ICONS = { met: "check", partial: "half", unmet: "x", na: "minus", unknown: "help" };
 
   function reliabilityCard(rel) {
     if (!rel) return null;
@@ -388,7 +401,7 @@
       h("span", { class: "reliability-text" }, h("strong", {}, `Confiabilidade: ${rel.band}`), h("span", {}, "Toque para ver como a nota é calculada")));
     const rows = rel.criteria.map((c) => h("li", { class: `criterion status-${c.status}` },
       h("div", { class: "criterion-head" },
-        h("span", { class: "criterion-icon", "aria-hidden": "true" }, STATUS_ICONS[c.status] || "?"),
+        h("span", { class: "criterion-icon", "aria-hidden": "true" }, icon(STATUS_ICONS[c.status] || "help")),
         h("strong", {}, c.name),
         h("span", { class: "criterion-points" }, c.status === "na" || c.status === "unknown" ? `${STATUS_LABELS[c.status]} (fora do cálculo)` : `${STATUS_LABELS[c.status]} · ${c.points}/${c.weight}`)),
       h("p", {}, c.detail),
@@ -416,7 +429,7 @@
       data = await api(`/api/discover/work?ref=${encodeURIComponent(ref)}`);
     } catch (error) {
       setTitle("Artigo");
-      mount($app, h("div", { class: "stack" }, h("a", { href: "#/busca", class: "muted" }, "← voltar à busca"), errorBox(error.message)));
+      mount($app, h("div", { class: "stack" }, h("a", { href: "#/busca", class: "muted" }, "Voltar à busca"), errorBox(error.message)));
       return;
     }
     const work = data.work;
@@ -491,14 +504,14 @@
 
     mount($app,
       h("article", { class: "stack" },
-        h("a", { href: "#/busca", class: "muted" }, "← voltar à busca"),
+        h("a", { href: "#/busca", class: "muted" }, "Voltar à busca"),
         h("h1", {}, work.title),
         h("div", { class: "meta" }, metaLine(work)),
         badges(work),
         reliabilityCard(data.reliability),
         h("div", { class: "row" },
           saveButton(work, { small: false, onChange: renderOrganize }),
-          oaHref ? h("a", { class: "btn btn-secondary", href: oaHref, target: "_blank", rel: "noopener noreferrer" }, "Abrir versão aberta ↗")
+          oaHref ? h("a", { class: "btn btn-secondary", href: oaHref, target: "_blank", rel: "noopener noreferrer" }, [icon("external"), "Abrir versão aberta"])
             : h("span", { class: "note" }, "Sem versão aberta conhecida"),
           h("a", { class: "btn btn-outline", href: Lib.aiLabHref(work.pmid || work.ref), title: "Resumos e análises com IA, opcionais e com avisos" }, "Analisar com IA (opcional)")),
         h("div", { class: "card stack" }, h("h3", {}, "Citar"),

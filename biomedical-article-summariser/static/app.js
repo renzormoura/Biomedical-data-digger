@@ -58,11 +58,14 @@
   }
 
   // ---------- tema ----------
+  const systemTheme = () => (window.matchMedia && matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
   function applyTheme(theme) {
     document.documentElement.dataset.theme = theme;
-    $("#theme-toggle").textContent = theme === "dark" ? "☀️ Claro" : "🌙 Escuro";
+    const toggle = $("#theme-toggle");
+    toggle.setAttribute("aria-label", theme === "dark" ? "Mudar para o tema claro" : "Mudar para o tema escuro");
+    toggle.title = toggle.getAttribute("aria-label");
   }
-  applyTheme(store.get(THEME_KEY, "dark"));
+  applyTheme(store.get(THEME_KEY, systemTheme()));
   $("#theme-toggle").addEventListener("click", () => {
     const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
     applyTheme(next);
@@ -180,7 +183,7 @@
   function describeMeta(meta) {
     if (!meta) return "";
     const parts = [];
-    parts.push(meta.cached ? "⚡ resultado em cache (sem custo)" : meta.tokens ? `≈ ${meta.tokens.toLocaleString("pt-BR")} tokens` : "");
+    parts.push(meta.cached ? "resultado em cache (sem custo)" : meta.tokens ? `≈ ${meta.tokens.toLocaleString("pt-BR")} tokens` : "");
     if (meta.quota_remaining !== null && meta.quota_remaining !== undefined) {
       parts.push(`cota restante hoje: ${meta.quota_remaining.toLocaleString("pt-BR")}`);
     }
@@ -370,7 +373,7 @@
 
   function setUser(user) {
     accountButton.dataset.user = user || "";
-    accountButton.textContent = user ? `👤 ${user}` : "👤 Entrar";
+    $("#account-label").textContent = user || "Entrar";
     logoutButton.hidden = !user;
     $$("[data-auth='login'], [data-auth='register'], #auth-form .field").forEach((el) => { el.hidden = Boolean(user); });
   }

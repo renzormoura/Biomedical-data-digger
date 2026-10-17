@@ -103,6 +103,6 @@ def passages_markdown(label: str, kind: str, title: str, abstract: str) -> str:
 def blocked_markdown(label: str, kind: str, title: str) -> str:
     return (
         f"---\n> **{label}**\n\n---\n## Título do Artigo: {title}\n\n"
-        f"> ⛔ **Análise não gerada:** o resumo deste artigo não traz informação sobre {TOPIC_NAMES[kind]}. "
+        f"> **Análise não gerada:** o resumo deste artigo não traz informação sobre {TOPIC_NAMES[kind]}. "
         "Para evitar que a IA preencha lacunas, nenhum texto foi gerado (nenhum token gasto)."
     )

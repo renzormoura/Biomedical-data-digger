@@ -198,7 +198,7 @@ GENERAL_HELP = """
 
 **Qualquer outro link:** páginas de editoras (Springer, Elsevier, Wiley...), repositórios e periódicos funcionam — o sistema extrai o que estiver disponível
 
-💡 **Dica:** Copie a URL da barra do navegador e cole aqui diretamente.
+**Dica:** Copie a URL da barra do navegador e cole aqui diretamente.
 """
 
 MEDICAL_HELP = """
@@ -214,16 +214,16 @@ MEDICAL_HELP = """
 
 **Qualquer outro link:** páginas de editoras (Springer, Elsevier, Wiley...), repositórios e periódicos funcionam — o sistema extrai o que estiver disponível
 
-💡 **Dica:** Copie a URL da barra do navegador e cole aqui diretamente.
+**Dica:** Copie a URL da barra do navegador e cole aqui diretamente.
 """
 
 ACADEMIC_HELP = (
     GENERAL_HELP
     + """
-📚 **Referências (ABNT, APA, Vancouver):** use um **DOI, PMID ou PMCID**. A referência vem do registro oficial
+**Referências (ABNT, APA, Vancouver):** use um **DOI, PMID ou PMCID**. A referência vem do registro oficial
 (Crossref ou Europe PMC) e é formatada por código, **sem IA**, então não há risco de autor ou ano inventado.
 
-🎓 **Uso responsável:** esta aba ajuda a entender, fichar e citar. Ela não substitui a leitura do artigo
+**Uso responsável:** esta aba ajuda a entender, fichar e citar. Ela não substitui a leitura do artigo
 completo nem a sua autoria no trabalho.
 """
 )
@@ -240,7 +240,7 @@ _GENERIC_PLACEHOLDER = "ex: 33984217 · PMC8234567 · 10.1038/nature · arxiv.or
 
 GENERAL_PAGE = PageSpec(
     key="geral",
-    tab_name="☰  Geral",
+    tab_name="Geral",
     subtitle="Análise científica universal · Europe PMC · arXiv · DOI · OpenAlex",
     sections=(
         _no_ai_section(),
@@ -267,7 +267,7 @@ GENERAL_PAGE = PageSpec(
 
 ACADEMIC_PAGE = PageSpec(
     key="academico",
-    tab_name="🎓  Acadêmico",
+    tab_name="Acadêmico",
     subtitle="Estudar · Escrever · Referenciar · Apresentar — para estudantes de qualquer curso",
     sections=(
         _no_ai_section(),
@@ -323,7 +323,7 @@ def _medical_page(generative_clinical: bool) -> PageSpec:
         ))
     return PageSpec(
         key="medicina",
-        tab_name="⚕  Medicina",
+        tab_name="Medicina",
         subtitle="Pronto-Socorro · Farmacologia · Segurança do Paciente · Contexto Brasileiro",
         sections=(
             _no_ai_section(),
@@ -364,7 +364,7 @@ MEDICAL_PAGE_GENERATIVE = _medical_page(generative_clinical=True)
 
 ENVIRONMENTAL_PAGE = PageSpec(
     key="ambiental",
-    tab_name="🌱  Ambiental",
+    tab_name="Ambiental",
     subtitle="Impacto ambiental · Poluentes · Mitigação · Contexto regulatório brasileiro",
     sections=(
         _no_ai_section(),
@@ -393,7 +393,7 @@ ENVIRONMENTAL_PAGE = PageSpec(
 
 PUBLIC_HEALTH_PAGE = PageSpec(
     key="saude_publica",
-    tab_name="🏥  Saúde Pública",
+    tab_name="Saúde Pública",
     subtitle="Epidemiologia · Vigilância · SUS · Políticas de saúde",
     sections=(
         _no_ai_section(),
@@ -430,7 +430,7 @@ PUBLIC_HEALTH_PAGE = PageSpec(
 
 TECHNOLOGY_PAGE = PageSpec(
     key="tecnologia",
-    tab_name="💻  Tecnologia e IA",
+    tab_name="Tecnologia e IA",
     subtitle="Computação · Inteligência Artificial · Dados · Reprodutibilidade",
     sections=(
         _no_ai_section(),
@@ -458,7 +458,7 @@ TECHNOLOGY_PAGE = PageSpec(
 
 ENGINEERING_PAGE = PageSpec(
     key="engenharias",
-    tab_name="⚙  Engenharias",
+    tab_name="Engenharias",
     subtitle="Civil · Elétrica · Química · Projeto, desempenho e normas",
     sections=(
         _no_ai_section(),
@@ -496,7 +496,7 @@ def _overview_section() -> Section:
 
 NURSING_PAGE = PageSpec(
     key="enfermagem",
-    tab_name="🩺  Enfermagem",
+    tab_name="Enfermagem",
     subtitle="Cuidados descritos · Escalas e instrumentos · Prática baseada em evidências",
     sections=(
         _no_ai_section(),
@@ -526,7 +526,7 @@ NURSING_PAGE = PageSpec(
 
 PHARMACY_PAGE = PageSpec(
     key="farmacia",
-    tab_name="💊  Farmácia",
+    tab_name="Farmácia",
     subtitle="Fármaco e mecanismo · Eficácia e segurança · Trechos de doses e interações (sem IA)",
     sections=(
         _no_ai_section(),
@@ -561,7 +561,7 @@ PHARMACY_PAGE = PageSpec(
 
 NUTRITION_PAGE = PageSpec(
     key="nutricao",
-    tab_name="🥗  Nutrição",
+    tab_name="Nutrição",
     subtitle="Intervenção alimentar · Desfechos · Limites para aplicar o resultado",
     sections=(
         _no_ai_section(),
@@ -591,7 +591,7 @@ NUTRITION_PAGE = PageSpec(
 
 PSYCHOLOGY_PAGE = PageSpec(
     key="psicologia",
-    tab_name="🧠  Psicologia",
+    tab_name="Psicologia",
     subtitle="Instrumentos e escalas · Amostra e tamanho de efeito · Generalização",
     sections=(
         _no_ai_section(),
@@ -618,7 +618,7 @@ PSYCHOLOGY_PAGE = PageSpec(
 
 LAW_PAGE = PageSpec(
     key="direito",
-    tab_name="⚖  Direito e Políticas",
+    tab_name="Direito e Políticas",
     subtitle="Política avaliada · Implicações regulatórias · Impacto social (sem parecer jurídico)",
     sections=(
         _no_ai_section(),
@@ -643,7 +643,7 @@ LAW_PAGE = PageSpec(
 
 EDUCATION_PAGE = PageSpec(
     key="educacao",
-    tab_name="📖  Educação",
+    tab_name="Educação",
     subtitle="Metodologia de ensino · Resultados de aprendizagem · Aplicação em sala de aula",
     sections=(
         _no_ai_section(),
@@ -669,7 +669,7 @@ EDUCATION_PAGE = PageSpec(
 
 AGRO_PAGE = PageSpec(
     key="agro",
-    tab_name="🌾  Agro e Veterinária",
+    tab_name="Agro e Veterinária",
     subtitle="Cultura e espécie · Manejo e intervenção · Viabilidade e normas",
     sections=(
         _no_ai_section(),
@@ -694,7 +694,7 @@ AGRO_PAGE = PageSpec(
 
 BIOTECH_PAGE = PageSpec(
     key="biotecnologia",
-    tab_name="🧬  Biotecnologia",
+    tab_name="Biotecnologia",
     subtitle="Organismo e método molecular · Dados e acesso · Reprodutibilidade e ética",
     sections=(
         _no_ai_section(),
@@ -722,7 +722,7 @@ BIOTECH_PAGE = PageSpec(
 PATIENT_HELP = (
     MEDICAL_HELP
     + """
-🙋 **Aviso importante:** esta aba explica o que um estudo encontrou, em linguagem simples. Ela **não é orientação
+**Aviso importante:** esta aba explica o que um estudo encontrou, em linguagem simples. Ela **não é orientação
 médica**, não diz se um tratamento serve para você e não deve ser usada para iniciar, parar ou mudar tratamento.
 Converse com um profissional de saúde.
 """
@@ -730,7 +730,7 @@ Converse com um profissional de saúde.
 
 PATIENT_PAGE = PageSpec(
     key="paciente",
-    tab_name="🙋  Para o Paciente",
+    tab_name="Para o Paciente",
     subtitle="Linguagem simples · O que o estudo mostra e não mostra · Perguntas para levar ao profissional",
     sections=(
         _no_ai_section(),

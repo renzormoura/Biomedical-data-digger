@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>Artigo — maquete da página do artigo</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="theme.js" defer></script>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></symbol>
+    <symbol id="i-theme" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.8-3.6 3.6-5.5 7-5.5s6.2 1.9 7 5.5"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-half" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5"/><path d="M12 4.5v15"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M7 4h10v16l-5-3.5L7 20z"/></symbol>
+    <symbol id="i-external" viewBox="0 0 24 24"><path d="M14 5h5v5M19 5l-8 8M18 14v4.5a1 1 0 0 1-1 1H5.5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1H10"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 4v4M12 16v4M4 12h4M16 12h4M7 7l2 2M15 15l2 2M17 7l-2 2M9 15l-2 2"/></symbol>
+  </svg>
+  <a class="skip" href="#main">Pular para o conteúdo</a>
+  <div class="mock-banner">Maquete de design com dados fictícios. Não é o site em produção.</div>
+
+  <header class="site-header">
+    <div class="container">
+      <a class="brand" href="index.html" aria-label="Biomedical Data Digger, início">
+        <svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="6" fill="currentColor"/><circle cx="14.5" cy="14.5" r="5.5" fill="none" stroke="var(--bg)" stroke-width="2.4"/><path d="m18.6 18.6 5 5" stroke="var(--bg)" stroke-width="2.4" stroke-linecap="round"/></svg>
+        <b>Biomedical</b><span>Data Digger</span>
+      </a>
+      <nav class="nav" aria-label="Principal">
+        <a href="index.html">Início</a>
+        <a href="#" aria-current="page">Buscar</a>
+        <a href="#">Biblioteca</a>
+        <a href="#">Laboratório de IA</a>
+        <a href="index.html#metodo">Método</a>
+      </nav>
+      <div class="header-actions">
+        <button class="btn btn-ghost" id="theme-toggle" type="button" aria-label="Alternar tema claro e escuro"><svg class="icon"><use href="#i-theme"/></svg></button>
+        <a class="btn btn-outline btn-sm" href="#"><svg class="icon"><use href="#i-user"/></svg><span class="btn-label">Entrar</span></a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="container">
+    <p class="crumbs"><a href="#">Resultados da busca</a> / Artigo</p>
+
+    <header class="article-head">
+      <h1>Duração de corticoide guiada por eosinófilos em adultos hospitalizados por exacerbação de asma: ensaio randomizado de não inferioridade</h1>
+      <p class="byline">A. B. Silva, C. D. Costa, E. F. Lima et al. · Revista Exemplo de Medicina · 2026</p>
+      <div class="tags">
+        <span><i class="dot"></i>Ensaio clínico randomizado</span>
+        <span>Estudo multicêntrico</span>
+        <span>Acesso aberto</span>
+        <span>Europe PMC</span>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" type="button"><svg class="icon"><use href="#i-bookmark"/></svg>Salvar na biblioteca</button>
+        <a class="btn btn-outline" href="#"><svg class="icon"><use href="#i-external"/></svg>Abrir versão aberta</a>
+        <a class="btn btn-outline" href="#"><svg class="icon"><use href="#i-spark"/></svg>Analisar com IA (opcional)</a>
+      </div>
+    </header>
+
+    <div class="article-layout">
+      <article class="prose">
+        <h2>Resumo, com as seções originais</h2>
+        <dl style="margin:0">
+          <div class="sec"><dt>Contexto</dt><dd>Corticoides sistêmicos são usados por cinco dias na exacerbação de asma, e a duração ideal é incerta.</dd></div>
+          <div class="sec"><dt>Métodos</dt><dd>Ensaio aberto, em dois centros, com adultos hospitalizados por exacerbação de asma, designados 1:1 para cuidado habitual (prednisolona por 5 dias) ou duração guiada por eosinófilos no sangue.</dd></div>
+          <div class="sec"><dt>Resultados</dt><dd>A dose cumulativa foi semelhante entre os grupos, mas significativamente menor nas exacerbações não eosinofílicas do que nas eosinofílicas no grupo guiado (136 vs 214 mg; p = 0,0004).</dd></div>
+          <div class="sec"><dt>Conclusões</dt><dd>A estratégia guiada foi viável; a margem de não inferioridade de 20% foi usada para o desfecho de falha de tratamento.</dd></div>
+        </dl>
+
+        <h2>Números e dados estatísticos</h2>
+        <blockquote class="quote"><small>Medida de precisão · valor de p</small>A dose cumulativa de corticoide por paciente foi semelhante entre os grupos, mas significativamente menor nas exacerbações não eosinofílicas (136 vs 214 mg; p = 0,0004).</blockquote>
+        <blockquote class="quote"><small>Margem</small>O desfecho primário foi a não inferioridade das taxas de falha de tratamento, com margem pré-especificada de 20%.</blockquote>
+        <p class="note">Frases copiadas do resumo. Nada foi gerado nem interpretado. A seleção é por palavras-chave e pode omitir frases. Lido apenas o resumo, não o texto completo.</p>
+
+        <h2>Citar</h2>
+        <div class="seg" role="group" aria-label="Formato da citação">
+          <button type="button" data-cite="ABNT" aria-pressed="true">ABNT</button>
+          <button type="button" data-cite="APA" aria-pressed="false">APA</button>
+          <button type="button" data-cite="Vancouver" aria-pressed="false">Vancouver</button>
+        </div>
+        <p class="citation" id="citation-text">SILVA, A. B.; COSTA, C. D.; LIMA, E. F. Duração de corticoide guiada por eosinófilos na exacerbação de asma. Revista Exemplo de Medicina, v. 12, n. 3, p. 101-110, 2026.</p>
+        <p class="note">Gerada por código a partir dos metadados do registro, sem IA.</p>
+      </article>
+
+      <aside class="aside" aria-label="Avaliação e metadados">
+        <section class="panel">
+          <div class="panel-head"><h3>Confiabilidade</h3><span class="band">Alta</span></div>
+          <div class="panel-body">
+            <div class="score"><strong>78</strong><span>/100</span></div>
+            <div class="meter" role="img" aria-label="78 de 100"><i style="width:78%"></i></div>
+            <p class="note" style="margin:0">Cobertura: 100% dos critérios avaliados.</p>
+            <details class="how">
+              <summary>Ver como a nota foi calculada</summary>
+              <div class="how-item"><b><span class="st-met">Integridade (retratação)</span><span class="pts">20/20</span></b><p>Sem marca de retratação no registro da Europe PMC.</p></div>
+              <div class="how-item"><b><span class="st-met">Desenho do estudo</span><span class="pts">22,5/25</span></b><p>Ensaio clínico randomizado pontua 90% do peso.</p></div>
+              <div class="how-item"><b><span class="st-met">Revisão por pares</span><span class="pts">10/10</span></b><p>Publicado em periódico.</p></div>
+              <div class="how-item"><b><span class="st-unmet">Tamanho da amostra</span><span class="pts">0/10</span></b><p>O resumo não informa o tamanho da amostra; pode constar no texto completo.</p></div>
+              <div class="how-item"><b><span class="st-partial">Resultado quantificado</span><span class="pts">5/10</span></b><p>Há números, mas sem medida de efeito identificável.</p></div>
+              <div class="how-item"><b><span class="st-partial">Precisão estatística</span><span class="pts">5/10</span></b><p>Informa valor de p, sem intervalo de confiança.</p></div>
+              <div class="how-item"><b><span class="st-met">Método descrito</span><span class="pts">10/10</span></b><p>O resumo traz seção de métodos.</p></div>
+              <p class="note" style="margin-top:12px">A nota resume sinais verificáveis no registro e no resumo. Não avalia a execução do estudo nem o risco de viés.</p>
+            </details>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head"><h3>Detalhes</h3></div>
+          <div class="panel-body">
+            <dl class="meta">
+              <div><dt>Periódico</dt><dd>Revista Exemplo de Medicina, v. 12, n. 3</dd></div>
+              <div><dt>Ano</dt><dd>2026</dd></div>
+              <div><dt>DOI</dt><dd><a href="#">10.0000/exemplo.2026.1</a></dd></div>
+              <div><dt>PubMed</dt><dd><a href="#">PMID 00000000</a></dd></div>
+              <div><dt>Idioma</dt><dd>EN</dd></div>
+              <div><dt>Citações</dt><dd>1</dd></div>
+            </dl>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head"><h3>Artigos semelhantes</h3></div>
+          <div class="panel-body">
+            <ul class="similar">
+              <li><a href="#">Eosinófilos no sangue como guia de tratamento em exacerbações de DPOC</a><small>Ensaio clínico randomizado · 2024</small></li>
+              <li><a href="#">Duração de corticoide sistêmico na asma: revisão sistemática</a><small>Revisão sistemática · 2023</small></li>
+              <li><a href="#">Biomarcadores para decisão terapêutica em doenças respiratórias</a><small>Revisão · 2022</small></li>
+            </ul>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p class="legal" style="margin-top:0;border-top:0;padding-top:0">As informações vêm de fontes públicas. A nota de confiabilidade resume sinais verificáveis no registro e no resumo do artigo; não substitui a leitura crítica do texto completo nem orientação médica ou profissional.</p>
+    </div>
+  </footer>
+</body>
+</html>

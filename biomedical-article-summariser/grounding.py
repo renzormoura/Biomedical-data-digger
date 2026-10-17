@@ -46,7 +46,7 @@ class GroundingReport:
             return ""
         listed = ", ".join(f"`{item}`" for item in self.ungrounded[:12])
         return (
-            "\n\n---\n> ⚠️ **Verificação automática de números:** os valores abaixo aparecem na "
+            "\n\n---\n> **Verificação automática de números:** os valores abaixo aparecem na "
             f"resposta mas **não foram encontrados** no título/resumo-fonte: {listed}. "
             "Confira no artigo original antes de usar."
         )

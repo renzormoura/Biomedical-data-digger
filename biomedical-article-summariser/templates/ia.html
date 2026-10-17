@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-BR" data-theme="dark">
+<html lang="pt-BR">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,25 +8,27 @@
   <title>Laboratório de IA — Biomedical Data Digger</title>
   <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/static/app.css?v={{ asset_version }}">
+  <link rel="stylesheet" href="/static/brand.css?v={{ asset_version }}">
   <script src="/static/app.js?v={{ asset_version }}" defer></script>
 </head>
 <body>
+  {% include "_icons.html" %}
   <a class="skip-link" href="#main">Pular para o conteúdo</a>
 
   <header class="topbar">
     <a class="brand" href="/" aria-label="Biomedical Data Digger — início">
-      <svg class="brand-mark" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true" focusable="false">
-        <rect width="32" height="32" rx="7" fill="currentColor"></rect>
-        <path d="M8 22V10l8 8 8-8v12" fill="none" stroke="var(--bg)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
-      </svg>
-      <span class="brand-name"><span class="accent">Biomedical</span> Data Digger</span>
+      <svg class="brand-mark" viewBox="0 0 32 32" width="26" height="26" aria-hidden="true" focusable="false"><rect x="1" y="1" width="30" height="30" rx="6" fill="currentColor"></rect><circle cx="14.5" cy="14.5" r="5.5" fill="none" stroke="var(--bg)" stroke-width="2.4"></circle><path d="m18.6 18.6 5 5" stroke="var(--bg)" stroke-width="2.4" stroke-linecap="round"></path></svg>
+      <span class="brand-name"><b>Biomedical</b> Data Digger</span>
     </a>
+    <nav class="mainnav" aria-label="Principal">
+      <a href="/">Início</a>
+      <a href="/#/busca">Busca</a>
+      <a href="/#/biblioteca">Biblioteca</a>
+      <a href="/ia" aria-current="page">Laboratório de IA</a>
+    </nav>
     <div class="topbar-actions">
-      <a class="btn btn-ghost" href="/">← Navegador de artigos</a>
-      <button type="button" class="btn btn-ghost" id="theme-toggle" aria-label="Alternar tema claro/escuro">☀️ Claro</button>
-      <button type="button" class="btn btn-ghost" id="account-button" data-user="{{ user or '' }}">
-        {% if user %}👤 {{ user }}{% else %}👤 Entrar{% endif %}
-      </button>
+      <button type="button" class="btn btn-ghost" id="theme-toggle" aria-label="Alternar tema claro ou escuro"><svg class="icon" aria-hidden="true"><use href="#i-theme"/></svg><span class="btn-label" id="theme-label">Tema</span></button>
+      <button type="button" class="btn btn-ghost" id="account-button" data-user="{{ user or '' }}"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><span class="btn-label" id="account-label">{{ user or "Entrar" }}</span></button>
     </div>
   </header>
 
@@ -37,7 +39,7 @@
               aria-controls="panel-{{ page.key }}" aria-selected="false" tabindex="-1">{{ page.tab_name }}</button>
       {% endfor %}
       <button type="button" role="tab" class="tab" id="tab-pesquisa" data-target="pesquisa"
-              aria-controls="panel-pesquisa" aria-selected="false" tabindex="-1">🔎  Pesquisa</button>
+              aria-controls="panel-pesquisa" aria-selected="false" tabindex="-1">Pesquisa</button>
     </nav>
 
     <main id="main" tabindex="-1">
@@ -125,7 +127,7 @@
                 <div class="field"><label for="{{ k }}-f-foco">Foco</label>
                   <select id="{{ k }}-f-foco" data-filter="foco"><option value="">Padrão</option>
                     {% for v in page.focus_choices %}<option>{{ v }}</option>{% endfor %}</select></div>
-                <button type="button" class="btn btn-ghost" data-action="clear-filters">↺ Limpar filtros</button>
+                <button type="button" class="btn btn-ghost" data-action="clear-filters">Limpar filtros</button>
               </div>
             </details>
 
@@ -205,5 +207,6 @@
   </dialog>
 
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+  {% include "_footer.html" %}
 </body>
 </html>

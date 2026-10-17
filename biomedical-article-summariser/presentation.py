@@ -25,19 +25,19 @@ def verification_annex_md(source_keys: Sequence[str]) -> str:
         name = source.get("name", result.get("url", ""))
         revised = source.get("updated", "—")
         if result.get("status") == "ok":
-            lines.append(f"> - 🟢 **{name}** — acessível · revisão {revised} · {result.get('url', '')}")
+            lines.append(f"> - **{name}** — acessível · revisão {revised} · {result.get('url', '')}")
         else:
             lines.append(
-                f"> - 🔴 **{name}** — **não verificável** ({result.get('motivo', 'erro')}) · {result.get('url', '')}"
+                f"> - **{name}** — **não verificável** ({result.get('motivo', 'erro')}) · {result.get('url', '')}"
             )
     lines.append(
-        "> ⚠️ Afirmações contextuais sobre uma fonte 🔴 devem ser tratadas como "
+        "> Afirmações contextuais sobre uma fonte não verificável devem ser tratadas como "
         "**não verificáveis** até a fonte voltar a responder."
     )
     return "\n".join(lines)
 
 
 UNVERIFIABLE_FALLBACK = (
-    "\n\n---\n> ⚠️ **Verificação externa indisponível no momento.** "
+    "\n\n---\n> **Verificação externa indisponível no momento.** "
     "Trate qualquer afirmação contextual como **não verificável**."
 )

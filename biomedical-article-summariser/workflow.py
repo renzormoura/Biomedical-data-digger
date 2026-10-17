@@ -47,14 +47,14 @@ BuildFn = Callable[..., list[Message]]
 MAX_SOURCE_CHARS = 12_000
 
 CLINICAL_DISCLAIMER = (
-    "\n\n---\n> ⚕️ **Apoio à leitura, não à decisão.** Conteúdo gerado por IA a partir apenas do "
+    "\n\n---\n> **Apoio à leitura, não à decisão.** Conteúdo gerado por IA a partir apenas do "
     "título e do resumo do artigo. Não substitui bula, diretriz institucional, o texto completo "
     "nem o julgamento clínico. Confirme doses e condutas na fonte primária."
 )
 
 
 CLINICAL_EXTRACT_DISCLAIMER = (
-    "\n\n---\n> ⚕️ **Apoio à leitura, não à decisão.** Trechos copiados apenas do título e do resumo do "
+    "\n\n---\n> **Apoio à leitura, não à decisão.** Trechos copiados apenas do título e do resumo do "
     "artigo, sem interpretação. Não substituem bula, diretriz institucional, o texto completo nem o "
     "julgamento clínico. Confirme doses e condutas na fonte primária."
 )
@@ -219,7 +219,7 @@ class Reply(str):
 
 
 TRUNCATION_NOTICE = (
-    "\n\n---\n> ✂️ **Resposta cortada:** o modelo atingiu o limite de tamanho antes de terminar. "
+    "\n\n---\n> **Resposta cortada:** o modelo atingiu o limite de tamanho antes de terminar. "
     "Tente o detalhe \"Resumido\" ou repita a análise."
 )
 
@@ -437,7 +437,7 @@ class AnalysisService:
             if completion.truncated:
                 body += TRUNCATION_NOTICE
             for warning in article.warnings:
-                body += f"\n\n> 🛡️ **Aviso de segurança:** {warning}"
+                body += f"\n\n> **Aviso de segurança:** {warning}"
             return _Outcome(
                 f"---\n> **{label}**  ·  Filtros: *{filters.describe()}*\n\n---\n{body}{footer}",
                 tokens, cacheable=not completion.truncated,
@@ -545,7 +545,7 @@ class AnalysisService:
         if clinical:
             markdown += CLINICAL_EXTRACT_DISCLAIMER
         for warning in article.warnings:
-            markdown += f"\n\n> 🛡️ **Aviso de segurança:** {warning}"
+            markdown += f"\n\n> **Aviso de segurança:** {warning}"
         return Reply(markdown, tokens=0, quota_remaining=self._remaining(client_id))
 
     def cite(self, article_id: str, style: str, *, client_id: str = "local") -> str:
