@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 2026-10 — Laboratório ligado ao navegador
+
+### Adicionado
+- Cartão do artigo carregado no topo de cada aba do Laboratório (título, autores, tipo de estudo, fonte e nota de confiabilidade, com link para a página do artigo); `GET /api/discover/brief`.
+- **Salvar no artigo**: a análise fica guardada na conta (até 200, 60 mil caracteres cada), aparece no cartão "Análises do Laboratório" da página do artigo e na seção "Análises salvas" da biblioteca, onde dá para ver, baixar e excluir. `POST/GET/DELETE /api/analyses`.
+- **Baixar a análise** em Word, Markdown, página web ou texto, com o artigo e o aviso de que análises com IA podem errar; `POST /api/export/analysis` (sem conta, sem guardar nada).
+
+### Corrigido
+- Na primeira análise de uma aba, os botões Copiar e Imprimir ficavam desabilitados porque o fim do carregamento restaurava o estado anterior.
+
 ## 2026-10 — Artigos semelhantes no fim do artigo
 
 - Seção "Artigos semelhantes" no fim da página do artigo, com até 6 cartões (salvar e abrir) e a lista dos termos usados na busca; carrega depois da página, por `GET /api/discover/similar`.

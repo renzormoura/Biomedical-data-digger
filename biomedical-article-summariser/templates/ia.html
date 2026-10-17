@@ -64,6 +64,7 @@
                 <label for="{{ k }}-article">ID ou URL do artigo</label>
                 <input type="text" id="{{ k }}-article" data-role="article" autocomplete="off" spellcheck="false"
                        placeholder="{{ page.placeholder }}" maxlength="2000">
+                <div class="article-card" data-role="article-card" aria-live="polite" hidden></div>
               </div>
               <div class="field">
                 <label for="{{ k }}-model">Modelo de linguagem</label>
@@ -153,6 +154,16 @@
               <span class="output-meta" data-role="output-meta"></span>
               <span class="output-actions">
                 <button type="button" class="btn btn-ghost btn-sm" data-action="copy" disabled>Copiar</button>
+                <details class="export-menu" data-role="export-menu" hidden>
+                  <summary class="btn btn-ghost btn-sm">Baixar</summary>
+                  <div class="export-options" role="group" aria-label="Formato do arquivo">
+                    <button type="button" class="btn btn-sm btn-secondary" data-action="export" data-format="docx">Word (.docx)</button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-action="export" data-format="md">Markdown (.md)</button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-action="export" data-format="html">Página web (.html)</button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-action="export" data-format="txt">Texto (.txt)</button>
+                  </div>
+                </details>
+                <button type="button" class="btn btn-ghost btn-sm" data-action="save-analysis" disabled>Salvar no artigo</button>
                 <button type="button" class="btn btn-ghost btn-sm" data-action="print" disabled>Imprimir</button>
               </span>
             </div>

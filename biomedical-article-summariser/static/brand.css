@@ -377,3 +377,27 @@ input[type="text"], input[type="search"], input[type="email"], input[type="passw
 .similar-card .meta { margin: 0; font-size: 0.86rem; }
 .similar-card .row { margin-top: auto; }
 @media print { .similar-section { display: none; } }
+
+/* ---------- Laboratório: cartão do artigo e exportação ---------- */
+.article-card { margin-top: 8px; padding: 10px 12px; border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius); background: var(--surface-2); }
+.article-card-title { display: block; font-weight: 600; font-size: 0.92rem; line-height: 1.35; color: var(--text); text-decoration: none; }
+.article-card-title:hover { color: var(--accent-text); text-decoration: underline; text-decoration-thickness: 1px; }
+.article-card-meta { margin: 4px 0 0; font-size: 0.8rem; color: var(--muted); }
+.article-card-score { margin: 4px 0 0; font-size: 0.8rem; font-weight: 600; }
+.output-actions { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.export-menu { position: relative; }
+.export-menu > summary { list-style: none; cursor: pointer; }
+.export-menu > summary::-webkit-details-marker { display: none; }
+.export-options { position: absolute; z-index: 30; right: 0; top: calc(100% + 6px); display: grid; gap: 6px; min-width: 190px; padding: 10px; background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--radius); box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35); }
+@media print { .article-card, .export-menu { display: none !important; } }
+
+/* ---------- Análises salvas ---------- */
+.analysis-list { list-style: none; margin: 0; padding: 0; display: grid; }
+.analysis-item { padding: 14px 0; border-top: 1px solid var(--border); display: grid; gap: 8px; }
+.analysis-item:first-child { border-top: 0; padding-top: 0; }
+.analysis-head { font-size: 0.95rem; }
+.analysis-article { font-size: 0.9rem; color: var(--text); text-decoration: none; overflow-wrap: anywhere; }
+.analysis-article:hover { color: var(--accent-text); text-decoration: underline; text-decoration-thickness: 1px; }
+.analysis-item .row { gap: 6px; }
+.analysis-body { padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); font-size: 0.92rem; overflow-wrap: anywhere; }
+@media print { .analysis-item .row { display: none; } }

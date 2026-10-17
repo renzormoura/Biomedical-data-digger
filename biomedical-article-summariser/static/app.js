@@ -83,6 +83,8 @@
       $("#panel-" + tab.dataset.target).hidden = !active;
     });
     if (focus) target.focus();
+    const activePanel = $("#panel-" + target.dataset.target);
+    if (activePanel && $('[data-role="article"]', activePanel)) showArticleCard(activePanel);
     target.scrollIntoView({ inline: "nearest", block: "nearest" });
     history.replaceState(null, "", "#" + target.dataset.target);
   }
@@ -102,7 +104,11 @@
 
   // Vindo do navegador de artigos: /ia?artigo=REF preenche o campo de artigo de todas as abas.
   const presetArticle = new URLSearchParams(location.search).get("artigo");
-  if (presetArticle) $$('[data-role="article"]').forEach((input) => { input.value = presetArticle.slice(0, 2000); });
+  if (presetArticle) {
+    $$('[data-role="article"]').forEach((input) => { input.value = presetArticle.slice(0, 2000); });
+    const current = $$(".panel").find((p) => !p.hidden);
+    if (current) showArticleCard(current);
+  }
 
   // ---------- histórico (local ao navegador) ----------
   function loadHistory() { return store.get(HISTORY_KEY, []).filter((x) => x && x.id); }
@@ -143,11 +149,14 @@
   renderHistory();
 
   // ---------- execução das análises ----------
+  const RESULT_ACTIONS = '[data-action="copy"], [data-action="print"], [data-action="save-analysis"]';
   function setBusy(panel, busy) {
     $$(".btn", panel).forEach((button) => {
       if (busy) { button.dataset.wasDisabled = button.disabled ? "1" : ""; button.disabled = true; }
       else { button.disabled = button.dataset.wasDisabled === "1"; delete button.dataset.wasDisabled; }
     });
+    // as acoes do resultado (copiar, imprimir, salvar) valem assim que existe um resultado, mesmo na primeira analise
+    if (!busy && panel.dataset.hasResult) $$(RESULT_ACTIONS, panel).forEach((button) => { button.disabled = false; });
     const output = $('[data-role="output"]', panel);
     output.setAttribute("aria-busy", String(busy));
   }
@@ -196,7 +205,10 @@
     panel.dataset.lastMarkdown = data.markdown;
     $('[data-role="output-title"]', panel).textContent = label;
     $('[data-role="output-meta"]', panel).textContent = describeMeta(data.meta);
-    $$('[data-action="copy"], [data-action="print"]', panel).forEach((b) => { b.disabled = false; });
+    panel.dataset.hasResult = "1";
+    $$(RESULT_ACTIONS, panel).forEach((b) => { b.disabled = false; });
+    $('[data-role="export-menu"]', panel).hidden = false;
+    panel.dataset.lastArticleTitle = data.title || "";
     output.scrollIntoView({ behavior: "smooth", block: "nearest" });
     if (data.title) remember(data.article_id, data.title);
   }
@@ -275,7 +287,93 @@
         .then(() => toast("Copiado!"), () => toast("Não foi possível copiar."));
     } else if (action === "print") {
       window.print();
+    } else if (action === "export") {
+      exportAnalysis(panel, button.dataset.format);
+    } else if (action === "save-analysis") {
+      saveAnalysis(panel);
     }
+  });
+
+  // Baixar a analise (Word, Markdown, pagina web, texto) sem salvar nada no servidor.
+  async function exportAnalysis(panel, format) {
+    const markdown = panel.dataset.lastMarkdown || "";
+    if (!markdown) return;
+    const label = $('[data-role="output-title"]', panel).textContent;
+    try {
+      const response = await fetch("/api/export/analysis", {
+        method: "POST", headers: { "Content-Type": "application/json" }, credentials: "same-origin",
+        body: JSON.stringify({ title: panel.dataset.lastArticleTitle || "", label, markdown, format }),
+      });
+      if (!response.ok) throw new Error("Não foi possível gerar o arquivo agora.");
+      const name = /filename="([^"]+)"/.exec(response.headers.get("Content-Disposition") || "")?.[1] || `analise.${format}`;
+      const url = URL.createObjectURL(await response.blob());
+      const link = Object.assign(document.createElement("a"), { href: url, download: name });
+      document.body.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      $('[data-role="export-menu"]', panel).open = false;
+    } catch (error) {
+      toast(error.message);
+    }
+  }
+
+  // Guardar a analise no artigo (precisa de conta): aparece na pagina do artigo e na biblioteca.
+  async function saveAnalysis(panel) {
+    if (!accountButton.dataset.user) {
+      authError.hidden = true;
+      dialog.showModal();
+      toast("Entre na sua conta para salvar análises.");
+      return;
+    }
+    try {
+      await api("/api/analyses", {
+        article_id: value(panel, "article"), page: panel.dataset.page,
+        label: $('[data-role="output-title"]', panel).textContent, markdown: panel.dataset.lastMarkdown || "",
+      });
+      toast("Análise salva no artigo. Veja na página do artigo e na Biblioteca.");
+    } catch (error) {
+      toast(error.message);
+    }
+  }
+
+  // Cartao do artigo carregado: mostra qual artigo sera analisado e a nota de confiabilidade.
+  const cardTimers = new WeakMap();
+  async function showArticleCard(panel) {
+    const input = $('[data-role="article"]', panel);
+    const card = $('[data-role="article-card"]', panel);
+    const ref = input.value.trim();
+    if (ref.length < 5) { card.hidden = true; card.replaceChildren(); input.dataset.cardFor = ""; return; }
+    if (input.dataset.cardFor === ref) return;
+    input.dataset.cardFor = ref;
+    let data;
+    try { data = await api(`/api/discover/brief?ref=${encodeURIComponent(ref)}`); } catch {
+      if (input.dataset.cardFor === ref) { card.hidden = true; card.replaceChildren(); }
+      return;
+    }
+    if (input.dataset.cardFor !== ref) return; // o usuario ja mudou o campo
+    const work = data.work;
+    const title = document.createElement("a");
+    title.className = "article-card-title";
+    title.href = `/#/artigo?ref=${encodeURIComponent(work.ref)}`;
+    title.textContent = work.title;
+    const meta = document.createElement("p");
+    meta.className = "article-card-meta";
+    meta.textContent = [work.authors, work.journal, work.year, (work.studyTypes || [])[0], work.source].filter(Boolean).join(" · ");
+    const score = document.createElement("p");
+    score.className = "article-card-score";
+    const rel = data.reliability;
+    score.textContent = rel.score === null ? `Confiabilidade: ${rel.band}` : `Confiabilidade ${rel.score}/100 · ${rel.band}`;
+    card.replaceChildren(title, meta, score);
+    card.hidden = false;
+  }
+  $$('[data-role="article"]').forEach((input) => {
+    const panel = input.closest(".panel");
+    input.addEventListener("input", () => {
+      clearTimeout(cardTimers.get(input));
+      cardTimers.set(input, setTimeout(() => showArticleCard(panel), 700));
+    });
+    input.addEventListener("change", () => showArticleCard(panel));
   });
 
   // Enter no campo de artigo dispara o primeiro botão de análise da aba.

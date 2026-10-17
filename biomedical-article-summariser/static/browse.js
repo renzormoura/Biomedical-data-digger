@@ -208,6 +208,39 @@
     });
   });
 
+  // analise salva do Laboratorio: ver (HTML sanitizado no servidor), baixar em 4 formatos e excluir
+  function analysisRow(item, { showTitle = false, onChange } = {}) {
+    const body = h("div", { class: "analysis-body prose", hidden: "" });
+    const toggle = h("button", { type: "button", class: "btn btn-sm btn-secondary", "aria-expanded": "false" }, "Ver");
+    let loaded = false;
+    toggle.addEventListener("click", async () => {
+      const open = body.hidden;
+      if (open && !loaded) {
+        const full = await guarded(() => api(`/api/analyses/${encodeURIComponent(item.id)}`));
+        if (!full) return;
+        body.innerHTML = full.html; // markdown_lite sanitiza no servidor (escapa o texto e so admite links http/https)
+        loaded = true;
+      }
+      body.hidden = !open;
+      toggle.setAttribute("aria-expanded", String(open));
+      toggle.textContent = open ? "Ocultar" : "Ver";
+    });
+    const remove = h("button", { type: "button", class: "btn btn-sm btn-ghost", "aria-label": `Excluir a análise ${item.label}` }, "Excluir");
+    remove.addEventListener("click", async () => {
+      if (await guarded(() => api(`/api/analyses/${encodeURIComponent(item.id)}`, { method: "DELETE" }))) { toast("Análise excluída"); if (onChange) onChange(); }
+    });
+    const date = new Date(item.createdAt);
+    return h("li", { class: "analysis-item" },
+      h("div", { class: "analysis-head" },
+        h("strong", {}, item.label),
+        h("span", { class: "muted" }, ` · ${item.page || "laboratório"} · ${Number.isNaN(date.getTime()) ? "" : date.toLocaleDateString("pt-BR")}`)),
+      showTitle ? h("a", { href: Lib.buildHash("/artigo", { ref: item.ref }), class: "analysis-article" }, item.title) : null,
+      h("div", { class: "row" }, toggle,
+        ["docx", "md", "html", "txt"].map((f) => h("a", { class: "btn btn-sm btn-secondary", href: `/api/analyses/${encodeURIComponent(item.id)}/download?format=${f}`, download: "" }, f.toUpperCase())),
+        remove),
+      body);
+  }
+
   // menu "Baixar": resumo, ficha, referencia e texto completo aberto; links abertos da fonte; impressao
   function downloadMenu(work) {
     const panel = h("div", { class: "download-panel", hidden: "", role: "region", "aria-label": "Opções de download" });
@@ -637,6 +670,22 @@
       h("p", { class: "note" }, "Fontes: ClinicalTrials.gov, OpenCitations e DataCite (inclui Zenodo)."));
     }
 
+    // analises salvas do Laboratorio de IA para este artigo (so com conta)
+    const analysesBox = h("div", { class: "stack" });
+    async function renderAnalyses() {
+      if (!session.user) {
+        mount(analysesBox, h("p", { class: "muted" }, "Entre na sua conta para guardar aqui as análises do Laboratório de IA."));
+        return;
+      }
+      const data = await guarded(() => api(`/api/analyses?ref=${encodeURIComponent(work.ref)}`));
+      if (!data) { mount(analysesBox, h("p", { class: "muted" }, "Não foi possível carregar suas análises agora.")); return; }
+      mount(analysesBox,
+        data.analyses.length
+          ? h("ul", { class: "analysis-list" }, data.analyses.map((item) => analysisRow(item, { onChange: renderAnalyses })))
+          : h("p", { class: "muted" }, "Nenhuma análise salva. No Laboratório, gere uma análise e clique em \"Salvar no artigo\"."),
+        h("a", { class: "btn btn-sm btn-outline", href: Lib.aiLabHref(work.pmid || work.ref) }, "Abrir no Laboratório de IA"));
+    }
+
     // artigos semelhantes: carregam depois da pagina e ficam no fim dela
     const similarBox = h("div", { class: "similar-grid" }, loading("Procurando artigos semelhantes…"));
     const similarNote = h("p", { class: "hint" });
@@ -708,10 +757,12 @@
               h("table", {}, h("tbody", {}, meta.map(([k, v]) => h("tr", {}, h("th", { scope: "row" }, k), h("td", {}, v))))),
               work.keywords.length ? h("div", { class: "kw" }, work.keywords.map((k) => h("a", { href: Lib.buildHash("/busca", { q: k }) }, k))) : null),
             h("section", { class: "card stack" }, h("h3", {}, "Registro e dados"), openData),
+            h("section", { class: "card stack" }, h("h3", {}, "Análises do Laboratório"), analysesBox),
             h("section", { class: "card stack" }, h("h3", {}, "Organizar"), organize),
           )),
         similarSection));
     renderOrganize();
+    renderAnalyses();
     renderOpenData();
     renderSimilar();
   }
@@ -728,6 +779,7 @@
     mount($app, h("h1", {}, "Biblioteca"), loading());
     const data = await guarded(() => api("/api/library"));
     if (!data) { mount($app, h("h1", {}, "Biblioteca"), errorBox("Não foi possível carregar sua biblioteca.")); return; }
+    const saved = await guarded(() => api("/api/analyses"));
     const activeTag = params.get("tag") || "";
     const allTags = [...new Set(data.items.flatMap((i) => i.tags))].sort();
     const shown = data.items.filter((i) => !activeTag || i.tags.includes(activeTag));
@@ -768,7 +820,11 @@
       h("h2", {}, "Listas de leitura"),
       h("div", { class: "row" }, listName, h("button", { type: "button", class: "btn btn-primary", onclick: createList }, "Criar lista")),
       data.lists.length ? data.lists.map((list) => renderListCard(list, params, exportLink, formats))
-        : h("p", { class: "muted" }, "Nenhuma lista ainda. Crie uma e adicione artigos pela página de cada artigo."));
+        : h("p", { class: "muted" }, "Nenhuma lista ainda. Crie uma e adicione artigos pela página de cada artigo."),
+      h("h2", {}, "Análises salvas"),
+      saved && saved.analyses.length
+        ? h("ul", { class: "analysis-list" }, saved.analyses.map((item) => analysisRow(item, { showTitle: true, onChange: () => renderLibrary(params) })))
+        : h("p", { class: "muted" }, "Nenhuma análise salva ainda. No Laboratório de IA, clique em \"Salvar no artigo\" depois de gerar uma análise."));
   }
 
   function renderListCard(list, params, exportLink, formats) {
