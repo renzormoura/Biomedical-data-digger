@@ -209,7 +209,10 @@
   // um unico ouvinte fecha qualquer seletor de lista ou painel de download aberto quando o clique cai fora dele
   document.addEventListener("click", (event) => {
     document.querySelectorAll(".save-picker:not([hidden])").forEach((picker) => {
-      if (!picker.parentElement.contains(event.target)) { picker.hidden = true; picker.replaceChildren(); }
+      if (!picker.parentElement.contains(event.target)) {
+        picker.hidden = true; picker.replaceChildren();
+        picker.parentElement.querySelector("button")?.setAttribute("aria-expanded", "false");
+      }
     });
     document.querySelectorAll(".download-panel:not([hidden])").forEach((panel) => {
       if (!panel.parentElement.contains(event.target)) { panel.hidden = true; panel.parentElement.querySelector("button")?.setAttribute("aria-expanded", "false"); }
@@ -298,41 +301,71 @@
       h("ul", {}, notes.map((note) => h("li", {}, note))));
   }
 
+  // Botao unico "Salvar": salva na biblioteca (padrao) e abre o menu para escolher listas ou criar uma nova.
+  // Com o artigo ja salvo, o clique abre o mesmo menu (nao remove): remover fica dentro do menu.
   function saveButton(work, { small = true, onChange } = {}) {
-    const button = h("button", { type: "button", class: `btn ${small ? "btn-sm " : ""}btn-secondary` });
-    const picker = h("div", { class: "save-picker", role: "group", "aria-label": "Adicionar a uma lista", hidden: "" });
+    const button = h("button", { type: "button", class: `btn ${small ? "btn-sm " : ""}btn-secondary save-button`, "aria-haspopup": "dialog", "aria-expanded": "false" });
+    const picker = h("div", { class: "save-picker", role: "dialog", "aria-label": "Salvar artigo", hidden: "" });
     const wrap = h("span", { class: "save-wrap" }, button, picker);
-    const refresh = () => { button.setAttribute("aria-pressed", String(Boolean(work.saved))); button.replaceChildren(icon("bookmark", work.saved), work.saved ? "Salvo" : "Salvar"); };
+    const refresh = () => {
+      button.setAttribute("aria-pressed", String(Boolean(work.saved)));
+      button.replaceChildren(icon("bookmark", work.saved), work.saved ? "Salvo" : "Salvar", icon("chevron"));
+    };
+    const closePicker = () => { picker.hidden = true; picker.replaceChildren(); button.setAttribute("aria-expanded", "false"); };
 
-    const closePicker = () => { picker.hidden = true; picker.replaceChildren(); };
-    // depois de salvar na biblioteca, oferece colocar o artigo em uma lista (so se o usuario tiver listas)
-    async function offerLists() {
-      const data = await guarded(() => api("/api/lists"));
-      if (!data || !data.lists.length) return;
-      const select = h("select", { "aria-label": "Lista" }, data.lists.map((l) => h("option", { value: l.id }, `${l.name} (${l.works.length})`)));
-      const add = h("button", { type: "button", class: "btn btn-sm btn-primary" }, "Adicionar");
-      add.addEventListener("click", async () => {
-        add.disabled = true;
-        const ok = await guarded(() => api(`/api/lists/${select.value}/items`, { method: "POST", body: { ref: work.ref } }));
-        if (ok) {
-          toast(`Adicionado à lista "${select.options[select.selectedIndex].text.replace(/ \(\d+\)$/, "")}"`);
-          closePicker();
-          if (onChange) onChange();
-        } else add.disabled = false;
-      });
-      const skip = h("button", { type: "button", class: "btn btn-sm btn-ghost" }, "Agora não");
-      skip.addEventListener("click", () => { closePicker(); button.focus(); });
-      mount(picker, h("p", { class: "save-picker-title" }, "Salvo na biblioteca. Adicionar também a uma lista?"),
-        select, h("div", { class: "row" }, add, skip));
+    async function renderMenu() {
+      mount(picker, loading("Carregando suas listas…"));
       picker.hidden = false;
-      select.focus();
-    }
-    picker.addEventListener("keydown", (event) => { if (event.key === "Escape") { closePicker(); button.focus(); } });
+      button.setAttribute("aria-expanded", "true");
+      const data = await guarded(() => api("/api/lists"));
+      if (!data) { closePicker(); return; }
 
-    button.addEventListener("click", async () => {
-      if (!requireUser("Entre para salvar artigos na sua biblioteca.")) return;
-      button.disabled = true;
-      closePicker();
+      const status = h("div", { class: "save-status" },
+        h("span", {}, icon("check"), work.saved ? " Salvo na biblioteca" : " Não está na biblioteca"),
+        h("button", { type: "button", class: "btn btn-sm btn-ghost", onclick: toggleLibrary }, work.saved ? "Remover" : "Salvar"));
+
+      const rows = data.lists.map((list) => {
+        const box = h("input", { type: "checkbox", checked: list.works.some((w) => w.ref === work.ref) });
+        box.addEventListener("change", async () => {
+          box.disabled = true;
+          const path = `/api/lists/${encodeURIComponent(list.id)}/items`;
+          const ok = await guarded(() => (box.checked
+            ? api(path, { method: "POST", body: { ref: work.ref } })
+            : api(`${path}?ref=${encodeURIComponent(work.ref)}`, { method: "DELETE" })));
+          box.disabled = false;
+          if (ok === undefined) { box.checked = !box.checked; return; }
+          toast(box.checked ? `Adicionado a "${list.name}"` : `Removido de "${list.name}"`);
+          if (onChange) onChange();
+        });
+        return h("label", { class: "check list-check" }, box, h("span", {}, list.name), h("small", { class: "muted" }, String(list.works.length)));
+      });
+
+      const name = h("input", { type: "text", placeholder: data.lists.length ? "Nome da nova lista" : "Nome da primeira lista (ex.: TCC)", maxlength: "80", "aria-label": "Nome da nova lista" });
+      const create = h("button", { type: "button", class: "btn btn-sm btn-primary" }, icon("plus"), "Criar e adicionar");
+      const createList = async () => {
+        if (!name.value.trim()) { name.focus(); return; }
+        create.disabled = true;
+        const made = await guarded(() => api("/api/lists", { method: "POST", body: { name: name.value } }));
+        if (made && await guarded(() => api(`/api/lists/${encodeURIComponent(made.id)}/items`, { method: "POST", body: { ref: work.ref } }))) {
+          toast(`Lista "${made.name}" criada com este artigo`);
+          if (onChange) onChange();
+          await renderMenu();
+          return;
+        }
+        create.disabled = false;
+      };
+      create.addEventListener("click", createList);
+      name.addEventListener("keydown", (event) => { if (event.key === "Enter") { event.preventDefault(); createList(); } });
+
+      mount(picker, status,
+        h("p", { class: "save-picker-title" }, data.lists.length ? "Adicionar a uma lista" : "Você ainda não tem listas. Crie a primeira:"),
+        rows.length ? h("div", { class: "list-checks" }, rows) : null,
+        h("div", { class: "new-list" }, name, create),
+        h("button", { type: "button", class: "btn btn-sm btn-ghost close-picker", onclick: () => { closePicker(); button.focus(); } }, "Fechar"));
+      (rows.length ? picker.querySelector("input[type=checkbox]") : name).focus();
+    }
+
+    async function toggleLibrary() {
       const done = await guarded(async () => {
         if (work.saved) await api(`/api/library?ref=${encodeURIComponent(work.ref)}`, { method: "DELETE" });
         else await api("/api/library", { method: "POST", body: { ref: work.ref } });
@@ -340,10 +373,28 @@
         toast(work.saved ? "Salvo na biblioteca" : "Removido da biblioteca");
         return true;
       });
-      button.disabled = false;
       refresh();
-      if (done && onChange) onChange();
-      if (done && work.saved) await offerLists();
+      if (done) { if (onChange) onChange(); await renderMenu(); }
+    }
+
+    picker.addEventListener("keydown", (event) => { if (event.key === "Escape") { closePicker(); button.focus(); } });
+    button.addEventListener("click", async () => {
+      if (!requireUser("Entre para salvar artigos na sua biblioteca.")) return;
+      if (!picker.hidden) { closePicker(); return; }
+      if (!work.saved) {
+        button.disabled = true;
+        const done = await guarded(async () => {
+          await api("/api/library", { method: "POST", body: { ref: work.ref } });
+          work.saved = true;
+          toast("Salvo na biblioteca");
+          return true;
+        });
+        button.disabled = false;
+        refresh();
+        if (!done) return;
+        if (onChange) onChange();
+      }
+      await renderMenu();
     });
     refresh();
     return wrap;

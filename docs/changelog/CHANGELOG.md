@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2026-10 — Salvar em lista, sem rodeios
+
+- O botão **Salvar** é um só: salva na biblioteca e abre o menu para marcar listas, **criar uma lista nova na hora** (mesmo sem nenhuma lista ainda) e remover da biblioteca. Com o artigo já salvo, o clique abre o mesmo menu em vez de remover. Vale na busca, no artigo e nos semelhantes; no celular o menu sobe como painel na base da tela.
+
 ## 2026-10 — Celular mais confortável
 
 - Busca: barra de busca sempre visível e fixa, botão **Filtros** com contador que abre uma folha inferior (com "Limpar tudo" e "Ver resultados"), filtros ativos como chips removíveis, **Ordenar** ao lado da contagem e resultados logo abaixo; avisos da busca recolhidos em um só bloco. No desktop os filtros seguem na coluna lateral, agora com os mesmos chips e a barra de busca no topo.

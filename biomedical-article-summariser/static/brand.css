@@ -503,3 +503,20 @@ input[type="text"], input[type="search"], input[type="email"], input[type="passw
 .notes { margin: 0 0 14px; padding: 10px 14px; border: 1px dashed var(--line-strong); border-radius: var(--radius); font-size: 0.86rem; color: var(--muted); }
 .notes summary { cursor: pointer; font-weight: 600; color: var(--text); }
 .notes ul { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 4px; }
+
+/* ---------- Menu do botão Salvar ---------- */
+.save-button .icon:last-child { width: 16px; height: 16px; margin-left: 2px; opacity: 0.7; }
+.save-picker { width: min(340px, 86vw); gap: 8px; }
+.save-status { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--border); font-size: 0.9rem; font-weight: 600; }
+.save-status .icon { color: var(--ok); }
+.save-picker-title { margin: 4px 0 0; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.list-checks { display: grid; max-height: 220px; overflow-y: auto; margin: 0 -4px; }
+.list-check { display: flex; align-items: center; gap: 10px; padding: 8px 4px; margin: 0; font-size: 0.95rem; font-weight: 500; color: var(--text); cursor: pointer; border-radius: var(--radius-sm); }
+.list-check:hover { background: var(--surface-2); }
+.list-check span { flex: 1; overflow-wrap: anywhere; }
+.new-list { display: grid; gap: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+.close-picker { justify-self: end; }
+@media (max-width: 900px) {
+  .save-picker { position: fixed; left: 8px; right: 8px; bottom: 72px; top: auto; width: auto; max-height: 75vh; overflow-y: auto; z-index: 55; }
+  .list-check { min-height: 44px; }
+}
