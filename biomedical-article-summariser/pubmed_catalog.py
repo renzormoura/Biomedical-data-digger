@@ -14,7 +14,7 @@ from xml.etree.ElementTree import Element
 import requests
 from loguru import logger
 
-from catalog import ISO2_TO_ISO3, CatalogError, SearchQuery, SearchResult, Work, iso2
+from catalog import ISO2_TO_ISO3, CatalogError, SearchQuery, SearchResult, Work, iso2, iso_date
 from citations import Author
 from europepmc_catalog import STUDY_FILTERS
 from extraction import STUDY_TYPE_LABELS, study_type_labels
@@ -72,6 +72,17 @@ def _year(article: Element) -> int | None:
     return None
 
 
+def _published(article: Element) -> str:
+    """Data em que o PubMed recebeu o registro (a mais proxima de "saiu agora")."""
+    for status in ("pubmed", "entrez"):
+        node = article.find(f"PubmedData/History/PubMedPubDate[@PubStatus='{status}']")
+        if node is not None:
+            year, month, day = (text_of(node.find(tag)) for tag in ("Year", "Month", "Day"))
+            if year and month and day:
+                return iso_date(f"{year}-{int(month):02d}-{int(day):02d}" if month.isdigit() and day.isdigit() else "")
+    return ""
+
+
 def to_work(article: Element) -> Work:
     cit = "MedlineCitation/Article/"
     ids = _article_ids(article)
@@ -90,6 +101,7 @@ def to_work(article: Element) -> Work:
         authors=authors,
         journal=text_of(article.find(cit + "Journal/Title")),
         year=_year(article),
+        published=_published(article),
         volume=text_of(article.find(cit + "Journal/JournalIssue/Volume")),
         issue=text_of(article.find(cit + "Journal/JournalIssue/Issue")),
         pages=pagination,

@@ -8,7 +8,7 @@ from typing import Any
 import requests
 from loguru import logger
 
-from catalog import CatalogError, SearchQuery, SearchResult, Work, iso2
+from catalog import CatalogError, SearchQuery, SearchResult, Work, iso2, iso_date
 from citations import Author
 
 API_URL = "https://api.openaire.eu/graph/v1/researchProducts"
@@ -57,6 +57,7 @@ def to_work(record: dict[str, Any]) -> Work:
         ),
         journal=str(container.get("name") or ""),
         year=int(date[:4]) if date[:4].isdigit() else None,
+        published=iso_date(date),
         volume=str(container.get("vol") or ""),
         issue=str(container.get("iss") or ""),
         pages=f"{start}-{end}" if start and end and start != end else start,

@@ -13,8 +13,10 @@ from alerts import (
     MANUAL_INTERVAL,
     MAX_ALERTS,
     MAX_NEW_PER_CHECK,
+    PER_TOPIC_NEW,
     AlertService,
     AlertStore,
+    eligible,
     work_key,
 )
 from catalog import Work
@@ -32,7 +34,7 @@ START = datetime(2026, 10, 18, 12, 0, tzinfo=timezone.utc)
 
 
 def make_work(ref, title=None, doi="", year=2026, **extra):
-    return Work(ref=ref, title=title or f"Artigo {ref}", doi=doi, year=year, **extra)
+    return Work(ref=ref, title=title or f"Artigo {ref}: pediatrics, oncology and metformina idosos", doi=doi, year=year, **extra)
 
 
 # ------------------------------------------------------------------ interesses
@@ -80,6 +82,26 @@ def test_topic_query_uses_portuguese_terms_only_for_portuguese():
     topic = interests.validar([{"area": "medicina", "subtopics": ["pediatria"]}], [], []).selected()[0]
     assert topic.query("en") == "pediatrics" and topic.query("pt") == "pediatria" and topic.query("") == "pediatrics"
     assert topic.key == "medicina/pediatria"
+    assert topic.alternatives("en")[0] == "pediatrics" and "pediatria" not in topic.alternatives("en")
+    assert topic.alternatives("pt")[0] == "pediatria" and "pediatrics" in topic.alternatives("pt")
+    assert {"pediatrics", "pediatria"} <= set(topic.alternatives("es")) and {"pediatrics", "pediatria"} <= set(topic.alternatives(""))
+
+
+@pytest.mark.parametrize("text,alternatives,expected", [
+    ("Large language models in radiology", ("large language model",), True),
+    ("Language models of the large intestine", ("large language model",), True),  # limitacao: confere palavras, nao a frase
+    ("Ventrículo direito persistente", ("direito penal", "legislação"), False),
+    ("Aspectos do direito penal brasileiro", ("direito penal",), True),
+    ("Pediatric oncology outcomes", ("pediatrics", "pediatric"), True),
+    ("Pediatrics today", ("pediatric",), True),  # plural simples
+    ("Pediatricians say", ("pediatric",), False),  # palavra inteira: "pediatricians" e outra palavra
+    ("PEDIATRÍA y niños", ("pediatria",), True),  # sem acento e sem diferenca de caixa
+    ("", ("cancer",), False),
+    ("qualquer coisa", (), False),
+    ("qualquer coisa", ("",), False),
+])
+def test_mentions_requires_whole_words_of_some_alternative(text, alternatives, expected):
+    assert interests.mentions(text, alternatives) is expected
 
 
 def test_carregar_drops_what_no_longer_exists_and_survives_garbage():
@@ -190,7 +212,7 @@ def test_keywords_become_their_own_searches(parts):
     searcher.results["metformina idosos"] = [make_work("A")]
     service.check(EMAIL)
     clock.advance(AUTO_INTERVAL + timedelta(minutes=1))
-    searcher.results["metformina idosos"] = [make_work("A"), make_work("Z", title="Novo estudo")]
+    searcher.results["metformina idosos"] = [make_work("A"), make_work("Z", title="Novo estudo sobre metformina idosos")]
     assert service.check(EMAIL).new == 1
     assert store.alerts(EMAIL)[0].topic == "“metformina idosos”"
 
@@ -206,6 +228,22 @@ def test_same_article_from_two_sources_alerts_once_and_retracted_are_skipped(par
     assert work_key(make_work("a", doi=" 10.1/X ")) == "10.1/x"
 
 
+def test_results_that_do_not_talk_about_the_topic_are_ignored(parts):
+    store, searcher, clock, service = parts
+    choose(store)
+    service.check(EMAIL)
+    clock.advance(AUTO_INTERVAL + timedelta(minutes=1))
+    searcher.results["pediatrics"] = [
+        make_work("ruido", title="Persistent right ventricular dysfunction predicts mortality"),
+        make_work("certo", title="Vaccination schedules in pediatrics"),
+        make_work("por-palavra-chave", title="Outcomes study", keywords=("pediatric",)),
+        make_work("de-passagem", title="Statin use after infarction", abstract="Patients were mostly adults; a few children were included."),
+        make_work("por-resumo", title="Asthma outcomes", abstract="We followed children seen in pediatrics clinics for two years."),
+    ]
+    assert service.check(EMAIL).new == 3
+    assert {a.work.ref for a in store.alerts(EMAIL)} == {"certo", "por-palavra-chave", "por-resumo"}
+
+
 def test_source_failures_do_not_consume_the_interval_and_are_reported(parts):
     store, searcher, clock, service = parts
     choose(store)
@@ -217,16 +255,69 @@ def test_source_failures_do_not_consume_the_interval_and_are_reported(parts):
     assert service.check(EMAIL).ran  # nao precisou esperar
 
 
-def test_new_alerts_per_check_are_capped_and_the_box_keeps_the_latest(parts):
+def test_each_topic_is_capped_and_the_overflow_does_not_queue_up(parts):
     store, searcher, clock, service = parts
     choose(store)
     service.check(EMAIL)
     clock.advance(AUTO_INTERVAL + timedelta(minutes=1))
-    searcher.results["pediatrics"] = [make_work(str(i)) for i in range(MAX_NEW_PER_CHECK + 8)]
+    searcher.results["pediatrics"] = [make_work(str(i), published=f"2026-10-{10 + i:02d}") for i in range(PER_TOPIC_NEW + 4)]
+    assert service.check(EMAIL).new == PER_TOPIC_NEW
+    assert [a.work.published for a in store.alerts(EMAIL)][0] == "2026-10-18"  # os mais recentes primeiro
+    clock.advance(AUTO_INTERVAL + timedelta(minutes=1))
+    assert service.check(EMAIL).new == 0  # os excedentes foram descartados, nao ficaram na fila
+
+
+def test_total_new_per_check_and_box_size_are_capped(parts):
+    store, searcher, clock, service = parts
+    topics = [{"area": "medicina", "subtopics": [s["key"] for s in interests.catalogo()["areas"][0]["subtopics"][:10]]}]
+    choose(store, topics)
+    service.check(EMAIL)
+    clock.advance(AUTO_INTERVAL + timedelta(minutes=1))
+    for topic in interests.validar(topics, [], []).selected():
+        searcher.results[topic.query("en")] = [make_work(f"{topic.sub}-{i}") for i in range(PER_TOPIC_NEW)]
     assert service.check(EMAIL).new == MAX_NEW_PER_CHECK
-    assert store.unread(EMAIL) == MAX_NEW_PER_CHECK
     store.add_alerts(EMAIL, [(make_work(f"x{i}"), "t") for i in range(MAX_ALERTS)])
     assert len(store.alerts(EMAIL, limit=1000)) == MAX_ALERTS
+
+
+def test_eligibility_uses_publication_date_and_ignores_absurd_future_years():
+    today = START
+    assert eligible(make_work("a", published="2026-10-10"), today)
+    assert not eligible(make_work("b", published="2026-05-01"), today)  # mais de 60 dias
+    assert eligible(make_work("c", published="2027-06-24", year=2027), today)  # data futura: sem data confiavel
+    assert eligible(make_work("d", published="", year=2026), today)
+    assert not eligible(make_work("e", published="2099-06-10", year=2099), today)
+    assert eligible(make_work("f", published="2026-13-99"), today)  # data invalida vira "sem data"
+
+
+def test_old_articles_do_not_alert_and_are_not_reconsidered(parts):
+    store, searcher, clock, service = parts
+    choose(store)
+    service.check(EMAIL)
+    clock.advance(AUTO_INTERVAL + timedelta(minutes=1))
+    searcher.results["pediatrics"] = [make_work("velho", published="2026-01-05"), make_work("novo", published="2026-10-17")]
+    assert service.check(EMAIL).new == 1 and store.alerts(EMAIL)[0].work.ref == "novo"
+    assert store.seen(EMAIL, ["velho"]) == {"velho"}
+
+
+def test_check_all_runs_only_due_accounts_oldest_first_and_survives_failures(parts):
+    store, searcher, clock, service = parts
+    store.set_preferences("a@x.com", interests.validar([{"area": "medicina", "subtopics": ["pediatria"]}], [], []))
+    store.set_preferences("b@x.com", interests.validar([{"area": "medicina", "subtopics": ["pediatria"]}], [], []))
+    store.set_preferences("sem@x.com", interests.validar([], [], []))
+    summary = service.check_all()
+    assert summary == {"due": 3, "ran": 2, "new": 0, "failed": 0}  # a conta sem interesses entra como vencida, mas nao roda
+    assert service.check_all()["due"] == 1  # as duas que rodaram esperam o intervalo; a sem interesses segue sem data
+    clock.advance(AUTO_INTERVAL + timedelta(minutes=1))
+    original = service.check
+
+    def explode(user, **kwargs):
+        if user == "a@x.com":
+            raise RuntimeError("falha isolada")
+        return original(user, **kwargs)
+
+    service.check = explode
+    assert service.check_all() == {"due": 3, "ran": 1, "new": 0, "failed": 1}
 
 
 def test_mark_read_dismiss_and_isolation_between_users(parts):
@@ -294,10 +385,10 @@ def env(tmp_path, monkeypatch):
     alerts = AlertService(store, lambda q, user: catalog.search(q).works, clock)
     repository = ArticleRepository(lambda raw: ("T", "Resumo suficiente para o teste.", "s"))
     service = AnalysisService(repository, MagicMock(), SlidingWindowLimiter(50, 60))
-    settings = Settings(session_secret="k" * 40, login_attempts_per_minute=100)
 
-    def client(email=EMAIL):
-        app = create_app(service, repository, settings, account_store_factory=lambda: AccountStore(), search_fn=lambda *a, **k: [], discovery=discovery, library=library, alerts=alerts)
+    def client(email=EMAIL, cron_token=""):
+        configured = Settings(session_secret="k" * 40, login_attempts_per_minute=100, alerts_cron_token=cron_token)
+        app = create_app(service, repository, configured, account_store_factory=lambda: AccountStore(), search_fn=lambda *a, **k: [], discovery=discovery, library=library, alerts=alerts)
         test_client = TestClient(app, base_url="http://testserver")
         if email:
             assert test_client.post("/api/auth/register", json={"email": email, "password": "senha-forte-123"}).status_code == 200
@@ -326,11 +417,11 @@ def test_save_interests_check_and_read_through_the_api(env):
     assert first["ran"] and first["baseline"] and first["unread"] == 0
     assert client.get("/api/interests").json()["lastChecked"]
     env.clock.advance(AUTO_INTERVAL + timedelta(minutes=1))
-    env.catalog.works["pediatrics"] = [make_work("A"), make_work("B", title="Novo em pediatria")]
+    env.catalog.works["pediatrics"] = [make_work("A"), make_work("B", title="New pediatrics study")]
     second = client.post("/api/alerts/check", json={"force": False}).json()
     assert second["new"] == 1 and second["unread"] == 1
     alert = second["alerts"][0]
-    assert alert["work"]["title"] == "Novo em pediatria" and alert["topic"] == "Medicina: Pediatria" and not alert["read"]
+    assert alert["work"]["title"] == "New pediatrics study" and alert["topic"] == "Medicina: Pediatria" and not alert["read"]
     assert client.post("/api/alerts/check", json={}).json()["reason"] == "intervalo"
     assert client.post("/api/alerts/read", json={"id": alert["id"]}).json()["unread"] == 0
     assert client.post("/api/alerts/read", json={"id": "nao-existe"}).status_code == 404
@@ -346,6 +437,15 @@ def test_invalid_interests_are_rejected_and_accounts_are_isolated(env):
     outra = env.client("bia@exemplo.com")
     assert outra.get("/api/interests").json()["topics"] == []
     assert outra.get("/api/alerts").json() == {"unread": 0, "alerts": []}
+
+
+def test_scheduled_run_is_disabled_without_token_and_protected_with_one(env, tmp_path):
+    assert env.client(None).post("/api/internal/alerts/run").status_code == 404
+    guarded = env.client(None, cron_token="t" * 30)
+    assert guarded.post("/api/internal/alerts/run").status_code == 401
+    assert guarded.post("/api/internal/alerts/run", headers={"Authorization": "Bearer errado"}).status_code == 401
+    ok = guarded.post("/api/internal/alerts/run", headers={"Authorization": "Bearer " + "t" * 30})
+    assert ok.status_code == 200 and ok.json() == {"due": 0, "ran": 0, "new": 0, "failed": 0}
 
 
 def test_check_reports_reason_when_there_is_nothing_to_watch(env):

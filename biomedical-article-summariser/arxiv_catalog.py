@@ -15,7 +15,7 @@ from xml.etree.ElementTree import Element
 import requests
 from loguru import logger
 
-from catalog import CatalogError, SearchQuery, SearchResult, Work
+from catalog import CatalogError, SearchQuery, SearchResult, Work, iso_date
 from openalex_catalog import split_name
 from xmlutil import parse_xml, text_of
 
@@ -72,6 +72,7 @@ def to_work(entry: Element) -> Work:
         authors=tuple(split_name(text_of(a)) for a in entry.findall("a:author/a:name", NS) if text_of(a)),
         journal=text_of(_first(entry, "x:journal_ref")) or "arXiv (preprint)",
         year=int(published[:4]) if published[:4].isdigit() else None,
+        published=iso_date(published),
         doi=text_of(_first(entry, "x:doi")),
         study_types=("Preprint",),
         open_access=True,

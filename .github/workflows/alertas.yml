@@ -1,0 +1,30 @@
+name: Alertas agendados
+
+# Procura artigos novos para as contas com interesses, mesmo com o site fechado.
+# Precisa de dois segredos do repositorio: APP_URL (ex.: https://seu-app.onrender.com, sem barra no fim)
+# e ALERTS_CRON_TOKEN (o mesmo valor configurado no Render, com 24+ caracteres).
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Chamar a verificacao do servidor
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          ALERTS_CRON_TOKEN: ${{ secrets.ALERTS_CRON_TOKEN }}
+        run: |
+          if [ -z "$APP_URL" ] || [ -z "$ALERTS_CRON_TOKEN" ]; then
+            echo "Segredos APP_URL e ALERTS_CRON_TOKEN nao configurados; nada a fazer."
+            exit 0
+          fi
+          # o plano gratuito do Render dorme: a primeira chamada acorda o servidor, entao ha novas tentativas
+          curl --fail --silent --show-error --retry 4 --retry-delay 20 --retry-all-errors --max-time 240 \
+            -X POST -H "Authorization: Bearer $ALERTS_CRON_TOKEN" "$APP_URL/api/internal/alerts/run"

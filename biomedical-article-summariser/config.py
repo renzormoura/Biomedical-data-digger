@@ -40,6 +40,7 @@ class Settings:
     production: bool = False
     session_secret: str = field(default="", repr=False)
     admin_token: str = field(default="", repr=False)
+    alerts_cron_token: str = field(default="", repr=False)
     llm_temperature: float = 0.2
     generative_clinical: bool = False
     discovery_calls_per_minute: int = 30
@@ -58,8 +59,12 @@ class Settings:
         admin_token = os.environ.get("ADMIN_TOKEN", "").strip()
         if admin_token and len(admin_token) < 24:
             raise ValueError("ADMIN_TOKEN deve ter ao menos 24 caracteres (ou ficar vazio para desativar).")
+        cron_token = os.environ.get("ALERTS_CRON_TOKEN", "").strip()
+        if cron_token and len(cron_token) < 24:
+            raise ValueError("ALERTS_CRON_TOKEN deve ter ao menos 24 caracteres (ou ficar vazio para desativar).")
         return cls(
             production=production,
+            alerts_cron_token=cron_token,
             session_secret=secret,
             admin_token=admin_token,
             discovery_calls_per_minute=_int_env("DISCOVERY_CALLS_PER_MINUTE", 30, minimum=1),

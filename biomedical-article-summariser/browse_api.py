@@ -6,11 +6,12 @@ etiquetar, listar e exportar exigem sessao. Nada aqui chama IA nem gasta token.
 
 from __future__ import annotations
 
+import hmac
 from collections.abc import Callable
 from typing import Annotated, Any
 
 from fastapi import FastAPI, Path, Query, Request
-from fastapi.responses import Response
+from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, Field
 
 import downloads
@@ -228,6 +229,7 @@ def register_browse_routes(
     current_user: Callable[[Request], str | None],
     identity: Callable[[Request], str],
     alerts: AlertService | None = None,
+    cron_token: str = "",
 ) -> None:
     shared_limiter = SlidingWindowLimiter(60, window=60.0)
     brasil_limiter = SlidingWindowLimiter(120, window=60.0)
@@ -507,6 +509,22 @@ def register_browse_routes(
                 "ran": result.ran, "new": result.new, "reason": result.reason, "baseline": result.baseline,
                 "notes": list(result.notes), **box(user),
             }
+
+        cron_limiter = SlidingWindowLimiter(10, window=60.0)
+
+        @app.post("/api/internal/alerts/run")
+        def run_scheduled_alerts(request: Request) -> JSONResponse:
+            """Verificacao agendada para todas as contas. Desativada (404) sem ALERTS_CRON_TOKEN."""
+            if not cron_token:
+                return JSONResponse({"error": "Não encontrado."}, status_code=404)
+            try:
+                cron_limiter.check(identity(request))
+            except RateLimitExceeded as error:
+                raise RateLimitedError(str(error)) from error
+            supplied = request.headers.get("authorization", "")
+            if not hmac.compare_digest(supplied.encode(), f"Bearer {cron_token}".encode()):
+                return JSONResponse({"error": "Não autorizado."}, status_code=401)
+            return JSONResponse(alert_service.check_all())
 
         @app.post("/api/alerts/read")
         def read_alerts(body: ReadIn, request: Request) -> dict[str, Any]:

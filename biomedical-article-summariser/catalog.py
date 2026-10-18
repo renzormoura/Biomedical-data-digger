@@ -7,7 +7,9 @@ busca consulta um unico catalogo e a interface deixa o usuario escolher qual.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
+from datetime import date
 from typing import Protocol
 
 from citations import Author
@@ -42,6 +44,7 @@ class Work:
     keywords: tuple[str, ...] = ()
     source: str = ""
     retracted: bool = False  # a fonte marca o registro como retratado
+    published: str = ""  # data de publicacao AAAA-MM-DD (ou AAAA-MM) quando a fonte informa; vazio se so ha o ano
 
     def to_dict(self) -> dict[str, object]:
         """Representacao JSON-segura (usada no banco e na API)."""
@@ -53,6 +56,7 @@ class Work:
             "study_types": list(self.study_types), "open_access": self.open_access, "oa_url": self.oa_url,
             "cited_by": self.cited_by, "language": self.language, "abstract": self.abstract,
             "keywords": list(self.keywords), "source": self.source, "retracted": self.retracted,
+            "published": self.published,
         }
 
     @classmethod
@@ -80,6 +84,7 @@ class Work:
             study_types=texts("study_types"), open_access=data.get("open_access") is True, oa_url=text("oa_url"),
             cited_by=cited if isinstance(cited, int) else 0, language=text("language"), abstract=text("abstract"),
             keywords=texts("keywords"), source=text("source"), retracted=data.get("retracted") is True,
+            published=iso_date(text("published")),
         )
 
     @property
@@ -155,6 +160,19 @@ ISO3_TO_ISO2 = {
     "chi": "zh", "zho": "zh", "jpn": "ja", "rus": "ru", "dut": "nl", "nld": "nl", "pol": "pl", "tur": "tr",
 }
 ISO2_TO_ISO3 = {"en": "eng", "pt": "por", "es": "spa", "fr": "fre", "de": "ger", "it": "ita"}
+
+
+def iso_date(value: object) -> str:
+    """Data AAAA-MM-DD (ou AAAA-MM) valida a partir de um texto da fonte; vazio quando nao da para confiar."""
+    match = re.match(r"^(\d{4})-(\d{2})(?:-(\d{2}))?", str(value or "").strip())
+    if not match:
+        return ""
+    year, month, day = int(match.group(1)), int(match.group(2)), int(match.group(3) or 1)
+    try:
+        date(year, month, day)
+    except ValueError:
+        return ""
+    return match.group(0)
 
 
 def iso2(code: str) -> str:

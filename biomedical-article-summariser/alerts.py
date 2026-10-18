@@ -14,21 +14,25 @@ import uuid
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 
 from catalog import SearchQuery, Work
 from db import Database
 from domain import DiggerError, NotFoundError
-from interests import Preferences, Topic, carregar
+from interests import Preferences, Topic, carregar, mentions
 
 AUTO_INTERVAL = timedelta(hours=6)
 MANUAL_INTERVAL = timedelta(minutes=15)
 MAX_SEARCHES = 24
 MAX_NEW_PER_CHECK = 30
+PER_TOPIC_NEW = 5  # temas amplos (ex.: pediatria) trazem centenas por semana; mostramos so os mais recentes
+RECENT_DAYS = 60  # com data de publicacao conhecida, artigo mais velho que isso nao conta como novo
 MAX_ALERTS = 200
+MAX_USERS_PER_RUN = 40  # por execucao agendada; o restante fica para a proxima
 MAX_SEEN = 5000
 RECENT_YEARS = 1  # considera artigos do ano corrente e do anterior
-PER_SEARCH = 10
+PER_SEARCH = 20
+ABSTRACT_MIN_TERMS = 2  # termos distintos do tema no resumo, quando o titulo nao os traz
 MAX_ABSTRACT_CHARS = 1500
 WORKERS = 4
 
@@ -67,6 +71,33 @@ def _now() -> datetime:
 
 def _iso(moment: datetime) -> str:
     return moment.isoformat(timespec="seconds")
+
+
+def eligible(work: Work, now: datetime) -> bool:
+    """Pode virar aviso: data conhecida e recente, ou sem data confiavel (so o criterio "ainda nao visto").
+
+    As fontes trazem datas futuras (fasciculos programados, ate 2099 no OpenAIRE); essas nao servem para dizer se e novo,
+    mas o ano absurdo descarta o registro.
+    """
+    if work.year and work.year > now.year + 1:
+        return False
+    try:
+        published = date.fromisoformat(work.published[:10]) if len(work.published) >= 10 else None
+    except ValueError:
+        published = None
+    if published is None or published > now.date():
+        return True
+    return (now.date() - published).days <= RECENT_DAYS
+
+
+def on_topic(work: Work, alternatives: tuple[str, ...]) -> bool:
+    """As fontes devolvem ruido (uma palavra casa em outro sentido, ou numa citacao de passagem): conferimos o texto.
+
+    Vale quando o titulo, as palavras-chave ou a revista tratam do tema, ou quando o resumo cita ao menos dois termos diferentes.
+    """
+    if mentions(" ".join([work.title, " ".join(work.keywords), work.journal]), alternatives):
+        return True
+    return sum(mentions(work.abstract, (alt,)) for alt in alternatives) >= ABSTRACT_MIN_TERMS
 
 
 def work_key(work: Work) -> str:
@@ -118,6 +149,14 @@ class AlertStore:
                ON CONFLICT (user_email) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at, last_checked = NULL""",
             (user, json.dumps(prefs.to_dict(), ensure_ascii=False), _iso(_now())),
         )
+
+    def due_users(self, cutoff: datetime, limit: int) -> list[str]:
+        """Contas com interesses cuja ultima verificacao e anterior ao corte (as nunca verificadas primeiro)."""
+        rows = self._db.query(
+            "SELECT user_email FROM interest_prefs WHERE last_checked IS NULL OR last_checked < ? ORDER BY COALESCE(last_checked, '') ASC LIMIT ?",
+            (_iso(cutoff), limit),
+        )
+        return [row[0] for row in rows]
 
     def touch_checked(self, user: str, moment: datetime) -> None:
         self._db.execute("UPDATE interest_prefs SET last_checked = ? WHERE user_email = ?", (_iso(moment), user))
@@ -179,6 +218,7 @@ class AlertStore:
             except ValueError:
                 data = {}
             result.append(Alert(alert_id, Work.from_dict(data if isinstance(data, dict) else {}), topic, created, read_at is not None))
+        result.sort(key=lambda a: (a.created_at, a.work.published), reverse=True)  # mesmo lote: o mais recente primeiro
         return result
 
     def unread(self, user: str) -> int:
@@ -203,6 +243,7 @@ class _Search:
     topic: str  # rotulo para exibir
     key: str
     query: SearchQuery
+    alternatives: tuple[str, ...]  # o resultado so conta se o titulo ou resumo tratar do tema
 
 
 class AlertService:
@@ -223,11 +264,26 @@ class AlertService:
         topics: list[Topic] = prefs.selected()
         for topic in topics:
             for language in languages:
-                searches.append(_Search(topic.label, _search_key(topic.key, language), SearchQuery(q=topic.query(language), language=language, **base)))  # type: ignore[arg-type]
+                searches.append(_Search(topic.label, _search_key(topic.key, language), SearchQuery(q=topic.query(language), language=language, **base), topic.alternatives(language)))  # type: ignore[arg-type]
         for term in prefs.terms:
             for language in languages:
-                searches.append(_Search(f"“{term}”", _search_key("termo", language, term), SearchQuery(q=term, language=language, **base)))  # type: ignore[arg-type]
+                searches.append(_Search(f"“{term}”", _search_key("termo", language, term), SearchQuery(q=term, language=language, **base), (term,)))  # type: ignore[arg-type]
         return searches[:MAX_SEARCHES]
+
+    def check_all(self, *, max_users: int = MAX_USERS_PER_RUN) -> dict[str, int]:
+        """Verificacao agendada (sem o usuario no site): as contas vencidas, da mais antiga para a mais nova."""
+        now = self._clock()
+        summary = {"due": 0, "ran": 0, "new": 0, "failed": 0}
+        for user in self._store.due_users(now - AUTO_INTERVAL, max_users):
+            summary["due"] += 1
+            try:
+                result = self.check(user)
+            except Exception:  # noqa: BLE001 - uma conta com problema nao pode parar as demais
+                summary["failed"] += 1
+                continue
+            summary["ran"] += int(result.ran)
+            summary["new"] += result.new
+        return summary
 
     def check(self, user: str, *, force: bool = False) -> CheckResult:
         prefs, last = self._store.preferences(user)
@@ -255,19 +311,29 @@ class AlertService:
         baselined = self._store.baselined(user)
         fresh_baselines: list[str] = []
         candidates: dict[str, tuple[Work, str]] = {}
-        silent: dict[str, None] = {}
+        silent: dict[str, None] = {}  # vistos sem avisar: linha de base, artigos antigos e excedentes
         for item, works in done:
-            usable = [w for w in works if not w.retracted and w.title.strip()]
+            usable = [w for w in works if not w.retracted and w.title.strip() and on_topic(w, item.alternatives)]
             if item.key not in baselined:
                 fresh_baselines.append(item.key)
                 silent.update({work_key(w): None for w in usable})
                 continue
             for work in usable:
-                candidates.setdefault(work_key(work), (work, item.topic))
+                if eligible(work, now):
+                    candidates.setdefault(work_key(work), (work, item.topic))
+                else:
+                    silent[work_key(work)] = None
         known = self._store.seen(user, list(candidates))
-        novos = [(w, topic) for key, (w, topic) in candidates.items() if key not in known and key not in silent]
-        novos.sort(key=lambda pair: (pair[0].year or 0, pair[0].cited_by), reverse=True)
-        novos = novos[:MAX_NEW_PER_CHECK]
+        fresh = [(w, topic) for key, (w, topic) in candidates.items() if key not in known and key not in silent]
+        fresh.sort(key=lambda pair: (pair[0].published, pair[0].cited_by), reverse=True)
+        novos: list[tuple[Work, str]] = []
+        per_topic: dict[str, int] = {}
+        for work, topic in fresh:
+            if per_topic.get(topic, 0) < PER_TOPIC_NEW and len(novos) < MAX_NEW_PER_CHECK:
+                per_topic[topic] = per_topic.get(topic, 0) + 1
+                novos.append((work, topic))
+            else:
+                silent[work_key(work)] = None  # tema amplo: mostramos so os mais recentes e nao deixamos fila acumulada
         created = self._store.add_alerts(user, novos) if novos else 0
         self._store.mark_seen(user, list(silent) + [work_key(w) for w, _ in novos])
         if fresh_baselines:

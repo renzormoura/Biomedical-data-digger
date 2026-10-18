@@ -15,7 +15,7 @@ import requests
 from loguru import logger
 
 import article_services
-from catalog import ISO2_TO_ISO3, CatalogError, SearchQuery, SearchResult, Work, iso2
+from catalog import ISO2_TO_ISO3, CatalogError, SearchQuery, SearchResult, Work, iso2, iso_date
 from citations import Author
 from extraction import STUDY_TYPE_LABELS, study_type_labels
 
@@ -134,6 +134,7 @@ def to_work(record: dict[str, Any]) -> Work:
         authors=_authors(record),
         journal=str((info.get("journal") or {}).get("title") or record.get("journalTitle") or ""),
         year=_int(record.get("pubYear")),
+        published=iso_date(record.get("firstPublicationDate")),
         volume=str(info.get("volume") or ""),
         issue=str(info.get("issue") or ""),
         pages=str(record.get("pageInfo") or ""),

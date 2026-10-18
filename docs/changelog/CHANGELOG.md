@@ -1,5 +1,24 @@
 # CHANGELOG
 
+## 2026-10 — Alertas: datas, filtro de relevância e verificação agendada
+
+### Medido com busca real
+- Em 8 buscas reais (PubMed, Europe PMC, arXiv, DOAJ, OpenAIRE), a primeira versão trazia muito ruído: "direito" casou com "ventrículo direito" (o PubMed traduz a palavra), "large language models" trouxe um artigo de enterovírus, e as fontes devolvem datas futuras (fascículos programados, até 2099 no OpenAIRE).
+
+### Alterado
+- Cada artigo guarda a **data exata de publicação** quando a fonte informa (`Work.published`): Europe PMC, OpenAlex, arXiv, OpenAIRE e, no PubMed, a data em que o registro chegou. Só o ano continua valendo para DOAJ.
+- Um artigo só vira aviso se tiver até 60 dias, quando a data é conhecida; datas futuras contam como "sem data" e anos absurdos são descartados.
+- **Filtro de relevância:** o resultado só conta se o título, as palavras-chave ou a revista tratam do tema, ou se o resumo cita ao menos dois termos diferentes. Cada tema agora tem uma lista de termos em inglês e em português (80 temas revisados), e a primeira é a que vai para a busca.
+- No máximo 5 avisos por tema em cada verificação, e os excedentes são descartados, sem formar fila. Cada busca traz até 20 resultados.
+
+### Adicionado
+- **Verificação agendada** (`POST /api/internal/alerts/run`, protegida por `ALERTS_CRON_TOKEN`; sem a variável a rota responde 404) e o fluxo `.github/workflows/alertas.yml`, que a chama a cada 6 horas. Para ativar: definir `ALERTS_CRON_TOKEN` no Render (24+ caracteres) e os segredos `APP_URL` e `ALERTS_CRON_TOKEN` no repositório do GitHub. Cada execução atende até 40 contas.
+
+### Limites que continuam
+- Precisão boa, mas não perfeita: a checagem é por palavras, não por frase, e para português o resultado é bem menor que para inglês.
+- Sem e-mail ainda (o aviso aparece no sininho, ao abrir o site). E-mail exige escolher um provedor.
+- Os termos de cada tema precisam de revisão por especialistas da área.
+
 ## 2026-10 — Alertas de artigos novos
 
 ### Adicionado

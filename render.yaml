@@ -16,3 +16,5 @@ services:
         sync: false
       - key: SESSION_SECRET
         generateValue: true
+      - key: ALERTS_CRON_TOKEN
+        sync: false

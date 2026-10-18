@@ -429,6 +429,9 @@ def create_app(
         }
 
     if discovery is not None and library is not None:
-        register_browse_routes(app, discovery=discovery, library=library, current_user=current_user, identity=identity, alerts=alerts)
+        register_browse_routes(
+            app, discovery=discovery, library=library, current_user=current_user, identity=identity, alerts=alerts,
+            cron_token=settings.alerts_cron_token,
+        )
 
     return app

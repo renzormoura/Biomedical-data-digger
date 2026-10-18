@@ -15,14 +15,14 @@ import requests
 from loguru import logger
 
 from article_services import _abstract_from_inverted_index
-from catalog import CatalogError, SearchQuery, SearchResult, Work, iso2
+from catalog import CatalogError, SearchQuery, SearchResult, Work, iso2, iso_date
 from citations import Author
 
 BASE_URL = "https://api.openalex.org/works"
 HTTP_TIMEOUT = 20
 MAX_KEYWORDS = 12
 SELECT = (
-    "id,doi,title,display_name,publication_year,type,language,cited_by_count,open_access,primary_location,"
+    "id,doi,title,display_name,publication_year,publication_date,type,language,cited_by_count,open_access,primary_location,"
     "authorships,biblio,abstract_inverted_index,keywords,topics,ids"
 )
 
@@ -80,6 +80,7 @@ def to_work(record: dict[str, Any]) -> Work:
         authors=authors,
         journal=str((location.get("source") or {}).get("display_name") or ""),
         year=year if isinstance(year, int) else None,
+        published=iso_date(record.get("publication_date")),
         volume=str(biblio.get("volume") or ""),
         issue=str(biblio.get("issue") or ""),
         pages=f"{first}-{last}" if first and last and first != last else str(first or ""),
