@@ -21,6 +21,7 @@ from openalex_catalog import OpenAlexCatalog
 from pubmed_catalog import PubMedCatalog
 from quota import QuotaManager
 from ratelimit import SlidingWindowLimiter
+from reports import ReportStore
 from usage import UsageLog
 from web import create_app as create_web_app
 from workflow import AnalysisService, ArticleRepository
@@ -45,12 +46,15 @@ def create_app():  # type: ignore[no-untyped-def]
     discovery = DiscoveryService(catalogs, SlidingWindowLimiter(settings.discovery_calls_per_minute, window=60.0))
     alert_store = AlertStore()
     alert_store.initialize()
+    report_store = ReportStore()
+    report_store.initialize()
     alerts = AlertService(
         alert_store,
         lambda query, user: discovery.search(query, source=discovery.search_default, client_id=f"alertas:{user}").works,
     )
     return create_web_app(
-        service, repository, settings, usage_log=usage_log, discovery=discovery, library=get_library_store(), alerts=alerts
+        service, repository, settings, usage_log=usage_log, discovery=discovery, library=get_library_store(), alerts=alerts,
+        reports=report_store,
     )
 
 

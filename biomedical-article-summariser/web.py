@@ -47,6 +47,7 @@ from domain import (
 from library_store import LibraryStore
 from presentation import UNVERIFIABLE_FALLBACK, verification_annex_md
 from ratelimit import RateLimitExceeded, SlidingWindowLimiter, client_key
+from reports import ReportStore
 from sessions import SessionSigner
 from usage import UsageLog
 from workflow import AnalysisService, ArticleRepository, Filters, Reply
@@ -134,6 +135,7 @@ def create_app(
     discovery: DiscoveryService | None = None,
     library: LibraryStore | None = None,
     alerts: AlertService | None = None,
+    reports: ReportStore | None = None,
 ) -> FastAPI:
     app = FastAPI(title="Biomedical Data Digger", docs_url=None, redoc_url=None, openapi_url=None)
     signer = SessionSigner(settings.session_secret or SessionSigner.generate_secret())
@@ -431,7 +433,7 @@ def create_app(
     if discovery is not None and library is not None:
         register_browse_routes(
             app, discovery=discovery, library=library, current_user=current_user, identity=identity, alerts=alerts,
-            cron_token=settings.alerts_cron_token,
+            cron_token=settings.alerts_cron_token, reports=reports,
         )
 
     return app

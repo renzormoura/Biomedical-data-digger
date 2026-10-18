@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 2026-10 — Relatório de tema (fase 1)
+
+### Adicionado
+- **Relatório de tema** a partir de uma lista de leitura: botão "Criar relatório" nas listas, seção "Relatórios de tema" na biblioteca e a tela `#/relatorio/<id>`. O autor escreve título e pergunta, escolhe quais estudos entram, escreve uma nota por estudo e uma nota livre sobre o método; cada salvamento gera uma nova versão.
+- O documento traz panorama (tipo de estudo, ano, idioma, fonte, acesso aberto), estudos com nota de confiabilidade e frases estatísticas copiadas do resumo, referências (ABNT, APA, Vancouver) e um **apêndice de método automático** (origem, contagens de reunidos, incluídos e excluídos, critérios e pesos da nota, limites, versão e data). Download em **HTML, Word (.docx) e Markdown**; PDF pela impressão do HTML.
+- Rotas `POST/GET /api/reports`, `GET/PUT/DELETE /api/reports/{id}` e `GET /api/reports/{id}/download`. Módulo `reports.py`.
+
+### Limites
+- As buscas usadas para achar os estudos não são registradas (a origem é uma lista montada à mão), e o método diz isso. Os estudos são um retrato do momento da criação e não se atualizam sozinhos.
+- Sem seção "Situação no Brasil", versões comparáveis, perfil de usuário nem link público ainda (fases seguintes do plano).
 ## 2026-10 — Citações e exportação para Zotero, Mendeley e EndNote
 
 ### Adicionado

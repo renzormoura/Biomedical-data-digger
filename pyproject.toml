@@ -76,6 +76,7 @@ files = [
     "biomedical-article-summariser/db.py",
     "biomedical-article-summariser/library_store.py",
     "biomedical-article-summariser/alerts.py",
+    "biomedical-article-summariser/reports.py",
     "biomedical-article-summariser/interests.py",
     "biomedical-article-summariser/exports.py",
     "biomedical-article-summariser/xmlutil.py",

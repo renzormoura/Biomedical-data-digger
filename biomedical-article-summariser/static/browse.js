@@ -1103,6 +1103,7 @@
     const data = await guarded(() => api("/api/library"));
     if (!data) { mount($app, h("h1", {}, "Biblioteca"), errorBox("Não foi possível carregar sua biblioteca.")); return; }
     const saved = await guarded(() => api("/api/analyses"));
+    const reports = await guarded(() => api("/api/reports"));
     const activeTag = params.get("tag") || "";
     const allTags = [...new Set(data.items.flatMap((i) => i.tags))].sort();
     const shown = data.items.filter((i) => !activeTag || i.tags.includes(activeTag));
@@ -1144,6 +1145,8 @@
       h("div", { class: "row" }, listName, h("button", { type: "button", class: "btn btn-primary", onclick: createList }, "Criar lista")),
       data.lists.length ? data.lists.map((list) => renderListCard(list, params, exportLink, formats))
         : h("p", { class: "muted" }, "Nenhuma lista ainda. Crie uma e adicione artigos pela página de cada artigo."),
+      h("h2", {}, "Relatórios de tema"),
+      reportRows(reports, () => renderLibrary(params)),
       h("h2", {}, "Análises salvas"),
       saved && saved.analyses.length
         ? h("ul", { class: "analysis-list" }, saved.analyses.map((item) => analysisRow(item, { showTitle: true, onChange: () => renderLibrary(params) })))
@@ -1182,6 +1185,7 @@
           const shared = await guarded(() => api(`/api/lists/${list.id}/share`, { method: "POST", body: {} }));
           if (shared) { showLink(shared.token); copyText(`${location.origin}/#/lista/${shared.token}`, "Link copiado"); }
         } }, "Compartilhar por link"),
+        h("button", { type: "button", class: "btn btn-secondary btn-sm", disabled: !list.works.length, onclick: () => createReportFromList(list) }, "Criar relatório"),
         list.works.length ? formats.map(([l, f]) => exportLink(l, f, list.id)) : null,
         h("button", { type: "button", class: "btn btn-ghost btn-sm", onclick: async () => {
           if (await guarded(() => api(`/api/lists/${list.id}`, { method: "DELETE" }))) renderLibrary(params);
@@ -1194,6 +1198,114 @@
       if (open) openLists.add(list.id); else openLists.delete(list.id);
     });
     return h("section", { class: "list-block" }, h("h3", {}, toggle), body);
+  }
+
+  // ------------------------------------------------------------------ Relatório de tema
+  const REPORT_DOWNLOADS = [["Página web (.html)", "html"], ["Word (.docx)", "docx"], ["Markdown (.md)", "md"]];
+
+  async function createReportFromList(list) {
+    const created = await guarded(() => api("/api/reports", { method: "POST", body: { list_id: list.id } }));
+    if (created) { toast("Relatório criado. Revise os estudos e o método."); location.hash = `#/relatorio/${created.id}`; }
+  }
+
+  function reportRows(reports, onChange) {
+    if (!reports || !reports.reports.length) return h("p", { class: "muted" }, "Nenhum relatório ainda. Abra uma lista e clique em “Criar relatório”.");
+    return h("ul", { class: "analysis-list" }, reports.reports.map((r) => h("li", { class: "analysis-item" },
+      h("a", { href: `#/relatorio/${r.id}`, class: "analysis-article" }, r.title),
+      h("small", { class: "muted" }, `${r.included} de ${r.total} estudos · versão ${r.version} · lista “${r.listName}” · ${fmtDate(r.updatedAt.slice(0, 10))}`),
+      h("div", { class: "row" },
+        h("a", { class: "btn btn-sm btn-secondary", href: `#/relatorio/${r.id}` }, "Abrir"),
+        h("button", { type: "button", class: "btn btn-sm btn-ghost", "aria-label": `Excluir o relatório ${r.title}`, onclick: async () => {
+          if (await guarded(() => api(`/api/reports/${r.id}`, { method: "DELETE" }))) { toast("Relatório excluído."); onChange(); }
+        } }, "Excluir")))));
+  }
+
+  async function renderReport(reportId) {
+    setTitle("Relatório");
+    if (!session.user) {
+      mount($app, h("h1", {}, "Relatório"), h("div", { class: "empty card" },
+        h("p", {}, "Entre na sua conta para ver seus relatórios."),
+        h("button", { type: "button", class: "btn btn-primary", onclick: () => openAuth("Entre para acessar seus relatórios.") }, "Entrar")));
+      return;
+    }
+    mount($app, h("h1", {}, "Relatório"), loading());
+    const data = await guarded(() => api(`/api/reports/${encodeURIComponent(reportId)}`));
+    if (!data) { mount($app, h("h1", {}, "Relatório"), errorBox("Não foi possível abrir este relatório."), h("a", { href: "#/biblioteca" }, "Voltar à biblioteca")); return; }
+    setTitle(data.title);
+
+    const titleInput = h("input", { type: "text", id: "report-title", maxlength: "200", value: data.title });
+    const questionInput = h("textarea", { id: "report-question", rows: "3", maxlength: "2000", placeholder: "Ex.: O exercício físico reduz a pressão arterial em adultos hipertensos?" });
+    questionInput.value = data.question;
+    const methodInput = h("textarea", { id: "report-method-note", rows: "4", maxlength: "3000", placeholder: "Ex.: Busquei em março de 2026 por “hipertensão e exercício”, só em português e inglês." });
+    methodInput.value = data.methodNote;
+    const rows = data.items.map((item) => {
+      const include = h("input", { type: "checkbox", id: `inc-${item.ref}`, checked: item.included ? "" : null });
+      include.checked = item.included;
+      const note = h("textarea", { rows: "2", maxlength: "1000", "aria-label": `Sua nota sobre ${item.work.title}`, placeholder: "Sua nota sobre este estudo (opcional)" });
+      note.value = item.note;
+      const rel = item.reliability;
+      const score = rel.score === null ? `confiabilidade ${rel.band.toLowerCase()}` : `confiabilidade ${rel.score}/100 (${rel.band.toLowerCase()})`;
+      const card = h("article", { class: "card stack report-study" },
+        h("label", { class: "report-include", for: `inc-${item.ref}` }, include, h("span", {}, "Incluir no relatório")),
+        h("h3", {}, h("a", { href: articleHref(item.work) }, item.work.title)),
+        h("p", { class: "meta" }, [metaLine(item.work), (item.work.studyTypes || [])[0], score].filter(Boolean).join(" · ")),
+        item.findings.length ? h("ul", { class: "plain-list" }, item.findings.map((f) => h("li", {}, h("small", { class: "muted" }, f.tags.join(" · ")), f.sentence))) : null,
+        note);
+      return { item, include, note, card };
+    });
+    const panoramaBox = h("div", { class: "stack" });
+    const paintPanorama = (summary) => {
+      const lines = [["Tipo de estudo", summary.types], ["Ano", summary.years], ["Idioma", summary.languages], ["Fonte", summary.sources]]
+        .filter(([, pairs]) => pairs.length).map(([label, pairs]) => h("li", {}, h("strong", {}, `${label}: `), pairs.map(([n, c]) => `${n} (${c})`).join("; ")));
+      mount(panoramaBox, h("p", {}, `${summary.total} estudos incluídos; ${summary.openAccess} com acesso aberto; ${summary.retracted} retratados; ${summary.withoutAbstract} sem resumo no registro.`),
+        h("ul", { class: "plain-list" }, lines));
+    };
+    paintPanorama(data.panorama);
+    const status = h("span", { class: "note", "aria-live": "polite" }, `Versão ${data.version}`);
+    const saveButton = h("button", { type: "button", class: "btn btn-primary" }, "Salvar alterações");
+
+    async function save() {
+      saveButton.disabled = true;
+      const body = {
+        title: titleInput.value, question: questionInput.value, methodNote: methodInput.value,
+        items: rows.map((r) => ({ ref: r.item.ref, included: r.include.checked, note: r.note.value })),
+      };
+      const saved = await guarded(() => api(`/api/reports/${encodeURIComponent(reportId)}`, { method: "PUT", body }));
+      saveButton.disabled = false;
+      if (!saved) return null;
+      status.textContent = `Salvo · versão ${saved.version}`;
+      titleInput.value = saved.title;
+      paintPanorama(saved.panorama);
+      setTitle(saved.title);
+      return saved;
+    }
+    saveButton.addEventListener("click", async () => { if (await save()) toast("Relatório salvo."); });
+    const download = (format) => async () => {
+      if (!(await save())) return; // o arquivo reflete o que está na tela
+      location.assign(`/api/reports/${encodeURIComponent(reportId)}/download?format=${format}`);
+    };
+
+    mount($app,
+      h("p", {}, h("a", { href: "#/biblioteca" }, "← Biblioteca")),
+      h("h1", {}, "Relatório de tema"),
+      h("p", { class: "lead" }, `Gerado da lista “${data.listName}”. Os estudos foram congelados na criação; escolha quais entram e escreva suas notas. Nada aqui é gerado por IA.`),
+      h("section", { class: "card stack" },
+        h("div", { class: "field" }, h("label", { for: "report-title" }, "Título"), titleInput),
+        h("div", { class: "field" }, h("label", { for: "report-question" }, "Pergunta ou tema"), questionInput)),
+      h("h2", {}, "Estudos"),
+      h("p", { class: "hint" }, "Desmarque o que não deve entrar. A nota de confiabilidade e as frases estatísticas vêm do resumo do registro."),
+      rows.map((r) => r.card),
+      h("h2", {}, "Panorama"), panoramaBox,
+      h("h2", {}, "Método"),
+      h("p", { class: "hint" }, "O texto abaixo é montado automaticamente e entra no apêndice do documento."),
+      h("ul", { class: "plain-list" }, data.method.map((p) => h("li", {}, p))),
+      h("details", { class: "more-records" }, h("summary", {}, "Como a nota de confiabilidade é calculada"),
+        h("ul", { class: "plain-list" }, data.criteria.map((c) => h("li", {}, h("strong", {}, `${c.name} (peso ${c.weight}): `), c.how)))),
+      h("div", { class: "field" }, h("label", { for: "report-method-note" }, "Sua nota sobre o método (opcional)"), methodInput),
+      h("div", { class: "interests-foot" }, status,
+        h("div", { class: "row" }, saveButton,
+          REPORT_DOWNLOADS.map(([label, format]) => h("button", { type: "button", class: "btn btn-secondary", onclick: download(format) }, label)))),
+      h("p", { class: "note" }, "Para PDF: baixe a página web (.html), abra no navegador e use Imprimir, Salvar como PDF. O relatório não conclui nem recomenda conduta; cabe ao autor interpretar os estudos."));
   }
 
   // ------------------------------------------------------------------ Lista compartilhada
@@ -1334,6 +1446,7 @@
     else if (view === "artigo") renderArticle(params);
     else if (view === "biblioteca") renderLibrary(params);
     else if (view === "interesses") renderInterests();
+    else if (view === "relatorio" && rest[0]) renderReport(rest[0]);
     else if (view === "lista" && rest[0]) renderSharedList(rest[0]);
     else renderHome();
     if (view !== "busca") window.scrollTo(0, 0);

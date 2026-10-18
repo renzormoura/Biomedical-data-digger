@@ -27,6 +27,16 @@ from exports import EXPORT_FORMATS
 from interests import catalogo, validar
 from library_store import MAX_ANALYSIS_CHARS, LibraryStore, ReadingList, SavedAnalysis
 from ratelimit import RateLimitExceeded, SlidingWindowLimiter
+from reports import (
+    FINDINGS_PER_STUDY,
+    Report,
+    ReportStore,
+    assess_study,
+    criteria_description,
+    method_paragraphs,
+    panorama,
+    report_blocks,
+)
 
 SNIPPET_CHARS = 300
 LANGUAGES = [("", "Todos"), ("pt", "Português"), ("en", "Inglês"), ("es", "Espanhol")]
@@ -61,6 +71,27 @@ class CheckIn(BaseModel):
 
 class ReadIn(BaseModel):
     id: str | None = Field(None, max_length=64)  # sem id = todos
+
+
+class ReportCreateIn(BaseModel):
+    list_id: str = Field(min_length=1, max_length=64)
+    title: str = Field("", max_length=300)
+    question: str = Field("", max_length=4000)
+
+
+class ReportItemIn(BaseModel):
+    ref: str = Field(min_length=1, max_length=MAX_REF)
+    included: bool = True
+    note: str = Field("", max_length=2000)
+
+
+class ReportUpdateIn(BaseModel):
+    title: str = Field("", max_length=300)
+    question: str = Field("", max_length=4000)
+    method_note: str = Field("", max_length=6000, alias="methodNote")
+    items: list[ReportItemIn] = Field(default_factory=list, max_length=300)
+
+    model_config = {"populate_by_name": True}
 
 
 class ListIn(BaseModel):
@@ -230,6 +261,7 @@ def register_browse_routes(
     identity: Callable[[Request], str],
     alerts: AlertService | None = None,
     cron_token: str = "",
+    reports: ReportStore | None = None,
 ) -> None:
     shared_limiter = SlidingWindowLimiter(60, window=60.0)
     brasil_limiter = SlidingWindowLimiter(120, window=60.0)
@@ -486,6 +518,76 @@ def register_browse_routes(
     def delete_analysis(analysis_id: Annotated[str, Path(max_length=64)], request: Request) -> dict[str, bool]:
         library.delete_analysis(require_user(request), analysis_id)
         return {"ok": True}
+
+    # -- relatorios de tema ---------------------------------------------------------
+    if reports is not None:
+        report_store = reports
+
+        def report_payload(report: Report) -> dict[str, Any]:
+            chosen = [item.work for item in report.included]
+            items = []
+            for item in report.items:
+                assessment = assess_study(item.work)
+                items.append({
+                    "ref": item.work.ref, "included": item.included, "note": item.note, "work": work_card(item.work),
+                    "reliability": {"score": assessment.reliability.score, "band": assessment.reliability.band,
+                                    "coverage": assessment.reliability.coverage, "warnings": list(assessment.reliability.warnings)},
+                    "findings": [{"tags": list(f.tags), "sentence": f.sentence} for f in assessment.findings[:FINDINGS_PER_STUDY]],
+                })
+            return {
+                "id": report.id, "title": report.title, "question": report.question, "methodNote": report.method_note,
+                "listName": report.list_name, "createdAt": report.created_at, "updatedAt": report.updated_at, "version": report.version,
+                "items": items, "panorama": panorama(chosen), "method": [p for p in method_paragraphs(report) if p],
+                "criteria": [{"name": n, "weight": w, "how": h} for n, w, h in criteria_description()],
+            }
+
+        @app.get("/api/reports")
+        def list_reports(request: Request) -> dict[str, Any]:
+            return {"reports": [
+                {"id": s.id, "title": s.title, "listName": s.list_name, "updatedAt": s.updated_at, "version": s.version,
+                 "included": s.included, "total": s.total}
+                for s in report_store.summaries(require_user(request))
+            ]}
+
+        @app.post("/api/reports")
+        def create_report(body: ReportCreateIn, request: Request) -> dict[str, Any]:
+            user = require_user(request)
+            chosen = next((item for item in library.lists(user) if item.id == body.list_id), None)
+            if chosen is None:
+                raise NotFoundError("Lista não encontrada.")
+            report = report_store.create(user, list_name=chosen.name, works=list(chosen.works), title=body.title, question=body.question)
+            return report_payload(report)
+
+        @app.get("/api/reports/{report_id}")
+        def get_report(report_id: Annotated[str, Path(max_length=64)], request: Request) -> dict[str, Any]:
+            return report_payload(report_store.get(require_user(request), report_id))
+
+        @app.put("/api/reports/{report_id}")
+        def update_report(report_id: Annotated[str, Path(max_length=64)], body: ReportUpdateIn, request: Request) -> dict[str, Any]:
+            report = report_store.update(
+                require_user(request), report_id, title=body.title, question=body.question, method_note=body.method_note,
+                items=[(item.ref, item.included, item.note) for item in body.items],
+            )
+            return report_payload(report)
+
+        @app.delete("/api/reports/{report_id}")
+        def delete_report(report_id: Annotated[str, Path(max_length=64)], request: Request) -> dict[str, bool]:
+            report_store.delete(require_user(request), report_id)
+            return {"ok": True}
+
+        @app.get("/api/reports/{report_id}/download")
+        def download_report(
+            report_id: Annotated[str, Path(max_length=64)], request: Request,
+            format: Annotated[str, Query(max_length=10)] = "html",  # noqa: A002 - nome do parametro HTTP
+        ) -> Response:
+            if format not in downloads.TEXT_FORMATS:
+                raise DiggerError("Formato de download inválido.")
+            report = report_store.get(require_user(request), report_id)
+            content, media = downloads.render(report_blocks(report), format)
+            filename = downloads.analysis_filename(report.title, "relatorio", downloads.TEXT_FORMATS[format][2])
+            return Response(content, media_type=media, headers={
+                "Content-Disposition": f'attachment; filename="{filename}"', "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff",
+            })
 
     # -- interesses e alertas -------------------------------------------------------
     if alerts is not None:
