@@ -40,6 +40,7 @@ https://github.com/renzormoura/Biomedical-data-digger
 | `biomedical-article-summariser/.env` | Secrets locais (NÃO commitado) |
 | `docs/PROJECT-CONTEXT.md` | Contexto completo do projeto |
 | `docs/features/busca-artigos.md` | Fontes, filtros, normalização e fórmula do índice |
+| `docs/features/notificacoes.md` | Interesses, sininho, verificação de artigos novos e agendamento |
 
 ## Arquivos que NÃO devem ser modificados sem cuidado
 - `runtime.txt` — remover ou alterar quebra o build no Render
