@@ -185,7 +185,7 @@ def work_full(work: Work, saved: bool | None = None) -> dict[str, Any]:
     full = work_card(work, saved)
     full.update({
         "abstract": work.abstract, "volume": work.volume, "issue": work.issue, "pages": work.pages, "pmcid": work.pmcid,
-        "authorList": [{"family": a.family, "given": a.given} for a in work.authors],
+        "authorList": [{"family": a.family, "given": a.given} for a in work.authors], "published": work.published,
     })
     return full
 
@@ -305,6 +305,22 @@ def register_browse_routes(
             "citations": dict(detail.citations),
             "reliability": reliability_payload(detail.reliability),
         }
+
+    @app.get("/api/discover/cite")
+    def cite_one(
+        request: Request,
+        ref: Annotated[str, Query(min_length=1, max_length=MAX_REF)],
+        format: Annotated[str, Query(max_length=20)] = "ris",  # noqa: A002 - nome do parametro HTTP
+    ) -> Response:
+        """Referencia de UM artigo para importar no Zotero, Mendeley ou EndNote. Publica: nao exige conta."""
+        if format not in EXPORT_FORMATS or format in ("csv", "json", "resumos"):
+            raise DiggerError("Formato de referência inválido.")
+        work = discovery.work(ref, client_id=identity(request))
+        filename, media_type, build = EXPORT_FORMATS[format]
+        return Response(
+            build([work]), media_type=f"{media_type}; charset=utf-8",
+            headers={"Content-Disposition": f'attachment; filename="referencia.{filename.rsplit(".", 1)[-1]}"', "Cache-Control": "no-store"},
+        )
 
     @app.get("/api/discover/brief")
     def brief(

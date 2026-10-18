@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 2026-10 — Citações e exportação para Zotero, Mendeley e EndNote
+
+### Adicionado
+- Formatos **EndNote (.enw)** e **CSL JSON**, e novos estilos de citação **IEEE, Harvard e MLA** (junto de ABNT, APA e Vancouver). Valem na página do artigo, na biblioteca e nas listas.
+- Na página do artigo, o bloco **Levar para o gerenciador de referências**: baixa a referência daquele artigo em RIS, EndNote, CSL JSON ou BibTeX, e copia o BibTeX. Rota pública `GET /api/discover/cite`.
+- **Metadados `citation_*`** no `<head>` da página do artigo, para o conector do Zotero e do Mendeley capturarem o artigo pelo botão da extensão.
+
+### Alterado
+- RIS, BibTeX e os novos formatos agora levam URL (DOI ou PubMed), PMID, idioma e palavras-chave; no RIS a revista vai em `JF` e o resumo em uma linha só, para não quebrar a importação.
 ## 2026-10 — Alertas: datas, filtro de relevância e verificação agendada
 
 ### Medido com busca real

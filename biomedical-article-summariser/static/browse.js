@@ -286,6 +286,23 @@
       work.language ? h("span", { class: "badge" }, work.language.toUpperCase()) : null,
       work.source ? h("span", { class: "badge" }, work.source) : null);
   }
+  // metadados no padrão do Google Scholar (citation_*): o conector do Zotero e o do Mendeley leem estas tags da página do artigo
+  function setCitationMeta(work) {
+    clearCitationMeta();
+    const tags = [["citation_title", work.title], ["citation_journal_title", work.journal], ["citation_volume", work.volume],
+      ["citation_issue", work.issue], ["citation_doi", work.doi], ["citation_pmid", work.pmid], ["citation_language", work.language],
+      ["citation_publication_date", (work.published || "").replace(/-/g, "/") || (work.year ? String(work.year) : "")]];
+    const [first, last] = String(work.pages || "").split(/\s*[-–—]\s*/);
+    tags.push(["citation_firstpage", first], ["citation_lastpage", last]);
+    for (const a of work.authorList || []) tags.push(["citation_author", [a.family, a.given].filter(Boolean).join(", ")]);
+    for (const k of work.keywords || []) tags.push(["citation_keywords", k]);
+    for (const [name, content] of tags) {
+      if (!content) continue;
+      document.head.append(h("meta", { name, content, "data-citation": "" }));
+    }
+  }
+  const clearCitationMeta = () => document.querySelectorAll("meta[data-citation]").forEach((el) => el.remove());
+
   const metaLine = (work) => [work.authors, work.journal, work.year].filter(Boolean).join(" · ");
   const articleHref = (work) => Lib.buildHash("/artigo", { ref: work.ref });
 
@@ -488,7 +505,7 @@
   const STEPS = [
     ["01", "Busque", "Filtre por ano, tipo de estudo, idioma e acesso aberto. Combine fontes sem ver o mesmo artigo duas vezes."],
     ["02", "Entenda", "Resumo organizado por seções, números com a frase de origem e a nota de confiabilidade explicada critério a critério."],
-    ["03", "Organize", "Salve, etiquete, monte listas de leitura, compartilhe por link e exporte as referências em BibTeX, RIS, ABNT, APA ou Vancouver."],
+    ["03", "Organize", "Salve, etiquete, monte listas de leitura, compartilhe por link e exporte as referências para o Zotero, Mendeley ou EndNote (RIS, CSL JSON, BibTeX) ou em ABNT, APA, Vancouver, IEEE, Harvard ou MLA."],
   ];
   const TRUST = [
     ["Sem IA primeiro.", "Trechos copiados do resumo; nada gerado nem interpretado."],
@@ -540,7 +557,7 @@
       h("section", { class: "stats", "aria-label": "O produto em números" },
         stat(sourceCount, "fontes integradas, com busca combinada"),
         stat(h("strong", {}, "8"), "critérios abertos de confiabilidade"),
-        stat(h("strong", {}, "5"), "formatos de citação e exportação"),
+        stat(h("strong", {}, "10"), "formatos de citação e exportação"),
         stat(h("strong", {}, "16"), "áreas de análise com IA opcional")),
 
       h("section", { class: "home-section", "aria-labelledby": "como" },
@@ -775,6 +792,7 @@
     }
     const work = data.work;
     setTitle(work.title);
+    setCitationMeta(work);
 
     // citar
     const citationBox = h("div", { "aria-live": "polite" });
@@ -784,6 +802,25 @@
         h("div", { class: "row" }, h("button", { type: "button", class: "btn btn-sm btn-secondary", onclick: () => copyText(text, `Referência ${style} copiada`) }, "Copiar"),
           h("span", { class: "note" }, "Gerada por código a partir dos metadados do registro (sem IA).")));
     };
+
+    // levar a referência para o Zotero, Mendeley ou EndNote
+    const REFERENCE_FORMATS = [["RIS (Zotero, Mendeley, EndNote)", "ris"], ["EndNote (.enw)", "endnote"], ["CSL JSON (Zotero)", "csljson"], ["BibTeX", "bibtex"]];
+    function referenceExport(article) {
+      const query = (format) => new URLSearchParams({ ref: article.ref, format }).toString();
+      const copyBibtex = async () => {
+        try {
+          const response = await fetch(`/api/discover/cite?${query("bibtex")}`, { credentials: "same-origin" });
+          if (!response.ok) throw new Error();
+          copyText(await response.text(), "BibTeX copiado");
+        } catch { toast("Não foi possível copiar o BibTeX agora."); }
+      };
+      return h("div", { class: "stack reference-export" },
+        h("h3", {}, "Levar para o gerenciador de referências"),
+        h("div", { class: "row" },
+          REFERENCE_FORMATS.map(([label, format]) => h("a", { class: "btn btn-secondary btn-sm", download: "", href: `/api/discover/cite?${query(format)}` }, label)),
+          h("button", { type: "button", class: "btn btn-ghost btn-sm", onclick: copyBibtex }, "Copiar BibTeX")),
+        h("p", { class: "note" }, "Zotero, Mendeley e EndNote abrem o arquivo RIS (Arquivo, Importar). O Zotero também lê o CSL JSON e, com o conector do navegador instalado, captura esta página direto pelo botão dele."));
+    }
 
     // organizar (etiquetas e listas): só com conta
     const organize = h("div", { class: "stack" });
@@ -1032,8 +1069,9 @@
                 : h("p", { class: "muted" }, "Nenhum dado estatístico foi encontrado no resumo."),
               h("p", { class: "note" }, "Frases copiadas do resumo; nada foi gerado nem interpretado. A seleção é por palavras-chave e pode omitir frases. Lido apenas o resumo, não o texto completo.")),
             h("section", { class: "block" }, h("h2", {}, "Citar"),
-              h("div", { class: "row" }, Object.keys(data.citations).map((st) => h("button", { type: "button", class: "btn btn-secondary btn-sm", onclick: () => showCitation(st) }, st))),
-              citationBox)),
+              h("div", { class: "row", role: "group", "aria-label": "Estilo da citação" }, Object.keys(data.citations).map((st) => h("button", { type: "button", class: "btn btn-secondary btn-sm", onclick: () => showCitation(st) }, st))),
+              citationBox,
+              referenceExport(work))),
           h("aside", { class: "article-aside", "aria-label": "Avaliação e detalhes" },
             reliabilityCard(data.reliability),
             h("section", { class: "card stack" }, h("h3", {}, "Detalhes"),
@@ -1071,7 +1109,7 @@
     const exportLink = (label, format, listId) => h("a", {
       class: "btn btn-secondary btn-sm", download: "", href: `/api/library/export?${new URLSearchParams({ format, ...(listId ? { list_id: listId } : {}) })}`,
     }, label);
-    const formats = [["BibTeX", "bibtex"], ["RIS", "ris"], ["ABNT", "abnt"], ["APA", "apa"], ["Vancouver", "vancouver"], ["Planilha (CSV)", "csv"], ["Dados (JSON)", "json"], ["Resumos (MD)", "resumos"]];
+    const formats = [["RIS (Zotero, EndNote)", "ris"], ["EndNote (.enw)", "endnote"], ["CSL JSON", "csljson"], ["BibTeX", "bibtex"], ["ABNT", "abnt"], ["APA", "apa"], ["Vancouver", "vancouver"], ["IEEE", "ieee"], ["Harvard", "harvard"], ["MLA", "mla"], ["Planilha (CSV)", "csv"], ["Dados (JSON)", "json"], ["Resumos (MD)", "resumos"]];
 
     const listName = h("input", { type: "text", id: "list-name", placeholder: "nome da lista (ex.: Leituras da semana 3)", maxlength: "80" });
     const createList = async () => {
@@ -1290,6 +1328,7 @@
 
   function render() {
     const { view, rest, params } = Lib.parseRoute(location.hash);
+    clearCitationMeta();
     renderNav(view);
     if (view === "busca") renderSearch(params);
     else if (view === "artigo") renderArticle(params);

@@ -584,3 +584,6 @@ input[type="text"], input[type="search"], input[type="email"], input[type="passw
 .interests-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; position: sticky; bottom: 0; padding: 12px 0; background: var(--bg); border-top: 1px solid var(--border); }
 .interests-foot .hint { margin: 0; }
 @media (max-width: 900px) { .interests-foot { bottom: calc(58px + env(safe-area-inset-bottom)); } }
+
+.reference-export { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+.reference-export h3 { margin: 0; font-size: 0.95rem; }

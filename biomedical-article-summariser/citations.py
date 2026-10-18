@@ -148,10 +148,107 @@ def format_vancouver(meta: CitationMetadata) -> str:
     return " ".join(part for part in parts if part)
 
 
+def _join_and(names: list[str], conjunction: str) -> str:
+    if len(names) <= 1:
+        return "".join(names)
+    return ", ".join(names[:-1]) + f", {conjunction} " + names[-1] if len(names) > 2 else f"{names[0]} {conjunction} {names[1]}"
+
+
+def format_ieee(meta: CitationMetadata) -> str:
+    """IEEE: iniciais antes do sobrenome; mais de seis autores vira "Primeiro et al."."""
+    def name(author: Author) -> str:
+        initials = " ".join(f"{i}." for i in author.initials)
+        return f"{initials} {author.family}".strip()
+
+    authors = list(meta.authors)
+    head = f"{name(authors[0])} et al." if len(authors) > 6 else _join_and([name(a) for a in authors], "and")
+    parts = [head + "," if head else "", f"\"{_clean_title(meta.title)},\""]
+    source = [f"*{meta.journal}*" if meta.journal else ""]
+    if meta.volume:
+        source.append(f"vol. {meta.volume}")
+    if meta.issue:
+        source.append(f"no. {meta.issue}")
+    if meta.pages:
+        source.append(f"pp. {_pages_dash(meta.pages, '–')}" if re.search(r"[-–—]", meta.pages) else f"p. {meta.pages.strip()}")
+    if meta.year:
+        source.append(meta.year)
+    if meta.doi:
+        source.append(f"doi: {meta.doi}")
+    tail = ", ".join(item for item in source if item)
+    if tail:
+        parts.append(tail + ".")
+    else:
+        parts[-1] = parts[-1][:-2] + '."'
+    return " ".join(part for part in parts if part)
+
+
+def format_harvard(meta: CitationMetadata) -> str:
+    """Harvard (autor-data): Sobrenome, A.B., Sobrenome, C. and Sobrenome, D. (2020) 'Titulo', Revista, 1(2), pp. 3-4."""
+    def name(author: Author) -> str:
+        return f"{author.family}, {''.join(f'{i}.' for i in author.initials)}".strip().rstrip(",")
+
+    authors = list(meta.authors)
+    head = f"{name(authors[0])} et al." if len(authors) > 3 else _join_and([name(a) for a in authors], "and").replace(", and ", " and ")
+    year = f"({meta.year})" if meta.year else "(n.d.)"
+    lead = f"{head} {year}" if head else f"'{_clean_title(meta.title)}' {year}"
+    parts = [lead + (f" '{_clean_title(meta.title)}'," if head else ".")]
+    source = f"*{meta.journal}*" if meta.journal else ""
+    if meta.volume:
+        source += f", {meta.volume}" if source else meta.volume
+        if meta.issue:
+            source += f"({meta.issue})"
+    if meta.pages:
+        label = "pp." if re.search(r"[-–—]", meta.pages) else "p."
+        source += f", {label} {_pages_dash(meta.pages, '–')}" if source else f"{label} {_pages_dash(meta.pages, '–')}"
+    if source:
+        parts.append(f"{source}.")
+    elif head:
+        parts[0] = parts[0].rstrip(",") + "."
+    if meta.doi:
+        parts.append(f"doi:{meta.doi}.")
+    return " ".join(parts)
+
+
+def format_mla(meta: CitationMetadata) -> str:
+    """MLA 9: Sobrenome, Nome, e Nome Sobrenome. "Titulo." Revista, vol. 1, no. 2, 2020, pp. 3-4, doi."""
+    authors = list(meta.authors)
+
+    def inverted(author: Author) -> str:
+        return f"{author.family}, {author.given}".strip().rstrip(",")
+
+    if not authors:
+        head = ""
+    elif len(authors) == 1:
+        head = inverted(authors[0]) + "."
+    elif len(authors) == 2:
+        head = f"{inverted(authors[0])}, and {authors[1].given} {authors[1].family}.".replace("  ", " ")
+    else:
+        head = f"{inverted(authors[0])}, et al."
+    parts = [head, f"\"{_clean_title(meta.title)}.\""]
+    source = [f"*{meta.journal}*" if meta.journal else ""]
+    if meta.volume:
+        source.append(f"vol. {meta.volume}")
+    if meta.issue:
+        source.append(f"no. {meta.issue}")
+    if meta.year:
+        source.append(meta.year)
+    if meta.pages:
+        source.append(f"pp. {_pages_dash(meta.pages, '-')}" if re.search(r"[-–—]", meta.pages) else f"p. {meta.pages.strip()}")
+    if meta.doi:
+        source.append(f"https://doi.org/{meta.doi}")
+    tail = ", ".join(item for item in source if item)
+    if tail:
+        parts.append(tail + ".")
+    return " ".join(part for part in parts if part)
+
+
 FORMATTERS: dict[str, Callable[[CitationMetadata], str]] = {
     "ABNT": format_abnt,
     "APA": format_apa,
     "Vancouver": format_vancouver,
+    "IEEE": format_ieee,
+    "Harvard": format_harvard,
+    "MLA": format_mla,
 }
 
 

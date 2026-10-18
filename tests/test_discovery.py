@@ -118,7 +118,7 @@ def test_work_detail_has_sections_findings_citations_and_similar():
     assert detail.work.ref == "1"
     assert [s.heading for s in detail.sections] == ["Contexto", "Métodos", "Resultados", "Conclusões"]
     assert any("RR 0.89" in f.sentence and "medida de efeito" in f.tags for f in detail.findings)
-    assert set(detail.citations) == {"ABNT", "APA", "Vancouver"}
+    assert set(detail.citations) == {"ABNT", "APA", "Vancouver", "IEEE", "Harvard", "MLA"}
     assert detail.citations["Vancouver"] == "Weber A, Suzuki H. Artigo 1. Example Journal. 2020;27(5):890-903. doi:10.0000/1"
     assert detail.citations["ABNT"].startswith("WEBER, A.; SUZUKI, H. Artigo 1.")
     assert detail.similar == ()  # os semelhantes carregam por rota propria

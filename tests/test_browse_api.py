@@ -111,7 +111,7 @@ def test_work_detail_payload(env):
     assert body["work"]["title"] == "Artigo 1" and body["work"]["abstract"].startswith("Background:")
     assert [s["heading"] for s in body["sections"]] == ["Contexto", "Métodos", "Resultados", "Conclusões"]
     assert any("RR 0.89" in f["sentence"] for f in body["findings"])
-    assert set(body["citations"]) == {"ABNT", "APA", "Vancouver"} and "similar" not in body
+    assert set(body["citations"]) == {"ABNT", "APA", "Vancouver", "IEEE", "Harvard", "MLA"} and "similar" not in body
     assert body["work"]["authorList"][0] == {"family": "Weber", "given": "Anika"}
 
 
