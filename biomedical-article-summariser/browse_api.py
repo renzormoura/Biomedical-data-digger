@@ -16,12 +16,14 @@ from pydantic import BaseModel, Field
 import downloads
 import markdown_lite
 import reliability
+from alerts import Alert, AlertService
 from brasil import anvisa, conitec, consulta, rename
 from catalog import SearchQuery, Work
 from discovery import DiscoveryService
 from domain import AuthRequiredError, DiggerError, NotFoundError, RateLimitedError, SourceUnavailableError
 from enrichment import Enrichment
 from exports import EXPORT_FORMATS
+from interests import catalogo, validar
 from library_store import MAX_ANALYSIS_CHARS, LibraryStore, ReadingList, SavedAnalysis
 from ratelimit import RateLimitExceeded, SlidingWindowLimiter
 
@@ -39,6 +41,25 @@ class RefIn(BaseModel):
 class TagsIn(BaseModel):
     ref: str = Field(min_length=1, max_length=MAX_REF)
     tags: list[Annotated[str, Field(max_length=80)]] = Field(max_length=30)
+
+
+class TopicIn(BaseModel):
+    area: str = Field(min_length=1, max_length=40)
+    subtopics: list[Annotated[str, Field(max_length=40)]] = Field(default_factory=list, max_length=40)
+
+
+class InterestsIn(BaseModel):
+    topics: list[TopicIn] = Field(default_factory=list, max_length=40)
+    languages: list[Annotated[str, Field(max_length=8)]] = Field(default_factory=list, max_length=12)
+    terms: list[Annotated[str, Field(max_length=200)]] = Field(default_factory=list, max_length=20)
+
+
+class CheckIn(BaseModel):
+    force: bool = False
+
+
+class ReadIn(BaseModel):
+    id: str | None = Field(None, max_length=64)  # sem id = todos
 
 
 class ListIn(BaseModel):
@@ -206,6 +227,7 @@ def register_browse_routes(
     library: LibraryStore,
     current_user: Callable[[Request], str | None],
     identity: Callable[[Request], str],
+    alerts: AlertService | None = None,
 ) -> None:
     shared_limiter = SlidingWindowLimiter(60, window=60.0)
     brasil_limiter = SlidingWindowLimiter(120, window=60.0)
@@ -446,6 +468,57 @@ def register_browse_routes(
     def delete_analysis(analysis_id: Annotated[str, Path(max_length=64)], request: Request) -> dict[str, bool]:
         library.delete_analysis(require_user(request), analysis_id)
         return {"ok": True}
+
+    # -- interesses e alertas -------------------------------------------------------
+    if alerts is not None:
+        alert_service = alerts
+
+        def alert_payload(item: Alert) -> dict[str, Any]:
+            return {"id": item.id, "topic": item.topic, "createdAt": item.created_at, "read": item.read, "work": work_card(item.work)}
+
+        def box(user: str) -> dict[str, Any]:
+            return {"unread": alert_service.store.unread(user), "alerts": [alert_payload(a) for a in alert_service.store.alerts(user)]}
+
+        @app.get("/api/interests/options")
+        def interest_options() -> dict[str, Any]:
+            return catalogo()
+
+        @app.get("/api/interests")
+        def get_interests(request: Request) -> dict[str, Any]:
+            prefs, checked = alert_service.store.preferences(require_user(request))
+            return {**prefs.to_dict(), "lastChecked": checked.isoformat(timespec="seconds") if checked else None}
+
+        @app.put("/api/interests")
+        def put_interests(body: InterestsIn, request: Request) -> dict[str, Any]:
+            user = require_user(request)
+            prefs = validar([t.model_dump() for t in body.topics], body.languages, body.terms)
+            alert_service.store.set_preferences(user, prefs)
+            return prefs.to_dict()
+
+        @app.get("/api/alerts")
+        def get_alerts(request: Request) -> dict[str, Any]:
+            return box(require_user(request))
+
+        @app.post("/api/alerts/check")
+        def check_alerts(body: CheckIn, request: Request) -> dict[str, Any]:
+            user = require_user(request)
+            result = alert_service.check(user, force=body.force)
+            return {
+                "ran": result.ran, "new": result.new, "reason": result.reason, "baseline": result.baseline,
+                "notes": list(result.notes), **box(user),
+            }
+
+        @app.post("/api/alerts/read")
+        def read_alerts(body: ReadIn, request: Request) -> dict[str, Any]:
+            user = require_user(request)
+            alert_service.store.mark_read(user, body.id)
+            return box(user)
+
+        @app.delete("/api/alerts")
+        def dismiss_alert(request: Request, id: Annotated[str, Query(min_length=1, max_length=64)]) -> dict[str, Any]:  # noqa: A002
+            user = require_user(request)
+            alert_service.store.dismiss(user, id)
+            return box(user)
 
     # -- biblioteca ---------------------------------------------------------------
     @app.get("/api/library")

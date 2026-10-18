@@ -23,6 +23,10 @@
     </a>
     <nav class="mainnav" id="mainnav" aria-label="Principal"></nav>
     <div class="topbar-actions">
+      <div class="bell-wrap" id="bell-wrap" hidden>
+        <button type="button" class="btn btn-ghost" id="bell-button" aria-haspopup="dialog" aria-expanded="false" aria-controls="alerts-panel" aria-label="Avisos de artigos novos"><svg class="icon" aria-hidden="true"><use href="#i-bell"/></svg><span class="bell-count" id="bell-count" hidden></span></button>
+        <section class="alerts-panel" id="alerts-panel" role="dialog" aria-label="Avisos de artigos novos" hidden></section>
+      </div>
       <button type="button" class="btn btn-ghost" id="theme-toggle" aria-label="Alternar tema claro ou escuro"><svg class="icon" aria-hidden="true"><use href="#i-theme"/></svg><span class="btn-label" id="theme-label">Tema</span></button>
       <button type="button" class="btn btn-ghost" id="account-button" data-user="{{ user or '' }}"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><span class="btn-label" id="account-label">{{ user or "Entrar" }}</span></button>
     </div>

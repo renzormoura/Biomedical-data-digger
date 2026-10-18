@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 2026-10 — Alertas de artigos novos
+
+### Adicionado
+- **Sininho** no canto superior direito (para quem está logado), com contador de não lidos, lista dos artigos novos, "Marcar como lidas", dispensar aviso e "Verificar agora". No celular o painel desce da barra, em largura total.
+- Tela **Meus interesses** (`#/interesses`): 14 áreas do conhecimento com subtemas (por exemplo, Medicina com Pediatria, Oncologia, Cardiologia...), até 4 idiomas, até 5 palavras-chave livres e limite de 15 temas. Para artigos em português a busca usa também os termos em português.
+- Rotas `GET/PUT /api/interests`, `GET /api/interests/options`, `GET /api/alerts`, `POST /api/alerts/check`, `POST /api/alerts/read`, `DELETE /api/alerts`. Módulos `interests.py` (catálogo e validação) e `alerts.py` (preferências, verificação e caixa de avisos).
+
+### Como funciona (e o que ainda não faz)
+- Ao salvar, a primeira verificação só **memoriza** os artigos recentes que já existem; só o que surgir depois vira aviso, para não tratar artigo antigo como novo.
+- A verificação roda quando o usuário está com o site aberto (ao entrar e a cada 15 minutos), no máximo a cada 6 horas (15 minutos no "Verificar agora"). Usa "Todas as fontes", ordenadas por mais recentes, do ano atual e do anterior.
+- **Ainda não** há e-mail nem aviso com o site fechado: isso exige uma tarefa agendada no servidor, prevista como próximo passo.
+
 ## 2026-10 — Dados reais do Brasil, fase 3: Rename
 
 ### Adicionado

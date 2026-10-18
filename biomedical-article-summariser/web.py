@@ -30,6 +30,7 @@ from account_store import (
     get_account_store,
     validate_credentials,
 )
+from alerts import AlertService
 from browse_api import register_browse_routes
 from config import Settings
 from discovery import DiscoveryService
@@ -132,6 +133,7 @@ def create_app(
     usage_log: UsageLog | None = None,
     discovery: DiscoveryService | None = None,
     library: LibraryStore | None = None,
+    alerts: AlertService | None = None,
 ) -> FastAPI:
     app = FastAPI(title="Biomedical Data Digger", docs_url=None, redoc_url=None, openapi_url=None)
     signer = SessionSigner(settings.session_secret or SessionSigner.generate_secret())
@@ -427,6 +429,6 @@ def create_app(
         }
 
     if discovery is not None and library is not None:
-        register_browse_routes(app, discovery=discovery, library=library, current_user=current_user, identity=identity)
+        register_browse_routes(app, discovery=discovery, library=library, current_user=current_user, identity=identity, alerts=alerts)
 
     return app

@@ -112,13 +112,96 @@
   const logoutButton = document.getElementById("logout-button");
   const session = { user: accountButton.dataset.user || "" };
 
+  let userHook = null; // o sininho se registra aqui depois de montado
   function setUser(user) {
     session.user = user || "";
     document.getElementById("account-label").textContent = user || "Entrar";
     logoutButton.hidden = !user;
     dialog.querySelectorAll(".field, [data-auth='login'], [data-auth='register']").forEach((el) => { el.hidden = Boolean(user); });
+    if (userHook) userHook();
   }
   setUser(session.user);
+
+  // ------------------------------------------------------------------ avisos (sininho)
+  const CHECK_EVERY_MS = 15 * 60 * 1000;
+  const bell = { items: [], unread: 0, hasInterests: false, timer: null, busy: false };
+  const bellWrap = document.getElementById("bell-wrap");
+  const bellButton = document.getElementById("bell-button");
+  const bellCount = document.getElementById("bell-count");
+  const alertsPanel = document.getElementById("alerts-panel");
+
+  function paintBell() {
+    bellCount.hidden = bell.unread === 0;
+    bellCount.textContent = bell.unread > 9 ? "9+" : String(bell.unread);
+    bellButton.setAttribute("aria-label", bell.unread ? `Avisos de artigos novos: ${bell.unread} não lidos` : "Avisos de artigos novos");
+    if (!alertsPanel.hidden) paintPanel();
+  }
+  function takeBox(data) {
+    bell.items = data.alerts || [];
+    bell.unread = data.unread || 0;
+    paintBell();
+  }
+  async function alertAction(path, options) {
+    try { takeBox(await api(path, options)); } catch (error) { if (error.status !== 401) toast(error.message); }
+  }
+  function paintPanel() {
+    const rows = bell.items.map((item) => h("li", { class: `alert-row${item.read ? "" : " is-unread"}` },
+      h("a", {
+        href: articleHref(item.work),
+        onclick: () => { closePanel(); if (!item.read) alertAction("/api/alerts/read", { method: "POST", body: { id: item.id } }); },
+      }, item.work.title),
+      h("small", { class: "muted" }, [metaLine(item.work), item.topic].filter(Boolean).join(" · ")),
+      h("button", { type: "button", class: "alert-dismiss", "aria-label": `Dispensar aviso: ${item.work.title}`, onclick: () => alertAction(`/api/alerts?id=${encodeURIComponent(item.id)}`, { method: "DELETE" }) }, icon("x"))));
+    const empty = bell.hasInterests
+      ? "Nenhum artigo novo por enquanto. Procuramos quando você abre o site; os artigos que já existiam hoje não contam como novos."
+      : "Escolha as áreas, os subtemas e os idiomas que você quer acompanhar, e avisamos quando sair um artigo novo.";
+    mount(alertsPanel,
+      h("div", { class: "alerts-head" }, h("strong", {}, "Novidades dos seus interesses"),
+        bell.unread ? h("button", { type: "button", class: "btn btn-ghost btn-sm", onclick: () => alertAction("/api/alerts/read", { method: "POST", body: {} }) }, "Marcar como lidas") : null),
+      rows.length ? h("ul", { class: "plain-list alert-list" }, rows) : h("p", { class: "muted alerts-empty" }, empty),
+      h("div", { class: "alerts-foot" },
+        h("a", { class: "btn btn-secondary btn-sm", href: "#/interesses", onclick: closePanel }, bell.hasInterests ? "Gerenciar interesses" : "Escolher interesses"),
+        bell.hasInterests ? h("button", { type: "button", class: "btn btn-ghost btn-sm", onclick: () => runCheck(true) }, "Verificar agora") : null));
+  }
+  function openPanel() { paintPanel(); alertsPanel.hidden = false; bellButton.setAttribute("aria-expanded", "true"); }
+  function closePanel() { alertsPanel.hidden = true; bellButton.setAttribute("aria-expanded", "false"); }
+  bellButton.addEventListener("click", () => (alertsPanel.hidden ? openPanel() : closePanel()));
+  document.addEventListener("click", (event) => { if (!alertsPanel.hidden && !bellWrap.contains(event.target)) closePanel(); });
+  document.addEventListener("keydown", (event) => { if (event.key === "Escape" && !alertsPanel.hidden) { closePanel(); bellButton.focus(); } });
+
+  /** Procura artigos novos (o servidor respeita o intervalo mínimo) e avisa só quando há novidade. */
+  async function runCheck(force = false) {
+    if (!session.user || bell.busy) return;
+    bell.busy = true;
+    try {
+      const result = await api("/api/alerts/check", { method: "POST", body: { force } });
+      takeBox(result);
+      if (result.new > 0) toast(result.new === 1 ? "1 artigo novo nos seus interesses." : `${result.new} artigos novos nos seus interesses.`);
+      else if (force && result.ran) toast(result.baseline ? "Pronto: guardamos os artigos de hoje. Você será avisado dos próximos." : "Nenhum artigo novo por enquanto.");
+      else if (force && result.reason === "intervalo") toast("Você verificou há pouco. Tente novamente em alguns minutos.");
+      else if (force && result.reason === "fontes") toast("As fontes não responderam agora. Tente mais tarde.");
+    } catch (error) {
+      if (error.status === 401) { setUser(""); } else if (force) toast(error.message);
+    } finally { bell.busy = false; }
+  }
+  async function syncBell() {
+    clearInterval(bell.timer);
+    bellWrap.hidden = !session.user;
+    closePanel();
+    if (!session.user) { bell.items = []; bell.unread = 0; bell.hasInterests = false; paintBell(); return; }
+    try {
+      const [box, prefs] = await Promise.all([api("/api/alerts"), api("/api/interests")]);
+      bell.hasInterests = prefs.topics.length > 0 || prefs.terms.length > 0;
+      takeBox(box);
+    } catch { return; }
+    if (bell.hasInterests) {
+      runCheck(false);
+      bell.timer = setInterval(() => { if (!document.hidden) runCheck(false); }, CHECK_EVERY_MS);
+    }
+  }
+  userHook = syncBell;
+  syncBell();
+
 
   function openAuth(hint) {
     authError.hidden = true;
@@ -181,7 +264,7 @@
 
   function renderNav(view) {
     renderBottomNav(view);
-    const items = [["#/", "Início", ""], ["#/busca", "Busca", "busca"], ["#/biblioteca", "Biblioteca", "biblioteca"]];
+    const items = [["#/", "Início", ""], ["#/busca", "Busca", "busca"], ["#/biblioteca", "Biblioteca", "biblioteca"], ["#/interesses", "Interesses", "interesses"]];
     mount(document.getElementById("mainnav"),
       items.map(([href, label, key]) => h("a", { href, "aria-current": key === view || (key === "busca" && view === "artigo") ? "page" : null }, label)),
       h("a", { href: "/ia", title: "Resumos e análises com IA (opcional)" }, "Laboratório de IA"));
@@ -1105,12 +1188,113 @@
   }
 
   // ------------------------------------------------------------------ roteador
+  // ------------------------------------------------------------------ interesses
+  async function renderInterests() {
+    setTitle("Meus interesses");
+    if (!session.user) {
+      mount($app, h("h1", {}, "Meus interesses"), h("div", { class: "empty card" },
+        h("p", {}, "Entre na sua conta para escolher o que acompanhar e receber avisos de artigos novos."),
+        h("button", { type: "button", class: "btn btn-primary", onclick: () => openAuth("Entre para escolher seus interesses.") }, "Entrar")));
+      return;
+    }
+    mount($app, h("h1", {}, "Meus interesses"), loading());
+    let catalog; let saved;
+    try { [catalog, saved] = await Promise.all([api("/api/interests/options"), api("/api/interests")]); } catch (error) {
+      if (error.status === 401) { setUser(""); renderInterests(); return; }
+      mount($app, h("h1", {}, "Meus interesses"), errorBox(error.message));
+      return;
+    }
+    // area -> Set de subtemas (conjunto vazio = a area inteira)
+    const chosen = new Map(saved.topics.map((t) => [t.area, new Set(t.subtopics)]));
+    const languages = new Set(saved.languages);
+    let terms = [...saved.terms];
+    const limits = catalog.limits;
+    const total = () => [...chosen.values()].reduce((sum, subs) => sum + (subs.size || 1), 0);
+    const summary = h("p", { class: "hint", "aria-live": "polite" });
+    const areaBox = h("div", { class: "stack" });
+    const termBox = h("div", { class: "chips" });
+    const langBox = h("div", { class: "pick-row", role: "group", "aria-label": "Idiomas dos artigos" });
+    const input = h("input", { type: "text", maxlength: String(limits.termChars), placeholder: "ex.: metformina em idosos", "aria-label": "Adicionar palavra-chave" });
+    const saveButton = h("button", { type: "button", class: "btn btn-primary" }, "Salvar interesses");
+
+    const pick = (label, pressed, onclick) => h("button", { type: "button", class: "pick", "aria-pressed": pressed ? "true" : "false", onclick }, label);
+    const withinLimit = (extra) => {
+      if (total() + extra > limits.topics) { toast(`Escolha no máximo ${limits.topics} temas.`); return false; }
+      return true;
+    };
+    function paint() {
+      const langText = languages.size ? `${languages.size} ${languages.size === 1 ? "idioma" : "idiomas"}` : "todos os idiomas";
+      summary.textContent = `${total()} de ${limits.topics} temas escolhidos · ${langText} · ${terms.length} ${terms.length === 1 ? "palavra-chave" : "palavras-chave"}`;
+      mount(langBox, catalog.languages.map((lang) => pick(lang.label, languages.has(lang.code), () => {
+        if (languages.has(lang.code)) languages.delete(lang.code);
+        else if (languages.size >= limits.languages) { toast(`Escolha no máximo ${limits.languages} idiomas.`); return; } else languages.add(lang.code);
+        paint();
+      })));
+      mount(areaBox, catalog.areas.map((area) => {
+        const subs = chosen.get(area.key);
+        const count = subs ? subs.size || 1 : 0;
+        const countText = subs && subs.size ? `${subs.size} ${subs.size === 1 ? "subtema" : "subtemas"}` : "toda a área";
+        return h("details", { class: "area-card", open: Boolean(subs) || null, "data-area": area.key },
+          h("summary", {}, h("span", {}, area.label), count ? h("span", { class: "area-count" }, countText) : null),
+          h("div", { class: "pick-row" },
+            pick("Toda a área", Boolean(subs) && subs.size === 0, () => {
+              if (subs && subs.size === 0) chosen.delete(area.key);
+              else { if (!withinLimit(1 - (subs ? subs.size || 1 : 0))) return; chosen.set(area.key, new Set()); }
+              paint();
+            }),
+            area.subtopics.map((sub) => pick(sub.label, Boolean(subs) && subs.has(sub.key), () => {
+              const current = chosen.get(area.key);
+              if (current && current.has(sub.key)) { current.delete(sub.key); if (!current.size) chosen.delete(area.key); } else {
+                // marcar um subtema troca "toda a área" (que valia 1) por subtemas (1 cada)
+                if (!withinLimit(current && current.size === 0 ? 0 : 1)) return;
+                if (current) current.add(sub.key); else chosen.set(area.key, new Set([sub.key]));
+              }
+              paint();
+            }))));
+      }));
+      mount(termBox, terms.map((t) => h("span", { class: "chip" }, t, h("button", { type: "button", "aria-label": `Remover ${t}`, onclick: () => { terms = terms.filter((x) => x !== t); paint(); } }, "×"))));
+    }
+    function addTerm() {
+      const text = input.value.replace(/\s+/g, " ").trim();
+      if (!text) return;
+      if (terms.length >= limits.terms) { toast(`Use no máximo ${limits.terms} palavras-chave.`); return; }
+      if (!terms.some((t) => t.toLowerCase() === text.toLowerCase())) terms.push(text);
+      input.value = "";
+      paint();
+    }
+    input.addEventListener("keydown", (event) => { if (event.key === "Enter") { event.preventDefault(); addTerm(); } });
+    saveButton.addEventListener("click", async () => {
+      saveButton.disabled = true;
+      const body = { topics: [...chosen].map(([area, subs]) => ({ area, subtopics: [...subs] })), languages: [...languages], terms };
+      const result = await guarded(() => api("/api/interests", { method: "PUT", body }));
+      saveButton.disabled = false;
+      if (!result) return;
+      toast(result.topics.length || result.terms.length ? "Interesses salvos. Vamos avisar quando sair artigo novo." : "Interesses removidos. Você não receberá avisos.");
+      syncBell();
+    });
+    paint();
+
+    mount($app,
+      h("h1", {}, "Meus interesses"),
+      h("p", { class: "lede" }, "Escolha as áreas, os subtemas e os idiomas que você quer acompanhar. Quando aparecer um artigo novo sobre eles, o sininho no canto superior avisa."),
+      h("section", { class: "card stack" }, h("h2", {}, "Idiomas"),
+        h("p", { class: "hint" }, "Sem escolher nenhum, aceitamos todos os idiomas. Para artigos em português, buscamos também pelo nome em português."), langBox),
+      h("section", { class: "stack" }, h("h2", {}, "Áreas e subtemas"),
+        h("p", { class: "hint" }, "Abra uma área e marque os subtemas, ou marque “Toda a área”."), areaBox),
+      h("section", { class: "card stack" }, h("h2", {}, "Palavras-chave"),
+        h("p", { class: "hint" }, "Para acompanhar algo mais específico, como um medicamento ou uma doença."),
+        h("div", { class: "new-list" }, input, h("button", { type: "button", class: "btn btn-secondary btn-sm", onclick: addTerm }, "Adicionar")), termBox),
+      h("div", { class: "interests-foot" }, summary, h("div", { class: "row" }, saveButton)),
+      h("p", { class: "note" }, "Como funciona: ao salvar, guardamos os artigos recentes que já existem e avisamos só dos que surgirem depois. Procuramos quando você abre o site, no máximo a cada 6 horas. Ainda não enviamos e-mail."));
+  }
+
   function render() {
     const { view, rest, params } = Lib.parseRoute(location.hash);
     renderNav(view);
     if (view === "busca") renderSearch(params);
     else if (view === "artigo") renderArticle(params);
     else if (view === "biblioteca") renderLibrary(params);
+    else if (view === "interesses") renderInterests();
     else if (view === "lista" && rest[0]) renderSharedList(rest[0]);
     else renderHome();
     if (view !== "busca") window.scrollTo(0, 0);

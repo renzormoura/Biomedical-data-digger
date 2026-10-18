@@ -7,6 +7,7 @@ const Lib = require("../../biomedical-article-summariser/static/browse-lib.js");
 test("parseRoute reconhece as telas e ignora o desconhecido", () => {
   assert.deepEqual(Lib.parseRoute("#/busca?q=sepsis").view, "busca");
   assert.equal(Lib.parseRoute("#/busca?q=sepsis").params.get("q"), "sepsis");
+  assert.equal(Lib.parseRoute("#/interesses").view, "interesses");
   assert.equal(Lib.parseRoute("").view, "");
   assert.equal(Lib.parseRoute("#/").view, "");
   assert.equal(Lib.parseRoute("#/admin/segredo").view, "");

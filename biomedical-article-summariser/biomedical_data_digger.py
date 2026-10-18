@@ -6,6 +6,7 @@ import os
 
 import uvicorn
 
+from alerts import AlertService, AlertStore
 from arxiv_catalog import ArxivCatalog
 from catalog import Catalog
 from config import Settings
@@ -42,8 +43,14 @@ def create_app():  # type: ignore[no-untyped-def]
         catalogs.append(OpenAlexCatalog(settings.openalex_api_key, settings.openalex_mailto))
     catalogs += [PubMedCatalog(settings.ncbi_api_key), ArxivCatalog(), DoajCatalog(), OpenAireCatalog()]
     discovery = DiscoveryService(catalogs, SlidingWindowLimiter(settings.discovery_calls_per_minute, window=60.0))
+    alert_store = AlertStore()
+    alert_store.initialize()
+    alerts = AlertService(
+        alert_store,
+        lambda query, user: discovery.search(query, source=discovery.search_default, client_id=f"alertas:{user}").works,
+    )
     return create_web_app(
-        service, repository, settings, usage_log=usage_log, discovery=discovery, library=get_library_store()
+        service, repository, settings, usage_log=usage_log, discovery=discovery, library=get_library_store(), alerts=alerts
     )
 
 
