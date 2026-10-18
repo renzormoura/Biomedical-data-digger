@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 2026-10 — Biblioteca: botão Exportar
+
+### Alterado
+- Na biblioteca e em cada lista, os 13 botões de exportação viraram **um botão "Exportar"** com um menu agrupado: gerenciadores de referências (RIS, EndNote, CSL JSON, BibTeX), citações prontas (ABNT, APA, Vancouver, IEEE, Harvard, MLA) e planilha e dados (CSV, JSON, resumos). No celular o menu abre como painel acima da barra inferior. Esc fecha o menu.
+
+### Corrigido
+- Entre 561 e 900 px de largura, o painel de download do artigo ficava esmagado (20 px de altura) porque recebia `top` e `bottom` ao mesmo tempo; o `bottom` agora vale só no celular, onde o painel é fixo.
+
 ## 2026-10 — Relatório de tema (fase 2): Situação no Brasil
 
 ### Adicionado

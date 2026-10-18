@@ -319,6 +319,40 @@
     });
   });
 
+  // botão "Exportar" da biblioteca e das listas: um só botão, com todas as opções agrupadas dentro
+  const EXPORT_GROUPS = [
+    ["Gerenciadores de referências", "Importe no Zotero, Mendeley ou EndNote.",
+      [["RIS (Zotero, Mendeley, EndNote)", "ris"], ["EndNote (.enw)", "endnote"], ["CSL JSON (Zotero)", "csljson"], ["BibTeX", "bibtex"]]],
+    ["Citações prontas", "Uma referência por linha, para colar no seu trabalho.",
+      [["ABNT", "abnt"], ["APA", "apa"], ["Vancouver", "vancouver"], ["IEEE", "ieee"], ["Harvard", "harvard"], ["MLA", "mla"]]],
+    ["Planilha e dados", "Para analisar ou guardar.", [["Planilha (CSV)", "csv"], ["Dados (JSON)", "json"], ["Resumos (MD)", "resumos"]]],
+  ];
+  function exportMenu(listId) {
+    const panel = h("div", { class: "download-panel", hidden: "", role: "region", "aria-label": "Opções de exportação" });
+    const button = h("button", { type: "button", class: "btn btn-secondary btn-sm", "aria-expanded": "false", "aria-haspopup": "true" }, icon("download"), "Exportar");
+    const close = () => { panel.hidden = true; button.setAttribute("aria-expanded", "false"); };
+    const href = (format) => `/api/library/export?${new URLSearchParams({ format, ...(listId ? { list_id: listId } : {}) })}`;
+    mount(panel, EXPORT_GROUPS.map(([title, hint, formats]) => h("section", { class: "download-option" },
+      h("h4", {}, title), h("p", { class: "hint" }, hint),
+      h("div", { class: "row" }, formats.map(([label, format]) => h("a", { class: "btn btn-sm btn-secondary", href: href(format), download: "", onclick: close }, label))))));
+    button.addEventListener("click", () => {
+      const open = panel.hidden;
+      panel.hidden = !open;
+      button.setAttribute("aria-expanded", String(open));
+    });
+    return h("span", { class: "download-wrap" }, button, panel);
+  }
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    document.querySelectorAll(".download-panel:not([hidden])").forEach((panel) => {
+      panel.hidden = true;
+      const button = panel.parentElement.querySelector("button");
+      button?.setAttribute("aria-expanded", "false");
+      button?.focus();
+    });
+  });
+
   // analise salva do Laboratorio: ver (HTML sanitizado no servidor), baixar em 4 formatos e excluir
   function analysisRow(item, { showTitle = false, onChange } = {}) {
     const body = h("div", { class: "analysis-body prose", hidden: "" });
@@ -1057,10 +1091,6 @@
     const activeTag = params.get("tag") || "";
     const allTags = [...new Set(data.items.flatMap((i) => i.tags))].sort();
     const shown = data.items.filter((i) => !activeTag || i.tags.includes(activeTag));
-    const exportLink = (label, format, listId) => h("a", {
-      class: "btn btn-secondary btn-sm", download: "", href: `/api/library/export?${new URLSearchParams({ format, ...(listId ? { list_id: listId } : {}) })}`,
-    }, label);
-    const formats = [["RIS (Zotero, EndNote)", "ris"], ["EndNote (.enw)", "endnote"], ["CSL JSON", "csljson"], ["BibTeX", "bibtex"], ["ABNT", "abnt"], ["APA", "apa"], ["Vancouver", "vancouver"], ["IEEE", "ieee"], ["Harvard", "harvard"], ["MLA", "mla"], ["Planilha (CSV)", "csv"], ["Dados (JSON)", "json"], ["Resumos (MD)", "resumos"]];
 
     const listName = h("input", { type: "text", id: "list-name", placeholder: "nome da lista (ex.: Leituras da semana 3)", maxlength: "80" });
     const createList = async () => {
@@ -1075,7 +1105,7 @@
         allTags.length ? h("div", { class: "chips", role: "group", "aria-label": "Filtrar por etiqueta" },
           h("a", { class: `chip${activeTag ? "" : " active"}`, href: "#/biblioteca" }, "Todas"),
           allTags.map((t) => h("a", { class: `chip${t === activeTag ? " active" : ""}`, href: Lib.buildHash("/biblioteca", { tag: t }) }, t))) : h("span", {}),
-        h("div", { class: "row export-row" }, h("span", { class: "muted" }, "Exportar tudo"), formats.map(([l, f]) => exportLink(l, f)))) : null,
+        exportMenu()) : null,
       !data.items.length
         ? h("div", { class: "empty card" }, h("p", {}, "Sua biblioteca está vazia."), h("a", { class: "btn btn-primary", href: "#/busca" }, "Buscar artigos"))
         : h("div", { class: "table-wrap" }, h("table", { class: "library-table" },
@@ -1093,7 +1123,7 @@
             } }, "Remover"))))))),
       h("h2", {}, "Listas de leitura"),
       h("div", { class: "row" }, listName, h("button", { type: "button", class: "btn btn-primary", onclick: createList }, "Criar lista")),
-      data.lists.length ? data.lists.map((list) => renderListCard(list, params, exportLink, formats))
+      data.lists.length ? data.lists.map((list) => renderListCard(list, params))
         : h("p", { class: "muted" }, "Nenhuma lista ainda. Crie uma e adicione artigos pela página de cada artigo."),
       h("h2", {}, "Relatórios de tema"),
       reportRows(reports, () => renderLibrary(params)),
@@ -1106,7 +1136,7 @@
   // listas abertas sobrevivem aos redesenhos da biblioteca (tirar artigo, compartilhar...)
   const openLists = new Set();
 
-  function renderListCard(list, params, exportLink, formats) {
+  function renderListCard(list, params) {
     const linkBox = h("div", { class: "stack" });
     const showLink = (token) => {
       const url = `${location.origin}/#/lista/${token}`;
@@ -1136,7 +1166,7 @@
           if (shared) { showLink(shared.token); copyText(`${location.origin}/#/lista/${shared.token}`, "Link copiado"); }
         } }, "Compartilhar por link"),
         h("button", { type: "button", class: "btn btn-secondary btn-sm", disabled: !list.works.length, onclick: () => createReportFromList(list) }, "Criar relatório"),
-        list.works.length ? formats.map(([l, f]) => exportLink(l, f, list.id)) : null,
+        list.works.length ? exportMenu(list.id) : null,
         h("button", { type: "button", class: "btn btn-ghost btn-sm", onclick: async () => {
           if (await guarded(() => api(`/api/lists/${list.id}`, { method: "DELETE" }))) renderLibrary(params);
         } }, "Excluir lista")),

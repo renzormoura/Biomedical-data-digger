@@ -5,7 +5,7 @@ Levar um artigo, uma lista ou a biblioteca inteira para o Zotero, Mendeley ou En
 
 ## Onde está
 - **Página do artigo, seção "Citar":** botões de estilo (ABNT, APA, Vancouver, IEEE, Harvard, MLA) com "Copiar", e o bloco "Levar para o gerenciador de referências", com download em RIS, EndNote (.enw), CSL JSON e BibTeX, além de "Copiar BibTeX". Não exige conta.
-- **Biblioteca e listas (exigem conta):** "Exportar tudo" e a exportação de cada lista, com os mesmos formatos mais CSV, JSON e resumos.
+- **Biblioteca e listas (exigem conta):** um botão **Exportar** na biblioteca e outro em cada lista, com um menu agrupado (gerenciadores de referências; citações prontas; planilha e dados), com os mesmos formatos mais CSV, JSON e resumos.
 - **Conector do navegador:** a página do artigo publica os metadados no padrão `citation_*` (título, autores, revista, volume, número, páginas, DOI, PMID, data, idioma e palavras-chave) no `<head>`. O conector do Zotero (e o do Mendeley) captura o artigo direto pelo botão da extensão. As tags são criadas ao abrir o artigo e removidas ao sair dele.
 
 ## Formatos
