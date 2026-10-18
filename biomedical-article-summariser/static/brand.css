@@ -592,3 +592,5 @@ input[type="text"], input[type="search"], input[type="email"], input[type="passw
 .report-include input { width: 18px; height: 18px; }
 .report-study h3 { margin: 0; font-size: 1.02rem; }
 .report-study textarea, #report-question, #report-method-note { width: 100%; }
+
+.report-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 0; border-top: 1px solid var(--border); }

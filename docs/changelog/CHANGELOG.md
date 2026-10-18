@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 2026-10 — Relatório de tema (fase 2): Situação no Brasil
+
+### Adicionado
+- Seção **Situação no Brasil** no relatório, para temas de medicamento: o sistema sugere substâncias a partir dos resumos (com quantos estudos citam cada uma), o autor **confirma** as que valem, e o documento traz Rename 2024, registro na ANVISA e decisões da Conitec, com a data de cada base, os avisos de que constar não é estar disponível e de que os dados ainda não foram revisados por especialista. O apêndice de método registra a confirmação e as datas.
+- Rota `GET /api/reports/{id}/brasil` e módulo `report_brasil.py`. O `PUT` do relatório aceita `substances`.
+
+### Alterado
+- A busca de nomes em português ficou ~4 vezes mais rápida (formas inglesas dos nomes em cache): de ~78 ms para ~21 ms por resumo.
+- Os cartões da situação no Brasil foram movidos para o escopo do módulo para serem usados no artigo e no relatório.
+- No relatório, a barra de ações deixou de ser fixa no rodapé (cobria o conteúdo no celular).
+
+### Corrigido
+- A lista de relatórios na biblioteca chamava uma função de data que só existia dentro da página do artigo; teria falhado assim que houvesse um relatório.
 ## 2026-10 — Relatório de tema (fase 1)
 
 ### Adicionado

@@ -18,12 +18,14 @@ from functools import lru_cache
 
 import citations
 import reliability
+from brasil.nomes import normalizar
 from catalog import Work
 from db import Database, Transaction
 from discovery import citation_metadata
 from domain import LimitReachedError, NotFoundError
 from downloads import Block
 from extraction import Finding, extract_findings, split_sections
+from report_brasil import BrasilSection
 
 MAX_REPORTS = 30
 MAX_ITEMS = 200
@@ -32,6 +34,8 @@ MAX_QUESTION_CHARS = 2000
 MAX_ITEM_NOTE_CHARS = 1000
 MAX_METHOD_NOTE_CHARS = 3000
 MAX_ABSTRACT_CHARS = 4000
+MAX_SUBSTANCES = 10
+MAX_SUBSTANCE_CHARS = 80
 FINDINGS_PER_STUDY = 3
 REFERENCE_STYLES = ("ABNT", "APA", "Vancouver")
 NO_TYPE = "Tipo de estudo não informado"
@@ -50,6 +54,9 @@ _SCHEMA = (
     """CREATE TABLE IF NOT EXISTS report_items (
         report_id TEXT NOT NULL REFERENCES reports(id) ON DELETE CASCADE, ref TEXT NOT NULL, data TEXT NOT NULL,
         position INTEGER NOT NULL, included INTEGER NOT NULL, note TEXT NOT NULL, PRIMARY KEY (report_id, ref))""",
+    """CREATE TABLE IF NOT EXISTS report_substances (
+        report_id TEXT NOT NULL REFERENCES reports(id) ON DELETE CASCADE, term TEXT NOT NULL, position INTEGER NOT NULL,
+        PRIMARY KEY (report_id, term))""",
 )
 
 
@@ -71,6 +78,7 @@ class Report:
     updated_at: str
     version: int
     items: tuple[ReportItem, ...]
+    substances: tuple[str, ...] = ()  # nomes (normalizados) que o autor confirmou para a secao "Situacao no Brasil"
 
     @property
     def included(self) -> list[ReportItem]:
@@ -118,6 +126,16 @@ def _work(raw: str) -> Work:
     return Work.from_dict(data if isinstance(data, dict) else {})
 
 
+def clean_substances(names: list[str]) -> list[str]:
+    """Nomes confirmados: normalizados (sem acento, minusculas), sem repeticao e com tamanho minimo, no maximo MAX_SUBSTANCES."""
+    cleaned: list[str] = []
+    for name in names:
+        term = normalizar(str(name))[:MAX_SUBSTANCE_CHARS]
+        if len(term) >= 3 and term not in cleaned:
+            cleaned.append(term)
+    return cleaned[:MAX_SUBSTANCES]
+
+
 class ReportStore:
     def __init__(self, database: Database | None = None) -> None:
         self._db = database or Database()
@@ -163,8 +181,11 @@ class ReportStore:
             "SELECT data, included, note FROM report_items WHERE report_id = ? ORDER BY position", (report_id,)
         )
         items = tuple(ReportItem(_work(data), bool(included), note) for data, included, note in item_rows)
+        substances = tuple(
+            term for (term,) in self._db.query("SELECT term FROM report_substances WHERE report_id = ? ORDER BY position", (report_id,))
+        )
         rid, title, question, method_note, list_name, created, updated, version = rows[0]
-        return Report(rid, title, question, method_note, list_name, created, updated, int(version), items)
+        return Report(rid, title, question, method_note, list_name, created, updated, int(version), items, substances)
 
     def summaries(self, user: str) -> list[ReportSummary]:
         rows = self._db.query(
@@ -177,9 +198,10 @@ class ReportStore:
 
     def update(
         self, user: str, report_id: str, *, title: str, question: str, method_note: str,
-        items: list[tuple[str, bool, str]],
+        items: list[tuple[str, bool, str]], substances: list[str] | None = None,
     ) -> Report:
         clean_title = _clean(title, MAX_TITLE_CHARS)
+        terms = clean_substances(substances) if substances is not None else None
         with self._db.transaction() as tx:
             self._owned(tx, user, report_id)
             current = tx.query("SELECT title FROM reports WHERE id = ?", (report_id,))[0][0]
@@ -192,12 +214,17 @@ class ReportStore:
                     "UPDATE report_items SET included = ?, note = ? WHERE report_id = ? AND ref = ?",
                     (1 if included else 0, _clean(note, MAX_ITEM_NOTE_CHARS), report_id, ref),
                 )
+            if terms is not None:
+                tx.execute("DELETE FROM report_substances WHERE report_id = ?", (report_id,))
+                for position, term in enumerate(terms):
+                    tx.execute("INSERT INTO report_substances (report_id, term, position) VALUES (?, ?, ?)", (report_id, term, position))
         return self.get(user, report_id)
 
     def delete(self, user: str, report_id: str) -> None:
         with self._db.transaction() as tx:
             self._owned(tx, user, report_id)
             tx.execute("DELETE FROM report_items WHERE report_id = ?", (report_id,))
+            tx.execute("DELETE FROM report_substances WHERE report_id = ?", (report_id,))
             tx.execute("DELETE FROM reports WHERE id = ?", (report_id,))
 
 
@@ -287,7 +314,7 @@ def reliability_line(result: reliability.Reliability) -> str:
     return f"Confiabilidade: {result.score}/100 ({result.band}), cobertura de {result.coverage}% dos critérios."
 
 
-def report_blocks(report: Report, today: date | None = None) -> list[Block]:
+def report_blocks(report: Report, today: date | None = None, brasil: BrasilSection | None = None) -> list[Block]:
     """Documento completo em blocos (vira HTML, DOCX, Markdown ou texto pelo gerador de downloads)."""
     chosen = report.included
     works = [item.work for item in chosen]
@@ -317,6 +344,9 @@ def report_blocks(report: Report, today: date | None = None) -> list[Block]:
         if item.note:
             blocks.append(("p", f"Nota do autor: {item.note}"))
 
+    if brasil is not None:
+        blocks += brasil.blocks
+
     blocks.append(("h1", "Referências"))
     for style in REFERENCE_STYLES:
         blocks.append(("h2", style))
@@ -324,6 +354,8 @@ def report_blocks(report: Report, today: date | None = None) -> list[Block]:
 
     blocks.append(("h1", "Apêndice: método"))
     blocks += [("p", paragraph) for paragraph in method_paragraphs(report, today) if paragraph]
+    if brasil is not None:
+        blocks.append(("p", brasil.method))
     blocks.append(("h2", "Critérios da nota de confiabilidade"))
     blocks += [("li", f"{name} (peso {weight}): {how}") for name, weight, how in criteria_description()]
     excluded = [item for item in report.items if not item.included]

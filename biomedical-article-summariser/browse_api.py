@@ -17,6 +17,7 @@ from pydantic import BaseModel, Field
 import downloads
 import markdown_lite
 import reliability
+import report_brasil
 from alerts import Alert, AlertService
 from brasil import anvisa, conitec, consulta, rename
 from catalog import SearchQuery, Work
@@ -90,6 +91,7 @@ class ReportUpdateIn(BaseModel):
     question: str = Field("", max_length=4000)
     method_note: str = Field("", max_length=6000, alias="methodNote")
     items: list[ReportItemIn] = Field(default_factory=list, max_length=300)
+    substances: list[Annotated[str, Field(max_length=120)]] | None = Field(None, max_length=30)
 
     model_config = {"populate_by_name": True}
 
@@ -537,7 +539,7 @@ def register_browse_routes(
             return {
                 "id": report.id, "title": report.title, "question": report.question, "methodNote": report.method_note,
                 "listName": report.list_name, "createdAt": report.created_at, "updatedAt": report.updated_at, "version": report.version,
-                "items": items, "panorama": panorama(chosen), "method": [p for p in method_paragraphs(report) if p],
+                "substances": list(report.substances), "items": items, "panorama": panorama(chosen), "method": [p for p in method_paragraphs(report) if p],
                 "criteria": [{"name": n, "weight": w, "how": h} for n, w, h in criteria_description()],
             }
 
@@ -566,9 +568,26 @@ def register_browse_routes(
         def update_report(report_id: Annotated[str, Path(max_length=64)], body: ReportUpdateIn, request: Request) -> dict[str, Any]:
             report = report_store.update(
                 require_user(request), report_id, title=body.title, question=body.question, method_note=body.method_note,
-                items=[(item.ref, item.included, item.note) for item in body.items],
+                items=[(item.ref, item.included, item.note) for item in body.items], substances=body.substances,
             )
             return report_payload(report)
+
+        @app.get("/api/reports/{report_id}/brasil")
+        def report_brasil_data(report_id: Annotated[str, Path(max_length=64)], request: Request) -> dict[str, Any]:
+            """Sugestoes de substancias (a confirmar) e a situacao no Brasil das ja confirmadas; carrega depois da tela."""
+            user = require_user(request)
+            report = report_store.get(user, report_id)
+            bases = brasil_bases(request)
+            confirmed = []
+            for item in report_brasil.situations(report.substances, bases):
+                confirmed.append({**situacao_payload(item), "termo": item.termo, "nome": report_brasil.display_name(item)})
+            return {
+                "suggestions": [
+                    {"termo": s.termo, "nome": s.nome, "en": s.en, "metodo": s.metodo, "studies": s.studies}
+                    for s in report_brasil.suggest([i.work for i in report.included], bases)
+                ],
+                "confirmed": confirmed, "meta": brasil_meta(bases),
+            }
 
         @app.delete("/api/reports/{report_id}")
         def delete_report(report_id: Annotated[str, Path(max_length=64)], request: Request) -> dict[str, bool]:
@@ -583,7 +602,8 @@ def register_browse_routes(
             if format not in downloads.TEXT_FORMATS:
                 raise DiggerError("Formato de download inválido.")
             report = report_store.get(require_user(request), report_id)
-            content, media = downloads.render(report_blocks(report), format)
+            section = report_brasil.build(report.substances, brasil_bases(request)) if report.substances else None
+            content, media = downloads.render(report_blocks(report, brasil=section), format)
             filename = downloads.analysis_filename(report.title, "relatorio", downloads.TEXT_FORMATS[format][2])
             return Response(content, media_type=media, headers={
                 "Content-Disposition": f'attachment; filename="{filename}"', "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff",

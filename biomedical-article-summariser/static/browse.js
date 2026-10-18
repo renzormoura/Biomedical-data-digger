@@ -918,56 +918,6 @@
 
     // situacao no Brasil: registro na ANVISA e decisoes da Conitec (dados oficiais locais, sem IA) para os medicamentos do resumo
     const brasilBox = h("div", { class: "stack" }, loading("Consultando dados oficiais…"));
-    const METHODS = { sinonimo: "sinônimo conhecido", cognato: "nome parecido" };
-    const CATEGORY_PLURAL = { Genérico: "genéricos", Similar: "similares", Novo: "novos", Biológico: "biológicos", Específico: "específicos", Fitoterápico: "fitoterápicos", Dinamizado: "dinamizados", Radiofármaco: "radiofármacos" };
-    const fmtDate = (iso) => { const d = new Date(`${iso}T12:00:00`); return Number.isNaN(d.getTime()) ? "" : d.toLocaleDateString("pt-BR"); };
-    const fmtMonth = (ym) => (/^\d{4}-\d{2}$/.test(ym) ? `${ym.slice(5)}/${ym.slice(0, 4)}` : "");
-    function conitecRows(records) {
-      const rowFor = (r) => h("li", { class: "conitec-row" },
-        h("div", {}, h("strong", {}, `${r.year || "—"} · ${r.recommendation || "—"}`),
-          r.decisionMs && r.decisionMs !== r.recommendation ? h("span", { class: "muted" }, ` · decisão do MS: ${r.decisionMs}`) : null),
-        r.indication ? h("p", { class: "conitec-indication" }, r.indication.length > 160 ? `${r.indication.slice(0, 157)}…` : r.indication) : null,
-        h("small", { class: "muted" }, [r.ordinance, r.publishedAt ? fmtDate(r.publishedAt) : "", r.technicalReport ? `Relatório técnico ${r.technicalReport}` : ""].filter(Boolean).join(" · ")));
-      const first = records.slice(0, 3);
-      const rest = records.slice(3);
-      return [h("ul", { class: "plain-list" }, first.map(rowFor)),
-        rest.length ? h("details", { class: "more-records" }, h("summary", {}, `Ver as outras ${rest.length} decisões`), h("ul", { class: "plain-list" }, rest.map(rowFor))) : null];
-    }
-    function anvisaSummary(s) {
-      const cats = Object.entries(s.categories).slice(0, 4).map(([name, n]) => `${Lib.formatCount(n)} ${CATEGORY_PLURAL[name] || name.toLowerCase()}`).join(" · ");
-      return h("li", { class: "anvisa-row" },
-        h("div", {}, h("strong", {}, `${s.name}: ${Lib.formatCount(s.active)} ${s.active === 1 ? "registro ativo" : "registros ativos"}`),
-          s.inactive ? h("span", { class: "muted" }, ` · ${Lib.formatCount(s.inactive)} inativos`) : null),
-        h("small", { class: "muted" }, [cats, s.companies ? `${s.companies} ${s.companies === 1 ? "empresa" : "empresas"}` : "",
-          s.validUntil ? `validade mais distante ${fmtMonth(s.validUntil)}` : "", s.classes.length ? `classe: ${s.classes.join(", ")}` : ""].filter(Boolean).join(" · ")));
-    }
-    function anvisaBlock(list, key) {
-      if (!list.length) return h("p", { class: "muted" }, "ANVISA: nenhum registro de medicamento com esta substância.");
-      const exact = list.find((s) => s.key === key) || list[0];
-      const others = list.filter((s) => s !== exact);
-      return [h("h5", {}, "Registro na ANVISA"), h("ul", { class: "plain-list" }, anvisaSummary(exact)),
-        others.length ? h("details", { class: "more-records" }, h("summary", {}, `Associações e outras formas (${others.length})`), h("ul", { class: "plain-list" }, others.map(anvisaSummary))) : null];
-    }
-    function renameSummary(r) {
-      const rows = r.presentations.map((a) => h("li", {}, `${a.text} · ${a.component}`, h("span", { class: "muted" }, ` (p. ${a.page} do PDF)`)));
-      const more = r.totalPresentations - r.presentations.length;
-      return h("li", { class: "anvisa-row" },
-        h("div", {}, h("strong", {}, `${r.name}: consta na Rename 2024`), h("span", { class: "muted" }, ` · componente ${r.components.join(", ").toLowerCase()}`)),
-        h("details", { class: "more-records" }, h("summary", {}, `Apresentações listadas (${r.totalPresentations})`),
-          h("ul", { class: "plain-list" }, rows, more > 0 ? h("li", { class: "muted" }, `e mais ${more} no PDF`) : null)));
-    }
-    function renameBlock(list, key) {
-      if (!list.length) return h("p", { class: "muted" }, "Rename 2024: a substância não consta na relação nacional de medicamentos essenciais.");
-      const exact = list.find((r) => r.key === key) || list[0];
-      const others = list.filter((r) => r !== exact);
-      return [h("h5", {}, "Rename 2024 (medicamentos essenciais)"), h("ul", { class: "plain-list" }, renameSummary(exact)),
-        others.length ? h("details", { class: "more-records" }, h("summary", {}, `Associações e outras formas (${others.length})`), h("ul", { class: "plain-list" }, others.map(renameSummary))) : null];
-    }
-    function situationBlock(item, key) {
-      return [renameBlock(item.rename || [], key), anvisaBlock(item.anvisa, key),
-        h("h5", {}, "Decisões da Conitec (incorporação ao SUS)"),
-        item.conitec.length ? conitecRows(item.conitec) : h("p", { class: "muted" }, "A Conitec não tem decisão registrada para esta substância.")];
-    }
     async function renderBrasil() {
       let data;
       try { data = await api(`/api/discover/brasil?ref=${encodeURIComponent(work.ref)}`); } catch {
@@ -1200,6 +1150,58 @@
     return h("section", { class: "list-block" }, h("h3", {}, toggle), body);
   }
 
+  // cartões da situação no Brasil (artigo e relatório): dados oficiais locais, sem IA
+  const METHODS = { sinonimo: "sinônimo conhecido", cognato: "nome parecido" };
+  const CATEGORY_PLURAL = { Genérico: "genéricos", Similar: "similares", Novo: "novos", Biológico: "biológicos", Específico: "específicos", Fitoterápico: "fitoterápicos", Dinamizado: "dinamizados", Radiofármaco: "radiofármacos" };
+  const fmtDate = (iso) => { const d = new Date(`${iso}T12:00:00`); return Number.isNaN(d.getTime()) ? "" : d.toLocaleDateString("pt-BR"); };
+  const fmtMonth = (ym) => (/^\d{4}-\d{2}$/.test(ym) ? `${ym.slice(5)}/${ym.slice(0, 4)}` : "");
+  function conitecRows(records) {
+    const rowFor = (r) => h("li", { class: "conitec-row" },
+      h("div", {}, h("strong", {}, `${r.year || "—"} · ${r.recommendation || "—"}`),
+        r.decisionMs && r.decisionMs !== r.recommendation ? h("span", { class: "muted" }, ` · decisão do MS: ${r.decisionMs}`) : null),
+      r.indication ? h("p", { class: "conitec-indication" }, r.indication.length > 160 ? `${r.indication.slice(0, 157)}…` : r.indication) : null,
+      h("small", { class: "muted" }, [r.ordinance, r.publishedAt ? fmtDate(r.publishedAt) : "", r.technicalReport ? `Relatório técnico ${r.technicalReport}` : ""].filter(Boolean).join(" · ")));
+    const first = records.slice(0, 3);
+    const rest = records.slice(3);
+    return [h("ul", { class: "plain-list" }, first.map(rowFor)),
+      rest.length ? h("details", { class: "more-records" }, h("summary", {}, `Ver as outras ${rest.length} decisões`), h("ul", { class: "plain-list" }, rest.map(rowFor))) : null];
+  }
+  function anvisaSummary(s) {
+    const cats = Object.entries(s.categories).slice(0, 4).map(([name, n]) => `${Lib.formatCount(n)} ${CATEGORY_PLURAL[name] || name.toLowerCase()}`).join(" · ");
+    return h("li", { class: "anvisa-row" },
+      h("div", {}, h("strong", {}, `${s.name}: ${Lib.formatCount(s.active)} ${s.active === 1 ? "registro ativo" : "registros ativos"}`),
+        s.inactive ? h("span", { class: "muted" }, ` · ${Lib.formatCount(s.inactive)} inativos`) : null),
+      h("small", { class: "muted" }, [cats, s.companies ? `${s.companies} ${s.companies === 1 ? "empresa" : "empresas"}` : "",
+        s.validUntil ? `validade mais distante ${fmtMonth(s.validUntil)}` : "", s.classes.length ? `classe: ${s.classes.join(", ")}` : ""].filter(Boolean).join(" · ")));
+  }
+  function anvisaBlock(list, key) {
+    if (!list.length) return h("p", { class: "muted" }, "ANVISA: nenhum registro de medicamento com esta substância.");
+    const exact = list.find((s) => s.key === key) || list[0];
+    const others = list.filter((s) => s !== exact);
+    return [h("h5", {}, "Registro na ANVISA"), h("ul", { class: "plain-list" }, anvisaSummary(exact)),
+      others.length ? h("details", { class: "more-records" }, h("summary", {}, `Associações e outras formas (${others.length})`), h("ul", { class: "plain-list" }, others.map(anvisaSummary))) : null];
+  }
+  function renameSummary(r) {
+    const rows = r.presentations.map((a) => h("li", {}, `${a.text} · ${a.component}`, h("span", { class: "muted" }, ` (p. ${a.page} do PDF)`)));
+    const more = r.totalPresentations - r.presentations.length;
+    return h("li", { class: "anvisa-row" },
+      h("div", {}, h("strong", {}, `${r.name}: consta na Rename 2024`), h("span", { class: "muted" }, ` · componente ${r.components.join(", ").toLowerCase()}`)),
+      h("details", { class: "more-records" }, h("summary", {}, `Apresentações listadas (${r.totalPresentations})`),
+        h("ul", { class: "plain-list" }, rows, more > 0 ? h("li", { class: "muted" }, `e mais ${more} no PDF`) : null)));
+  }
+  function renameBlock(list, key) {
+    if (!list.length) return h("p", { class: "muted" }, "Rename 2024: a substância não consta na relação nacional de medicamentos essenciais.");
+    const exact = list.find((r) => r.key === key) || list[0];
+    const others = list.filter((r) => r !== exact);
+    return [h("h5", {}, "Rename 2024 (medicamentos essenciais)"), h("ul", { class: "plain-list" }, renameSummary(exact)),
+      others.length ? h("details", { class: "more-records" }, h("summary", {}, `Associações e outras formas (${others.length})`), h("ul", { class: "plain-list" }, others.map(renameSummary))) : null];
+  }
+  function situationBlock(item, key) {
+    return [renameBlock(item.rename || [], key), anvisaBlock(item.anvisa, key),
+      h("h5", {}, "Decisões da Conitec (incorporação ao SUS)"),
+      item.conitec.length ? conitecRows(item.conitec) : h("p", { class: "muted" }, "A Conitec não tem decisão registrada para esta substância.")];
+  }
+
   // ------------------------------------------------------------------ Relatório de tema
   const REPORT_DOWNLOADS = [["Página web (.html)", "html"], ["Word (.docx)", "docx"], ["Markdown (.md)", "md"]];
 
@@ -1218,6 +1220,80 @@
         h("button", { type: "button", class: "btn btn-sm btn-ghost", "aria-label": `Excluir o relatório ${r.title}`, onclick: async () => {
           if (await guarded(() => api(`/api/reports/${r.id}`, { method: "DELETE" }))) { toast("Relatório excluído."); onChange(); }
         } }, "Excluir")))));
+  }
+
+  // seção "Situação no Brasil" do relatório: o autor confirma as substâncias; os cartões vêm das bases oficiais locais
+  const MAX_REPORT_SUBSTANCES = 10;
+  const plainTerm = (text) => text.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+
+  function reportBrasil(reportId, initial) {
+    const box = h("div", { class: "stack" }, loading("Consultando dados oficiais…"));
+    const entries = new Map(); // termo -> { nome, hint }
+    const picked = new Set(initial);
+    const checklist = h("div", { class: "stack", role: "group", "aria-label": "Substâncias para a seção Situação no Brasil" });
+    const cards = h("div", { class: "stack" });
+    const note = h("p", { class: "note" });
+    const manualInput = h("input", { type: "text", placeholder: "Outro medicamento (nome em português)", maxlength: "80", "aria-label": "Adicionar medicamento" });
+    const manualButton = h("button", { type: "button", class: "btn btn-secondary btn-sm" }, "Adicionar");
+
+    function paintChecklist() {
+      if (!entries.size) {
+        mount(checklist, h("p", { class: "muted" }, "Não identificamos substâncias nos resumos dos estudos incluídos. Se o tema é um medicamento, adicione o nome abaixo."));
+        return;
+      }
+      mount(checklist, [...entries].map(([termo, entry]) => {
+        const input = h("input", { type: "checkbox", id: `sub-${termo.replace(/\W+/g, "-")}` });
+        input.checked = picked.has(termo);
+        input.addEventListener("change", () => {
+          if (input.checked && picked.size >= MAX_REPORT_SUBSTANCES) { input.checked = false; toast(`Escolha no máximo ${MAX_REPORT_SUBSTANCES} substâncias.`); return; }
+          if (input.checked) picked.add(termo); else picked.delete(termo);
+        });
+        return h("label", { class: "report-include", for: input.id }, input, h("span", {}, h("strong", {}, entry.nome), h("small", { class: "muted" }, ` · ${entry.hint}`)));
+      }));
+    }
+
+    async function load() {
+      let data;
+      try { data = await api(`/api/reports/${encodeURIComponent(reportId)}/brasil`); } catch {
+        mount(box, h("p", { class: "muted" }, "Os dados oficiais do Brasil não estão disponíveis agora. O relatório pode ser salvo sem esta seção."));
+        return;
+      }
+      for (const s of data.suggestions) {
+        entries.set(s.termo, { nome: s.nome, hint: `citada em ${s.studies} ${s.studies === 1 ? "estudo" : "estudos"}; no texto: ${s.en} (${METHODS[s.metodo] || s.metodo}). Confirme` });
+      }
+      picked.clear();
+      for (const c of data.confirmed) {
+        picked.add(c.termo);
+        if (!entries.has(c.termo)) entries.set(c.termo, { nome: c.nome, hint: "confirmada por você" });
+      }
+      paintChecklist();
+      mount(cards, data.confirmed.map((c) => h("div", { class: "conitec-drug" }, h("h4", {}, c.nome), situationBlock(c, c.termo))));
+      const meta = data.meta;
+      note.textContent = `Bases consultadas por código, sem IA: ANVISA (extraída em ${fmtDate(meta.anvisa.extraidoEm)}), Conitec (extraída em ${fmtDate(meta.conitec.extraidoEm)}) e Rename 2024 (extraída em ${fmtDate(meta.rename.extraidoEm)}). `
+        + "Constar na Rename ou ter registro na ANVISA não significa disponibilidade na unidade de saúde. Os dados ainda não foram revisados por farmacêutico ou médico.";
+      mount(box, h("p", { class: "hint" }, "Opcional, para temas de medicamento. Marque as substâncias que o relatório deve tratar: a ligação do nome é automática e só entra no documento o que você confirmar. Salve para ver a situação de cada uma."),
+        checklist,
+        h("div", { class: "new-list" }, manualInput, manualButton),
+        data.confirmed.length ? h("h3", {}, "Como aparecerá no documento") : null, cards, note);
+    }
+
+    async function addManual() {
+      const query = manualInput.value.trim();
+      if (query.length < 3) { manualInput.focus(); return; }
+      if (picked.size >= MAX_REPORT_SUBSTANCES) { toast(`Escolha no máximo ${MAX_REPORT_SUBSTANCES} substâncias.`); return; }
+      const found = await guarded(() => api(`/api/brasil/medicamento?q=${encodeURIComponent(query)}`));
+      if (!found) return;
+      if (!found.rename.length && !found.anvisa.length && !found.conitec.length) { toast("Não encontramos essa substância nas bases oficiais."); return; }
+      const termo = plainTerm(query);
+      entries.set(termo, { nome: query, hint: "adicionada por você" });
+      picked.add(termo);
+      manualInput.value = "";
+      paintChecklist();
+    }
+    manualButton.addEventListener("click", addManual);
+    manualInput.addEventListener("keydown", (event) => { if (event.key === "Enter") { event.preventDefault(); addManual(); } });
+    load();
+    return { node: box, selected: () => [...picked], reload: load };
   }
 
   async function renderReport(reportId) {
@@ -1253,6 +1329,7 @@
         note);
       return { item, include, note, card };
     });
+    const brasil = reportBrasil(reportId, data.substances || []);
     const panoramaBox = h("div", { class: "stack" });
     const paintPanorama = (summary) => {
       const lines = [["Tipo de estudo", summary.types], ["Ano", summary.years], ["Idioma", summary.languages], ["Fonte", summary.sources]]
@@ -1269,6 +1346,7 @@
       const body = {
         title: titleInput.value, question: questionInput.value, methodNote: methodInput.value,
         items: rows.map((r) => ({ ref: r.item.ref, included: r.include.checked, note: r.note.value })),
+        substances: brasil.selected(),
       };
       const saved = await guarded(() => api(`/api/reports/${encodeURIComponent(reportId)}`, { method: "PUT", body }));
       saveButton.disabled = false;
@@ -1277,6 +1355,7 @@
       titleInput.value = saved.title;
       paintPanorama(saved.panorama);
       setTitle(saved.title);
+      brasil.reload();
       return saved;
     }
     saveButton.addEventListener("click", async () => { if (await save()) toast("Relatório salvo."); });
@@ -1296,13 +1375,14 @@
       h("p", { class: "hint" }, "Desmarque o que não deve entrar. A nota de confiabilidade e as frases estatísticas vêm do resumo do registro."),
       rows.map((r) => r.card),
       h("h2", {}, "Panorama"), panoramaBox,
+      h("h2", {}, "Situação no Brasil (medicamentos)"), brasil.node,
       h("h2", {}, "Método"),
       h("p", { class: "hint" }, "O texto abaixo é montado automaticamente e entra no apêndice do documento."),
       h("ul", { class: "plain-list" }, data.method.map((p) => h("li", {}, p))),
       h("details", { class: "more-records" }, h("summary", {}, "Como a nota de confiabilidade é calculada"),
         h("ul", { class: "plain-list" }, data.criteria.map((c) => h("li", {}, h("strong", {}, `${c.name} (peso ${c.weight}): `), c.how)))),
       h("div", { class: "field" }, h("label", { for: "report-method-note" }, "Sua nota sobre o método (opcional)"), methodInput),
-      h("div", { class: "interests-foot" }, status,
+      h("div", { class: "report-foot" }, status,
         h("div", { class: "row" }, saveButton,
           REPORT_DOWNLOADS.map(([label, format]) => h("button", { type: "button", class: "btn btn-secondary", onclick: download(format) }, label)))),
       h("p", { class: "note" }, "Para PDF: baixe a página web (.html), abra no navegador e use Imprimir, Salvar como PDF. O relatório não conclui nem recomenda conduta; cabe ao autor interpretar os estudos."));

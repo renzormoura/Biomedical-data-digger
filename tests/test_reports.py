@@ -271,3 +271,118 @@ def test_html_escapes_user_text(env):
     created = client.post("/api/reports", json={"list_id": seeded(env, client), "title": "<script>alert(1)</script>"}).json()
     page = client.get(f"/api/reports/{created['id']}/download", params={"format": "html"}).text
     assert "<script>alert(1)</script>" not in page and "&lt;script&gt;" in page
+
+
+# ------------------------------------------------------------------ situacao no Brasil (pacote de saude)
+from unittest.mock import patch  # noqa: E402
+
+import report_brasil  # noqa: E402
+from brasil import anvisa, conitec, rename  # noqa: E402
+
+DRUGS = "Metformin and aspirin were compared with placebo; dapagliflozin was an add-on."
+
+
+def drug_work(ref, **overrides):
+    return make_work(ref, title=f"Estudo {ref} de medicamentos", abstract=DRUGS, **overrides)
+
+
+@pytest.fixture(scope="module")
+def bases():
+    return anvisa.carregar(), conitec.carregar(), rename.carregar()
+
+
+def test_clean_substances_normalizes_dedupes_and_limits():
+    cleaned = reports.clean_substances(["Ácido Acetilsalicílico", "acido acetilsalicilico", "ab", "  Metformina ", ""] + [f"droga{i}" for i in range(20)])
+    assert cleaned[:2] == ["acido acetilsalicilico", "metformina"] and len(cleaned) == reports.MAX_SUBSTANCES and "ab" not in cleaned
+
+
+def test_substances_are_saved_kept_cleared_and_isolated(store):
+    report = create(store)
+    assert report.substances == ()
+    saved = store.update(EMAIL, report.id, title="", question="", method_note="", items=[], substances=["Metformina", "Aspirina"])
+    assert saved.substances == ("metformina", "aspirina")
+    assert store.update(EMAIL, report.id, title="", question="", method_note="", items=[]).substances == ("metformina", "aspirina")  # None mantem
+    assert store.update(EMAIL, report.id, title="", question="", method_note="", items=[], substances=["Insulina"]).substances == ("insulina",)
+    assert store.update(EMAIL, report.id, title="", question="", method_note="", items=[], substances=[]).substances == ()
+    store.update(EMAIL, report.id, title="", question="", method_note="", items=[], substances=["x" * 200])
+    assert len(store.get(EMAIL, report.id).substances[0]) == reports.MAX_SUBSTANCE_CHARS
+    store.delete(EMAIL, report.id)
+    assert store._db.query("SELECT COUNT(*) FROM report_substances")[0][0] == 0  # noqa: SLF001
+
+
+def test_suggest_ranks_by_how_many_studies_cite_the_substance(bases):
+    works = [drug_work("1"), drug_work("2"), make_work("3", abstract="Metformin alone in obese adults.", title="Outro")]
+    suggestions = {s.termo: s for s in report_brasil.suggest(works, bases)}
+    assert suggestions["metformina"].studies == 3 and suggestions["dapagliflozina"].studies == 2
+    ordered = [s.termo for s in report_brasil.suggest(works, bases)]
+    assert ordered.index("metformina") < ordered.index("dapagliflozina")
+    assert suggestions["metformina"].nome == "Metformina" and suggestions["metformina"].en == "metformin" and suggestions["metformina"].metodo
+    assert report_brasil.suggest([make_work("9", abstract="Exercise and blood pressure in adults.")], bases) == []
+    assert report_brasil.suggest([], bases) == []
+
+
+def test_build_describes_rename_anvisa_and_conitec_with_dates(bases):
+    section = report_brasil.build(("metformina", "dapagliflozina", "substanciainexistente"), bases)
+    flat = "\n".join(text for _, text in section.blocks)
+    assert ("h1", "Situação no Brasil") in section.blocks and ("h2", "Metformina") in section.blocks
+    assert "Rename 2024" in flat and "consta, componente básico" in flat and "registros ativos" in flat
+    assert "Conitec:" in flat and "decisões registradas" in flat  # dapagliflozina tem decisoes
+    assert "nenhum registro de medicamento" in flat and "não consta na relação nacional" in flat  # substancia inexistente
+    assert "extraído em" in flat and "não significa disponibilidade" in flat and "ainda não foram revisados por farmacêutico ou médico" in flat
+    assert "confirmou as substâncias" in section.method and "extraído em" in section.method
+    assert report_brasil.build((), bases) is None
+
+
+def test_report_blocks_places_the_brazil_section_between_studies_and_references(store, bases):
+    report = store.update(EMAIL, create(store).id, title="", question="", method_note="", items=[], substances=["metformina"])
+    section = report_brasil.build(report.substances, bases)
+    blocks = report_blocks(report, date(2026, 10, 18), brasil=section)
+    headings = [text for kind, text in blocks if kind == "h1"]
+    assert headings.index("Estudos incluídos") < headings.index("Situação no Brasil") < headings.index("Referências")
+    assert section.method in [text for _, text in blocks]
+    assert "Situação no Brasil" not in [text for _, text in report_blocks(report, date(2026, 10, 18))]
+
+
+def seeded_drugs(env):
+    created = env.library.create_list(EMAIL, "Metformina")
+    for work in (drug_work("1"), drug_work("2")):
+        env.library.add_to_list(EMAIL, created.id, work)
+    return created.id
+
+
+def test_brasil_routes_suggest_confirm_and_describe(env):
+    client = env.client()
+    report = client.post("/api/reports", json={"list_id": seeded_drugs(env)}).json()
+    first = client.get(f"/api/reports/{report['id']}/brasil").json()
+    assert {"metformina", "dapagliflozina"} <= {s["termo"] for s in first["suggestions"]} and first["confirmed"] == []
+    assert set(first["meta"]) == {"anvisa", "conitec", "rename"}
+    saved = client.put(f"/api/reports/{report['id']}", json={"title": "", "items": [], "substances": ["Metformina", "dapagliflozina"]}).json()
+    assert saved["substances"] == ["metformina", "dapagliflozina"]
+    again = client.get(f"/api/reports/{report['id']}/brasil").json()
+    names = {c["termo"]: c for c in again["confirmed"]}
+    assert names["metformina"]["nome"] == "Metformina" and names["metformina"]["rename"] and names["metformina"]["anvisa"]
+    assert names["dapagliflozina"]["conitec"]
+    kept = client.put(f"/api/reports/{report['id']}", json={"title": "", "items": []}).json()
+    assert kept["substances"] == ["metformina", "dapagliflozina"]  # sem o campo, nao apaga
+
+
+def test_download_includes_the_brazil_section_only_for_confirmed_substances(env):
+    client = env.client()
+    report = client.post("/api/reports", json={"list_id": seeded_drugs(env), "title": "Metformina no diabetes"}).json()
+    url = f"/api/reports/{report['id']}/download"
+    assert "Situação no Brasil" not in client.get(url).text
+    client.put(f"/api/reports/{report['id']}", json={"title": "", "items": [], "substances": ["metformina"]})
+    page = client.get(url).text
+    assert "Situação no Brasil" in page and "Rename 2024" in page and "ANVISA" in page and "confirmou as substâncias" in page
+    assert "Situação no Brasil" in client.get(url, params={"format": "md"}).text
+
+
+def test_brasil_routes_degrade_without_snapshots_and_require_login(env):
+    client = env.client()
+    report = client.post("/api/reports", json={"list_id": seeded_drugs(env)}).json()
+    client.put(f"/api/reports/{report['id']}", json={"title": "", "items": [], "substances": ["metformina"]})
+    with patch.object(rename, "carregar", side_effect=FileNotFoundError("sem arquivo")):
+        assert client.get(f"/api/reports/{report['id']}/brasil").status_code == 503
+        assert client.get(f"/api/reports/{report['id']}/download").status_code == 503  # nao entrega um documento sem a secao confirmada
+    assert env.client(None).get(f"/api/reports/{report['id']}/brasil").status_code == 401
+    assert env.client("bia@exemplo.com").get(f"/api/reports/{report['id']}/brasil").status_code == 404

@@ -1,6 +1,6 @@
 # Plano: relatório de tema (núcleo geral) com o pacote "Saúde no Brasil"
 
-Status: fase 1 implementada em 2026-10-18 (ver `docs/features/relatorio-de-tema.md`); fases 2 a 6 pendentes. Decisão estratégica tomada com o usuário em 2026-10-18: o produto é **um só**, com um núcleo para qualquer área do conhecimento e um pacote vertical opcional para saúde no Brasil.
+Status: fases 1 e 2 implementadas em 2026-10-18 (ver `docs/features/relatorio-de-tema.md`); fases 3 a 6 pendentes. Decisão estratégica tomada com o usuário em 2026-10-18: o produto é **um só**, com um núcleo para qualquer área do conhecimento e um pacote vertical opcional para saúde no Brasil.
 
 ## 1. Problema
 

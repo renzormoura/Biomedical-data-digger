@@ -13,7 +13,7 @@ import json
 import re
 import unicodedata
 from dataclasses import dataclass
-from functools import lru_cache
+from functools import cache, lru_cache
 from pathlib import Path
 
 ALIASES_PATH = Path(__file__).resolve().parent.parent / "dados_brasil" / "aliases_en_pt.json"
@@ -96,6 +96,17 @@ def formas_inglesas(termo: str) -> set[str]:
     return resultado
 
 
+@cache
+def _formas(termo: str) -> tuple[str, ...]:
+    """Formas inglesas de um nome (ordenadas); em cache, pois o vocabulario e o mesmo a cada texto analisado."""
+    return tuple(sorted(formas_inglesas(termo)))
+
+
+@cache
+def _formas_dobradas(termo: str) -> tuple[str, ...]:
+    return tuple(sorted(formas_inglesas(dobrar(termo))))
+
+
 @dataclass(frozen=True)
 class Candidato:
     pt: str  # nome em portugues, como aparece nos dados
@@ -122,9 +133,9 @@ def encontrar(texto: str, vocabulario: dict[str, str], *, limite: int) -> list[C
         if termo in por_termo:
             achados[termo] = Candidato(exibicao, por_termo[termo][0], "sinonimo", termo)
             continue
-        casou = next((f for f in sorted(formas_inglesas(termo)) if f" {f} " in normalizado), None)
+        casou = next((f for f in _formas(termo) if f" {f} " in normalizado), None)
         if casou is None:
-            casou_dobrado = next((f for f in sorted(formas_inglesas(dobrar(termo))) if f" {f} " in dobrado), None)
+            casou_dobrado = next((f for f in _formas_dobradas(termo) if f" {f} " in dobrado), None)
             casou = next((w for w in normalizado.split() if dobrar(w) == casou_dobrado), None) if casou_dobrado and " " not in casou_dobrado else casou_dobrado
         if casou:
             achados[termo] = Candidato(exibicao, casou, "cognato", termo)
