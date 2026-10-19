@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 2026-10 — Página inicial renovada
+
+### Alterado
+- A aba **Início** agora apresenta tudo o que o produto oferece: busca em várias fontes, feed de novidades, resumo fiel e nota de confiabilidade, situação no Brasil, interesses e avisos no sininho, biblioteca e listas, relatório de tema, citações e exportação, Laboratório de IA opcional e controle dos dados. Traz números ao vivo (fontes de busca, fontes do feed e áreas), "Como funciona" em quatro passos, recursos em cinco grupos com atalho para cada área, "Para quem" com seis públicos e a origem das fontes.
+
 ## 2026-10 — Perfil pelo botão do usuário
 
 ### Alterado

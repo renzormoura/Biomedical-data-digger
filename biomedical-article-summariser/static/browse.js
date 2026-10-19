@@ -541,22 +541,53 @@
   }
 
   // ------------------------------------------------------------------ Início
-  const TOPICS = ["diabetes tipo 2", "sepse", "saúde mental", "inteligência artificial na saúde", "mudanças climáticas"];
+  const TOPICS = ["diabetes tipo 2", "inteligência artificial na educação", "mudanças climáticas", "energia solar", "saúde mental"];
   const STEPS = [
-    ["01", "Busque", "Filtre por ano, tipo de estudo, idioma e acesso aberto. Combine fontes sem ver o mesmo artigo duas vezes."],
-    ["02", "Entenda", "Resumo organizado por seções, números com a frase de origem e a nota de confiabilidade explicada critério a critério."],
-    ["03", "Organize", "Salve, etiquete, monte listas de leitura, compartilhe por link e exporte as referências para o Zotero, Mendeley ou EndNote (RIS, CSL JSON, BibTeX) ou em ABNT, APA, Vancouver, IEEE, Harvard ou MLA."],
+    ["01", "Descubra", "Busque em várias fontes ao mesmo tempo e acompanhe o feed de novidades das áreas que você escolheu."],
+    ["02", "Entenda", "Resumo por seções, números com a frase de origem e a nota de confiabilidade explicada critério a critério."],
+    ["03", "Acompanhe", "Avisos no sininho de artigos novos, de artigos retratados que você guarda e de mudanças regulatórias."],
+    ["04", "Entregue", "Monte listas, gere o relatório de tema com método declarado e leve as referências ao Zotero, Mendeley ou EndNote."],
+  ];
+  const FEATURES = [
+    ["Descobrir", "Ache o que importa, em todas as áreas.", [
+      ["Busca em todas as fontes", "Europe PMC, PubMed, arXiv, DOAJ e OpenAIRE (e OpenAlex, quando ativo) numa busca só, sem repetir o mesmo artigo. Filtros por ano, tipo de estudo, idioma e acesso aberto.", "#/busca", "Buscar"],
+      ["Feed de novidades", "Revistas, instituições de pesquisa, preprints e divulgação científica de 14 áreas, filtrados pelos seus interesses. Ao clicar, você vai para a fonte.", "#/feed", "Abrir o feed"],
+      ["Artigos semelhantes", "No fim de cada artigo, outros estudos parecidos para você seguir a leitura sem recomeçar a busca.", "", ""],
+    ]],
+    ["Entender", "Leia com os limites à vista.", [
+      ["Resumo fiel e números", "O resumo como o autor escreveu, dividido por seções, e as frases com números e estatísticas copiadas do resumo, com a frase de origem.", "", ""],
+      ["Nota de confiabilidade", "De 0 a 100, com 8 critérios abertos: o que contou, o que faltou e a evidência. O que a fonte não informa sai do cálculo.", "", ""],
+      ["Situação no Brasil", "Para medicamentos: registro na ANVISA, decisões da Conitec e presença na Rename 2024, com a data de cada base. Constar não é estar disponível na sua unidade.", Lib.buildHash("/busca", { q: "metformina" }), "Ver um exemplo"],
+      ["Registros e dados abertos", "Ensaios clínicos (ClinicalTrials.gov), citações (OpenCitations) e dados relacionados (DataCite e Zenodo) do artigo.", "", ""],
+    ]],
+    ["Acompanhar", "Receba o que importa, no sininho.", [
+      ["Interesses por área e idioma", "14 áreas do conhecimento com subtemas, idiomas e palavras-chave. Avisamos quando sai artigo novo sobre o que você escolheu.", "#/perfil/interesses", "Escolher interesses"],
+      ["Avisos importantes", "Artigo retratado na sua biblioteca, mudança regulatória de uma substância que você acompanha e artigos novos na lista de um relatório. Você liga e desliga cada tipo.", "#/perfil/notificacoes", "Ver as notificações"],
+    ]],
+    ["Organizar e entregar", "Do que você leu ao documento pronto.", [
+      ["Biblioteca e listas", "Salve artigos, etiquete, monte listas de leitura e compartilhe uma lista por link.", "#/biblioteca", "Abrir a biblioteca"],
+      ["Relatório de tema", "Escolha os estudos de uma lista e gere um documento com panorama, nota de cada estudo, referências e apêndice de método. Guarda versões e histórico, e se atualiza com artigos novos. Baixe em Word, página web ou Markdown.", "#/biblioteca", "Criar um relatório"],
+      ["Citações e exportação", "ABNT, APA, Vancouver, IEEE, Harvard e MLA; exportação para Zotero, Mendeley e EndNote (RIS, CSL JSON, BibTeX). O conector do Zotero captura o artigo direto da página.", "", ""],
+      ["Downloads", "Resumo, ficha de leitura e texto completo aberto (quando existe) em texto, Markdown, página web e Word.", "", ""],
+    ]],
+    ["Opcional e seu", "IA com cautela e controle dos seus dados.", [
+      ["Laboratório de IA", "16 áreas de análise (resumos, pergunta PICO, crítica metodológica e outras), geradas por IA, opcionais e com avisos. Tudo o mais funciona sem IA.", "/ia", "Conhecer o Laboratório"],
+      ["Perfil e dados", "Escolha o seu perfil de uso, baixe uma cópia de todos os seus dados ou exclua a conta quando quiser.", "#/perfil", "Abrir o perfil"],
+    ]],
   ];
   const TRUST = [
     ["Sem IA primeiro.", "Trechos copiados do resumo; nada gerado nem interpretado."],
     ["Dado ausente não pune.", "O que a fonte não informa sai do cálculo e reduz a cobertura."],
     ["Limites declarados.", "A nota não mede a execução do estudo nem substitui a leitura crítica."],
+    ["Notícia não tem nota.", "O feed diz que tipo de fonte é cada uma (instituição, revista, preprint...), mas notícias e comunicados não passam pela nota dos artigos."],
   ];
   const AUDIENCE = [
-    ["Estudantes", "Achar artigos para o TCC, entender o resumo e citar do jeito certo.", "diabetes tipo 2"],
+    ["Estudantes", "Achar artigos para o TCC, entender o resumo, citar do jeito certo e montar o referencial com o método declarado.", "diabetes tipo 2"],
     ["Professores", "Montar listas de leitura e compartilhar com a turma por link.", "saúde pública"],
-    ["Pesquisadores", "Comparar estudos e ver o tipo de evidência antes de ler o texto completo.", "ensaio clínico hipertensão"],
-    ["Profissionais", "Encontrar rápido a evidência sobre uma pergunta, com os limites à vista.", "sepse"],
+    ["Pesquisadores", "Acompanhar a literatura da área, comparar estudos, ver o tipo de evidência e levar as referências ao Zotero.", "ensaio clínico hipertensão"],
+    ["Saúde e farmácia", "Evidência sobre uma pergunta, com a situação do medicamento no Brasil e avisos de artigo retratado.", "sepse"],
+    ["Consultorias", "Relatórios de tema com método e histórico para entregar a clientes, atualizados quando sai artigo novo.", "mudanças climáticas"],
+    ["Engenharia, direito, economia e outras áreas", "O feed e os alertas cobrem 14 áreas do conhecimento, não só a saúde.", "inteligência artificial"],
   ];
   const SAMPLE_CRITERIA = [
     ["met", "Integridade (retratação)", "20/20"], ["met", "Desenho do estudo", "22,5/25"], ["met", "Revisão por pares", "10/10"],
@@ -564,31 +595,41 @@
     ["partial", "Precisão estatística", "5/10"], ["met", "Método descrito no resumo", "10/10"],
   ];
 
+  function featureCard([title, text, href, action]) {
+    return h("div", { class: "feature" },
+      h("h4", {}, title), h("p", { class: "muted" }, text),
+      href ? h("a", { href }, action, icon("arrow")) : null);
+  }
+
   function renderHome() {
     setTitle("Início");
     const input = h("input", { type: "search", id: "home-q", placeholder: "Tema, título, DOI ou palavra-chave", "aria-label": "Buscar artigos", maxlength: "300", autocomplete: "off" });
     const sourceBox = h("span", { class: "search-source" });
-    const sourceCount = h("strong", {}, "2");
+    const sourceCount = h("strong", {}, "—");
+    const feedCount = h("strong", {}, "—");
+    const areaCount = h("strong", {}, "—");
     let sourceSelect = null;
     const go = (q) => {
       const fonte = sourceSelect && sourceSelect.value !== "" ? sourceSelect.value : "";
       location.hash = Lib.buildHash("/busca", { q, fonte });
     };
     loadOptions().then((options) => {
+      sourceCount.textContent = String(options.sources.filter((src) => src.id !== "all").length);
       if (options.sources.length < 2) return;
       sourceSelect = h("select", { id: "home-source", "aria-label": "Fonte" },
         options.sources.map((src) => h("option", { value: src.default ? "" : src.id }, src.name)));
       sourceSelect.value = "";  // a primeira opcao ("Todas as fontes") e a padrao
       mount(sourceBox, sourceSelect);
-      sourceCount.textContent = String(options.sources.filter((src) => src.id !== "all").length);
     }).catch(() => { /* a busca funciona sem o seletor */ });
+    api("/api/feed/sources").then((data) => { feedCount.textContent = String(data.sources.length); }).catch(() => { feedCount.textContent = ""; });
+    loadFeedAreas().then((areas) => { areaCount.textContent = areas.length ? String(areas.length) : ""; });
 
     const stat = (value, label) => h("div", { class: "stat" }, value, h("span", {}, label));
     mount($app,
       h("section", { class: "home-hero" },
-        h("p", { class: "eyebrow" }, "Navegador de artigos científicos"),
-        h("h1", { class: "display" }, "Encontre, entenda e organize a pesquisa."),
-        h("p", { class: "lead" }, "Busque em várias fontes ao mesmo tempo, leia o resumo como o autor escreveu e veja, com critérios abertos, o quanto cada artigo merece confiança."),
+        h("p", { class: "eyebrow" }, "Plataforma de pesquisa científica"),
+        h("h1", { class: "display" }, "Encontre, entenda, acompanhe e entregue a pesquisa."),
+        h("p", { class: "lead" }, "Busque em várias fontes ao mesmo tempo, veja com critérios abertos o quanto cada artigo merece confiança, acompanhe o que sai de novo na sua área e transforme as leituras em um relatório com método declarado."),
         h("form", { class: "home-search", role: "search", onsubmit: (e) => { e.preventDefault(); go(input.value.trim()); } },
           input, sourceBox,
           h("button", { type: "submit", class: "btn btn-primary" }, icon("search"), "Buscar")),
@@ -597,16 +638,23 @@
       profileShortcuts(),
 
       h("section", { class: "stats", "aria-label": "O produto em números" },
-        stat(sourceCount, "fontes integradas, com busca combinada"),
-        stat(h("strong", {}, "8"), "critérios abertos de confiabilidade"),
-        stat(h("strong", {}, "10"), "formatos de citação e exportação"),
-        stat(h("strong", {}, "16"), "áreas de análise com IA opcional")),
+        stat(sourceCount, "fontes de busca, combinadas numa só"),
+        stat(feedCount, "fontes de novidades no feed"),
+        stat(areaCount, "áreas do conhecimento para acompanhar"),
+        stat(h("strong", {}, "8"), "critérios abertos de confiabilidade")),
 
       h("section", { class: "home-section", "aria-labelledby": "como" },
         h("p", { class: "eyebrow" }, "Como funciona"),
-        h("h2", { id: "como" }, "Da pergunta à leitura crítica, em três passos."),
-        h("div", { class: "cols-3" }, STEPS.map(([n, title, text]) => h("div", { class: "step" },
+        h("h2", { id: "como" }, "Da pergunta ao documento pronto, em quatro passos."),
+        h("div", { class: "cols-4" }, STEPS.map(([n, title, text]) => h("div", { class: "step" },
           h("span", { class: "num" }, n), h("h3", {}, title), h("p", { class: "muted" }, text))))),
+
+      h("section", { class: "home-section", "aria-labelledby": "recursos" },
+        h("p", { class: "eyebrow" }, "O que você encontra aqui"),
+        h("h2", { id: "recursos" }, "Tudo num lugar só, em todas as áreas."),
+        FEATURES.map(([group, tagline, cards]) => h("div", { class: "feature-group" },
+          h("div", { class: "feature-head" }, h("h3", {}, group), h("p", { class: "muted" }, tagline)),
+          h("div", { class: "feature-grid" }, cards.map(featureCard))))),
 
       h("section", { class: "home-section split", "aria-labelledby": "confianca" },
         h("div", {},
@@ -629,13 +677,20 @@
           h("h3", {}, who), h("p", { class: "muted" }, what),
           h("a", { href: Lib.buildHash("/busca", { q }) }, "Começar", icon("arrow")))))),
 
+      h("section", { class: "home-section", "aria-labelledby": "fontes" },
+        h("p", { class: "eyebrow" }, "De onde vem o conteúdo"),
+        h("h2", { id: "fontes" }, "Fontes públicas, sempre citadas."),
+        h("p", { class: "lead" }, "A busca consulta Europe PMC, PubMed, arXiv, DOAJ e OpenAIRE (e OpenAlex). Os registros abertos vêm de ClinicalTrials.gov, OpenCitations, DataCite e Zenodo, e a situação no Brasil, de dados oficiais da ANVISA, da Conitec e da Rename. O feed reúne revistas, instituições, preprints, divulgação científica e jornais, cada um identificado pelo tipo de fonte."),
+        h("p", {}, h("a", { href: "#/feed" }, "Ver as fontes do feed", icon("arrow")))),
+
       h("section", { class: "cta" },
         h("div", {}, h("h2", {}, "Sua biblioteca, no seu ritmo."),
-          h("p", { class: "muted" }, "Buscar e ler não exige conta. Crie uma para salvar artigos, montar listas e exportar referências.")),
+          h("p", { class: "muted" }, "Buscar, ler e navegar pelo feed não exige conta. Crie uma para salvar artigos, acompanhar os seus interesses, montar listas e gerar relatórios.")),
         h("div", { class: "row" },
           session.user
             ? h("a", { class: "btn btn-primary", href: "#/biblioteca" }, "Abrir minha biblioteca")
-            : h("button", { type: "button", class: "btn btn-primary", onclick: () => openAuth("Crie uma conta para salvar artigos e montar listas.") }, "Criar conta ou entrar"),
+            : h("button", { type: "button", class: "btn btn-primary", onclick: () => openAuth("Crie uma conta para salvar artigos, acompanhar interesses e montar listas.") }, "Criar conta ou entrar"),
+          h("a", { class: "btn btn-outline", href: "#/feed" }, "Ver o feed"),
           h("a", { class: "btn btn-outline", href: "/ia" }, "Conhecer o Laboratório de IA"))));
   }
 
