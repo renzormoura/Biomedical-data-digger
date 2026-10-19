@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 2026-10 — Início mais simples
+
+### Alterado
+- A aba **Início** ficou mais enxuta e direta: busca em destaque, três números, seis cartões com ícone (buscar, confiar, acompanhar, avisos, listas, entregar), o exemplo da nota de confiabilidade e a chamada final. Saíram "Como funciona", a lista longa de recursos, "Para quem" e "De onde vem o conteúdo", que repetiam o que as outras abas já mostram.
+
 ## 2026-10 — Página inicial renovada
 
 ### Alterado
