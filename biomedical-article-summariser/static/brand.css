@@ -673,3 +673,13 @@ input[type="text"], input[type="search"], input[type="email"], input[type="passw
 .feature-icon .icon { width: 20px; height: 20px; }
 @media (max-width: 900px) { .feature-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .feature-grid { grid-template-columns: 1fr; } .stats-3 { grid-template-columns: 1fr; } }
+
+/* celular: resultados da busca compactos, para ver mais artigos por tela */
+@media (max-width: 560px) {
+  .result { padding: 12px 0; }
+  .result h3 { font-size: 1rem; line-height: 1.28; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .result .meta { margin: 4px 0 6px; font-size: 0.82rem; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+  .result .snippet { -webkit-line-clamp: 2; font-size: 0.9rem; margin: 6px 0 0; }
+  .result .row { margin-top: 8px; }
+  .result .row .btn { min-height: 36px; }
+}

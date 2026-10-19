@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 2026-10 — Celular: busca compacta e menu do Laboratório
+
+### Alterado
+- No celular, os resultados da busca ficaram mais compactos (título em até 3 linhas, autores em 1, trecho em 2 e botões menores): cabem cerca de 2,5 artigos por tela, antes 1,5.
+- O Laboratório de IA agora tem o mesmo menu das outras telas (Início, Feed, Busca, Biblioteca, Laboratório), no topo e na barra inferior; faltava o Feed.
+
 ## 2026-10 — Busca e feed mais rápidos
 
 ### Alterado
