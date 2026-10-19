@@ -67,6 +67,9 @@ class ProfileStore:
             return DEFAULT
         return Profile(str(rows[0][0]), bool(rows[0][1]))
 
+    def delete(self, user: str) -> None:
+        self._db.execute("DELETE FROM user_profiles WHERE user_email = ?", (user,))
+
     def set(self, user: str, key: str, health_pack: bool | None = None) -> Profile:
         if key not in _KEYS:
             raise ProfileError("Perfil desconhecido.")

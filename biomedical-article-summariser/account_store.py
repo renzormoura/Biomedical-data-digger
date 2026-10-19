@@ -178,6 +178,50 @@ class AccountStore:
         calculated_hash = self._password_digest(password, bytes.fromhex(stored_salt))
         return hmac.compare_digest(calculated_hash, stored_hash)
 
+    def _fetch_one(self, sql: str, params: tuple[object, ...]) -> tuple[object, ...] | None:
+        with self._connection() as connection:
+            if self.uses_postgres:
+                with connection.cursor() as cursor:
+                    cursor.execute(sql.replace("?", "%s"), params)
+                    row = cursor.fetchone()
+                return tuple(row) if row else None
+            row = connection.execute(sql, params).fetchone()
+            return tuple(row) if row else None
+
+    def _write(self, sql: str, params: tuple[object, ...]) -> int:
+        """Executa uma escrita e devolve quantas linhas foram afetadas."""
+        with self._connection() as connection:
+            if self.uses_postgres:
+                with connection.cursor() as cursor:
+                    cursor.execute(sql.replace("?", "%s"), params)
+                    count = int(cursor.rowcount)
+                connection.commit()
+                return count
+            count = int(connection.execute(sql, params).rowcount)
+            connection.commit()
+            return count
+
+    def exists(self, email: str) -> bool:
+        return self._fetch_one("SELECT 1 FROM users WHERE email = ?", (email.strip().lower(),)) is not None
+
+    def created_at(self, email: str) -> str:
+        """Data de criacao da conta (ISO), ou vazio se a conta nao existe."""
+        row = self._fetch_one("SELECT created_at FROM users WHERE email = ?", (email.strip().lower(),))
+        if not row:
+            return ""
+        value = row[0]
+        return value.isoformat(timespec="seconds") if isinstance(value, datetime) else str(value)[:19]
+
+    def change_password(self, email: str, new_password: str) -> bool:
+        salt = secrets.token_bytes(32)
+        digest = self._password_digest(new_password, salt)
+        return self._write(
+            "UPDATE users SET password_hash = ?, password_salt = ? WHERE email = ?", (digest, salt.hex(), email.strip().lower())
+        ) > 0
+
+    def delete_user(self, email: str) -> bool:
+        return self._write("DELETE FROM users WHERE email = ?", (email.strip().lower(),)) > 0
+
     @staticmethod
     def _is_unique_violation(error: Exception) -> bool:
         if isinstance(error, sqlite3.IntegrityError):

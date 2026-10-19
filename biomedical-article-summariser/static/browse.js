@@ -162,7 +162,7 @@
         bell.unread ? h("button", { type: "button", class: "btn btn-ghost btn-sm", onclick: () => alertAction("/api/alerts/read", { method: "POST", body: {} }) }, "Marcar como lidas") : null),
       rows.length ? h("ul", { class: "plain-list alert-list" }, rows) : h("p", { class: "muted alerts-empty" }, empty),
       h("div", { class: "alerts-foot" },
-        h("a", { class: "btn btn-secondary btn-sm", href: "#/interesses", onclick: closePanel }, bell.hasInterests ? "Gerenciar interesses" : "Escolher interesses"),
+        h("a", { class: "btn btn-secondary btn-sm", href: "#/perfil/interesses", onclick: closePanel }, bell.hasInterests ? "Gerenciar interesses" : "Escolher interesses"),
         bell.hasInterests ? h("button", { type: "button", class: "btn btn-ghost btn-sm", onclick: () => runCheck(true) }, "Verificar agora") : null));
   }
   function openPanel() { paintPanel(); alertsPanel.hidden = false; bellButton.setAttribute("aria-expanded", "true"); }
@@ -259,7 +259,7 @@
 
   // ------------------------------------------------------------------ navegação
   function renderBottomNav(view) {
-    const items = [["#/", "Início", "", "home"], ["#/busca", "Busca", "busca", "search"], ["#/biblioteca", "Biblioteca", "biblioteca", "bookmark"], ["/ia", "Laboratório", "lab", "spark"]];
+    const items = [["#/", "Início", "", "home"], ["#/busca", "Busca", "busca", "search"], ["#/biblioteca", "Biblioteca", "biblioteca", "bookmark"], ["#/perfil", "Perfil", "perfil", "user"], ["/ia", "Laboratório", "lab", "spark"]];
     mount(document.getElementById("bottomnav"), items.map(([href, label, key, name]) => h("a", {
       href, "aria-current": key === view || (key === "busca" && view === "artigo") ? "page" : null,
     }, icon(name), h("span", {}, label))));
@@ -267,7 +267,7 @@
 
   function renderNav(view) {
     renderBottomNav(view);
-    const items = [["#/", "Início", ""], ["#/busca", "Busca", "busca"], ["#/biblioteca", "Biblioteca", "biblioteca"], ["#/interesses", "Interesses", "interesses"]];
+    const items = [["#/", "Início", ""], ["#/busca", "Busca", "busca"], ["#/biblioteca", "Biblioteca", "biblioteca"], ["#/perfil", "Perfil", "perfil"]];
     mount(document.getElementById("mainnav"),
       items.map(([href, label, key]) => h("a", { href, "aria-current": key === view || (key === "busca" && view === "artigo") ? "page" : null }, label)),
       h("a", { href: "/ia", title: "Resumos e análises com IA (opcional)" }, "Laboratório de IA"));
@@ -1242,9 +1242,9 @@
   const showHealth = () => session.healthPack !== false;
   const PROFILE_SHORTCUTS = {
     estudante: [["Procurar artigos para o seu trabalho", "#/busca"], ["Montar uma lista e criar o relatório de tema", "#/biblioteca"], ["Exportar as referências em ABNT, APA ou Vancouver", "#/biblioteca"]],
-    pesquisador: [["Acompanhar temas e receber avisos de artigos novos", "#/interesses"], ["Levar as referências para o Zotero, Mendeley ou EndNote", "#/biblioteca"], ["Criar um relatório de tema com o método declarado", "#/biblioteca"]],
-    saude: [["Ver a situação de um medicamento no Brasil (ANVISA, Conitec, Rename)", Lib.buildHash("/busca", { q: "metformina" })], ["Acompanhar especialidades e receber avisos", "#/interesses"], ["Criar um relatório com a situação regulatória dos medicamentos", "#/biblioteca"]],
-    consultoria: [["Criar um relatório de tema com método e histórico", "#/biblioteca"], ["Acompanhar os temas dos seus clientes", "#/interesses"], ["Exportar as referências para o cliente", "#/biblioteca"]],
+    pesquisador: [["Acompanhar temas e receber avisos de artigos novos", "#/perfil/interesses"], ["Levar as referências para o Zotero, Mendeley ou EndNote", "#/biblioteca"], ["Criar um relatório de tema com o método declarado", "#/biblioteca"]],
+    saude: [["Ver a situação de um medicamento no Brasil (ANVISA, Conitec, Rename)", Lib.buildHash("/busca", { q: "metformina" })], ["Acompanhar especialidades e receber avisos", "#/perfil/interesses"], ["Criar um relatório com a situação regulatória dos medicamentos", "#/biblioteca"]],
+    consultoria: [["Criar um relatório de tema com método e histórico", "#/biblioteca"], ["Acompanhar os temas dos seus clientes", "#/perfil/interesses"], ["Exportar as referências para o cliente", "#/biblioteca"]],
   };
   const PROFILE_SKIP_KEY = () => `bdd.profile.skip:${session.user}`;
   let profileOptionsPromise;
@@ -1260,7 +1260,7 @@
       h("p", { class: "eyebrow" }, "Para você"),
       h("h2", { id: "para-voce" }, "Por onde começar"),
       h("ul", { class: "plain-list shortcut-list" }, items.map(([label, href]) => h("li", {}, h("a", { href }, label)))),
-      h("p", { class: "note" }, h("a", { href: "#/perfil" }, "Mudar perfil e preferências")));
+      h("p", { class: "note" }, h("a", { href: "#/perfil/uso" }, "Mudar perfil e preferências")));
   }
 
   /** Formulário do perfil (usado na pergunta da primeira entrada e na tela de perfil). */
@@ -1331,17 +1331,124 @@
     render();
   }
 
-  function renderProfile() {
-    setTitle("Perfil e preferências");
+  // ------------------------------------------------------------------ aba Perfil (visão geral, perfil de uso, interesses, conta e dados)
+  const PROFILE_SECTIONS = [["", "Visão geral"], ["uso", "Perfil de uso"], ["interesses", "Interesses e alertas"], ["conta", "Conta e dados"]];
+
+  function profileTabs(active) {
+    return h("nav", { class: "profile-tabs", "aria-label": "Seções do perfil" }, PROFILE_SECTIONS.map(([key, label]) =>
+      h("a", { class: "profile-tab", href: key ? `#/perfil/${key}` : "#/perfil", "aria-current": key === active ? "page" : null }, label)));
+  }
+
+  async function profileOverview(content) {
+    mount(content, loading());
+    const [account, options] = await Promise.all([guarded(() => api("/api/account")), loadProfileOptions().catch(() => ({ profiles: [] }))]);
+    if (!account) { mount(content, errorBox("Não foi possível carregar o seu perfil agora.")); return; }
+    const chosen = options.profiles.find((p) => p.key === (account.profile && account.profile.profile));
+    const since = account.createdAt ? fmtDate(account.createdAt.slice(0, 10)) : "";
+    const stat = (value, label, href) => h("a", { class: "account-stat", href }, h("strong", {}, Lib.formatCount(value)), h("span", {}, label));
+    const interests = account.interests || {};
+    const checked = interests.lastChecked ? fmtDate(interests.lastChecked.slice(0, 10)) : "";
+    mount(content,
+      h("section", { class: "card account-head" },
+        h("span", { class: "avatar", "aria-hidden": "true" }, account.email.slice(0, 1).toUpperCase()),
+        h("div", {}, h("strong", { class: "account-email" }, account.email), since ? h("p", { class: "muted" }, `Membro desde ${since}`) : null)),
+      h("div", { class: "account-stats" },
+        stat(account.counts.library, account.counts.library === 1 ? "artigo salvo" : "artigos salvos", "#/biblioteca"),
+        stat(account.counts.lists, account.counts.lists === 1 ? "lista" : "listas", "#/biblioteca"),
+        stat(account.counts.reports, account.counts.reports === 1 ? "relatório" : "relatórios", "#/biblioteca"),
+        stat(account.counts.analyses, account.counts.analyses === 1 ? "análise salva" : "análises salvas", "#/biblioteca")),
+      h("section", { class: "card stack" }, h("h2", {}, "Perfil de uso"),
+        chosen ? h("p", {}, h("strong", {}, chosen.label), h("span", { class: "muted" }, ` · pacote Saúde no Brasil ${account.profile.healthPack ? "ligado" : "desligado"}`))
+          : h("p", { class: "muted" }, "Você ainda não escolheu. Isso só define o que fica em destaque; nada é bloqueado."),
+        h("div", { class: "row" }, h("a", { class: "btn btn-secondary btn-sm", href: "#/perfil/uso" }, chosen ? "Alterar" : "Escolher"))),
+      h("section", { class: "card stack" }, h("h2", {}, "Interesses e alertas"),
+        interests.topics || interests.terms
+          ? h("p", {}, `${interests.topics} ${interests.topics === 1 ? "tema" : "temas"}, ${interests.terms} ${interests.terms === 1 ? "palavra-chave" : "palavras-chave"}`,
+            h("span", { class: "muted" }, ` · ${interests.unread} ${interests.unread === 1 ? "aviso não lido" : "avisos não lidos"}${checked ? ` · última verificação em ${checked}` : ""}`))
+          : h("p", { class: "muted" }, "Você ainda não escolheu o que acompanhar. Escolha áreas, subtemas e idiomas e avisamos quando sair artigo novo."),
+        h("div", { class: "row" }, h("a", { class: "btn btn-secondary btn-sm", href: "#/perfil/interesses" }, interests.topics || interests.terms ? "Gerenciar" : "Escolher interesses"))),
+      h("div", { class: "row" }, h("button", { type: "button", class: "btn btn-outline", onclick: () => logoutButton.click() }, "Sair da conta")));
+  }
+
+  function profileUse(content) {
+    mount(content,
+      h("p", { class: "lead" }, "Diga o que você faz para destacarmos as ferramentas certas na página inicial e ligar ou desligar o pacote de saúde. Nada do núcleo (busca, biblioteca, alertas, relatórios e exportação) é bloqueado por esta escolha."),
+      h("section", { class: "card stack" }, profileForm({ onSaved: () => renderProfile("uso") })));
+  }
+
+  function profileAccount(content) {
+    const passwordStatus = h("p", { class: "note", role: "status" });
+    const field = (id, label, autocomplete) => {
+      const input = h("input", { type: "password", id, autocomplete, maxlength: "128", required: "" });
+      return [h("div", { class: "field" }, h("label", { for: id }, label), input), input];
+    };
+    const [currentField, currentInput] = field("pw-current", "Senha atual", "current-password");
+    const [newField, newInput] = field("pw-new", "Nova senha (mínimo de 8 caracteres)", "new-password");
+    const [repeatField, repeatInput] = field("pw-repeat", "Repita a nova senha", "new-password");
+    const saveButton = h("button", { type: "submit", class: "btn btn-primary" }, "Trocar senha");
+    const passwordForm = h("form", { class: "stack", onsubmit: async (event) => {
+      event.preventDefault();
+      passwordStatus.textContent = "";
+      if (newInput.value !== repeatInput.value) { passwordStatus.textContent = "As senhas novas não são iguais."; return; }
+      saveButton.disabled = true;
+      try {
+        await api("/api/account/password", { method: "POST", body: { current: currentInput.value, new: newInput.value } });
+        passwordForm.reset();
+        toast("Senha alterada.");
+        passwordStatus.textContent = "Senha alterada. Outros aparelhos já conectados continuam conectados até a sessão expirar (7 dias).";
+      } catch (error) { passwordStatus.textContent = error.message; } finally { saveButton.disabled = false; }
+    } }, currentField, newField, repeatField, passwordStatus, h("div", { class: "row" }, saveButton));
+
+    const deleteBox = h("div", { class: "stack" });
+    const showDelete = () => {
+      const input = h("input", { type: "password", id: "delete-password", autocomplete: "current-password", maxlength: "128", "aria-label": "Sua senha, para confirmar" });
+      const status = h("p", { class: "note", role: "alert" });
+      const confirmButton = h("button", { type: "button", class: "btn btn-danger" }, "Excluir definitivamente");
+      confirmButton.addEventListener("click", async () => {
+        if (!input.value) { status.textContent = "Digite a sua senha para confirmar."; input.focus(); return; }
+        confirmButton.disabled = true;
+        try {
+          await api("/api/account", { method: "DELETE", body: { password: input.value } });
+          setUser("");
+          toast("Conta excluída.");
+          location.hash = "#/";
+          render();
+        } catch (error) { status.textContent = error.message; confirmButton.disabled = false; }
+      });
+      mount(deleteBox,
+        h("p", { class: "note" }, "Isso apaga a conta e tudo o que ela guardou, sem volta. Baixe os seus dados antes, se quiser."),
+        h("div", { class: "field" }, h("label", { for: "delete-password" }, "Sua senha"), input), status,
+        h("div", { class: "row" }, confirmButton, h("button", { type: "button", class: "btn btn-ghost", onclick: () => mount(deleteBox, startDelete) }, "Cancelar")));
+      input.focus();
+    };
+    const startDelete = h("button", { type: "button", class: "btn btn-outline btn-danger-outline", onclick: showDelete }, "Excluir minha conta…");
+    mount(deleteBox, startDelete);
+
+    mount(content,
+      h("section", { class: "card stack" }, h("h2", {}, "Senha"), passwordForm),
+      h("section", { class: "card stack" }, h("h2", {}, "Seus dados"),
+        h("p", {}, "Baixe uma cópia de tudo o que a sua conta guarda: biblioteca, listas, análises salvas, relatórios, interesses, avisos e perfil. A senha não entra no arquivo."),
+        h("div", { class: "row" }, h("a", { class: "btn btn-secondary", href: "/api/account/export", download: "" }, icon("download"), "Baixar meus dados (JSON)"))),
+      h("section", { class: "card stack danger-zone" }, h("h2", {}, "Excluir conta"),
+        h("p", {}, "Apaga a conta e todos os dados dela: biblioteca, listas (inclusive os links compartilhados), análises salvas, relatórios, interesses, avisos e perfil. Não há como desfazer."),
+        deleteBox));
+  }
+
+  function renderProfile(section = "") {
+    const active = PROFILE_SECTIONS.some(([key]) => key === section) ? section : "";
+    setTitle(active ? `Perfil: ${PROFILE_SECTIONS.find(([key]) => key === active)[1]}` : "Perfil");
     if (!session.user) {
-      mount($app, h("h1", {}, "Perfil e preferências"), h("div", { class: "empty card" },
-        h("p", {}, "Entre na sua conta para escolher o seu perfil."),
-        h("button", { type: "button", class: "btn btn-primary", onclick: () => openAuth("Entre para escolher seu perfil.") }, "Entrar")));
+      mount($app, h("h1", {}, "Perfil"), h("div", { class: "empty card" },
+        h("p", {}, "Entre na sua conta para ver o seu perfil, escolher interesses e gerenciar os seus dados."),
+        h("button", { type: "button", class: "btn btn-primary", onclick: () => openAuth("Entre para acessar o seu perfil.") }, "Entrar")));
       return;
     }
-    mount($app, h("h1", {}, "Perfil e preferências"),
-      h("p", { class: "lead" }, "Diga o que você faz para destacarmos as ferramentas certas na página inicial e ligar ou desligar o pacote de saúde. Nada do núcleo (busca, biblioteca, alertas, relatórios e exportação) é bloqueado por esta escolha."),
-      h("section", { class: "card stack" }, profileForm({ onSaved: () => { location.hash = "#/"; } })));
+    const content = h("div", { class: "stack profile-content" });
+    mount($app, h("h1", {}, "Perfil"), profileTabs(active), content);
+    if (active === "uso") profileUse(content);
+    else if (active === "interesses") renderInterests(content);
+    else if (active === "conta") profileAccount(content);
+    else profileOverview(content);
   }
 
   // ------------------------------------------------------------------ Relatório de tema
@@ -1679,19 +1786,18 @@
 
   // ------------------------------------------------------------------ roteador
   // ------------------------------------------------------------------ interesses
-  async function renderInterests() {
-    setTitle("Meus interesses");
+  async function renderInterests(target = $app) {
     if (!session.user) {
-      mount($app, h("h1", {}, "Meus interesses"), h("div", { class: "empty card" },
+      mount(target, h("h2", {}, "Interesses e alertas"), h("div", { class: "empty card" },
         h("p", {}, "Entre na sua conta para escolher o que acompanhar e receber avisos de artigos novos."),
         h("button", { type: "button", class: "btn btn-primary", onclick: () => openAuth("Entre para escolher seus interesses.") }, "Entrar")));
       return;
     }
-    mount($app, h("h1", {}, "Meus interesses"), loading());
+    mount(target, h("h2", {}, "Interesses e alertas"), loading());
     let catalog; let saved;
     try { [catalog, saved] = await Promise.all([api("/api/interests/options"), api("/api/interests")]); } catch (error) {
-      if (error.status === 401) { setUser(""); renderInterests(); return; }
-      mount($app, h("h1", {}, "Meus interesses"), errorBox(error.message));
+      if (error.status === 401) { setUser(""); renderInterests(target); return; }
+      mount(target, h("h2", {}, "Interesses e alertas"), errorBox(error.message));
       return;
     }
     // area -> Set de subtemas (conjunto vazio = a area inteira)
@@ -1764,8 +1870,8 @@
     });
     paint();
 
-    mount($app,
-      h("h1", {}, "Meus interesses"),
+    mount(target,
+      h("h2", {}, "Interesses e alertas"),
       h("p", { class: "lede" }, "Escolha as áreas, os subtemas e os idiomas que você quer acompanhar. Quando aparecer um artigo novo sobre eles, o sininho no canto superior avisa."),
       h("section", { class: "card stack" }, h("h2", {}, "Idiomas"),
         h("p", { class: "hint" }, "Sem escolher nenhum, aceitamos todos os idiomas. Para artigos em português, buscamos também pelo nome em português."), langBox),
@@ -1785,8 +1891,8 @@
     if (view === "busca") renderSearch(params);
     else if (view === "artigo") renderArticle(params);
     else if (view === "biblioteca") renderLibrary(params);
-    else if (view === "interesses") renderInterests();
-    else if (view === "perfil") renderProfile();
+    else if (view === "interesses") location.replace("#/perfil/interesses");
+    else if (view === "perfil") renderProfile(rest[0] || "");
     else if (view === "relatorio" && rest[0]) renderReport(rest[0]);
     else if (view === "lista" && rest[0]) renderSharedList(rest[0]);
     else renderHome();

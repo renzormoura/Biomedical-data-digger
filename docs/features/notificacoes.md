@@ -8,7 +8,7 @@ Em produção, com limites. Os avisos aparecem no sininho, ao abrir o site, e po
 
 ## O que o usuário vê
 - **Sininho** no canto superior direito, só para quem está logado. Mostra o número de avisos não lidos. O painel lista os artigos (título, revista, ano e o tema que gerou o aviso) e oferece "Marcar como lidas", dispensar um aviso, "Verificar agora" e "Gerenciar interesses". No celular o painel desce da barra, em largura total.
-- **Tela Meus interesses** (`#/interesses`):
+- **Interesses e alertas**, dentro da aba Perfil (`#/perfil/interesses`; o endereço antigo `#/interesses` redireciona):
   - 14 áreas do conhecimento (Medicina, Farmácia, Enfermagem, Odontologia, Nutrição, Biologia, Psicologia, Computação e IA, Engenharias, Física/Química/Matemática, Meio ambiente, Agrárias, Ciências sociais, Educação), cada uma com subtemas (por exemplo, Medicina: Pediatria, Oncologia, Cardiologia...). Marcar "Toda a área" acompanha a área inteira.
   - Até 4 idiomas (sem escolher nenhum, todos valem), até 5 palavras-chave livres e no máximo 15 temas.
   - O botão "Salvar interesses" grava e dispara a primeira verificação.
@@ -57,7 +57,7 @@ Em produção, com limites. Os avisos aparecem no sininho, ao abrir o site, e po
 | `POST /api/internal/alerts/run` | token | Verificação agendada de todas as contas |
 
 ## Dados
-Tabelas criadas por `AlertStore.initialize()`, em SQLite ou PostgreSQL, sempre filtradas pela conta: `interest_prefs` (preferências e última verificação), `interest_baselines` (buscas já memorizadas), `alert_seen` (artigos já vistos, até 5.000 por conta) e `alerts` (a caixa de avisos, com um retrato dos metadados do artigo). Os módulos novos são `interests.py` e `alerts.py`; a interface está em `static/browse.js` (sininho e tela de interesses).
+Tabelas criadas por `AlertStore.initialize()`, em SQLite ou PostgreSQL, sempre filtradas pela conta: `interest_prefs` (preferências e última verificação), `interest_baselines` (buscas já memorizadas), `alert_seen` (artigos já vistos, até 5.000 por conta) e `alerts` (a caixa de avisos, com um retrato dos metadados do artigo). Os módulos novos são `interests.py` e `alerts.py`; a interface está em `static/browse.js` (sininho e a seção Interesses e alertas da aba Perfil).
 
 ## Limites conhecidos
 - **Não detecta a publicação em si:** detecta artigos que passaram a aparecer na busca. Um artigo pode demorar dias para ser indexado, e um antigo só indexado agora pode aparecer como novo se a fonte não informar a data.

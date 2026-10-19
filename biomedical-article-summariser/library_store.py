@@ -246,6 +246,15 @@ class LibraryStore:
             self._owned(tx, user, list_id)
             tx.execute("DELETE FROM reading_list_items WHERE list_id = ? AND ref = ?", (list_id, ref))
 
+    def delete_user_data(self, user: str) -> None:
+        """Apaga biblioteca, listas (com seus itens) e analises salvas da conta (exclusao de conta)."""
+        with self._db.transaction() as tx:
+            for (list_id,) in tx.query("SELECT id FROM reading_lists WHERE owner_email = ?", (user,)):
+                tx.execute("DELETE FROM reading_list_items WHERE list_id = ?", (list_id,))
+            tx.execute("DELETE FROM reading_lists WHERE owner_email = ?", (user,))
+            tx.execute("DELETE FROM library_items WHERE user_email = ?", (user,))
+            tx.execute("DELETE FROM saved_analyses WHERE user_email = ?", (user,))
+
     # ------------------------------------------------------------------ compartilhamento
     def share(self, user: str, list_id: str) -> str:
         """Gera (ou devolve) o token do link publico somente leitura."""

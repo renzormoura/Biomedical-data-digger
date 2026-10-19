@@ -346,6 +346,10 @@ class ReportStore:
             tx.execute("DELETE FROM report_log WHERE report_id = ?", (report_id,))
             tx.execute("DELETE FROM reports WHERE id = ?", (report_id,))
 
+    def delete_user_data(self, user: str) -> None:
+        for summary in self.summaries(user):
+            self.delete(user, summary.id)
+
     # ------------------------------------------------------------------ atualizacao e versoes
     def add_works(self, user: str, report_id: str, works: list[Work], *, origin: str) -> tuple[Report, int]:
         """Acrescenta estudos (incluidos) que ainda nao estao no relatorio; devolve o relatorio e quantos entraram."""

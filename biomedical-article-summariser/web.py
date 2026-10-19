@@ -23,6 +23,7 @@ from pydantic import BaseModel, Field
 import article_services
 import markdown_lite
 import pages
+from account_routes import register_account_routes
 from account_store import (
     AccountStore,
     AccountStoreError,
@@ -32,6 +33,7 @@ from account_store import (
 )
 from alerts import AlertService
 from browse_api import register_browse_routes
+from cache import TTLCache
 from config import Settings
 from discovery import DiscoveryService
 from domain import (
@@ -202,8 +204,22 @@ def create_app(
         return JSONResponse({"error": "Erro interno. Tente novamente em instantes."}, status_code=500)
 
     # -- identidade ----------------------------------------------------------
+    # a sessao e um cookie assinado, sem estado: conferimos (com cache curto) se a conta ainda existe, para que
+    # uma conta excluida nao continue "logada" em outros aparelhos
+    exists_cache: TTLCache[bool] = TTLCache(1024, 30.0)
+
     def current_user(request: Request) -> str | None:
-        return signer.verify(request.cookies.get(SESSION_COOKIE))
+        user = signer.verify(request.cookies.get(SESSION_COOKIE))
+        if user is None:
+            return None
+        known = exists_cache.get(user)
+        if known is None:
+            try:
+                known = account_store_factory().exists(user)
+            except AccountStoreError:
+                known = True  # banco de contas fora do ar: nao derruba a sessao
+            exists_cache.set(user, known)
+        return user if known else None
 
     def ip_of(request: Request) -> str:
         peer = request.client.host if request.client else None
@@ -219,7 +235,12 @@ def create_app(
         except RateLimitExceeded as error:
             raise RateLimitedError(str(error)) from error
 
+    def end_account(response: JSONResponse, email: str) -> None:
+        exists_cache.set(email, False)
+        response.delete_cookie(SESSION_COOKIE, path="/")
+
     def start_session(response: JSONResponse, email: str) -> None:
+        exists_cache.set(email, True)
         response.set_cookie(
             SESSION_COOKIE, signer.issue(email), max_age=7 * 24 * 3600,
             httponly=True, samesite="lax", secure=settings.production, path="/",
@@ -435,6 +456,12 @@ def create_app(
                 for item in items
             ]
         }
+
+    if library is not None:
+        register_account_routes(
+            app, account_store_factory=account_store_factory, current_user=current_user, throttle_auth=throttle_auth, on_deleted=end_account,
+            library=library, reports=reports, alerts=alerts.store if alerts is not None else None, profiles=profiles,
+        )
 
     if discovery is not None and library is not None:
         register_browse_routes(

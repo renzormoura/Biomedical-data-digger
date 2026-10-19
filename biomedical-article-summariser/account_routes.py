@@ -1,0 +1,166 @@
+"""Rotas da conta: resumo do perfil, troca de senha, copia dos dados e exclusao (LGPD).
+
+Todas exigem sessao. Troca de senha e exclusao pedem a senha atual e passam pelo mesmo limite de tentativas do login.
+A exclusao apaga a conta e tudo o que ela guardou (biblioteca, listas, analises, relatorios, interesses, avisos e perfil).
+Observacao: a sessao e um cookie assinado sem estado no servidor; trocar a senha NAO encerra a sessao de outros aparelhos.
+"""
+
+from __future__ import annotations
+
+import json
+from collections.abc import Callable
+from datetime import datetime, timezone
+from typing import Any
+
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse, Response
+from pydantic import BaseModel, Field
+
+from account_store import AccountStore, AccountStoreError, InvalidCredentialsFormat, validate_credentials
+from alerts import AlertStore
+from domain import AuthRequiredError, DiggerError
+from library_store import LibraryStore
+from profiles import ProfileStore
+from reports import ReportStore
+
+
+class PasswordIn(BaseModel):
+    current: str = Field(max_length=200)
+    new: str = Field(max_length=200)
+
+
+class DeleteIn(BaseModel):
+    password: str = Field(max_length=200)
+
+
+def register_account_routes(
+    app: FastAPI,
+    *,
+    account_store_factory: Callable[[], AccountStore],
+    current_user: Callable[[Request], str | None],
+    throttle_auth: Callable[[Request], None],
+    on_deleted: Callable[[JSONResponse, str], None],
+    library: LibraryStore,
+    reports: ReportStore | None,
+    alerts: AlertStore | None,
+    profiles: ProfileStore | None,
+) -> None:
+    def require_user(request: Request) -> str:
+        user = current_user(request)
+        if user is None:
+            raise AuthRequiredError("Entre na sua conta para ver o perfil.")
+        return user
+
+    def confirm_password(user: str, password: str) -> None:
+        try:
+            ok = account_store_factory().authenticate(user, password.strip())
+        except AccountStoreError as error:
+            raise DiggerError(str(error)) from error
+        if not ok:
+            raise DiggerError("Senha incorreta.")
+
+    @app.get("/api/account")
+    def account_summary(request: Request) -> dict[str, Any]:
+        user = require_user(request)
+        try:
+            created = account_store_factory().created_at(user)
+        except AccountStoreError as error:
+            raise DiggerError(str(error)) from error
+        counts = {
+            "library": len(library.items(user)), "lists": len(library.lists(user)), "analyses": len(library.analyses(user)),
+            "reports": len(reports.summaries(user)) if reports else 0,
+        }
+        interests: dict[str, Any] = {"topics": 0, "terms": 0, "languages": 0, "unread": 0, "lastChecked": None}
+        if alerts is not None:
+            prefs, checked = alerts.preferences(user)
+            interests = {
+                "topics": len(prefs.selected()), "terms": len(prefs.terms), "languages": len(prefs.languages),
+                "unread": alerts.unread(user), "lastChecked": checked.isoformat(timespec="seconds") if checked else None,
+            }
+        profile = profiles.get(user) if profiles else None
+        return {
+            "email": user, "createdAt": created, "counts": counts, "interests": interests,
+            "profile": {"profile": profile.key, "healthPack": profile.health_pack, "configured": profile.configured} if profile else None,
+        }
+
+    @app.post("/api/account/password")
+    def change_password(body: PasswordIn, request: Request) -> dict[str, bool]:
+        user = require_user(request)
+        throttle_auth(request)
+        confirm_password(user, body.current)
+        try:
+            _, new_password = validate_credentials(user, body.new)
+        except InvalidCredentialsFormat as error:
+            raise DiggerError(str(error)) from error
+        if new_password == body.current.strip():
+            raise DiggerError("A nova senha precisa ser diferente da atual.")
+        try:
+            account_store_factory().change_password(user, new_password)
+        except AccountStoreError as error:
+            raise DiggerError(str(error)) from error
+        return {"ok": True}
+
+    @app.get("/api/account/export")
+    def export_data(request: Request) -> Response:
+        """Copia de todos os dados da conta em JSON (sem a senha), para portabilidade."""
+        user = require_user(request)
+        try:
+            created = account_store_factory().created_at(user)
+        except AccountStoreError as error:
+            raise DiggerError(str(error)) from error
+        profile = profiles.get(user) if profiles else None
+        payload: dict[str, Any] = {
+            "exportedAt": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "account": {"email": user, "createdAt": created},
+            "profile": {"profile": profile.key, "healthPack": profile.health_pack} if profile else None,
+            "library": [{**item.work.to_dict(), "tags": list(item.tags), "savedAt": item.saved_at} for item in library.items(user)],
+            "lists": [
+                {"name": item.name, "createdAt": item.created_at, "shared": item.share_token is not None, "works": [w.to_dict() for w in item.works]}
+                for item in library.lists(user)
+            ],
+            "analyses": [
+                {"article": item.title, "ref": item.ref, "page": item.page, "label": item.label, "markdown": item.markdown, "createdAt": item.created_at}
+                for item in library.analyses(user)
+            ],
+        }
+        if reports is not None:
+            payload["reports"] = []
+            for summary in reports.summaries(user):
+                report = reports.get(user, summary.id)
+                payload["reports"].append({
+                    "title": report.title, "question": report.question, "methodNote": report.method_note, "listName": report.list_name,
+                    "createdAt": report.created_at, "updatedAt": report.updated_at, "version": report.version, "substances": list(report.substances),
+                    "history": [{"kind": e.kind, "text": e.text, "createdAt": e.created_at} for e in report.log],
+                    "studies": [{**item.work.to_dict(), "included": item.included, "note": item.note} for item in report.items],
+                })
+        if alerts is not None:
+            prefs, _checked = alerts.preferences(user)
+            payload["interests"] = prefs.to_dict()
+            payload["alerts"] = [
+                {"topic": a.topic, "createdAt": a.created_at, "read": a.read, "work": a.work.to_dict()} for a in alerts.alerts(user, limit=200)
+            ]
+        return Response(
+            json.dumps(payload, ensure_ascii=False, indent=2), media_type="application/json; charset=utf-8",
+            headers={"Content-Disposition": 'attachment; filename="meus-dados.json"', "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"},
+        )
+
+    @app.delete("/api/account")
+    def delete_account(body: DeleteIn, request: Request) -> JSONResponse:
+        """Exclui a conta e todos os dados dela. Pede a senha e nao tem volta."""
+        user = require_user(request)
+        throttle_auth(request)
+        confirm_password(user, body.password)
+        library.delete_user_data(user)
+        if reports is not None:
+            reports.delete_user_data(user)
+        if alerts is not None:
+            alerts.delete_user_data(user)
+        if profiles is not None:
+            profiles.delete(user)
+        try:
+            account_store_factory().delete_user(user)
+        except AccountStoreError as error:
+            raise DiggerError(str(error)) from error
+        response = JSONResponse({"deleted": True})
+        on_deleted(response, user)
+        return response

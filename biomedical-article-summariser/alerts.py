@@ -158,6 +158,11 @@ class AlertStore:
         )
         return [row[0] for row in rows]
 
+    def delete_user_data(self, user: str) -> None:
+        with self._db.transaction() as tx:
+            for table in ("interest_prefs", "interest_baselines", "alert_seen", "alerts"):
+                tx.execute(f"DELETE FROM {table} WHERE user_email = ?", (user,))  # noqa: S608 - nomes fixos acima
+
     def touch_checked(self, user: str, moment: datetime) -> None:
         self._db.execute("UPDATE interest_prefs SET last_checked = ? WHERE user_email = ?", (_iso(moment), user))
 

@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 2026-10 — Aba Perfil
+
+### Adicionado
+- Aba **Perfil** (`#/perfil`) no menu e na barra inferior, com quatro seções: **Visão geral** (e-mail, "membro desde", contadores e resumos), **Perfil de uso**, **Interesses e alertas** (a antiga página "Meus interesses" agora vive aqui; `#/interesses` redireciona) e **Conta e dados**.
+- **Conta e dados:** trocar senha (pede a atual), **baixar uma cópia dos dados** em JSON (sem a senha) e **excluir a conta** com todos os dados, confirmando a senha. Rotas `GET /api/account`, `POST /api/account/password`, `GET /api/account/export` e `DELETE /api/account`; módulo `account_routes.py`.
+- O servidor passa a conferir, com cache de 30 segundos, se a conta da sessão ainda existe: uma conta excluída deixa de valer em outros aparelhos.
+
+### Alterado
+- O item "Interesses" saiu do menu (virou parte do Perfil), e a barra inferior do celular passou a ter 5 itens.
+
+### Limites
+- Sem troca de e-mail, recuperação de senha, confirmação de e-mail, verificação em duas etapas nem encerramento remoto de outras sessões (trocar a senha não derruba os outros aparelhos; a sessão expira em 7 dias).
 ## 2026-10 — Roteiro de validação com usuários (fase 5, preparação)
 
 ### Adicionado
