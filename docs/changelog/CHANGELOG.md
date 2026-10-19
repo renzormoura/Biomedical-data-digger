@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 2026-10 — Panorama do tema mais sóbrio
+
+### Alterado
+- O Panorama do tema perdeu o gráfico de anos e as cores variadas. Agora tem três números (acesso aberto, fontes, período), uma única barra de tipo de evidência em escala de um tom só (do mais forte ao mais fraco) com legenda, e o estudo de maior nota.
+
 ## 2026-10 — Panorama do tema na busca
 
 ### Adicionado

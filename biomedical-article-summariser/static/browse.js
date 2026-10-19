@@ -630,50 +630,42 @@
   }
 
   // ------------------------------------------------------------------ Busca
-  const DESIGN_COLORS = { sistematica: "d-a", ensaio: "d-b", observacional: "d-c", revisao: "d-d", opiniao: "d-e", preprint: "d-f", desconhecido: "d-g" };
+  // do mais forte ao mais fraco: uma escala de um tom so (laranja ate cinza) em vez de varias cores
+  const DESIGN_TONES = { sistematica: "t1", ensaio: "t2", observacional: "t3", revisao: "t4", opiniao: "t5", preprint: "t6", desconhecido: "t7" };
 
   function panoramaView(info) {
-    const maxDesign = Math.max(...info.designs.map((d) => d.count), 1);
-    const maxYear = Math.max(...info.timeline.map((y) => y.count), 1);
-    const bar = (cls, fraction, axis) => {
-      const node = h("i", { class: cls });
-      node.style[axis] = `${Math.max(fraction * 100, fraction > 0 ? 4 : 0)}%`;  // via CSSOM: a CSP bloqueia style inline no HTML
-      return node;
-    };
-    const strongest = info.strongest;
     const pct = Math.round((info.openAccess / info.sample) * 100);
+    const strongest = info.strongest;
     const first = info.timeline[0];
     const last = info.timeline[info.timeline.length - 1];
+    const stat = (value, label) => h("div", { class: "pano-stat" }, h("strong", {}, value), h("span", {}, label));
+    const bar = h("div", { class: "pano-bar", role: "img", "aria-label": `Tipos de evidência: ${info.designs.map((d) => `${d.label} ${d.count}`).join(", ")}` },
+      info.designs.map((d) => {
+        const part = h("i", { class: `pano-seg ${DESIGN_TONES[d.key] || "t7"}`, title: `${d.label}: ${d.count}` });
+        part.style.flexGrow = String(d.count);  // via CSSOM: a CSP bloqueia style inline no HTML
+        return part;
+      }));
     const root = h("details", { class: "panorama" },
-      h("summary", { class: "panorama-head" },
+      h("summary", { class: "pano-head" },
         h("h3", {}, "Panorama do tema"),
-        h("span", { class: "muted" }, `Retrato dos ${info.sample} primeiros resultados por relevância${info.total > info.sample ? ` (de ${Lib.formatCount(info.total)})` : ""}`)),
-      h("div", { class: "panorama-grid" },
-        h("div", { class: "panorama-block" },
-          h("h4", {}, "Que tipo de evidência"),
-          h("ul", { class: "design-bars" }, info.designs.map((d) => h("li", {},
-            h("span", { class: "design-label" }, d.label),
-            h("span", { class: "design-track" }, bar(`design-fill ${DESIGN_COLORS[d.key] || "d-g"}`, d.count / maxDesign, "width")),
-            h("b", {}, String(d.count)))))),
-        h("div", { class: "panorama-block" },
-          h("h4", {}, "Quando foi publicado"),
-          first ? h("div", { class: "year-chart", role: "img", "aria-label": `Publicações por ano, de ${first.year} a ${last.year}` },
-            info.timeline.map((y) => h("span", { class: "year-col", title: `${y.year}: ${y.count}` }, bar("year-fill", y.count / maxYear, "height")))) : null,
-          first ? h("div", { class: "year-axis" }, h("span", {}, String(first.year)), h("span", {}, String(last.year))) : null),
-        h("div", { class: "panorama-block" },
-          h("h4", {}, "De relance"),
-          h("ul", { class: "panorama-facts" },
-            h("li", {}, h("strong", {}, `${pct}%`), " com acesso aberto"),
-            h("li", {}, h("strong", {}, String(info.sources.length)), info.sources.length === 1 ? " fonte" : " fontes",
-              h("span", { class: "muted" }, ` (${info.sources.slice(0, 3).map((s) => s.name).join(", ")})`)),
-            info.retracted ? h("li", { class: "danger" }, h("strong", {}, String(info.retracted)), info.retracted === 1 ? " artigo retratado" : " artigos retratados") : null))),
-      strongest ? h("a", { class: "panorama-best", href: articleHref(strongest) },
-        h("span", { class: "best-score" }, h("strong", {}, String(Math.round(strongest.score))), h("small", {}, "/100")),
-        h("span", { class: "best-text" },
+        h("span", { class: "muted" }, `Primeiros ${info.sample} resultados por relevância${info.total > info.sample ? ` · de ${Lib.formatCount(info.total)}` : ""}`)),
+      h("div", { class: "pano-stats" },
+        stat(`${pct}%`, "com acesso aberto"),
+        stat(String(info.sources.length), info.sources.length === 1 ? "fonte" : "fontes"),
+        first ? stat(first.year === last.year ? String(first.year) : `${first.year}–${last.year}`, "período publicado") : null,
+        info.retracted ? stat(String(info.retracted), info.retracted === 1 ? "retratado" : "retratados") : null),
+      h("div", { class: "pano-evidence" },
+        h("h4", {}, "Tipo de evidência"),
+        bar,
+        h("ul", { class: "pano-legend" }, info.designs.map((d) => h("li", {},
+          h("i", { class: `pano-dot ${DESIGN_TONES[d.key] || "t7"}`, "aria-hidden": "true" }), h("span", {}, d.label), h("b", {}, String(d.count)))))),
+      strongest ? h("a", { class: "pano-best", href: articleHref(strongest) },
+        h("span", { class: "pano-best-score" }, h("strong", {}, String(Math.round(strongest.score))), h("small", {}, "/100")),
+        h("span", { class: "pano-best-text" },
           h("small", {}, "Maior nota de confiabilidade na amostra"),
           h("b", {}, strongest.title),
           h("small", { class: "muted" }, [strongest.design, strongest.journal, strongest.year].filter(Boolean).join(" · ")))) : null,
-      h("p", { class: "muted panorama-note" }, "Conta só a amostra mostrada, não a literatura inteira. A nota mede sinais do registro e do resumo; veja os limites na página do artigo."));
+      h("p", { class: "muted pano-note" }, "Conta só a amostra mostrada, não a literatura inteira. A nota mede sinais do registro e do resumo."));
     root.open = !window.matchMedia("(max-width: 560px)").matches;  // no celular comeca fechado, para a lista aparecer logo
     return root;
   }
