@@ -21,7 +21,8 @@ TIERS: dict[str, tuple[str, str]] = {
     "revista": ("Revista", "Revista científica; o feed pode trazer artigos e notícias da própria revista."),
     "preprint": ("Preprint", "Trabalho ainda sem revisão por pares."),
     "divulgacao": ("Divulgação científica", "Divulgação de pesquisas e comunicados de imprensa de instituições."),
-    "jornal": ("Jornal", "Imprensa geral; reportagens que passam pela redação do jornal."),
+    "jornal": ("Jornal", "Imprensa geral; reportagens que passam pela redação do jornal. Só entram as que citam pesquisa ou ciência."),
+    "blog": ("Blog acadêmico", "Análises de pesquisadores publicadas em blogs de revistas e universidades; não passam por revisão por pares."),
 }
 
 
@@ -35,6 +36,7 @@ class Source:
     tier: str
     areas: tuple[str, ...] = ()  # chaves de area de interests.py; vazio = qualquer area
     max_items: int = 40  # itens mais recentes guardados por busca (alguns feeds trazem milhares)
+    undated: bool = False  # o feed nao informa datas (ex.: NBER); os itens usam o horario em que foram vistos
 
 
 SOURCES: tuple[Source, ...] = (
@@ -81,6 +83,25 @@ SOURCES: tuple[Source, ...] = (
     Source("sciencedaily-sociedade", "ScienceDaily: Sociedade", "https://www.sciencedaily.com/rss/science_society.xml", "https://www.sciencedaily.com/news/science_society/", "en", "divulgacao", ("sociais", "educacao")),
     Source("agencia-brasil-educacao", "Agência Brasil: Educação", "https://agenciabrasil.ebc.com.br/rss/educacao/feed.xml", "https://agenciabrasil.ebc.com.br/educacao", "pt", "jornal", ("educacao",)),
     Source("g1-educacao", "G1: Educação", "https://g1.globo.com/rss/g1/educacao/", "https://g1.globo.com/educacao/", "pt", "jornal", ("educacao",)),
+    # ---- ciencias agrarias
+    Source("sciencedaily-agricultura", "ScienceDaily: Agricultura e alimentos", "https://www.sciencedaily.com/rss/plants_animals/agriculture_and_food.xml", "https://www.sciencedaily.com/news/plants_animals/agriculture_and_food/", "en", "divulgacao", ("agrarias",)),
+    Source("sciencedaily-plantas", "ScienceDaily: Plantas e animais", "https://www.sciencedaily.com/rss/plants_animals.xml", "https://www.sciencedaily.com/news/plants_animals/", "en", "divulgacao", ("agrarias", "biologia", "ambiente")),
+    Source("phys-plantas", "Phys.org: Plantas e animais", "https://phys.org/rss-feed/biology-news/plants-animals/", "https://phys.org/biology-news/plants-animals/", "en", "divulgacao", ("agrarias", "biologia")),
+    Source("mongabay", "Mongabay", "https://news.mongabay.com/feed/", "https://news.mongabay.com/", "en", "jornal", ("ambiente", "agrarias")),
+    Source("agencia-brasil-ambiente", "Agência Brasil: Meio ambiente", "https://agenciabrasil.ebc.com.br/rss/meio-ambiente/feed.xml", "https://agenciabrasil.ebc.com.br/meio-ambiente", "pt", "jornal", ("ambiente", "agrarias")),
+    # ---- direito (area "sociais")
+    Source("verfassungsblog", "Verfassungsblog", "https://verfassungsblog.de/feed/", "https://verfassungsblog.de/", "en", "blog", ("sociais",)),
+    Source("ejil-talk", "EJIL: Talk!", "https://www.ejiltalk.org/feed/", "https://www.ejiltalk.org/", "en", "blog", ("sociais",)),
+    Source("ohrh", "Oxford Human Rights Hub", "https://ohrh.law.ox.ac.uk/feed/", "https://ohrh.law.ox.ac.uk/", "en", "blog", ("sociais",)),
+    # ---- economia (area "sociais")
+    Source("voxeu", "VoxEU (CEPR)", "https://cepr.org/rss/vox-content", "https://cepr.org/voxeu", "en", "blog", ("sociais",)),
+    Source("nber", "NBER: novos working papers", "https://www.nber.org/rss/new.xml", "https://www.nber.org/papers", "en", "preprint", ("sociais",), undated=True),
+    Source("ipea", "Ipea", "https://www.ipea.gov.br/portal/index.php?option=com_content&view=category&layout=blog&id=2&Itemid=3&format=feed&type=rss", "https://www.ipea.gov.br/portal/", "pt", "instituicao", ("sociais",)),
+    Source("owid", "Our World in Data", "https://ourworldindata.org/atom.xml", "https://ourworldindata.org/", "en", "instituicao"),
+    Source("agencia-brasil-economia", "Agência Brasil: Economia", "https://agenciabrasil.ebc.com.br/rss/economia/feed.xml", "https://agenciabrasil.ebc.com.br/economia", "pt", "jornal", ("sociais",)),
+    # ---- comunicacao cientifica e universidades (qualquer area)
+    Source("scielo", "SciELO em Perspectiva", "https://blog.scielo.org/feed/", "https://blog.scielo.org/", "pt", "blog"),
+    Source("jornal-unesp", "Jornal da Unesp", "https://jornal.unesp.br/feed/", "https://jornal.unesp.br/", "pt", "instituicao"),
 )
 
 SOURCE_BY_ID: dict[str, Source] = {source.id: source for source in SOURCES}

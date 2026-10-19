@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 2026-10 — Feed: fontes de ciências agrárias, direito e economia
+
+### Adicionado
+- **15 fontes novas** (51 no total), todas verificadas: ScienceDaily (agricultura e alimentos; plantas e animais), Phys.org (plantas e animais), Mongabay e Agência Brasil (meio ambiente) para ciências agrárias; Verfassungsblog, EJIL: Talk! e Oxford Human Rights Hub para direito; VoxEU/CEPR, NBER, Ipea, Our World in Data e Agência Brasil Economia para economia; SciELO em Perspectiva e Jornal da Unesp para qualquer área.
+- Novo tipo de fonte **Blog acadêmico** (análises de pesquisadores sem revisão por pares). Fontes sem data no feed (NBER) usam o horário em que foram vistas.
+
+### Limites
+- Sem feed utilizável de Embrapa, Conjur ou Migalhas: ciências agrárias e direito em português seguem com pouca cobertura.
 ## 2026-10 — Feed de novidades acadêmicas
 
 ### Adicionado

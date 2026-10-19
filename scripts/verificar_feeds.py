@@ -31,7 +31,7 @@ def main() -> int:
             problems += 1
             continue
         dated = sum(1 for entry in entries if entry.published is not None)
-        flag = "OK    " if entries and dated >= max(1, len(entries) // 2) else "ATENCAO"
+        flag = "OK    " if entries and (source.undated or dated >= max(1, len(entries) // 2)) else "ATENCAO"
         if flag != "OK    ":
             problems += 1
         print(f"{flag} {source.id:26} {len(entries):4} itens, {dated} com data")

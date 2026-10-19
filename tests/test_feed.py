@@ -46,7 +46,9 @@ def test_curated_sources_are_well_formed():
         assert set(source.areas) <= areas and 1 <= source.max_items <= 100
     assert {"revista", "preprint"} == set(ARTICLE_TIERS)
     covered = {a for s in SOURCES for a in s.areas}
-    assert {"medicina", "engenharia", "computacao", "exatas", "ambiente", "psicologia", "educacao", "sociais", "biologia"} <= covered
+    assert {"medicina", "engenharia", "computacao", "exatas", "ambiente", "psicologia", "educacao", "sociais", "biologia", "agrarias"} <= covered
+    assert sum(1 for s in SOURCES if "agrarias" in s.areas) >= 3 and sum(1 for s in SOURCES if "sociais" in s.areas) >= 8
+    assert {s.id for s in SOURCES if s.undated} == {"nber"}
 
 
 # ------------------------------------------------------------------ datas, trechos e links
