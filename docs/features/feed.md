@@ -11,7 +11,7 @@ O feed é leitura (a pessoa vem ver). O sininho é aviso (o produto procura a pe
 - **Filtros:** Tudo, Artigos ou Notícias; área do conhecimento (14); idioma (português ou inglês). Ficam na URL (`#/feed?modo=tudo&tipo=noticias&area=medicina&lang=pt`).
 - **Artigos novos dos interesses** (os mesmos do sininho) entram em "Para você" e abrem a página do artigo aqui dentro, com a nota de confiabilidade.
 - **Fontes e critérios:** painel no fim da página com as 51 fontes, o tipo de cada uma, idioma, áreas e se falharam na última busca.
-- Em celular, a barra inferior passou a ser: Início, **Feed**, Busca, Biblioteca, Perfil. O Laboratório de IA continua no menu do computador, no rodapé e na página de cada artigo.
+- Em celular, a barra inferior é: Início, **Feed**, Busca, Biblioteca, Laboratório.
 
 ## Fontes (lista curada)
 51 fontes verificadas funcionando em 2026-10-18 (`feed_sources.py`):

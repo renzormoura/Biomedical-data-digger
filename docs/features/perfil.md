@@ -1,7 +1,7 @@
 # Feature: aba Perfil (perfil de uso, interesses, conta e dados) e pacote "Saúde no Brasil"
 
 ## Objetivo
-Reunir numa só aba tudo o que é da pessoa: quem ela é no produto, o que ela acompanha e os dados dela. A aba **Perfil** (`#/perfil`) aparece no menu e na barra inferior do celular e tem cinco seções.
+Reunir numa só aba tudo o que é da pessoa: quem ela é no produto, o que ela acompanha e os dados dela. O **Perfil** (`#/perfil`) abre pelo **botão com o nome do usuário** (o e-mail) no canto superior direito, no computador e no celular; não há item "Perfil" no menu nem na barra inferior. O botão fica destacado quando o Perfil está aberto. Tem cinco seções.
 
 Origem do perfil de uso: `docs/roadmap/plano-relatorio-de-tema.md`, seção 2 e fase 4.
 
@@ -15,7 +15,7 @@ Origem do perfil de uso: `docs/roadmap/plano-relatorio-de-tema.md`, seção 2 e 
 | **Notificações** | `#/perfil/notificacoes` | Liga e desliga cada tipo de aviso do sininho (retratação, mudança regulatória, novidades dos relatórios e artigos novos nos interesses) e explica como funcionam; botão "Verificar agora" |
 | **Conta e dados** | `#/perfil/conta` | Trocar senha; **baixar uma cópia dos dados** (JSON); **excluir a conta** |
 
-Sem conta, a aba mostra um convite para entrar. O diálogo da conta (cabeçalho) tem o atalho "Meu perfil". O sininho e os atalhos da página inicial apontam para a seção de interesses.
+Sem conta, o mesmo botão mostra "Entrar" e abre o diálogo de entrada; quem acessa `#/perfil` sem conta vê um convite para entrar. "Sair da conta" fica na Visão geral do Perfil. O sininho e os atalhos da página inicial apontam para a seção de interesses.
 
 ## Perfil de uso e pacote "Saúde no Brasil"
 O produto é um só, com um núcleo para qualquer área. O perfil só **destaca** ferramentas e **liga ou desliga** o pacote de saúde (ANVISA, Conitec e Rename); nunca bloqueia uma função do núcleo.

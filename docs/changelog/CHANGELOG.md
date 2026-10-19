@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2026-10 — Perfil pelo botão do usuário
+
+### Alterado
+- O **Perfil** agora abre pelo botão com o nome do usuário (e-mail), no canto superior direito. Com conta, o botão leva ao Perfil e fica destacado enquanto ele está aberto; sem conta, mostra "Entrar" e abre a entrada. O item "Perfil" saiu do menu e da barra inferior do celular, que voltou a ter o Laboratório (Início, Feed, Busca, Biblioteca, Laboratório). "Sair da conta" fica na Visão geral do Perfil.
 ## 2026-10 — Feed: fontes de ciências agrárias, direito e economia
 
 ### Adicionado

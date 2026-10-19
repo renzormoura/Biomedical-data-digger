@@ -657,3 +657,7 @@ input[type="text"], input[type="search"], input[type="email"], input[type="passw
 .feed-open .icon { width: 14px; height: 14px; }
 .feed-sources { margin-top: 24px; }
 .feed-source-list li { padding: 4px 0; }
+
+/* o botao com o nome do usuario e a porta do Perfil */
+#account-button[aria-current="page"] { border-color: var(--accent); box-shadow: inset 0 -2px 0 var(--accent); }
+#account-label { max-width: 14rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

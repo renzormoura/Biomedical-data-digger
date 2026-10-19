@@ -117,6 +117,8 @@
   function setUser(user) {
     session.user = user || "";
     document.getElementById("account-label").textContent = user || "Entrar";
+    accountButton.setAttribute("aria-label", user ? `Meu perfil (${user})` : "Entrar na conta");
+    accountButton.title = user ? "Meu perfil" : "Entrar na conta";
     logoutButton.hidden = !user;
     profileLink.hidden = !user;
     dialog.querySelectorAll(".field, [data-auth='login'], [data-auth='register']").forEach((el) => { el.hidden = Boolean(user); });
@@ -215,7 +217,8 @@
     openAuth(message);
     return false;
   }
-  accountButton.addEventListener("click", () => openAuth());
+  // com conta, o botao com o nome do usuario abre o Perfil (o "Sair da conta" fica la); sem conta, abre a entrada
+  accountButton.addEventListener("click", () => { if (session.user) location.hash = "#/perfil"; else openAuth(); });
 
   async function authenticate(kind) {
     const email = document.getElementById("auth-email").value.trim();
@@ -258,7 +261,7 @@
 
   // ------------------------------------------------------------------ navegação
   function renderBottomNav(view) {
-    const items = [["#/", "Início", "", "home"], ["#/feed", "Feed", "feed", "feed"], ["#/busca", "Busca", "busca", "search"], ["#/biblioteca", "Biblioteca", "biblioteca", "bookmark"], ["#/perfil", "Perfil", "perfil", "user"]];
+    const items = [["#/", "Início", "", "home"], ["#/feed", "Feed", "feed", "feed"], ["#/busca", "Busca", "busca", "search"], ["#/biblioteca", "Biblioteca", "biblioteca", "bookmark"], ["/ia", "Laboratório", "lab", "spark"]];
     mount(document.getElementById("bottomnav"), items.map(([href, label, key, name]) => h("a", {
       href, "aria-current": key === view || (key === "busca" && view === "artigo") ? "page" : null,
     }, icon(name), h("span", {}, label))));
@@ -266,7 +269,8 @@
 
   function renderNav(view) {
     renderBottomNav(view);
-    const items = [["#/", "Início", ""], ["#/feed", "Feed", "feed"], ["#/busca", "Busca", "busca"], ["#/biblioteca", "Biblioteca", "biblioteca"], ["#/perfil", "Perfil", "perfil"]];
+    if (view === "perfil") accountButton.setAttribute("aria-current", "page"); else accountButton.removeAttribute("aria-current");
+    const items = [["#/", "Início", ""], ["#/feed", "Feed", "feed"], ["#/busca", "Busca", "busca"], ["#/biblioteca", "Biblioteca", "biblioteca"]];
     mount(document.getElementById("mainnav"),
       items.map(([href, label, key]) => h("a", { href, "aria-current": key === view || (key === "busca" && view === "artigo") ? "page" : null }, label)),
       h("a", { href: "/ia", title: "Resumos e análises com IA (opcional)" }, "Laboratório de IA"));
