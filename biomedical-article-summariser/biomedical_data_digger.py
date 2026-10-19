@@ -14,6 +14,7 @@ from config import Settings
 from discovery import DiscoveryService
 from doaj_catalog import DoajCatalog
 from europepmc_catalog import EuropePmcCatalog
+from feed import FeedService, FeedStore
 from generation import GenerationPolicy
 from library_store import get_library_store
 from llm_service import get_router
@@ -66,6 +67,8 @@ def create_app():  # type: ignore[no-untyped-def]
         lambda query, user: discovery.search(query, source=discovery.search_default, client_id=f"alertas:{user}").works,
     )
     library = get_library_store()
+    feed_store = FeedStore()
+    feed_store.initialize()
     notification_store = NotificationStore()
     notification_store.initialize()
     notifications = NotificationService(
@@ -75,7 +78,7 @@ def create_app():  # type: ignore[no-untyped-def]
     )
     return create_web_app(
         service, repository, settings, usage_log=usage_log, discovery=discovery, library=library, alerts=alerts,
-        reports=report_store, profiles=profile_store, notifications=notifications,
+        reports=report_store, profiles=profile_store, notifications=notifications, feed=FeedService(feed_store),
     )
 
 

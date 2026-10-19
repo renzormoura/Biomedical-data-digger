@@ -46,6 +46,7 @@ from domain import (
     RateLimitedError,
     SourceUnavailableError,
 )
+from feed import FeedService
 from library_store import LibraryStore
 from notifications import NotificationService
 from presentation import UNVERIFIABLE_FALLBACK, verification_annex_md
@@ -143,6 +144,7 @@ def create_app(
     reports: ReportStore | None = None,
     profiles: ProfileStore | None = None,
     notifications: NotificationService | None = None,
+    feed: FeedService | None = None,
 ) -> FastAPI:
     app = FastAPI(title="Biomedical Data Digger", docs_url=None, redoc_url=None, openapi_url=None)
     signer = SessionSigner(settings.session_secret or SessionSigner.generate_secret())
@@ -469,7 +471,7 @@ def create_app(
     if discovery is not None and library is not None:
         register_browse_routes(
             app, discovery=discovery, library=library, current_user=current_user, identity=identity, alerts=alerts,
-            cron_token=settings.alerts_cron_token, reports=reports, profiles=profiles, notifications=notifications,
+            cron_token=settings.alerts_cron_token, reports=reports, profiles=profiles, notifications=notifications, feed=feed,
         )
 
     return app

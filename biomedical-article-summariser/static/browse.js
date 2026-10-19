@@ -258,7 +258,7 @@
 
   // ------------------------------------------------------------------ navegação
   function renderBottomNav(view) {
-    const items = [["#/", "Início", "", "home"], ["#/busca", "Busca", "busca", "search"], ["#/biblioteca", "Biblioteca", "biblioteca", "bookmark"], ["#/perfil", "Perfil", "perfil", "user"], ["/ia", "Laboratório", "lab", "spark"]];
+    const items = [["#/", "Início", "", "home"], ["#/feed", "Feed", "feed", "feed"], ["#/busca", "Busca", "busca", "search"], ["#/biblioteca", "Biblioteca", "biblioteca", "bookmark"], ["#/perfil", "Perfil", "perfil", "user"]];
     mount(document.getElementById("bottomnav"), items.map(([href, label, key, name]) => h("a", {
       href, "aria-current": key === view || (key === "busca" && view === "artigo") ? "page" : null,
     }, icon(name), h("span", {}, label))));
@@ -266,7 +266,7 @@
 
   function renderNav(view) {
     renderBottomNav(view);
-    const items = [["#/", "Início", ""], ["#/busca", "Busca", "busca"], ["#/biblioteca", "Biblioteca", "biblioteca"], ["#/perfil", "Perfil", "perfil"]];
+    const items = [["#/", "Início", ""], ["#/feed", "Feed", "feed"], ["#/busca", "Busca", "busca"], ["#/biblioteca", "Biblioteca", "biblioteca"], ["#/perfil", "Perfil", "perfil"]];
     mount(document.getElementById("mainnav"),
       items.map(([href, label, key]) => h("a", { href, "aria-current": key === view || (key === "busca" && view === "artigo") ? "page" : null }, label)),
       h("a", { href: "/ia", title: "Resumos e análises com IA (opcional)" }, "Laboratório de IA"));
@@ -1330,6 +1330,125 @@
     render();
   }
 
+  // ------------------------------------------------------------------ Feed de novidades acadêmicas
+  const FEED_REFRESH_MS = 8000;
+  const FEED_MAX_RETRIES = 4;
+  let feedAreasPromise;
+  const loadFeedAreas = () => {
+    feedAreasPromise ||= api("/api/interests/options").then((data) => data.areas).catch(() => { feedAreasPromise = undefined; return []; });
+    return feedAreasPromise;
+  };
+
+  function feedWhen(item) {
+    if (!item.dateKnown) return "data não informada";
+    const hours = Math.floor((Date.now() - new Date(item.publishedAt).getTime()) / 3600000);
+    if (hours < 1) return "agora há pouco";
+    if (hours < 24) return `há ${hours} h`;
+    if (hours < 48) return "ontem";
+    return fmtDate(item.publishedAt.slice(0, 10));
+  }
+
+  function feedCard(item) {
+    const internal = item.internal === true;
+    const link = h("a", internal
+      ? { href: item.url }
+      : { href: item.url, target: "_blank", rel: "noopener noreferrer nofollow" }, item.title, internal ? null : icon("external"));
+    return h("article", { class: "feed-card" },
+      h("div", { class: "feed-meta" },
+        h("span", { class: `feed-tier tier-${item.source.tier}` }, item.source.tierLabel),
+        h("span", { class: "feed-source" }, item.source.name),
+        h("span", { class: "muted" }, ` · ${feedWhen(item)}`, item.source.language && !["pt", "un"].includes(item.source.language) ? ` · ${item.source.language.toUpperCase()}` : "")),
+      h("h3", {}, link),
+      item.snippet ? h("p", { class: "feed-snippet" }, item.snippet) : null,
+      item.matched.length ? h("div", { class: "chips" }, item.matched.map((m) => h("span", { class: "chip" }, m))) : null,
+      internal ? h("a", { class: "feed-open", href: item.url }, "Ver o artigo e a nota de confiabilidade")
+        : h("a", { class: "feed-open", href: item.url, target: "_blank", rel: "noopener noreferrer nofollow" }, `Ler em ${item.source.name}`, icon("external")));
+  }
+
+  async function renderFeed(params) {
+    setTitle("Feed");
+    const state = {
+      mode: params.get("modo") === "tudo" ? "tudo" : "voce", kind: ["artigos", "noticias"].includes(params.get("tipo")) ? params.get("tipo") : "todos",
+      area: (params.get("area") || "").replace(/[^a-z-]/g, "").slice(0, 30), lang: ["pt", "en"].includes(params.get("lang")) ? params.get("lang") : "",
+    };
+    const go = (changes) => { location.hash = Lib.buildHash("/feed", { modo: state.mode === "tudo" ? "tudo" : "", tipo: state.kind === "todos" ? "" : state.kind, area: state.area, lang: state.lang, ...changes }); };
+    const list = h("div", { class: "feed-list", "aria-live": "polite" });
+    const more = h("div", { class: "row" });
+    const status = h("p", { class: "note" });
+    const controls = h("div", { class: "feed-controls card" });
+    mount($app, h("h1", {}, "Feed"),
+      h("p", { class: "lead" }, "Novidades de revistas, instituições de pesquisa e divulgação científica, em todas as áreas do conhecimento. Ao clicar, você vai para a fonte."),
+      controls, list, more, status, feedSourcesPanel());
+
+    const areas = await loadFeedAreas();
+    let page = 1;
+    let retries = 0;
+    let hasInterests = false;
+    const chip = (label, active, onclick) => h("button", { type: "button", class: "pick", "aria-pressed": String(active), onclick }, label);
+    const paintControls = () => mount(controls,
+      hasInterests ? h("div", { class: "pick-row", role: "group", "aria-label": "Mostrar" },
+        chip("Para você", state.mode === "voce", () => go({ modo: "" })), chip("Tudo", state.mode === "tudo", () => go({ modo: "tudo" }))) : null,
+      h("div", { class: "pick-row", role: "group", "aria-label": "Tipo" },
+        [["todos", "Tudo"], ["artigos", "Artigos"], ["noticias", "Notícias"]].map(([key, label]) => chip(label, state.kind === key, () => go({ tipo: key === "todos" ? "" : key })))),
+      h("div", { class: "row" },
+        h("select", { "aria-label": "Área do conhecimento", onchange: (event) => go({ area: event.target.value }) },
+          h("option", { value: "" }, "Todas as áreas"), areas.map((a) => h("option", { value: a.key, selected: a.key === state.area ? "" : null }, a.label))),
+        h("select", { "aria-label": "Idioma", onchange: (event) => go({ lang: event.target.value }) },
+          [["", "Qualquer idioma"], ["pt", "Português"], ["en", "Inglês"]].map(([value, label]) => h("option", { value, selected: value === state.lang ? "" : null }, label)))));
+
+    async function load(reset) {
+      if (reset) { page = 1; mount(list, loading("Carregando as novidades…")); mount(more); }
+      const query = new URLSearchParams({ mode: state.mode, kind: state.kind, page: String(page) });
+      if (state.area) query.set("area", state.area);
+      if (state.lang) query.set("lang", state.lang);
+      let data;
+      try { data = await api(`/api/feed?${query}`); } catch (error) { mount(list, errorBox(error.message)); return; }
+      hasInterests = data.hasInterests;
+      paintControls();
+      if (reset) mount(list);
+      list.append(...data.items.map(feedCard));
+      if (!list.children.length) {
+        if (data.refreshing && retries < FEED_MAX_RETRIES) {
+          mount(list, loading("Buscando as primeiras novidades nas fontes (pode levar cerca de um minuto)…"));
+          retries += 1;
+          setTimeout(() => { if (location.hash.startsWith("#/feed")) load(true); }, FEED_REFRESH_MS);
+          return;
+        }
+        mount(list, h("div", { class: "empty card" },
+          h("p", {}, data.personalized ? "Nenhuma novidade sobre os seus interesses por enquanto." : "Nenhuma novidade com esses filtros."),
+          h("div", { class: "row" },
+            data.personalized ? h("button", { type: "button", class: "btn btn-secondary", onclick: () => go({ modo: "tudo" }) }, "Ver tudo") : null,
+            session.user && !data.hasInterests ? h("a", { class: "btn btn-primary", href: "#/perfil/interesses" }, "Escolher interesses") : null,
+            !session.user ? h("button", { type: "button", class: "btn btn-primary", onclick: () => openAuth("Entre para ver o feed dos seus interesses.") }, "Entrar") : null)));
+      }
+      mount(more, data.hasMore ? h("button", { type: "button", class: "btn btn-secondary", onclick: () => { page += 1; load(false); } }, "Carregar mais") : null);
+      status.textContent = data.updatedAt ? `Fontes atualizadas pela última vez em ${fmtDate(data.updatedAt.slice(0, 10))}.` : "";
+      if (!session.user) status.append(" Entre na sua conta para ver só o que combina com os seus interesses.");
+    }
+    paintControls();
+    load(true);
+  }
+
+  function feedSourcesPanel() {
+    const body = h("div", { class: "stack" });
+    let loaded = false;
+    const details = h("details", { class: "more-records feed-sources" }, h("summary", {}, "Fontes e critérios do feed"), body);
+    details.addEventListener("toggle", async () => {
+      if (!details.open || loaded) return;
+      loaded = true;
+      mount(body, loading());
+      let data;
+      try { data = await api("/api/feed/sources"); } catch { loaded = false; mount(body, h("p", { class: "muted" }, "Não foi possível carregar as fontes agora.")); return; }
+      mount(body,
+        h("p", { class: "note" }, "O feed mostra só o título, um trecho curto e o link: o conteúdo é da fonte, e você é levado a ela ao clicar. Notícias e comunicados não passam pela nota de confiabilidade dos artigos. O tipo da fonte ajuda a julgar:"),
+        h("ul", { class: "plain-list" }, data.tiers.map((t) => h("li", {}, h("strong", {}, `${t.label}: `), t.description))),
+        h("ul", { class: "plain-list feed-source-list" }, data.sources.map((s) => h("li", {},
+          h("a", { href: s.site, target: "_blank", rel: "noopener noreferrer" }, s.name),
+          h("small", { class: "muted" }, ` · ${s.tierLabel} · ${s.language.toUpperCase()} · ${s.areas.join(", ")}${s.failing ? " · fora do ar na última busca" : ""}`)))));
+    });
+    return details;
+  }
+
   // ------------------------------------------------------------------ aba Perfil (visão geral, perfil de uso, interesses, conta e dados)
   const PROFILE_SECTIONS = [["", "Visão geral"], ["uso", "Perfil de uso"], ["interesses", "Interesses e alertas"], ["notificacoes", "Notificações"], ["conta", "Conta e dados"]];
 
@@ -1919,6 +2038,7 @@
     if (view === "busca") renderSearch(params);
     else if (view === "artigo") renderArticle(params);
     else if (view === "biblioteca") renderLibrary(params);
+    else if (view === "feed") renderFeed(params);
     else if (view === "interesses") location.replace("#/perfil/interesses");
     else if (view === "perfil") renderProfile(rest[0] || "");
     else if (view === "relatorio" && rest[0]) renderReport(rest[0]);

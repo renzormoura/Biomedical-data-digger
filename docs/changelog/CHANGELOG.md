@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 2026-10 — Feed de novidades acadêmicas
+
+### Adicionado
+- Aba **Feed** (`#/feed`): novidades de **36 fontes curadas** (revistas, instituições, preprints, divulgação científica e jornais) de todas as áreas, filtradas pelos interesses da pessoa ("Para você") ou sem filtro ("Tudo"), por tipo (artigos ou notícias), área e idioma. Clicar leva à fonte; mostra só título, trecho de até 300 caracteres e link. Os artigos novos dos interesses também aparecem e abrem a página do artigo.
+- Painel "Fontes e critérios" com o tipo de cada fonte e o aviso de que notícias não passam pela nota de confiabilidade.
+- Leitura de RSS, Atom e RDF com XML seguro, limite de tamanho, requisição condicional e no máximo uma busca por fonte a cada 3 horas; falha de uma fonte não derruba as outras. Jornais só entram quando citam pesquisa; no máximo 12 itens por fonte na tela.
+- `scripts/verificar_feeds.py` confere todas as fontes. A rota agendada também atualiza o feed. Módulos `feed.py` e `feed_sources.py`; rotas `GET /api/feed` e `GET /api/feed/sources`.
+
+### Alterado
+- Barra inferior do celular: Início, Feed, Busca, Biblioteca, Perfil (o Laboratório de IA saiu da barra e continua no menu do computador, no rodapé e na página do artigo).
+
+### Limites
+- Revisar os termos de uso de cada fonte antes de cobrar pelo produto. Cobertura fraca em ciências agrárias, direito e economia. Classificação por palavras, com ruído.
 ## 2026-10 — Notificações: retratação, mudança regulatória e relatórios
 
 ### Adicionado

@@ -223,6 +223,29 @@ def mentions(text: str, alternatives: tuple[str, ...]) -> bool:
     return any((needles := _needle(alt)) and all(p.search(plain) for p in needles) for alt in alternatives)
 
 
+def topic_keys_in(text: str) -> list[str]:
+    """Chaves (area ou area/subtema) dos temas que o texto trata, em portugues ou ingles; o texto e normalizado uma vez so."""
+    plain = _plain(text)
+    keys = []
+    for topic in _TOPIC_INDEX.values():
+        for alternative in topic.alternatives(""):
+            needles = _needle(alternative)
+            if needles and all(p.search(plain) for p in needles):
+                keys.append(topic.key)
+                break
+    return keys
+
+
+def area_label(key: str) -> str:
+    return _AREA_INDEX[key][0] if key in _AREA_INDEX else key
+
+
+def topic_label(key: str) -> str:
+    area, _, sub = key.partition("/")
+    topic = _TOPIC_INDEX.get((area, sub))
+    return topic.label if topic else key
+
+
 def clean_term(text: str) -> str:
     return " ".join("".join(ch if ch.isprintable() else " " for ch in str(text)).split())[:MAX_TERM_CHARS]
 

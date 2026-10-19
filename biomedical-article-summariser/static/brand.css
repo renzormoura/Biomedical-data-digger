@@ -636,3 +636,24 @@ input[type="text"], input[type="search"], input[type="email"], input[type="passw
 .alert-row.is-important { border-left: 3px solid var(--danger); }
 .alert-body { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
 .profile-option strong .alert-kind { display: inline-block; margin-left: 8px; }
+
+/* feed de novidades */
+.feed-controls { display: grid; gap: 10px; margin-bottom: 16px; }
+.feed-list { display: grid; gap: 12px; }
+.feed-card { padding: 16px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); display: grid; gap: 8px; }
+.feed-card h3 { margin: 0; font-size: 1.05rem; line-height: 1.3; }
+.feed-card h3 a { color: var(--text); text-decoration: none; overflow-wrap: anywhere; }
+.feed-card h3 a:hover { color: var(--accent-text); text-decoration: underline; }
+.feed-card h3 .icon { width: 14px; height: 14px; margin-left: 6px; vertical-align: -1px; color: var(--muted); }
+.feed-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 0.82rem; }
+.feed-source { font-weight: 600; }
+.feed-tier { padding: 1px 7px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.feed-tier.tier-instituicao { border-color: var(--accent); color: var(--accent-text); }
+.feed-tier.tier-revista { border-color: var(--ok); color: var(--ok); }
+.feed-tier.tier-preprint { border-color: var(--warn); color: var(--warn); }
+.feed-tier.tier-interesses { border-color: var(--accent); color: var(--accent-text); }
+.feed-snippet { margin: 0; color: var(--muted); font-size: 0.92rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.feed-open { font-size: 0.86rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.feed-open .icon { width: 14px; height: 14px; }
+.feed-sources { margin-top: 24px; }
+.feed-source-list li { padding: 4px 0; }

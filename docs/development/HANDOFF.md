@@ -42,6 +42,7 @@ https://github.com/renzormoura/Biomedical-data-digger
 | `docs/features/busca-artigos.md` | Fontes, filtros, normalização e fórmula do índice |
 | `docs/features/citacoes-exportacao.md` | Citações e exportação para Zotero, Mendeley e EndNote |
 | `docs/roadmap/roteiro-validacao-usuarios.md` | Roteiro da fase 5: hipóteses, tarefas, fichas e critérios de decisão |
+| `docs/features/feed.md` | Feed de novidades acadêmicas: fontes, atualização e manutenção |
 | `docs/features/perfil.md` | Perfil de uso e pacote Saúde no Brasil |
 | `docs/features/relatorio-de-tema.md` | Relatório de tema (fase 1 do plano), rotas e limites |
 | `docs/features/notificacoes.md` | Interesses, sininho, verificação de artigos novos e agendamento |
