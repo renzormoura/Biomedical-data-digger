@@ -27,6 +27,8 @@ from enrichment import Enrichment
 from exports import EXPORT_FORMATS
 from interests import catalogo, validar
 from library_store import MAX_ANALYSIS_CHARS, LibraryStore, ReadingList, SavedAnalysis
+from profiles import Profile, ProfileStore
+from profiles import options as profile_options_list
 from ratelimit import RateLimitExceeded, SlidingWindowLimiter
 from reports import (
     FINDINGS_PER_STUDY,
@@ -79,6 +81,13 @@ class ReportCreateIn(BaseModel):
     list_id: str = Field(min_length=1, max_length=64)
     title: str = Field("", max_length=300)
     question: str = Field("", max_length=4000)
+
+
+class ProfileIn(BaseModel):
+    profile: str = Field(min_length=1, max_length=40)
+    health_pack: bool | None = Field(None, alias="healthPack")  # ausente = padrao do perfil
+
+    model_config = {"populate_by_name": True}
 
 
 class ReportSearchIn(BaseModel):
@@ -283,6 +292,7 @@ def register_browse_routes(
     alerts: AlertService | None = None,
     cron_token: str = "",
     reports: ReportStore | None = None,
+    profiles: ProfileStore | None = None,
 ) -> None:
     shared_limiter = SlidingWindowLimiter(60, window=60.0)
     brasil_limiter = SlidingWindowLimiter(120, window=60.0)
@@ -539,6 +549,25 @@ def register_browse_routes(
     def delete_analysis(analysis_id: Annotated[str, Path(max_length=64)], request: Request) -> dict[str, bool]:
         library.delete_analysis(require_user(request), analysis_id)
         return {"ok": True}
+
+    # -- perfil de uso -------------------------------------------------------------
+    if profiles is not None:
+        profile_store = profiles
+
+        def profile_payload(profile: Profile) -> dict[str, Any]:
+            return {"profile": profile.key, "healthPack": profile.health_pack, "configured": profile.configured}
+
+        @app.get("/api/profile/options")
+        def profile_options() -> dict[str, Any]:
+            return {"profiles": profile_options_list()}
+
+        @app.get("/api/profile")
+        def get_profile(request: Request) -> dict[str, Any]:
+            return profile_payload(profile_store.get(require_user(request)))
+
+        @app.put("/api/profile")
+        def put_profile(body: ProfileIn, request: Request) -> dict[str, Any]:
+            return profile_payload(profile_store.set(require_user(request), body.profile, body.health_pack))
 
     # -- relatorios de tema ---------------------------------------------------------
     if reports is not None:

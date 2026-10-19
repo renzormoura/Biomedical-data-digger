@@ -19,7 +19,7 @@
     const parts = path.split("/").filter(Boolean).map((p) => {
       try { return decodeURIComponent(p); } catch { return p; }
     });
-    const known = ["busca", "artigo", "biblioteca", "lista", "interesses", "relatorio"];
+    const known = ["busca", "artigo", "biblioteca", "lista", "interesses", "relatorio", "perfil"];
     const view = known.includes(parts[0]) ? parts[0] : "";
     return { view, rest: view ? parts.slice(1) : [], params };
   }

@@ -46,6 +46,8 @@ from domain import (
 )
 from library_store import LibraryStore
 from presentation import UNVERIFIABLE_FALLBACK, verification_annex_md
+from profiles import DEFAULT as DEFAULT_PROFILE
+from profiles import ProfileStore
 from ratelimit import RateLimitExceeded, SlidingWindowLimiter, client_key
 from reports import ReportStore
 from sessions import SessionSigner
@@ -136,6 +138,7 @@ def create_app(
     library: LibraryStore | None = None,
     alerts: AlertService | None = None,
     reports: ReportStore | None = None,
+    profiles: ProfileStore | None = None,
 ) -> FastAPI:
     app = FastAPI(title="Biomedical Data Digger", docs_url=None, redoc_url=None, openapi_url=None)
     signer = SessionSigner(settings.session_secret or SessionSigner.generate_secret())
@@ -231,8 +234,11 @@ def create_app(
     @app.get("/")
     def index(request: Request):  # type: ignore[no-untyped-def]
         """Navegador de artigos: busca, leitura, biblioteca e listas."""
+        user = current_user(request)
+        profile = profiles.get(user) if profiles is not None else DEFAULT_PROFILE
         return templates.TemplateResponse(
-            request, "browse.html", {"user": current_user(request), "asset_version": asset_version}
+            request, "browse.html",
+            {"user": user, "asset_version": asset_version, "profile": profile.key or "", "health_pack": "1" if profile.health_pack else "0"},
         )
 
     @app.get("/ia")
@@ -433,7 +439,7 @@ def create_app(
     if discovery is not None and library is not None:
         register_browse_routes(
             app, discovery=discovery, library=library, current_user=current_user, identity=identity, alerts=alerts,
-            cron_token=settings.alerts_cron_token, reports=reports,
+            cron_token=settings.alerts_cron_token, reports=reports, profiles=profiles,
         )
 
     return app

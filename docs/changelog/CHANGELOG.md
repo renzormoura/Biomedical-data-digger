@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 2026-10 — Perfil de uso (fase 4 do relatório de tema)
+
+### Adicionado
+- **Perfil de uso** por conta (estudante, pesquisador, profissional de saúde ou farmácia, consultoria, outro), com pergunta na primeira entrada ("Agora não" disponível) e tela **Perfil e preferências** (`#/perfil`), acessível pelo diálogo da conta.
+- O perfil liga ou desliga o **pacote Saúde no Brasil** (cartão no artigo e seção no relatório) e mostra três atalhos "Para você" na página inicial. Só o perfil de saúde liga o pacote por padrão; a caixa permite mudar à parte. Sem conta ou sem perfil, o pacote fica visível. Nada do núcleo é bloqueado.
+- Rotas `GET /api/profile/options`, `GET/PUT /api/profile`; módulo `profiles.py`; a página inicial recebe o perfil do servidor para não piscar.
+
+### Limites
+- A recusa da pergunta fica no navegador. Se o pacote estiver desligado, o relatório que já tem substâncias confirmadas continua mostrando a seção e as incluindo no documento.
 ## 2026-10 — Relatório de tema (fase 3): versões e atualização
 
 ### Adicionado

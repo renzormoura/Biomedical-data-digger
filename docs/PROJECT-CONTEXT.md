@@ -318,5 +318,6 @@ python -m unittest discover -s tests -v
 - `docs/features/busca-artigos.md`: fontes, normalização, filtros e fórmula do índice.
 - `docs/features/analises-clinicas.md`: análises especializadas e regras dos prompts clínicos.
 - `docs/features/citacoes-exportacao.md`: citações, exportação para Zotero, Mendeley e EndNote e metadados do conector.
+- `docs/features/perfil.md`: perfil de uso e pacote Saúde no Brasil (liga e desliga).
 - `docs/features/relatorio-de-tema.md`: relatório de tema a partir de listas, com método declarado e download em HTML e DOCX.
 - `docs/features/notificacoes.md`: interesses, sininho, verificação de artigos novos e verificação agendada.

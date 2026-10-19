@@ -28,7 +28,7 @@
         <section class="alerts-panel" id="alerts-panel" role="dialog" aria-label="Avisos de artigos novos" hidden></section>
       </div>
       <button type="button" class="btn btn-ghost" id="theme-toggle" aria-label="Alternar tema claro ou escuro"><svg class="icon" aria-hidden="true"><use href="#i-theme"/></svg><span class="btn-label" id="theme-label">Tema</span></button>
-      <button type="button" class="btn btn-ghost" id="account-button" data-user="{{ user or '' }}"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><span class="btn-label" id="account-label">{{ user or "Entrar" }}</span></button>
+      <button type="button" class="btn btn-ghost" id="account-button" data-user="{{ user or '' }}" data-profile="{{ profile }}" data-health-pack="{{ health_pack }}"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><span class="btn-label" id="account-label">{{ user or "Entrar" }}</span></button>
     </div>
   </header>
 
@@ -48,6 +48,7 @@
         <button type="button" class="btn btn-secondary" data-auth="register">Criar conta</button>
         <button type="button" class="btn btn-ghost" data-auth="cancel">Cancelar</button>
       </div>
+      <a class="btn btn-outline" id="profile-link" href="#/perfil" hidden>Perfil e preferências</a>
       <button type="button" class="btn btn-outline" id="logout-button" hidden>Sair da conta</button>
     </form>
   </dialog>

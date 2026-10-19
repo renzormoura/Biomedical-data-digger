@@ -598,3 +598,13 @@ input[type="text"], input[type="search"], input[type="email"], input[type="passw
 
 .version-row { display: grid; gap: 4px; padding: 8px 0; border-bottom: 1px solid var(--border); }
 .version-row:last-child { border-bottom: 0; }
+
+.profile-option { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; }
+.profile-option:hover { border-color: var(--line-strong); }
+.profile-option.is-chosen { border-color: var(--accent); background: var(--accent-soft); }
+.profile-option input { margin-top: 3px; width: 18px; height: 18px; flex: none; }
+.profile-option span { display: grid; gap: 2px; }
+#profile-dialog .auth-card { max-width: 34rem; }
+.shortcut-list { gap: 8px; }
+.shortcut-list li { padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius); }
+.shortcut-list a { font-weight: 600; }

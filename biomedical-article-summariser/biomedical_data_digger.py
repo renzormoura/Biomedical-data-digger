@@ -18,6 +18,7 @@ from library_store import get_library_store
 from llm_service import get_router
 from openaire_catalog import OpenAireCatalog
 from openalex_catalog import OpenAlexCatalog
+from profiles import ProfileStore
 from pubmed_catalog import PubMedCatalog
 from quota import QuotaManager
 from ratelimit import SlidingWindowLimiter
@@ -48,13 +49,15 @@ def create_app():  # type: ignore[no-untyped-def]
     alert_store.initialize()
     report_store = ReportStore()
     report_store.initialize()
+    profile_store = ProfileStore()
+    profile_store.initialize()
     alerts = AlertService(
         alert_store,
         lambda query, user: discovery.search(query, source=discovery.search_default, client_id=f"alertas:{user}").works,
     )
     return create_web_app(
         service, repository, settings, usage_log=usage_log, discovery=discovery, library=get_library_store(), alerts=alerts,
-        reports=report_store,
+        reports=report_store, profiles=profile_store,
     )
 
 

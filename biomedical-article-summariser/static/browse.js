@@ -110,13 +110,15 @@
   const dialog = document.getElementById("auth-dialog");
   const authError = document.getElementById("auth-error");
   const logoutButton = document.getElementById("logout-button");
-  const session = { user: accountButton.dataset.user || "" };
+  const profileLink = document.getElementById("profile-link");
+  const session = { user: accountButton.dataset.user || "", profile: accountButton.dataset.profile || "", healthPack: accountButton.dataset.healthPack !== "0" };
 
   let userHook = null; // o sininho se registra aqui depois de montado
   function setUser(user) {
     session.user = user || "";
     document.getElementById("account-label").textContent = user || "Entrar";
     logoutButton.hidden = !user;
+    profileLink.hidden = !user;
     dialog.querySelectorAll(".field, [data-auth='login'], [data-auth='register']").forEach((el) => { el.hidden = Boolean(user); });
     if (userHook) userHook();
   }
@@ -199,7 +201,7 @@
       bell.timer = setInterval(() => { if (!document.hidden) runCheck(false); }, CHECK_EVERY_MS);
     }
   }
-  userHook = syncBell;
+  userHook = () => { syncBell(); syncProfile(); };
   syncBell();
 
 
@@ -235,6 +237,7 @@
   dialog.querySelector("[data-auth='login']").addEventListener("click", () => authenticate("login"));
   dialog.querySelector("[data-auth='register']").addEventListener("click", () => authenticate("register"));
   dialog.querySelector("[data-auth='cancel']").addEventListener("click", () => dialog.close());
+  profileLink.addEventListener("click", () => dialog.close());
   logoutButton.addEventListener("click", async () => {
     try { await api("/api/auth/logout", { method: "POST", body: {} }); } catch { /* sessão já inválida */ }
     setUser("");
@@ -587,6 +590,8 @@
           input, sourceBox,
           h("button", { type: "submit", class: "btn btn-primary" }, icon("search"), "Buscar")),
         h("p", { class: "examples" }, "Exemplos: ", TOPICS.map((t) => h("a", { href: Lib.buildHash("/busca", { q: t }) }, t)))),
+
+      profileShortcuts(),
 
       h("section", { class: "stats", "aria-label": "O produto em números" },
         stat(sourceCount, "fontes integradas, com busca combinada"),
@@ -1062,7 +1067,7 @@
               h("table", {}, h("tbody", {}, meta.map(([k, v]) => h("tr", {}, h("th", { scope: "row" }, k), h("td", {}, v))))),
               work.keywords.length ? h("div", { class: "kw" }, work.keywords.map((k) => h("a", { href: Lib.buildHash("/busca", { q: k }) }, k))) : null),
             h("section", { class: "card stack" }, h("h3", {}, "Registro e dados"), openData),
-            h("section", { class: "card stack" }, h("h3", {}, "Situação no Brasil"), brasilBox),
+            showHealth() ? h("section", { class: "card stack" }, h("h3", {}, "Situação no Brasil"), brasilBox) : null,
             h("section", { class: "card stack" }, h("h3", {}, "Análises do Laboratório"), analysesBox),
             h("section", { class: "card stack" }, h("h3", {}, "Organizar"), organize),
           )),
@@ -1070,7 +1075,7 @@
     renderOrganize();
     renderAnalyses();
     renderOpenData();
-    renderBrasil();
+    if (showHealth()) renderBrasil();
     renderSimilar();
   }
 
@@ -1230,6 +1235,113 @@
     return [renameBlock(item.rename || [], key), anvisaBlock(item.anvisa, key),
       h("h5", {}, "Decisões da Conitec (incorporação ao SUS)"),
       item.conitec.length ? conitecRows(item.conitec) : h("p", { class: "muted" }, "A Conitec não tem decisão registrada para esta substância.")];
+  }
+
+  // ------------------------------------------------------------------ perfil de uso
+  // O perfil só escolhe o que fica em destaque e liga o pacote "Saúde no Brasil"; nenhuma função do núcleo é bloqueada.
+  const showHealth = () => session.healthPack !== false;
+  const PROFILE_SHORTCUTS = {
+    estudante: [["Procurar artigos para o seu trabalho", "#/busca"], ["Montar uma lista e criar o relatório de tema", "#/biblioteca"], ["Exportar as referências em ABNT, APA ou Vancouver", "#/biblioteca"]],
+    pesquisador: [["Acompanhar temas e receber avisos de artigos novos", "#/interesses"], ["Levar as referências para o Zotero, Mendeley ou EndNote", "#/biblioteca"], ["Criar um relatório de tema com o método declarado", "#/biblioteca"]],
+    saude: [["Ver a situação de um medicamento no Brasil (ANVISA, Conitec, Rename)", Lib.buildHash("/busca", { q: "metformina" })], ["Acompanhar especialidades e receber avisos", "#/interesses"], ["Criar um relatório com a situação regulatória dos medicamentos", "#/biblioteca"]],
+    consultoria: [["Criar um relatório de tema com método e histórico", "#/biblioteca"], ["Acompanhar os temas dos seus clientes", "#/interesses"], ["Exportar as referências para o cliente", "#/biblioteca"]],
+  };
+  const PROFILE_SKIP_KEY = () => `bdd.profile.skip:${session.user}`;
+  let profileOptionsPromise;
+  const loadProfileOptions = () => {
+    profileOptionsPromise ||= api("/api/profile/options").catch((error) => { profileOptionsPromise = undefined; throw error; });
+    return profileOptionsPromise;
+  };
+
+  function profileShortcuts() {
+    const items = session.user && PROFILE_SHORTCUTS[session.profile];
+    if (!items) return null;
+    return h("section", { class: "home-section profile-shortcuts", "aria-labelledby": "para-voce" },
+      h("p", { class: "eyebrow" }, "Para você"),
+      h("h2", { id: "para-voce" }, "Por onde começar"),
+      h("ul", { class: "plain-list shortcut-list" }, items.map(([label, href]) => h("li", {}, h("a", { href }, label)))),
+      h("p", { class: "note" }, h("a", { href: "#/perfil" }, "Mudar perfil e preferências")));
+  }
+
+  /** Formulário do perfil (usado na pergunta da primeira entrada e na tela de perfil). */
+  function profileForm({ onSaved, onSkip } = {}) {
+    const box = h("div", { class: "stack" }, loading());
+    loadProfileOptions().then(({ profiles }) => {
+      let chosen = session.profile || "";
+      const healthBox = h("input", { type: "checkbox", id: "profile-health" });
+      healthBox.checked = session.healthPack !== false;
+      const group = h("div", { class: "stack", role: "radiogroup", "aria-label": "O que você faz" });
+      const paintGroup = () => mount(group, profiles.map((p) => {
+        const input = h("input", { type: "radio", name: "profile", id: `profile-${p.key}`, value: p.key });
+        input.checked = chosen === p.key;
+        input.addEventListener("change", () => { chosen = p.key; healthBox.checked = p.healthPack; paintGroup(); });
+        return h("label", { class: `profile-option${chosen === p.key ? " is-chosen" : ""}`, for: `profile-${p.key}` }, input,
+          h("span", {}, h("strong", {}, p.label), h("small", { class: "muted" }, p.description)));
+      }));
+      paintGroup();
+      const status = h("p", { class: "note", role: "status" });
+      const save = h("button", { type: "button", class: "btn btn-primary" }, "Salvar");
+      save.addEventListener("click", async () => {
+        if (!chosen) { status.textContent = "Escolha uma das opções."; return; }
+        save.disabled = true;
+        const saved = await guarded(() => api("/api/profile", { method: "PUT", body: { profile: chosen, healthPack: healthBox.checked } }));
+        save.disabled = false;
+        if (!saved) return;
+        session.profile = saved.profile;
+        session.healthPack = saved.healthPack;
+        toast("Perfil salvo.");
+        if (onSaved) onSaved(saved);
+      });
+      mount(box, group,
+        h("label", { class: "report-include", for: "profile-health" }, healthBox,
+          h("span", {}, h("strong", {}, "Mostrar a situação de medicamentos no Brasil"), h("small", { class: "muted" }, " ANVISA, Conitec e Rename, nos artigos e nos relatórios"))),
+        status,
+        h("div", { class: "row" }, save, onSkip ? h("button", { type: "button", class: "btn btn-ghost", onclick: onSkip }, "Agora não") : null));
+    }).catch(() => mount(box, errorBox("Não foi possível carregar as opções agora.")));
+    return box;
+  }
+
+  function askProfile() {
+    if (!session.user || session.profile) return;
+    try { if (localStorage.getItem(PROFILE_SKIP_KEY())) return; } catch { /* modo privado: pergunta de novo */ }
+    if (document.getElementById("profile-dialog")) return;
+    const dialogEl = h("dialog", { id: "profile-dialog", "aria-labelledby": "profile-title" });
+    const close = () => { dialogEl.close(); dialogEl.remove(); };
+    dialogEl.addEventListener("close", () => dialogEl.remove());
+    dialogEl.append(h("div", { class: "auth-card stack" },
+      h("h2", { id: "profile-title" }, "Como você vai usar o Biomedical Data Digger?"),
+      h("p", { class: "hint" }, "Isso só escolhe o que fica em destaque. Você pode mudar quando quiser em Perfil e preferências, e nada fica bloqueado."),
+      profileForm({
+        onSaved: () => { close(); render(); },
+        onSkip: () => { try { localStorage.setItem(PROFILE_SKIP_KEY(), "1"); } catch { /* sem armazenamento */ } close(); },
+      })));
+    document.body.append(dialogEl);
+    if (typeof dialogEl.showModal === "function") dialogEl.showModal();
+  }
+
+  async function syncProfile() {
+    if (!session.user) { session.profile = ""; session.healthPack = true; profileLink.hidden = true; return; }
+    profileLink.hidden = false;
+    try {
+      const data = await api("/api/profile");
+      session.profile = data.profile || "";
+      session.healthPack = data.healthPack;
+    } catch { return; }
+    askProfile();
+    render();
+  }
+
+  function renderProfile() {
+    setTitle("Perfil e preferências");
+    if (!session.user) {
+      mount($app, h("h1", {}, "Perfil e preferências"), h("div", { class: "empty card" },
+        h("p", {}, "Entre na sua conta para escolher o seu perfil."),
+        h("button", { type: "button", class: "btn btn-primary", onclick: () => openAuth("Entre para escolher seu perfil.") }, "Entrar")));
+      return;
+    }
+    mount($app, h("h1", {}, "Perfil e preferências"),
+      h("p", { class: "lead" }, "Diga o que você faz para destacarmos as ferramentas certas na página inicial e ligar ou desligar o pacote de saúde. Nada do núcleo (busca, biblioteca, alertas, relatórios e exportação) é bloqueado por esta escolha."),
+      h("section", { class: "card stack" }, profileForm({ onSaved: () => { location.hash = "#/"; } })));
   }
 
   // ------------------------------------------------------------------ Relatório de tema
@@ -1475,7 +1587,7 @@
         note);
       return { item, include, note, card };
     });
-    const brasil = reportBrasil(reportId, data.substances || []);
+    const brasil = showHealth() || (data.substances || []).length ? reportBrasil(reportId, data.substances || []) : null;
     const panoramaBox = h("div", { class: "stack" });
     const paintPanorama = (summary) => {
       const lines = [["Tipo de estudo", summary.types], ["Ano", summary.years], ["Idioma", summary.languages], ["Fonte", summary.sources]]
@@ -1492,7 +1604,7 @@
       const body = {
         title: titleInput.value, question: questionInput.value, methodNote: methodInput.value,
         items: rows.map((r) => ({ ref: r.item.ref, included: r.include.checked, note: r.note.value })),
-        substances: brasil.selected(),
+        substances: brasil ? brasil.selected() : undefined,
       };
       const saved = await guarded(() => api(`/api/reports/${encodeURIComponent(reportId)}`, { method: "PUT", body }));
       saveButton.disabled = false;
@@ -1501,7 +1613,7 @@
       titleInput.value = saved.title;
       paintPanorama(saved.panorama);
       setTitle(saved.title);
-      brasil.reload();
+      if (brasil) brasil.reload();
       return saved;
     }
     saveButton.addEventListener("click", async () => { if (await save()) toast("Relatório salvo."); });
@@ -1523,7 +1635,7 @@
       rows.map((r) => r.card),
       h("h2", {}, "Atualizar o relatório"), updates.node,
       h("h2", {}, "Panorama"), panoramaBox,
-      h("h2", {}, "Situação no Brasil (medicamentos)"), brasil.node,
+      brasil ? [h("h2", {}, "Situação no Brasil (medicamentos)"), brasil.node] : null,
       h("h2", {}, "Método"),
       h("p", { class: "hint" }, "O texto abaixo é montado automaticamente e entra no apêndice do documento."),
       h("ul", { class: "plain-list" }, data.method.map((p) => h("li", {}, p))),
@@ -1674,6 +1786,7 @@
     else if (view === "artigo") renderArticle(params);
     else if (view === "biblioteca") renderLibrary(params);
     else if (view === "interesses") renderInterests();
+    else if (view === "perfil") renderProfile();
     else if (view === "relatorio" && rest[0]) renderReport(rest[0]);
     else if (view === "lista" && rest[0]) renderSharedList(rest[0]);
     else renderHome();
@@ -1681,4 +1794,5 @@
   }
   window.addEventListener("hashchange", () => { render(); $app.focus({ preventScroll: true }); });
   render();
+  askProfile();
 })();
