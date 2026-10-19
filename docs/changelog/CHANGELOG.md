@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 2026-10 — Relatório de tema (fase 3): versões e atualização
+
+### Adicionado
+- **Versões do relatório** com resumo do que mudou e **restauração** de uma versão anterior (como nova versão). Salvar sem mudanças não cria versão. Ficam as últimas 50.
+- **Atualizar o relatório:** "Novos na lista de origem" (com adicionar), **busca de artigos novos sobre o tema** (todas as fontes, só o que ainda não está no relatório) e **"Acompanhar nos meus alertas"**, que leva a busca para as palavras-chave do sininho.
+- **Histórico de buscas e adições**, que entra no apêndice de método do documento. O método passa a dizer que as buscas feitas a partir do relatório estão registradas.
+- Rotas `GET /api/reports/{id}/history`, `POST /api/reports/{id}/search`, `POST /api/reports/{id}/add` e `POST /api/reports/{id}/restore`.
+
+### Limites
+- Relatórios criados antes desta fase não têm lista de origem registrada (o painel "Novos na lista" avisa). A busca que levou aos estudos da lista de origem continua sem registro.
 ## 2026-10 — Biblioteca: botão Exportar
 
 ### Alterado

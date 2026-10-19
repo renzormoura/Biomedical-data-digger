@@ -595,3 +595,6 @@ input[type="text"], input[type="search"], input[type="email"], input[type="passw
 
 /* o painel só é fixo (e sobe acima da barra inferior) no celular; entre 561 e 900px ele é absoluto e um "bottom" o esmagaria */
 @media (max-width: 560px) { .download-panel { bottom: 72px; } }
+
+.version-row { display: grid; gap: 4px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.version-row:last-child { border-bottom: 0; }

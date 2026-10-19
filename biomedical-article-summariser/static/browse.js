@@ -1326,6 +1326,122 @@
     return { node: box, selected: () => [...picked], reload: load };
   }
 
+  // atualizar o relatório (novos na lista, busca de novidades) e histórico de versões
+  const LANGUAGE_CHOICES = [["", "Qualquer idioma"], ["pt", "Português"], ["en", "Inglês"], ["es", "Espanhol"]];
+
+  function reportUpdates({ reportId, data, save, rerender }) {
+    const box = h("div", { class: "stack" }, loading("Carregando histórico…"));
+    const newBox = h("div", { class: "stack" });
+    const resultsBox = h("div", { class: "stack", "aria-live": "polite" });
+    const versionsBox = h("div", { class: "stack" });
+    const logBox = h("div", { class: "stack" });
+    const queryInput = h("input", { type: "text", maxlength: "200", placeholder: "Tema ou palavras-chave (ex.: hipertensão e exercício)", "aria-label": "Procurar artigos novos sobre o tema" });
+    const languageSelect = h("select", { "aria-label": "Idioma dos artigos" }, LANGUAGE_CHOICES.map(([value, label]) => h("option", { value }, label)));
+    const yearInput = h("input", { type: "number", min: "1800", max: "2100", value: String(Math.max(1800, Number(data.createdAt.slice(0, 4)) - 1)), "aria-label": "Artigos desde o ano" });
+    const searchButton = h("button", { type: "button", class: "btn btn-secondary btn-sm" }, "Procurar");
+    let lastQuery = "";
+
+    // salva o que está na tela antes de mudar a lista de estudos, para não perder edições
+    async function addRefs(refs, origin, query = "") {
+      if (!(await save())) return;
+      const result = await guarded(() => api(`/api/reports/${encodeURIComponent(reportId)}/add`, { method: "POST", body: { refs, origin, query } }));
+      if (!result) return;
+      toast(result.added ? `${result.added} ${result.added === 1 ? "estudo adicionado" : "estudos adicionados"} ao relatório.` : "Nada novo para adicionar.");
+      rerender();
+    }
+
+    async function follow() {
+      const term = lastQuery.trim();
+      if (!term) return;
+      const prefs = await guarded(() => api("/api/interests"));
+      if (!prefs) return;
+      if (prefs.terms.some((t) => t.toLowerCase() === term.toLowerCase())) { toast("Esta busca já está nos seus alertas."); return; }
+      if (prefs.terms.length >= 5) { toast("Você já usa as 5 palavras-chave dos alertas. Remova uma em Meus interesses."); return; }
+      const saved = await guarded(() => api("/api/interests", { method: "PUT", body: { topics: prefs.topics, languages: prefs.languages, terms: [...prefs.terms, term] } }));
+      if (saved) { toast("Pronto: vamos avisar no sininho quando sair artigo novo sobre isso."); syncBell(); }
+    }
+
+    async function runSearch() {
+      const query = queryInput.value.trim();
+      if (query.length < 2) { queryInput.focus(); return; }
+      if (!(await save())) return; // a busca fica registrada no histórico, que é uma versão do relatório
+      searchButton.disabled = true;
+      mount(resultsBox, loading("Procurando em todas as fontes…"));
+      const found = await guarded(() => api(`/api/reports/${encodeURIComponent(reportId)}/search`, {
+        method: "POST", body: { query, language: languageSelect.value, yearFrom: Number(yearInput.value) || null },
+      }));
+      searchButton.disabled = false;
+      if (!found) { mount(resultsBox); return; }
+      lastQuery = query;
+      mount(resultsBox,
+        found.results.length
+          ? [h("p", { class: "hint" }, `${found.results.length} artigos que ainda não estão no relatório (desde ${found.yearFrom}).`),
+            found.results.map((work) => h("div", { class: "card stack report-study" },
+              h("h3", {}, h("a", { href: articleHref(work) }, work.title)),
+              h("p", { class: "meta" }, [metaLine(work), (work.studyTypes || [])[0]].filter(Boolean).join(" · ")),
+              h("div", { class: "row" }, h("button", { type: "button", class: "btn btn-secondary btn-sm", onclick: () => addRefs([work.ref], "busca", query) }, "Adicionar ao relatório")))),
+            h("div", { class: "row" },
+              h("button", { type: "button", class: "btn btn-primary btn-sm", onclick: () => addRefs(found.results.map((w) => w.ref), "busca", query) }, "Adicionar todos"),
+              h("button", { type: "button", class: "btn btn-ghost btn-sm", onclick: follow }, "Acompanhar nos meus alertas"))]
+          : [h("p", { class: "muted" }, "Nenhum artigo novo para esta busca."), h("button", { type: "button", class: "btn btn-ghost btn-sm", onclick: follow }, "Acompanhar nos meus alertas")]);
+    }
+    searchButton.addEventListener("click", runSearch);
+    queryInput.addEventListener("keydown", (event) => { if (event.key === "Enter") { event.preventDefault(); runSearch(); } });
+
+    function paintVersions(history) {
+      mount(versionsBox, history.versions.length
+        ? h("ul", { class: "plain-list" }, history.versions.map((v) => {
+          const row = h("li", { class: "version-row" },
+            h("div", {}, h("strong", {}, `Versão ${v.version}`), v.current ? h("span", { class: "badge" }, " atual") : null,
+              h("span", { class: "muted" }, ` · ${fmtDate(v.savedAt.slice(0, 10))}`)),
+            h("small", { class: "muted" }, v.summary));
+          if (!v.current) {
+            const ask = h("div", { class: "row" });
+            const start = () => mount(ask,
+              h("span", { class: "note" }, "Alterações não salvas serão perdidas."),
+              h("button", { type: "button", class: "btn btn-sm btn-primary", onclick: async () => {
+                if (await guarded(() => api(`/api/reports/${encodeURIComponent(reportId)}/restore`, { method: "POST", body: { version: v.version } }))) { toast(`Versão ${v.version} restaurada.`); rerender(); }
+              } }, "Confirmar"),
+              h("button", { type: "button", class: "btn btn-sm btn-ghost", onclick: () => mount(ask, h("button", { type: "button", class: "btn btn-sm btn-secondary", onclick: start }, "Restaurar")) }, "Cancelar"));
+            mount(ask, h("button", { type: "button", class: "btn btn-sm btn-secondary", onclick: start }, "Restaurar"));
+            row.append(ask);
+          }
+          return row;
+        }))
+        : h("p", { class: "muted" }, "Sem versões registradas ainda. Salve o relatório para criar a primeira."));
+    }
+
+    async function load() {
+      const history = await guarded(() => api(`/api/reports/${encodeURIComponent(reportId)}/history`));
+      if (!history) { mount(box, h("p", { class: "muted" }, "Não foi possível carregar o histórico agora.")); return; }
+      mount(newBox,
+        !history.listAvailable
+          ? h("p", { class: "muted" }, `A lista de origem (“${history.listName}”) não existe mais, então não há como comparar.`)
+          : history.newInList.length
+            ? [h("p", {}, `${history.newInList.length} ${history.newInList.length === 1 ? "artigo entrou" : "artigos entraram"} na lista “${history.listName}” depois deste relatório:`),
+              history.newInList.map((work) => h("div", { class: "row" },
+                h("a", { href: articleHref(work) }, work.title),
+                h("button", { type: "button", class: "btn btn-secondary btn-sm", onclick: () => addRefs([work.ref], "lista") }, "Adicionar"))),
+              h("div", { class: "row" }, h("button", { type: "button", class: "btn btn-primary btn-sm", onclick: () => addRefs(history.newInList.map((w) => w.ref), "lista") }, "Adicionar todos"))]
+            : h("p", { class: "muted" }, `Nenhum artigo novo na lista “${history.listName}”.`));
+      paintVersions(history);
+      mount(logBox, history.log.length
+        ? h("ul", { class: "plain-list" }, history.log.map((e) => h("li", {}, h("small", { class: "muted" }, fmtDate(e.createdAt.slice(0, 10))), e.text)))
+        : h("p", { class: "muted" }, "Nenhuma busca ou adição feita a partir deste relatório."));
+      mount(box,
+        h("h3", {}, "Novos na lista de origem"), newBox,
+        h("h3", {}, "Procurar artigos novos sobre o tema"),
+        h("p", { class: "hint" }, "A busca usa todas as fontes, dos mais recentes aos mais antigos, e mostra só o que ainda não está no relatório. Ela fica registrada no histórico e no apêndice de método."),
+        h("div", { class: "new-list" }, queryInput,
+          h("div", { class: "row" }, languageSelect, h("label", { class: "report-include" }, h("span", {}, "Desde"), yearInput), searchButton)),
+        resultsBox,
+        h("details", { class: "more-records" }, h("summary", {}, "Versões do relatório"), versionsBox),
+        h("details", { class: "more-records" }, h("summary", {}, "Histórico de buscas e adições"), logBox));
+    }
+    load();
+    return { node: box };
+  }
+
   async function renderReport(reportId) {
     setTitle("Relatório");
     if (!session.user) {
@@ -1389,6 +1505,7 @@
       return saved;
     }
     saveButton.addEventListener("click", async () => { if (await save()) toast("Relatório salvo."); });
+    const updates = reportUpdates({ reportId, data, save, rerender: () => renderReport(reportId) });
     const download = (format) => async () => {
       if (!(await save())) return; // o arquivo reflete o que está na tela
       location.assign(`/api/reports/${encodeURIComponent(reportId)}/download?format=${format}`);
@@ -1404,6 +1521,7 @@
       h("h2", {}, "Estudos"),
       h("p", { class: "hint" }, "Desmarque o que não deve entrar. A nota de confiabilidade e as frases estatísticas vêm do resumo do registro."),
       rows.map((r) => r.card),
+      h("h2", {}, "Atualizar o relatório"), updates.node,
       h("h2", {}, "Panorama"), panoramaBox,
       h("h2", {}, "Situação no Brasil (medicamentos)"), brasil.node,
       h("h2", {}, "Método"),

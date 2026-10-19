@@ -6,7 +6,7 @@ Entregar algo pronto a partir de uma lista de leitura: um documento com estudos 
 Plano completo e fases seguintes: `docs/roadmap/plano-relatorio-de-tema.md`.
 
 ## Status
-Fases 1 (relatório mínimo) e 2 (seção "Situação no Brasil") implementadas. Faltam: versões e atualização (fase 3), seletor de perfil (fase 4), validação com usuários (fase 5) e camada comercial (fase 6).
+Fases 1 (relatório mínimo), 2 (seção "Situação no Brasil") e 3 (versões e atualização) implementadas. Faltam: seletor de perfil (fase 4), validação com usuários (fase 5) e camada comercial (fase 6).
 
 ## Como usar
 1. Na **Biblioteca**, abra uma lista e clique em **Criar relatório**. Os estudos da lista são congelados naquele momento.
@@ -32,6 +32,14 @@ O relatório não conclui nem recomenda conduta. O método diz explicitamente qu
 - Os dados são consultados no momento de abrir ou baixar o relatório, nos instantâneos atuais do repositório (não ficam congelados no relatório). Se as bases não puderem ser lidas, o download responde 503 em vez de entregar um documento sem a seção que o autor confirmou.
 - Código: `report_brasil.py` (sugerir, descrever e montar os blocos); rotas e tela no mesmo lugar do relatório.
 
+## Versões e atualização (fase 3)
+- **Versões:** cada salvamento que muda algo cria uma nova versão, com um resumo do que mudou (título, pergunta, nota do método, estudos incluídos ou excluídos, notas, substâncias, estudos adicionados). Salvar sem mudar nada **não** cria versão (o download também salva antes). Ficam as últimas 50. **Restaurar** devolve o estado editável de uma versão como uma nova versão; estudos adicionados depois continuam no relatório, mas excluídos.
+- **Novos na lista de origem:** o relatório lembra de qual lista veio e mostra os artigos que entraram nela depois, com "Adicionar" e "Adicionar todos". Relatórios criados antes da fase 3 não têm lista de origem registrada.
+- **Procurar artigos novos sobre o tema:** busca em todas as fontes, mais recentes primeiro, por palavras-chave, idioma e ano inicial (padrão: ano da criação menos 1), e mostra só o que ainda não está no relatório. O autor adiciona o que quiser; o sistema busca os metadados na fonte, não confia no navegador.
+- **Acompanhar nos meus alertas:** depois de uma busca, o botão acrescenta aquelas palavras às palavras-chave dos alertas (até 5), para o sininho avisar quando sair artigo novo.
+- **Histórico no método:** cada busca e cada adição fica registrada (data e texto) e entra no apêndice como "Histórico de atualizações". Com isso o método deixa de dizer que as buscas não são registradas, mas ainda avisa que a busca que levou aos estudos da lista de origem não foi guardada.
+- Código: `ReportStore` (`report_versions`, `report_sources`, `report_log`), `describe_change` e `new_in_list` em `reports.py`.
+
 ## Código
 - `reports.py`: armazenamento (`ReportStore`: tabelas `reports` e `report_items`, sempre filtradas pela conta), cálculo puro (`assess_study`, `panorama`, `method_paragraphs`) e montagem do documento em blocos (`report_blocks`), que o `downloads.render` converte em HTML, DOCX, Markdown ou texto.
 - `browse_api.py`: rotas. `static/browse.js`: botão na lista, seção "Relatórios de tema" na biblioteca e a tela `#/relatorio/<id>`.
@@ -45,13 +53,19 @@ O relatório não conclui nem recomenda conduta. O método diz explicitamente qu
 | `GET /api/reports/{id}` | Relatório completo: estudos com nota e frases, panorama, método e critérios |
 | `PUT /api/reports/{id}` | Salva título, pergunta, nota do método, substâncias confirmadas (opcional; sem o campo, mantém) e, por estudo, inclusão e nota (nova versão) |
 | `GET /api/reports/{id}/brasil` | Sugestões de substâncias (a confirmar) e a situação das já confirmadas, com a data de cada base |
+| `GET /api/reports/{id}/history` | Versões, histórico de buscas e adições e artigos novos na lista de origem |
+| `POST /api/reports/{id}/search` | Procura artigos fora do relatório (`query`, `language`, `yearFrom`) e registra a busca |
+| `POST /api/reports/{id}/add` | Adiciona estudos (`refs`, `origin` = `lista` ou `busca`, `query`) e cria uma versão |
+| `POST /api/reports/{id}/restore` | Restaura uma versão (`version`) como nova versão |
 | `DELETE /api/reports/{id}` | Exclui |
 | `GET /api/reports/{id}/download?format=html\|docx\|md\|txt` | Baixa o documento |
 
 ## Limites
 - Até 30 relatórios por conta e 200 estudos por relatório; texto de notas limitado (título 200, pergunta 2.000, nota por estudo 1.000, nota do método 3.000 caracteres).
 - A nota de confiabilidade usa só título, resumo e metadados. Registros sem resumo ficam com nota indeterminada.
-- Os estudos são um retrato do momento da criação: não se atualizam sozinhos (isso é a fase 3).
+- Os metadados de cada estudo são um retrato do momento em que ele entrou no relatório e não se atualizam sozinhos; só entram estudos novos quando o autor adiciona.
+- A busca de novidades tem os mesmos limites das demais buscas (ruído, poucos resultados em português) e traz no máximo 20 resultados por vez.
+- Versões guardam o estado editável, não uma cópia dos metadados dos estudos.
 - A ordem dos estudos é a da lista; ainda não é possível reordenar.
 - Até 10 substâncias por relatório; a sugestão analisa os 120 primeiros estudos incluídos.
 - A ligação de nomes é automática e pode errar ou deixar nomes de fora: por isso a confirmação é do autor.

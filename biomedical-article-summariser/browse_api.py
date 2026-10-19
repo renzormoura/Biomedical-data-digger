@@ -18,7 +18,7 @@ import downloads
 import markdown_lite
 import reliability
 import report_brasil
-from alerts import Alert, AlertService
+from alerts import Alert, AlertService, work_key
 from brasil import anvisa, conitec, consulta, rename
 from catalog import SearchQuery, Work
 from discovery import DiscoveryService
@@ -35,6 +35,7 @@ from reports import (
     assess_study,
     criteria_description,
     method_paragraphs,
+    new_in_list,
     panorama,
     report_blocks,
 )
@@ -78,6 +79,24 @@ class ReportCreateIn(BaseModel):
     list_id: str = Field(min_length=1, max_length=64)
     title: str = Field("", max_length=300)
     question: str = Field("", max_length=4000)
+
+
+class ReportSearchIn(BaseModel):
+    query: str = Field(min_length=2, max_length=200)
+    language: str = Field("", max_length=8)
+    year_from: int | None = Field(None, ge=1800, le=2100, alias="yearFrom")
+
+    model_config = {"populate_by_name": True}
+
+
+class ReportAddIn(BaseModel):
+    refs: list[Annotated[str, Field(min_length=1, max_length=MAX_REF)]] = Field(min_length=1, max_length=50)
+    origin: str = Field(pattern="^(lista|busca)$")
+    query: str = Field("", max_length=200)
+
+
+class ReportRestoreIn(BaseModel):
+    version: int = Field(ge=1, le=100000)
 
 
 class ReportItemIn(BaseModel):
@@ -557,7 +576,9 @@ def register_browse_routes(
             chosen = next((item for item in library.lists(user) if item.id == body.list_id), None)
             if chosen is None:
                 raise NotFoundError("Lista não encontrada.")
-            report = report_store.create(user, list_name=chosen.name, works=list(chosen.works), title=body.title, question=body.question)
+            report = report_store.create(
+                user, list_name=chosen.name, works=list(chosen.works), title=body.title, question=body.question, source_list_id=chosen.id,
+            )
             return report_payload(report)
 
         @app.get("/api/reports/{report_id}")
@@ -571,6 +592,59 @@ def register_browse_routes(
                 items=[(item.ref, item.included, item.note) for item in body.items], substances=body.substances,
             )
             return report_payload(report)
+
+        def source_list(user: str, report: Report) -> ReadingList | None:
+            return next((item for item in library.lists(user) if item.id == report.source_list_id), None) if report.source_list_id else None
+
+        @app.get("/api/reports/{report_id}/history")
+        def report_history(report_id: Annotated[str, Path(max_length=64)], request: Request) -> dict[str, Any]:
+            """Versoes, historico de atualizacoes e artigos que entraram na lista de origem depois do relatorio."""
+            user = require_user(request)
+            report = report_store.get(user, report_id)
+            origin = source_list(user, report)
+            return {
+                "versions": [{"version": v.version, "savedAt": v.saved_at, "summary": v.summary, "current": v.version == report.version}
+                             for v in report_store.versions(user, report_id)],
+                "log": [{"kind": e.kind, "text": e.text, "createdAt": e.created_at} for e in report.log],
+                "listName": origin.name if origin else report.list_name, "listAvailable": origin is not None,
+                "newInList": [work_card(w) for w in new_in_list(report, origin.works)] if origin else [],
+            }
+
+        @app.post("/api/reports/{report_id}/search")
+        def report_search(report_id: Annotated[str, Path(max_length=64)], body: ReportSearchIn, request: Request) -> dict[str, Any]:
+            """Procura artigos sobre o tema que ainda nao estao no relatorio; a busca fica registrada no historico."""
+            user = require_user(request)
+            report = report_store.get(user, report_id)
+            year_from = body.year_from or max(1800, int(report.created_at[:4]) - 1)
+            query = SearchQuery(q=body.query, year_from=year_from, language=body.language, sort="recent", per_page=20)
+            found = discovery.search(query, source=discovery.search_default, client_id=identity(request))
+            present = {work_key(item.work) for item in report.items} | {item.work.ref for item in report.items}
+            fresh = [w for w in found.works if work_key(w) not in present and w.ref not in present]
+            scope = ", ".join(p for p in [f"idioma {body.language}" if body.language else "", f"desde {year_from}"] if p)
+            report_store.log_search(user, report_id, f"Busca: “{body.query}” ({scope}; todas as fontes): {len(fresh)} resultados fora do relatório.")
+            return {"query": body.query, "yearFrom": year_from, "results": [work_card(w) for w in fresh], "notes": list(found.notes)}
+
+        @app.post("/api/reports/{report_id}/add")
+        def report_add(report_id: Annotated[str, Path(max_length=64)], body: ReportAddIn, request: Request) -> dict[str, Any]:
+            """Acrescenta estudos ao relatorio: da lista de origem (so os que estao nela) ou de uma busca (metadados vindos da fonte)."""
+            user = require_user(request)
+            report = report_store.get(user, report_id)
+            if body.origin == "lista":
+                origin = source_list(user, report)
+                if origin is None:
+                    raise NotFoundError("A lista de origem não existe mais.")
+                wanted = set(body.refs)
+                works = [w for w in origin.works if w.ref in wanted]
+                label = f"lista “{origin.name}”"
+            else:
+                works = [discovery.work(ref, client_id=identity(request)) for ref in dict.fromkeys(body.refs)]
+                label = f"busca “{body.query}”" if body.query else "busca"
+            updated, added = report_store.add_works(user, report_id, works, origin=label)
+            return {"added": added, "report": report_payload(updated)}
+
+        @app.post("/api/reports/{report_id}/restore")
+        def report_restore(report_id: Annotated[str, Path(max_length=64)], body: ReportRestoreIn, request: Request) -> dict[str, Any]:
+            return report_payload(report_store.restore(require_user(request), report_id, body.version))
 
         @app.get("/api/reports/{report_id}/brasil")
         def report_brasil_data(report_id: Annotated[str, Path(max_length=64)], request: Request) -> dict[str, Any]:

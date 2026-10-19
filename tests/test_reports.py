@@ -168,8 +168,14 @@ class Catalog:
     def study_types(self):
         return ()
 
+    results: list = []
+    queries: list = []
+
     def search(self, query):
-        raise AssertionError("nao deve buscar")
+        from catalog import SearchResult
+
+        type(self).queries.append(query)
+        return SearchResult(works=tuple(type(self).results), total=len(type(self).results), page=1, per_page=20, source="Fake")
 
     def get(self, ref):
         return make_work(ref)
@@ -386,3 +392,172 @@ def test_brasil_routes_degrade_without_snapshots_and_require_login(env):
         assert client.get(f"/api/reports/{report['id']}/download").status_code == 503  # nao entrega um documento sem a secao confirmada
     assert env.client(None).get(f"/api/reports/{report['id']}/brasil").status_code == 401
     assert env.client("bia@exemplo.com").get(f"/api/reports/{report['id']}/brasil").status_code == 404
+
+
+# ------------------------------------------------------------------ fase 3: versoes, historico e atualizacao
+from reports import MAX_VERSIONS, describe_change, new_in_list  # noqa: E402
+
+
+def state(**overrides):
+    base = {"title": "T", "question": "Q", "method_note": "", "substances": [], "items": [{"ref": "1", "included": True, "note": ""}]}
+    base.update(overrides)
+    return base
+
+
+def test_describe_change_summarizes_each_kind_of_edit():
+    assert describe_change(None, state()) == "Versão inicial."
+    assert describe_change(state(), state()) == "Sem alterações."
+    assert describe_change(state(), state(title="Novo")) == "Título alterado."
+    both = describe_change(state(), state(question="Outra", method_note="x", substances=["metformina"]))
+    assert both == "Pergunta alterada; nota do método alterada; substâncias do Brasil alteradas."
+    old = state(items=[{"ref": "1", "included": True, "note": ""}, {"ref": "2", "included": False, "note": ""}])
+    new = state(items=[{"ref": "1", "included": False, "note": "n"}, {"ref": "2", "included": True, "note": ""}, {"ref": "3", "included": True, "note": ""}])
+    assert describe_change(old, new) == "1 estudo adicionado; 1 estudo incluído; 1 estudo excluído; notas alteradas em 1 estudo."
+
+
+def test_versions_are_recorded_on_create_update_and_listed_newest_first(store):
+    report = create(store, source_list_id="lista-1")
+    store.update(EMAIL, report.id, title="Novo título", question="", method_note="", items=[("1", False, "")])
+    store.update(EMAIL, report.id, title="Novo título", question="", method_note="", items=[("1", False, "")])
+    versions = store.versions(EMAIL, report.id)
+    assert [v.version for v in versions] == [2, 1]  # a segunda gravação nao mudou nada: nao cria versao
+    assert versions[1].summary == "Criado a partir da lista “Hipertensão”."
+    assert versions[0].summary == "Título alterado; 1 estudo excluído."
+    assert store.get(EMAIL, report.id).version == 2
+    assert store.get(EMAIL, report.id).source_list_id == "lista-1" and create(store).source_list_id == ""
+
+
+def test_restore_brings_back_the_editable_state_and_excludes_later_studies(store):
+    report = create(store, title="Original", question="Pergunta original")
+    store.update(EMAIL, report.id, title="Editado", question="Outra", method_note="Nota", items=[("1", False, "fora"), ("2", True, "bom")], substances=["metformina"])
+    store.add_works(EMAIL, report.id, [make_work("9")], origin="busca")
+    restored = store.restore(EMAIL, report.id, 1)
+    assert restored.title == "Original" and restored.question == "Pergunta original" and restored.method_note == "" and restored.substances == ()
+    by_ref = {i.work.ref: i for i in restored.items}
+    assert by_ref["1"].included and by_ref["1"].note == "" and by_ref["2"].included and by_ref["2"].note == ""
+    assert not by_ref["9"].included  # entrou depois: continua no relatorio, mas excluido
+    assert restored.version == 4 and store.versions(EMAIL, report.id)[0].summary == "Restaurada a versão 1."
+    with pytest.raises(NotFoundError):
+        store.restore(EMAIL, report.id, 99)
+    other = store.create("outra@exemplo.com", list_name="L", works=[make_work("1")])
+    with pytest.raises(NotFoundError):
+        store.restore(EMAIL, other.id, 1)
+
+
+def test_corrupt_version_state_cannot_be_restored(store):
+    report = create(store)
+    store._db.execute("UPDATE report_versions SET state = 'quebrado' WHERE version = 1")  # noqa: SLF001
+    with pytest.raises(NotFoundError):
+        store.restore(EMAIL, report.id, 1)
+
+
+def test_old_versions_are_pruned(store, monkeypatch):
+    monkeypatch.setattr(reports, "MAX_VERSIONS", 3)
+    report = create(store)
+    for index in range(5):
+        store.update(EMAIL, report.id, title=f"T{index}", question="", method_note="", items=[])
+    assert [v.version for v in store.versions(EMAIL, report.id)] == [6, 5, 4]
+    assert MAX_VERSIONS == 50
+
+
+def test_add_works_skips_duplicates_logs_and_versions(store):
+    report = create(store)
+    updated, added = store.add_works(EMAIL, report.id, [make_work("1"), make_work("7"), make_work("8")], origin="busca “pressão”")
+    assert added == 2 and [i.work.ref for i in updated.items] == ["1", "2", "3", "7", "8"] and all(i.included for i in updated.items)
+    assert updated.version == 2 and store.versions(EMAIL, report.id)[0].summary == "2 estudos adicionados (busca “pressão”)."
+    assert sorted(e.text for e in updated.log) == ["Adicionado: Estudo 7 sobre exercício (busca “pressão”).", "Adicionado: Estudo 8 sobre exercício (busca “pressão”)."]
+    again, none = store.add_works(EMAIL, report.id, [make_work("7")], origin="busca")
+    assert none == 0 and again.version == 2  # sem novidade, sem nova versao
+
+
+def test_add_works_respects_the_item_limit_and_ownership(store, monkeypatch):
+    monkeypatch.setattr(reports, "MAX_ITEMS", 3)
+    report = create(store)
+    with pytest.raises(LimitReachedError):
+        store.add_works(EMAIL, report.id, [make_work("9")], origin="busca")
+    with pytest.raises(NotFoundError):
+        store.add_works("outra@exemplo.com", report.id, [make_work("9")], origin="busca")
+
+
+def test_search_log_enters_the_method_appendix(store):
+    report = create(store)
+    assert "não são registradas" in "\n".join(method_paragraphs(report, date(2026, 10, 18)))
+    store.log_search(EMAIL, report.id, "Busca: “pressão” (desde 2025; todas as fontes): 4 resultados fora do relatório.")
+    store.add_works(EMAIL, report.id, [make_work("7")], origin="busca “pressão”")
+    report = store.get(EMAIL, report.id)
+    text = "\n".join(method_paragraphs(report, date(2026, 10, 18)))
+    assert "histórico de atualizações abaixo" in text and "não foi registrada" in text
+    blocks = report_blocks(report, date(2026, 10, 18))
+    assert ("h2", "Histórico de atualizações") in blocks
+    flat = "\n".join(t for _, t in blocks)
+    assert "Busca: “pressão”" in flat and "Adicionado: Estudo 7 sobre exercício" in flat
+    with pytest.raises(NotFoundError):
+        store.log_search("outra@exemplo.com", report.id, "x")
+
+
+def test_new_in_list_and_delete_cleans_every_table(store):
+    report = create(store, source_list_id="l")
+    assert [w.ref for w in new_in_list(report, [make_work("1"), make_work("5")])] == ["5"]
+    store.log_search(EMAIL, report.id, "Busca: x")
+    store.delete(EMAIL, report.id)
+    for table in ("report_versions", "report_sources", "report_log", "report_items"):
+        assert store._db.query(f"SELECT COUNT(*) FROM {table}")[0][0] == 0  # noqa: SLF001, S608
+
+
+def test_history_search_add_and_restore_routes(env):
+    client = env.client()
+    list_id = seeded(env, client)
+    report = client.post("/api/reports", json={"list_id": list_id, "title": "Exercício"}).json()
+    base = f"/api/reports/{report['id']}"
+    history = client.get(f"{base}/history").json()
+    assert history["listAvailable"] and history["newInList"] == [] and history["log"] == []
+    assert [v["version"] for v in history["versions"]] == [1] and history["versions"][0]["current"]
+    env.library.add_to_list(EMAIL, list_id, make_work("3"))
+    history = client.get(f"{base}/history").json()
+    assert [w["ref"] for w in history["newInList"]] == ["3"]
+    added = client.post(f"{base}/add", json={"refs": ["3", "naoestanalista"], "origin": "lista"}).json()
+    assert added["added"] == 1 and len(added["report"]["items"]) == 3 and added["report"]["version"] == 2
+    assert client.get(f"{base}/history").json()["newInList"] == []
+
+    Catalog.results = [make_work("1"), make_work("3"), make_work("20"), make_work("21", doi="10.1/novo")]
+    Catalog.queries = []
+    found = client.post(f"{base}/search", json={"query": "pressão arterial", "language": "pt"}).json()
+    assert [w["ref"] for w in found["results"]] == ["20", "21"]  # 1 e 3 ja estao no relatorio
+    assert Catalog.queries[0].q == "pressão arterial" and Catalog.queries[0].language == "pt" and Catalog.queries[0].sort == "recent"
+    assert found["yearFrom"] == int(report["createdAt"][:4]) - 1
+    assert client.post(f"{base}/search", json={"query": "x"}).status_code == 422
+    custom = client.post(f"{base}/search", json={"query": "pressão", "yearFrom": 2024}).json()
+    assert custom["yearFrom"] == 2024
+    log = client.get(f"{base}/history").json()["log"]
+    assert any(e["kind"] == "busca" and "pressão arterial" in e["text"] and "2 resultados fora do relatório" in e["text"] for e in log)
+
+    from_search = client.post(f"{base}/add", json={"refs": ["20", "21"], "origin": "busca", "query": "pressão arterial"}).json()
+    assert from_search["added"] == 2 and from_search["report"]["version"] == 3
+    assert any("busca “pressão arterial”" in e["text"] for e in client.get(f"{base}/history").json()["log"])
+
+    restored = client.post(f"{base}/restore", json={"version": 1}).json()
+    assert restored["version"] == 4 and [i["included"] for i in restored["items"]] == [True, True, False, False, False]
+    versions = client.get(f"{base}/history").json()["versions"]
+    assert [v["version"] for v in versions] == [4, 3, 2, 1] and versions[0]["summary"] == "Restaurada a versão 1."
+    assert client.post(f"{base}/restore", json={"version": 99}).status_code == 404
+    assert client.post(f"{base}/restore", json={"version": 0}).status_code == 422
+    Catalog.results = []
+
+
+def test_add_from_a_deleted_source_list_and_isolation(env):
+    client = env.client()
+    list_id = seeded(env, client)
+    report = client.post("/api/reports", json={"list_id": list_id}).json()
+    base = f"/api/reports/{report['id']}"
+    env.library.delete_list(EMAIL, list_id)
+    history = client.get(f"{base}/history").json()
+    assert not history["listAvailable"] and history["newInList"] == [] and history["listName"] == "Hipertensão"
+    assert client.post(f"{base}/add", json={"refs": ["1"], "origin": "lista"}).status_code == 404
+    assert client.post(f"{base}/add", json={"refs": ["1"], "origin": "outra"}).status_code == 422
+    outra = env.client("bia@exemplo.com")
+    for method, url, body in [("get", f"{base}/history", None), ("post", f"{base}/search", {"query": "xx"}),
+                              ("post", f"{base}/add", {"refs": ["1"], "origin": "busca"}), ("post", f"{base}/restore", {"version": 1})]:
+        response = getattr(outra, method)(url, **({"json": body} if body else {}))
+        assert response.status_code == 404, url
+    anonimo = env.client(None)
+    assert anonimo.get(f"{base}/history").status_code == 401 and anonimo.post(f"{base}/restore", json={"version": 1}).status_code == 401

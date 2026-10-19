@@ -34,6 +34,9 @@ MAX_QUESTION_CHARS = 2000
 MAX_ITEM_NOTE_CHARS = 1000
 MAX_METHOD_NOTE_CHARS = 3000
 MAX_ABSTRACT_CHARS = 4000
+MAX_VERSIONS = 50
+MAX_LOG = 200
+MAX_LOG_TEXT = 400
 MAX_SUBSTANCES = 10
 MAX_SUBSTANCE_CHARS = 80
 FINDINGS_PER_STUDY = 3
@@ -57,6 +60,15 @@ _SCHEMA = (
     """CREATE TABLE IF NOT EXISTS report_substances (
         report_id TEXT NOT NULL REFERENCES reports(id) ON DELETE CASCADE, term TEXT NOT NULL, position INTEGER NOT NULL,
         PRIMARY KEY (report_id, term))""",
+    """CREATE TABLE IF NOT EXISTS report_versions (
+        report_id TEXT NOT NULL REFERENCES reports(id) ON DELETE CASCADE, version INTEGER NOT NULL, saved_at TEXT NOT NULL,
+        summary TEXT NOT NULL, state TEXT NOT NULL, PRIMARY KEY (report_id, version))""",
+    """CREATE TABLE IF NOT EXISTS report_sources (
+        report_id TEXT PRIMARY KEY REFERENCES reports(id) ON DELETE CASCADE, list_id TEXT NOT NULL)""",
+    """CREATE TABLE IF NOT EXISTS report_log (
+        id TEXT PRIMARY KEY, report_id TEXT NOT NULL REFERENCES reports(id) ON DELETE CASCADE, kind TEXT NOT NULL,
+        text TEXT NOT NULL, created_at TEXT NOT NULL)""",
+    "CREATE INDEX IF NOT EXISTS idx_report_log ON report_log (report_id, created_at)",
 )
 
 
@@ -65,6 +77,20 @@ class ReportItem:
     work: Work
     included: bool
     note: str
+
+
+@dataclass(frozen=True)
+class LogEntry:
+    kind: str  # "busca" ou "adicao"
+    text: str
+    created_at: str
+
+
+@dataclass(frozen=True)
+class VersionInfo:
+    version: int
+    saved_at: str
+    summary: str
 
 
 @dataclass(frozen=True)
@@ -79,6 +105,8 @@ class Report:
     version: int
     items: tuple[ReportItem, ...]
     substances: tuple[str, ...] = ()  # nomes (normalizados) que o autor confirmou para a secao "Situacao no Brasil"
+    log: tuple[LogEntry, ...] = ()  # buscas e adicoes feitas depois da criacao (entram no apendice de metodo)
+    source_list_id: str = ""
 
     @property
     def included(self) -> list[ReportItem]:
@@ -136,6 +164,37 @@ def clean_substances(names: list[str]) -> list[str]:
     return cleaned[:MAX_SUBSTANCES]
 
 
+def _plural(n: int, singular: str, plural: str) -> str:
+    return f"{n} {singular if n == 1 else plural}"
+
+
+def describe_change(previous: dict[str, object] | None, new: dict[str, object]) -> str:
+    """Frase curta com o que mudou entre duas versoes (estado editavel: titulo, pergunta, nota, substancias, estudos)."""
+    if previous is None:
+        return "Versão inicial."
+    changes: list[str] = []
+    for key, label in (("title", "título alterado"), ("question", "pergunta alterada"), ("method_note", "nota do método alterada")):
+        if previous.get(key) != new.get(key):
+            changes.append(label)
+    old_items = {i["ref"]: i for i in previous.get("items", [])}  # type: ignore[attr-defined]
+    new_items = {i["ref"]: i for i in new.get("items", [])}  # type: ignore[attr-defined]
+    added = [ref for ref in new_items if ref not in old_items]
+    if added:
+        changes.append(_plural(len(added), "estudo adicionado", "estudos adicionados"))
+    included = sum(1 for r, i in new_items.items() if r in old_items and i["included"] and not old_items[r]["included"])
+    excluded = sum(1 for r, i in new_items.items() if r in old_items and not i["included"] and old_items[r]["included"])
+    if included:
+        changes.append(_plural(included, "estudo incluído", "estudos incluídos"))
+    if excluded:
+        changes.append(_plural(excluded, "estudo excluído", "estudos excluídos"))
+    noted = sum(1 for r, i in new_items.items() if r in old_items and i["note"] != old_items[r]["note"])
+    if noted:
+        changes.append(f"notas alteradas em {_plural(noted, 'estudo', 'estudos')}")
+    if list(previous.get("substances", [])) != list(new.get("substances", [])):  # type: ignore[call-overload]
+        changes.append("substâncias do Brasil alteradas")
+    return (changes[0].capitalize() + "".join(f"; {c}" for c in changes[1:]) + ".") if changes else "Sem alterações."
+
+
 class ReportStore:
     def __init__(self, database: Database | None = None) -> None:
         self._db = database or Database()
@@ -149,7 +208,49 @@ class ReportStore:
         if not tx.query("SELECT 1 FROM reports WHERE id = ? AND owner_email = ?", (report_id, user)):
             raise NotFoundError("Relatório não encontrado.")
 
-    def create(self, user: str, *, list_name: str, works: list[Work], title: str = "", question: str = "") -> Report:
+    def _state(self, tx: Transaction, report_id: str) -> dict[str, object]:
+        title, question, method_note = tx.query("SELECT title, question, method_note FROM reports WHERE id = ?", (report_id,))[0]
+        items = tx.query("SELECT ref, included, note FROM report_items WHERE report_id = ? ORDER BY position", (report_id,))
+        substances = tx.query("SELECT term FROM report_substances WHERE report_id = ? ORDER BY position", (report_id,))
+        return {
+            "title": title, "question": question, "method_note": method_note, "substances": [t for (t,) in substances],
+            "items": [{"ref": ref, "included": bool(included), "note": note} for ref, included, note in items],
+        }
+
+    def _record_version(self, tx: Transaction, report_id: str, version: int, summary: str | None = None) -> None:
+        state = self._state(tx, report_id)
+        if summary is None:
+            rows = tx.query("SELECT state FROM report_versions WHERE report_id = ? ORDER BY version DESC LIMIT 1", (report_id,))
+            try:
+                previous = json.loads(rows[0][0]) if rows else None
+            except ValueError:
+                previous = None
+            summary = describe_change(previous if isinstance(previous, dict) else None, state)
+        tx.execute(
+            "INSERT INTO report_versions (report_id, version, saved_at, summary, state) VALUES (?, ?, ?, ?, ?) "
+            "ON CONFLICT (report_id, version) DO UPDATE SET saved_at = excluded.saved_at, summary = excluded.summary, state = excluded.state",
+            (report_id, version, _now(), summary, json.dumps(state, ensure_ascii=False)),
+        )
+        tx.execute(
+            "DELETE FROM report_versions WHERE report_id = ? AND version NOT IN "
+            "(SELECT version FROM report_versions WHERE report_id = ? ORDER BY version DESC LIMIT ?)",
+            (report_id, report_id, MAX_VERSIONS),
+        )
+
+    def _log(self, tx: Transaction, report_id: str, kind: str, message: str) -> None:
+        tx.execute(
+            "INSERT INTO report_log (id, report_id, kind, text, created_at) VALUES (?, ?, ?, ?, ?)",
+            (uuid.uuid4().hex, report_id, kind, _clean(message, MAX_LOG_TEXT).replace("\n", " "), _now()),
+        )
+        tx.execute(
+            "DELETE FROM report_log WHERE report_id = ? AND id NOT IN "
+            "(SELECT id FROM report_log WHERE report_id = ? ORDER BY created_at DESC, id DESC LIMIT ?)",
+            (report_id, report_id, MAX_LOG),
+        )
+
+    def create(
+        self, user: str, *, list_name: str, works: list[Work], title: str = "", question: str = "", source_list_id: str = "",
+    ) -> Report:
         if not works:
             raise NotFoundError("A lista está vazia: adicione artigos antes de criar o relatório.")
         report_id, now = uuid.uuid4().hex, _now()
@@ -168,6 +269,9 @@ class ReportStore:
                     "ON CONFLICT (report_id, ref) DO NOTHING",
                     (report_id, work.ref, _snapshot(work), position),
                 )
+            if source_list_id:
+                tx.execute("INSERT INTO report_sources (report_id, list_id) VALUES (?, ?)", (report_id, source_list_id))
+            self._record_version(tx, report_id, 1, f"Criado a partir da lista “{list_name}”.")
         return self.get(user, report_id)
 
     def get(self, user: str, report_id: str) -> Report:
@@ -184,8 +288,16 @@ class ReportStore:
         substances = tuple(
             term for (term,) in self._db.query("SELECT term FROM report_substances WHERE report_id = ? ORDER BY position", (report_id,))
         )
+        log = tuple(
+            LogEntry(kind, message, created)
+            for kind, message, created in self._db.query(
+                "SELECT kind, text, created_at FROM report_log WHERE report_id = ? ORDER BY created_at, id", (report_id,)
+            )
+        )
+        source = self._db.query("SELECT list_id FROM report_sources WHERE report_id = ?", (report_id,))
         rid, title, question, method_note, list_name, created, updated, version = rows[0]
-        return Report(rid, title, question, method_note, list_name, created, updated, int(version), items, substances)
+        return Report(rid, title, question, method_note, list_name, created, updated, int(version), items, substances, log,
+                      str(source[0][0]) if source else "")
 
     def summaries(self, user: str) -> list[ReportSummary]:
         rows = self._db.query(
@@ -205,9 +317,10 @@ class ReportStore:
         with self._db.transaction() as tx:
             self._owned(tx, user, report_id)
             current = tx.query("SELECT title FROM reports WHERE id = ?", (report_id,))[0][0]
+            before = self._state(tx, report_id)
             tx.execute(
-                "UPDATE reports SET title = ?, question = ?, method_note = ?, updated_at = ?, version = version + 1 WHERE id = ?",
-                (clean_title or current, _clean(question, MAX_QUESTION_CHARS), _clean(method_note, MAX_METHOD_NOTE_CHARS), _now(), report_id),
+                "UPDATE reports SET title = ?, question = ?, method_note = ? WHERE id = ?",
+                (clean_title or current, _clean(question, MAX_QUESTION_CHARS), _clean(method_note, MAX_METHOD_NOTE_CHARS), report_id),
             )
             for ref, included, note in items:
                 tx.execute(
@@ -218,6 +331,9 @@ class ReportStore:
                 tx.execute("DELETE FROM report_substances WHERE report_id = ?", (report_id,))
                 for position, term in enumerate(terms):
                     tx.execute("INSERT INTO report_substances (report_id, term, position) VALUES (?, ?, ?)", (report_id, term, position))
+            if self._state(tx, report_id) != before:  # salvar sem mudar nada nao cria versao (o download tambem salva antes)
+                tx.execute("UPDATE reports SET updated_at = ?, version = version + 1 WHERE id = ?", (_now(), report_id))
+                self._record_version(tx, report_id, int(tx.query("SELECT version FROM reports WHERE id = ?", (report_id,))[0][0]))
         return self.get(user, report_id)
 
     def delete(self, user: str, report_id: str) -> None:
@@ -225,10 +341,89 @@ class ReportStore:
             self._owned(tx, user, report_id)
             tx.execute("DELETE FROM report_items WHERE report_id = ?", (report_id,))
             tx.execute("DELETE FROM report_substances WHERE report_id = ?", (report_id,))
+            tx.execute("DELETE FROM report_versions WHERE report_id = ?", (report_id,))
+            tx.execute("DELETE FROM report_sources WHERE report_id = ?", (report_id,))
+            tx.execute("DELETE FROM report_log WHERE report_id = ?", (report_id,))
             tx.execute("DELETE FROM reports WHERE id = ?", (report_id,))
+
+    # ------------------------------------------------------------------ atualizacao e versoes
+    def add_works(self, user: str, report_id: str, works: list[Work], *, origin: str) -> tuple[Report, int]:
+        """Acrescenta estudos (incluidos) que ainda nao estao no relatorio; devolve o relatorio e quantos entraram."""
+        added = 0
+        with self._db.transaction() as tx:
+            self._owned(tx, user, report_id)
+            present = {ref for (ref,) in tx.query("SELECT ref FROM report_items WHERE report_id = ?", (report_id,))}
+            position = int(tx.query("SELECT COALESCE(MAX(position), -1) FROM report_items WHERE report_id = ?", (report_id,))[0][0]) + 1
+            for work in works:
+                if work.ref in present:
+                    continue
+                if len(present) >= MAX_ITEMS:
+                    raise LimitReachedError(f"Este relatório chegou ao limite de {MAX_ITEMS} estudos.")
+                tx.execute("INSERT INTO report_items (report_id, ref, data, position, included, note) VALUES (?, ?, ?, ?, 1, '')",
+                           (report_id, work.ref, _snapshot(work), position))
+                present.add(work.ref)
+                position += 1
+                added += 1
+                self._log(tx, report_id, "adicao", f"Adicionado: {work.title} ({origin}).")
+            if added:
+                tx.execute("UPDATE reports SET updated_at = ?, version = version + 1 WHERE id = ?", (_now(), report_id))
+                self._record_version(tx, report_id, int(tx.query("SELECT version FROM reports WHERE id = ?", (report_id,))[0][0]),
+                                     f"{_plural(added, 'estudo adicionado', 'estudos adicionados')} ({origin}).")
+        return self.get(user, report_id), added
+
+    def log_search(self, user: str, report_id: str, message: str) -> None:
+        with self._db.transaction() as tx:
+            self._owned(tx, user, report_id)
+            self._log(tx, report_id, "busca", message)
+
+    def versions(self, user: str, report_id: str) -> list[VersionInfo]:
+        self.get(user, report_id)
+        rows = self._db.query(
+            "SELECT version, saved_at, summary FROM report_versions WHERE report_id = ? ORDER BY version DESC", (report_id,)
+        )
+        return [VersionInfo(int(v), saved, summary) for v, saved, summary in rows]
+
+    def restore(self, user: str, report_id: str, version: int) -> Report:
+        """Volta o estado editavel (titulo, pergunta, nota, substancias, inclusao e notas) de uma versao anterior, como nova versao.
+
+        Estudos adicionados depois daquela versao continuam no relatorio, mas ficam excluidos.
+        """
+        with self._db.transaction() as tx:
+            self._owned(tx, user, report_id)
+            rows = tx.query("SELECT state FROM report_versions WHERE report_id = ? AND version = ?", (report_id, version))
+            if not rows:
+                raise NotFoundError("Versão não encontrada.")
+            try:
+                state = json.loads(rows[0][0])
+            except ValueError:
+                raise NotFoundError("Versão não encontrada.") from None
+            tx.execute(
+                "UPDATE reports SET title = ?, question = ?, method_note = ?, updated_at = ?, version = version + 1 WHERE id = ?",
+                (state["title"], state["question"], state["method_note"], _now(), report_id),
+            )
+            saved = {item["ref"]: item for item in state["items"]}
+            for (ref,) in tx.query("SELECT ref FROM report_items WHERE report_id = ?", (report_id,)):
+                item = saved.get(ref)
+                if item is None:  # adicionado depois daquela versao: continua no relatorio, mas excluido
+                    tx.execute("UPDATE report_items SET included = 0 WHERE report_id = ? AND ref = ?", (report_id, ref))
+                else:
+                    tx.execute("UPDATE report_items SET included = ?, note = ? WHERE report_id = ? AND ref = ?",
+                               (1 if item["included"] else 0, item["note"], report_id, ref))
+            tx.execute("DELETE FROM report_substances WHERE report_id = ?", (report_id,))
+            for position, term in enumerate(state["substances"]):
+                tx.execute("INSERT INTO report_substances (report_id, term, position) VALUES (?, ?, ?)", (report_id, term, position))
+            self._record_version(tx, report_id, int(tx.query("SELECT version FROM reports WHERE id = ?", (report_id,))[0][0]),
+                                 f"Restaurada a versão {version}.")
+        return self.get(user, report_id)
 
 
 # ---------------------------------------------------------------------- calculo (puro, sem rede)
+def new_in_list(report: Report, list_works: tuple[Work, ...] | list[Work]) -> list[Work]:
+    """Artigos que entraram na lista de origem depois da criacao do relatorio (e que ainda nao estao nele)."""
+    present = {item.work.ref for item in report.items}
+    return [work for work in list_works if work.ref not in present]
+
+
 def assess_study(work: Work) -> StudyAssessment:
     sections = tuple(split_sections(work.abstract))
     findings = tuple(extract_findings(work.abstract))
@@ -269,6 +464,13 @@ def criteria_description() -> tuple[tuple[str, int, str], ...]:
     return tuple((c.name, c.weight, c.how) for c in sample.criteria)
 
 
+def _br_date(iso: str) -> str:
+    try:
+        return date.fromisoformat(iso[:10]).strftime("%d/%m/%Y")
+    except ValueError:
+        return iso[:10]
+
+
 def method_paragraphs(report: Report, today: date | None = None) -> list[str]:
     """Texto automatico do apendice de metodo: o que foi feito, com contagens e limites, sem adjetivos."""
     today = today or date.today()
@@ -281,7 +483,12 @@ def method_paragraphs(report: Report, today: date | None = None) -> list[str]:
         created = date.fromisoformat(created).strftime("%d/%m/%Y")
     return [
         f"Os estudos foram reunidos manualmente pelo autor na lista de leitura “{report.list_name}” e congelados neste relatório "
-        f"em {created}. As buscas usadas para encontrá-los não são registradas nesta versão do relatório.",
+        f"em {created}. " + (
+            "As buscas feitas a partir deste relatório estão no histórico de atualizações abaixo; a busca que levou aos estudos "
+            "da lista de origem não foi registrada."
+            if any(entry.kind == "busca" for entry in report.log)
+            else "As buscas usadas para encontrá-los não são registradas nesta versão do relatório."
+        ),
         f"Fontes dos registros: {sources_text}." if sources_text else "",
         f"Foram reunidos {total} estudos; {included} foram incluídos e {excluded} excluídos pelo autor, sem critério automático.",
         "Para cada estudo incluído, a nota de confiabilidade (0 a 100) soma os critérios abaixo, cada um com seu peso; "
@@ -362,6 +569,9 @@ def report_blocks(report: Report, today: date | None = None, brasil: BrasilSecti
     if excluded:
         blocks.append(("h2", "Estudos reunidos e excluídos pelo autor"))
         blocks += [("li", f"{item.work.title} ({item.work.year or 's.d.'})" + (f" — {item.note}" if item.note else "")) for item in excluded]
+    if report.log:
+        blocks.append(("h2", "Histórico de atualizações"))
+        blocks += [("li", f"{_br_date(entry.created_at)} — {entry.text}") for entry in report.log]
     if report.method_note:
         blocks += [("h2", "Nota do autor sobre o método"), *[("p", line) for line in report.method_note.splitlines() if line.strip()]]
     return blocks
