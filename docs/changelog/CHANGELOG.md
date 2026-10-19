@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 2026-10 — Panorama do tema na busca
+
+### Adicionado
+- Acima dos resultados da busca, o **Panorama do tema**: barras com o tipo de evidência encontrada (revisões sistemáticas e meta-análises, ensaios, observacionais, revisões narrativas, relatos e opinião, preprints, não informado), gráfico de publicações por ano, porcentagem de acesso aberto, fontes, artigos retratados e o estudo de maior nota de confiabilidade (com link). Sem IA: só conta o que o registro de cada artigo informa. Descreve os primeiros 40 resultados por relevância (a tela diz o tamanho da amostra e o total da busca). Vem de `GET /api/discover/panorama`, que aceita os mesmos filtros da busca; no celular começa recolhido.
+
 ## 2026-10 — Celular: busca compacta e menu do Laboratório
 
 ### Alterado

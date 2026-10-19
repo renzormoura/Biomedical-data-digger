@@ -630,6 +630,54 @@
   }
 
   // ------------------------------------------------------------------ Busca
+  const DESIGN_COLORS = { sistematica: "d-a", ensaio: "d-b", observacional: "d-c", revisao: "d-d", opiniao: "d-e", preprint: "d-f", desconhecido: "d-g" };
+
+  function panoramaView(info) {
+    const maxDesign = Math.max(...info.designs.map((d) => d.count), 1);
+    const maxYear = Math.max(...info.timeline.map((y) => y.count), 1);
+    const bar = (cls, fraction, axis) => {
+      const node = h("i", { class: cls });
+      node.style[axis] = `${Math.max(fraction * 100, fraction > 0 ? 4 : 0)}%`;  // via CSSOM: a CSP bloqueia style inline no HTML
+      return node;
+    };
+    const strongest = info.strongest;
+    const pct = Math.round((info.openAccess / info.sample) * 100);
+    const first = info.timeline[0];
+    const last = info.timeline[info.timeline.length - 1];
+    const root = h("details", { class: "panorama" },
+      h("summary", { class: "panorama-head" },
+        h("h3", {}, "Panorama do tema"),
+        h("span", { class: "muted" }, `Retrato dos ${info.sample} primeiros resultados por relevância${info.total > info.sample ? ` (de ${Lib.formatCount(info.total)})` : ""}`)),
+      h("div", { class: "panorama-grid" },
+        h("div", { class: "panorama-block" },
+          h("h4", {}, "Que tipo de evidência"),
+          h("ul", { class: "design-bars" }, info.designs.map((d) => h("li", {},
+            h("span", { class: "design-label" }, d.label),
+            h("span", { class: "design-track" }, bar(`design-fill ${DESIGN_COLORS[d.key] || "d-g"}`, d.count / maxDesign, "width")),
+            h("b", {}, String(d.count)))))),
+        h("div", { class: "panorama-block" },
+          h("h4", {}, "Quando foi publicado"),
+          first ? h("div", { class: "year-chart", role: "img", "aria-label": `Publicações por ano, de ${first.year} a ${last.year}` },
+            info.timeline.map((y) => h("span", { class: "year-col", title: `${y.year}: ${y.count}` }, bar("year-fill", y.count / maxYear, "height")))) : null,
+          first ? h("div", { class: "year-axis" }, h("span", {}, String(first.year)), h("span", {}, String(last.year))) : null),
+        h("div", { class: "panorama-block" },
+          h("h4", {}, "De relance"),
+          h("ul", { class: "panorama-facts" },
+            h("li", {}, h("strong", {}, `${pct}%`), " com acesso aberto"),
+            h("li", {}, h("strong", {}, String(info.sources.length)), info.sources.length === 1 ? " fonte" : " fontes",
+              h("span", { class: "muted" }, ` (${info.sources.slice(0, 3).map((s) => s.name).join(", ")})`)),
+            info.retracted ? h("li", { class: "danger" }, h("strong", {}, String(info.retracted)), info.retracted === 1 ? " artigo retratado" : " artigos retratados") : null))),
+      strongest ? h("a", { class: "panorama-best", href: articleHref(strongest) },
+        h("span", { class: "best-score" }, h("strong", {}, String(Math.round(strongest.score))), h("small", {}, "/100")),
+        h("span", { class: "best-text" },
+          h("small", {}, "Maior nota de confiabilidade na amostra"),
+          h("b", {}, strongest.title),
+          h("small", { class: "muted" }, [strongest.design, strongest.journal, strongest.year].filter(Boolean).join(" · ")))) : null,
+      h("p", { class: "muted panorama-note" }, "Conta só a amostra mostrada, não a literatura inteira. A nota mede sinais do registro e do resumo; veja os limites na página do artigo."));
+    root.open = !window.matchMedia("(max-width: 560px)").matches;  // no celular comeca fechado, para a lista aparecer logo
+    return root;
+  }
+
   async function renderSearch(params) {
     setTitle("Busca");
     mount($app, h("h1", {}, "Busca"), loading("Preparando a busca…"));
@@ -669,9 +717,20 @@
     };
 
     let controller;
+    const panoramaBox = h("div", { class: "panorama-slot" });
+    const loadPanorama = async (signal) => {
+      const params = Lib.apiParamsFromSearchState(st, PAGE_SIZE);
+      params.delete("page");
+      params.delete("per_page");
+      try {
+        const info = await api(`/api/discover/panorama?${params}`, { signal });
+        if (info.sample >= 5) mount(panoramaBox, panoramaView(info));
+      } catch (error) { /* o panorama e um extra: sem ele a lista segue normal */ }
+    };
     let run = async () => {
       if (controller) controller.abort();
       controller = new AbortController();
+      mount(panoramaBox);
       mount(results, loading("Buscando…"));
       try {
         const data = await api(`/api/discover/search?${Lib.apiParamsFromSearchState(st, PAGE_SIZE)}`, { signal: controller.signal });
@@ -681,6 +740,7 @@
               h("span", { class: "muted" }, ` · ${activeSource().name}`)),
             h("label", { class: "sort-inline" }, h("span", {}, "Ordenar"), sort)),
           notesBlock(data.notes || []),
+          panoramaBox,
           data.works.length
             ? h("ol", { class: "results" }, data.works.map((work) => h("li", { class: "result" },
               h("h3", {}, h("a", { href: articleHref(work) }, highlighted(work.title, st.q))),
@@ -694,6 +754,7 @@
             Lib.pageWindow(data.page, data.pages).map((p) => (p === "…" ? h("span", { class: "muted" }, "…")
               : h("button", { type: "button", class: `btn btn-secondary btn-sm${p === data.page ? " current" : ""}`, "aria-current": p === data.page ? "page" : null, onclick: () => goPage(p) }, p))),
             h("button", { type: "button", class: "btn btn-secondary btn-sm", disabled: data.page >= data.pages, onclick: () => goPage(data.page + 1) }, "Próxima")) : null);
+        if (st.page <= 1 && data.works.length) loadPanorama(controller.signal);
       } catch (error) {
         if (error.name === "AbortError") return;
         mount(results, errorBox(error.message));

@@ -19,6 +19,7 @@ import downloads
 import markdown_lite
 import reliability
 import report_brasil
+import search_overview
 from alerts import Alert, AlertService, CheckResult, work_key
 from brasil import anvisa, conitec, consulta, rename
 from catalog import SearchQuery, Work
@@ -47,6 +48,7 @@ from reports import (
     report_blocks,
 )
 
+PANORAMA_PAGE = 20
 SNIPPET_CHARS = 300
 LANGUAGES = [("", "Todos"), ("pt", "Português"), ("en", "Inglês"), ("es", "Espanhol")]
 SORTS = [("relevance", "Relevância"), ("recent", "Mais recentes"), ("cited", "Mais citados")]
@@ -362,6 +364,34 @@ def register_browse_routes(
             "total": result.total, "page": result.page, "pages": result.pages, "perPage": result.per_page,
             "source": result.source, "notes": list(result.notes),
         }
+
+    @app.get("/api/discover/panorama")
+    def search_panorama(
+        request: Request,
+        q: Annotated[str, Query(max_length=300)] = "",
+        yf: Annotated[int | None, Query(ge=1800, le=2100)] = None,
+        yt: Annotated[int | None, Query(ge=1800, le=2100)] = None,
+        types: Annotated[str, Query(max_length=400)] = "",
+        oa: bool = False,
+        lang: Annotated[str, Query(max_length=8)] = "",
+        sort: Annotated[str, Query(max_length=20)] = "relevance",
+        source: Annotated[str | None, Query(max_length=40)] = None,
+    ) -> dict[str, Any]:
+        """Retrato visual dos primeiros resultados (ate 40) da mesma busca: tipos de estudo, anos, acesso aberto e o estudo de maior nota."""
+        works: list[Work] = []
+        total = 0
+        for page in (1, 2):
+            query = SearchQuery(
+                q=q, year_from=yf, year_to=yt, study_types=tuple(t.strip() for t in types.split(",") if t.strip()),
+                open_access=oa, language=lang, sort=sort, page=page, per_page=PANORAMA_PAGE,
+            )
+            result = discovery.search(query, source=source or discovery.search_default, client_id=identity(request))
+            total = result.total
+            works.extend(result.works)
+            if page >= result.pages:
+                break
+        unique = list({(w.doi or w.ref): w for w in works}.values())
+        return search_overview.build(unique, total)
 
     @app.get("/api/discover/work")
     def work(

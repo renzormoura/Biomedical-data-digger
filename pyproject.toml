@@ -81,6 +81,7 @@ files = [
     "biomedical-article-summariser/feed.py",
     "biomedical-article-summariser/feed_sources.py",
     "biomedical-article-summariser/account_routes.py",
+    "biomedical-article-summariser/search_overview.py",
     "biomedical-article-summariser/profiles.py",
     "biomedical-article-summariser/report_brasil.py",
     "biomedical-article-summariser/interests.py",
