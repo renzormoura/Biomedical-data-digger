@@ -53,7 +53,7 @@ def build(works: Sequence[Work], total: int) -> dict[str, Any]:
     timeline = [{"year": year, "count": years.get(year, 0)} for year in range(max(min(years, default=top_year), top_year - MAX_YEARS + 1), top_year + 1)] if years else []
 
     sources = Counter(work.source or "Outras" for work in works)
-    scored = [(work, _score(work)) for work in works if not work.retracted and work.abstract]
+    scored = [(work, rating) for work in works if not work.retracted and work.abstract for rating in [_score(work)] if rating.score is not None]
     best_work, best = max(scored, key=lambda pair: (pair[1].score, pair[0].cited_by or 0), default=(None, None))
     strongest = None
     if best_work is not None and best is not None:

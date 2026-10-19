@@ -48,3 +48,4 @@ def test_panorama_route_uses_the_same_filters_and_dedupes(env):  # noqa: F811
     assert body["sample"] >= 1 and body["total"] >= 1
     assert env.catalog.search_calls[-1].open_access is True
     assert {"designs", "timeline", "openAccess", "sources", "strongest"} <= set(body)
+

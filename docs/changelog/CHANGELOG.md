@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## 2026-10 — Documentação profissional completa
+
+### Adicionado
+- Índice da documentação (`docs/README.md`), visão geral do produto, guia do usuário e glossário.
+- Documentos novos de funcionalidades: nota de confiabilidade, página do artigo, biblioteca e listas, panorama do tema, Saúde no Brasil e conta e sessões. A busca e o Laboratório de IA foram reescritos (descreviam o produto antigo).
+- Arquitetura: visão geral com diagramas, catálogo de módulos, modelo de dados, front-end, segurança e integrações externas.
+- Referência da API (todas as rotas, acesso, corpo e erros).
+- Operação: implantação, configuração (variáveis), rotinas agendadas, atualização dos dados do Brasil, runbook e publicação da documentação (código privado, documentação acessível).
+- Desenvolvimento: guia (como fazer mudanças comuns, convenções e armadilhas) e estratégia de testes.
+- Jurídico: licença e confidencialidade, licenças e termos das fontes (pendências para o uso comercial) e privacidade e LGPD (rascunho técnico).
+- `README.md` na raiz, `LICENSE` (todos os direitos reservados, titular a preencher) e `SECURITY.md`.
+
+### Alterado
+- Reescritos `PROJECT-CONTEXT.md`, `HANDOFF.md`, `roadmap.md`, `setup.md` e o `README.md` da aplicação, que descreviam o produto anterior.
+
+### Corrigido
+- O panorama do tema ignora, por precaução, artigos cuja nota é indeterminada ao escolher o "estudo de maior nota".
+
 ## 2026-10 — Panorama do tema mais sóbrio
 
 ### Alterado

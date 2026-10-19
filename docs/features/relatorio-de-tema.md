@@ -6,7 +6,7 @@ Entregar algo pronto a partir de uma lista de leitura: um documento com estudos 
 Plano completo e fases seguintes: `docs/roadmap/plano-relatorio-de-tema.md`.
 
 ## Status
-Fases 1 (relatório mínimo), 2 (seção "Situação no Brasil") e 3 (versões e atualização) implementadas. Faltam: seletor de perfil (fase 4), validação com usuários (fase 5) e camada comercial (fase 6).
+Fases 1 (relatório mínimo), 2 (seção "Situação no Brasil"), 3 (versões e atualização) e 4 (seletor de perfil, ver [Perfil](perfil.md)) implementadas. Faltam: validação com usuários (fase 5, roteiro pronto) e camada comercial (fase 6).
 
 ## Como usar
 1. Na **Biblioteca**, abra uma lista e clique em **Criar relatório**. Os estudos da lista são congelados naquele momento.

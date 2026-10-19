@@ -1,68 +1,48 @@
-# HANDOFF — Estado atual para continuação
+# Passagem de bastão (HANDOFF)
 
-## Data
-Setembro 2026
+Estado do projeto para quem vai continuar. Atualizado em **19/10/2026**. O panorama completo está em [PROJECT-CONTEXT](../PROJECT-CONTEXT.md) e o plano em [Roadmap](../roadmap/roadmap.md).
 
-## Estado geral
-O projeto está **funcional e em produção** no Render. Não há tarefas interrompidas no momento.
+## Resumo do estado
+- **Em produção** no Render (`https://biomedical-data-digger.onrender.com`). Branch única: `main` (cada push gera deploy).
+- Produto: plataforma de pesquisa científica geral + pacote opcional Saúde no Brasil + Laboratório de IA opcional.
+- Qualidade: 1.471 testes passando, ruff e mypy limpos, testes de JS; cobertura ≈96%.
+- Nenhuma tarefa interrompida.
 
-## URL de produção
-https://biomedical-data-digger.onrender.com
+## O que está pronto mas **ainda não ligado/validado**
+| Item | Situação | O que falta |
+|---|---|---|
+| Rotina agendada (alertas, retratações, feed) | Fluxo e rota prontos | Definir `ALERTS_CRON_TOKEN` no Render e os segredos `APP_URL` e `ALERTS_CRON_TOKEN` no GitHub |
+| PostgreSQL | Contas validadas | Validar todas as tabelas novas (biblioteca, relatórios, alertas, notificações, feed, perfil) em banco real |
+| Dados do Brasil | Instantâneos de 17/10/2026 | Revisão por farmacêutico/médico; resolver a licença da Rename |
+| Feed | 51 fontes verificadas em 18/10/2026 | Revisar os termos de cada fonte |
+| Validação com usuários | Roteiro pronto | Executar |
 
-## Repositório
-https://github.com/renzormoura/Biomedical-data-digger
+## Onde está cada coisa
+- Código: `biomedical-article-summariser/` ([catálogo de módulos](../arquitetura/modulos.md)).
+- Testes: `tests/` (`tests/js/` para JavaScript); avaliação com modelo real: `evals/`.
+- Dados do Brasil: `biomedical-article-summariser/dados_brasil/` + `scripts/atualizar_*.py`.
+- Infra: `render.yaml`, `.github/workflows/ci.yml`, `.github/workflows/alertas.yml`.
+- Documentação: `docs/` ([índice](../README.md)).
 
-## Último trabalho realizado
-- Busca por palavra-chave agregada em Europe PMC, OpenAlex, Semantic Scholar, Crossref e arXiv
-- Sistema universal de busca implementado: PMID, PMCID, DOI, arXiv, OpenAlex, Semantic Scholar e URLs
-- Filtros de pesquisa ampliados para áreas médicas e gerais
-- Índice de Relevância Bibliográfica documentado, normalizado por fonte e coberto por testes
-- 11 novos botões em 6 seções (accordions)
-- Botão "Confiabilidade do Artigo" para análise crítica baseada no conteúdo do artigo
-- Redesign visual completo com tema escuro/claro
-- Documentação atualizada
+## Como retomar o trabalho
+1. [Preparar o ambiente](setup.md) e rodar a suíte (`pytest`, `ruff check`, `mypy`).
+2. Ler a [visão geral da arquitetura](../arquitetura/visao-geral.md) e o [guia de desenvolvimento](../desenvolvimento/guia-de-desenvolvimento.md).
+3. Escolher o próximo item em [Roadmap > Próximo](../roadmap/roadmap.md#próximo-pré-lançamento-comercial).
 
-## Próximos passos sugeridos (por prioridade)
-1. **Testar novas fontes em produção** — arXiv, DOI via Semantic Scholar/CrossRef, OpenAlex
-2. **Export PDF/Word** — download do resultado formatado
-3. **Texto completo** — ativar `fetch_full_text()` para PMCIDs quando decidir a UX
-4. **Avaliação metodológica estruturada** — manter separada do índice bibliográfico
+## Convenções do trabalho
+- **Commits atômicos** com mensagem no estilo `tipo(escopo): descrição` (por exemplo, `feat(feed): …`, `fix(celular): …`, `perf(busca): …`) e o trailer de coautoria quando houver.
+- **Atualizar o [Changelog](../changelog/CHANGELOG.md)** e a documentação da funcionalidade a cada mudança de comportamento.
+- **Push só com confirmação** do responsável pelo produto.
+- Não commitar: `.env`, bancos locais, `.claude/`, `.code-review-graph/`, `tools/`, `biomedical-article_summarizer/` e PDFs de apresentação (ver `git status` antes de `git add`; **sempre adicione arquivos por caminho explícito**).
+- Testes não chamam a rede nem o Groq: dependências externas são simuladas.
 
-## Arquivos principais
-| Arquivo | Descrição |
-|---|---|
-| `biomedical-article-summariser/biomedical_data_digger.py` | Ponto de entrada (composição + Uvicorn); rotas em `web.py` |
-| `biomedical-article-summariser/article_services.py` | Busca, normalização e cache de artigos |
-| `biomedical-article-summariser/llm_service.py` | Integração Groq/Ollama |
-| `biomedical-article-summariser/prompt_builders.py` | Prompt base e análises especializadas |
-| `biomedical-article-summariser/requirements.txt` | Dependências pinadas |
-| `biomedical-article-summariser/runtime.txt` | Força Python 3.11.9 no Render |
-| `biomedical-article-summariser/.env` | Secrets locais (NÃO commitado) |
-| `docs/PROJECT-CONTEXT.md` | Contexto completo do projeto |
-| `docs/features/busca-artigos.md` | Fontes, filtros, normalização e fórmula do índice |
-| `docs/features/citacoes-exportacao.md` | Citações e exportação para Zotero, Mendeley e EndNote |
-| `docs/roadmap/roteiro-validacao-usuarios.md` | Roteiro da fase 5: hipóteses, tarefas, fichas e critérios de decisão |
-| `docs/features/feed.md` | Feed de novidades acadêmicas: fontes, atualização e manutenção |
-| `docs/features/perfil.md` | Perfil de uso e pacote Saúde no Brasil |
-| `docs/features/relatorio-de-tema.md` | Relatório de tema (fase 1 do plano), rotas e limites |
-| `docs/features/notificacoes.md` | Interesses, sininho, verificação de artigos novos e agendamento |
+## Cuidados
+- `runtime.txt` e `PYTHON_VERSION=3.11.9`: remover quebra o build no Render.
+- Prompts clínicos (`prompt_builders.py`, `prompt_specs.py`): usados em contexto de pronto-socorro; não alterar sem validação clínica.
+- Streaming de IA foi implementado e revertido ([ADR-003](../adrs/ADR-003-streaming-revertido.md)): não reimplementar sem plano maior.
+- Os caches e limitadores são por processo: rodar **uma** instância.
+- Depois de mudar JS/CSS localmente, reiniciar o servidor.
+- A política de segurança de conteúdo bloqueia `style` e `<script>` inline: use classes e CSSOM.
 
-## Arquivos que NÃO devem ser modificados sem cuidado
-- `runtime.txt` — remover ou alterar quebra o build no Render
-- `.env` — nunca commitar
-- Prompts clínicos em `prompt_builders.py` — usados em contexto real de PS
-- `article_services.py` e `llm_service.py` — contratos usados pela interface e pelo fluxo de sumarização
-
-## Próximos passos sugeridos (por prioridade)
-1. **Testar novas fontes em produção** — arXiv, DOI via Semantic Scholar/CrossRef, OpenAlex
-2. **Decidir UX para texto completo** — `fetch_full_text()` já está implementada no código; falta definir como expor ao usuário sem sobrecarregar a interface
-3. **Export PDF/Word** — gerar documento formatado com o resultado
-4. **Avaliação metodológica estruturada** — manter separada do índice bibliográfico
-
-## Observações importantes
-- Streaming foi implementado e revertido (ver ADR-003) — NÃO reimplementar sem upgrade do plano Render
-- Toggle Rápido/Completo foi implementado e revertido a pedido do usuário — `fetch_full_text()` permanece no código para uso futuro
-- A função `generate_response_stream()` existe no código mas não é usada — pode ser ativada futuramente
-- O Render hiberna após 15 min sem uso — normal no free tier
-- O índice bibliográfico é uma heurística de ordenação, não um julgamento científico do artigo
-- Modelos disponíveis na conta Groq atual: gpt-oss-20b (padrão), gpt-oss-120b, qwen3.6-27b, qwen3.8-27b
+## Histórico
+Ver o [Changelog](../changelog/CHANGELOG.md) e os [ADRs](../adrs/).

@@ -1,0 +1,30 @@
+Biomedical Data Digger
+Copyright (c) 2026 [TITULAR DO PROJETO — preencher com o nome completo ou a razão social]
+Todos os direitos reservados.
+
+Este software, incluindo o código-fonte, os dados curados, os textos, a
+interface e a documentação, é propriedade do titular acima e é confidencial.
+
+Nenhuma licença é concedida. É proibido, sem autorização prévia, expressa e
+por escrito do titular:
+
+  1. copiar, reproduzir, distribuir, publicar ou tornar acessível a terceiros
+     o código-fonte ou qualquer parte deste repositório;
+  2. modificar, criar obras derivadas, descompilar ou aplicar engenharia
+     reversa;
+  3. usar o software, total ou parcialmente, para fornecer produto ou serviço
+     a terceiros, comercial ou não;
+  4. remover avisos de propriedade e de confidencialidade.
+
+O acesso a este repositório é concedido apenas a pessoas expressamente
+autorizadas pelo titular, para o fim específico indicado por ele, e implica o
+dever de sigilo. A documentação em docs/ somente pode ser divulgada nos termos
+de docs/operacao/publicacao-da-documentacao.md.
+
+Dados de terceiros descritos ou incluídos (ANVISA, Conitec, Rename, fontes de
+artigos e feeds) pertencem aos seus respectivos titulares e seguem as licenças
+e termos de cada um (ver docs/legal/licencas-e-termos.md); esta notice não
+concede direitos sobre eles.
+
+O software é fornecido "no estado em que se encontra", sem garantias de
+qualquer natureza.
