@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 2026-10 — Busca e feed mais rápidos
+
+### Alterado
+- **Busca em todas as fontes:** a página não espera mais a fonte mais lenta. Com 3 fontes respondidas, as demais ganham só mais 1,5 s (limite total de 8 s, antes 14 s); quem atrasar fica de fora com o aviso de sempre e entra no cache para a próxima busca. Medido localmente: de cerca de 14 s para 1 a 3 s (a OpenAIRE levou 23 s numa consulta e o arXiv 4,5 s).
+- **Feed:** a lista de candidatos fica 30 s em memória (limpa a cada atualização), poupando a leitura de até 800 linhas do banco a cada visita, e a atualização das fontes usa 8 conexões em vez de 4.
+
 ## 2026-10 — Início mais simples
 
 ### Alterado

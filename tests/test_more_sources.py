@@ -354,6 +354,22 @@ def test_slow_source_is_left_out_with_a_note_but_warms_the_cache(monkeypatch):
     assert slow.per_pages == [5]  # a segunda leitura veio do cache, sem nova chamada
 
 
+def test_slowest_source_does_not_hold_the_page_once_enough_sources_answered(monkeypatch):
+    import time
+
+    import discovery
+    monkeypatch.setattr(discovery, "ALL_GRACE", 0.2)
+    monkeypatch.setattr(discovery, "READY_SOURCES", 2)
+    fast = [Recorder(f"f{i}", f"Rapida {i} (x)", works=[Work(ref=f"f{i}", title=f"R{i}", doi=f"10.1/f{i}")]) for i in range(2)]
+    slow = Recorder("s", "Lenta (x)", works=[Work(ref="s", title="Lenta", doi="10.1/s")], delay=3.0)
+    svc = DiscoveryService([*fast, slow], SlidingWindowLimiter(100, 60), fallback=None)
+    started = time.monotonic()
+    result = svc.search(SearchQuery(q="x"), source="all")
+    assert time.monotonic() - started < 1.5  # nao esperou os 3 s da fonte lenta
+    assert {w.ref for w in result.works} == {"f0", "f1"}
+    assert any("Lenta demorou demais" in n for n in result.notes)
+
+
 def test_search_default_is_all_sources_when_there_is_more_than_one():
     one = DiscoveryService([Stub("europepmc", "Europe PMC (x)")], SlidingWindowLimiter(100, 60), fallback=None)
     assert one.search_default == "europepmc" and one.sources()[0]["default"] is True

@@ -7,8 +7,9 @@ Busca e obras ficam em cache; cada identidade tem limite por minuto.
 from __future__ import annotations
 
 import re
+import time
 from collections.abc import Callable, Mapping, Sequence
-from concurrent.futures import ThreadPoolExecutor, wait
+from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
 from dataclasses import dataclass, replace
 
 from loguru import logger
@@ -41,7 +42,9 @@ _GENERIC_KEYWORDS = frozenset([
 ])
 ALL_SOURCES = "all"
 ALL_SOURCES_NAME = "Todas as fontes"
-ALL_DEADLINE = 14.0  # segundos; fonte mais lenta fica de fora desta busca (e entra no cache para a proxima)
+ALL_DEADLINE = 8.0  # segundos; fonte mais lenta fica de fora desta busca (e entra no cache para a proxima)
+READY_SOURCES = 3  # com tantas fontes respondidas, as que faltam ganham so mais ALL_GRACE segundos
+ALL_GRACE = 1.5
 MIN_PER_SOURCE = 2
 _NON_WORD = re.compile(r"\W+")
 Fallback = Callable[[str], Work | None]
@@ -241,7 +244,7 @@ class DiscoveryService:
 
         pool = ThreadPoolExecutor(max_workers=len(runnable))
         futures = [(catalog, pool.submit(run, item)) for item in runnable for catalog in (item[0],)]
-        wait([f for _, f in futures], timeout=ALL_DEADLINE)
+        self._wait_for_sources([f for _, f in futures])
         pool.shutdown(wait=False, cancel_futures=True)  # quem atrasou termina sozinho e deixa o resultado no cache
         results: list[SearchResult] = []
         for catalog, future in futures:
@@ -260,6 +263,24 @@ class DiscoveryService:
         )
         self._searches.set(key, merged)
         return merged
+
+    @staticmethod
+    def _wait_for_sources(futures: list[Future[SearchResult | None]]) -> None:
+        """Espera as fontes, mas sem deixar a mais lenta segurar a pagina: quando ja ha respostas suficientes, da so um curto prazo as demais."""
+        start = time.monotonic()
+        ready_at: float | None = None
+        enough = min(READY_SOURCES, len(futures))
+        pending = set(futures)
+        while pending:
+            now = time.monotonic()
+            limit = start + ALL_DEADLINE
+            if ready_at is not None:
+                limit = min(limit, ready_at + ALL_GRACE)
+            if now >= limit:
+                return
+            _, pending = wait(pending, timeout=limit - now, return_when=FIRST_COMPLETED)
+            if ready_at is None and len(futures) - len(pending) >= enough:
+                ready_at = time.monotonic()
 
     # -- obra -----------------------------------------------------------------
     def _find(self, ref: str, source: str | None) -> Work | None:

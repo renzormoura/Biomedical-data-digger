@@ -12,6 +12,7 @@ import hashlib
 import json
 import re
 import threading
+import time
 from collections.abc import Callable, Sequence
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
@@ -35,11 +36,12 @@ SNIPPET_CHARS = 300
 TITLE_CHARS = 300
 MAX_FEED_BYTES = 3_000_000
 HTTP_TIMEOUT = 15
-WORKERS = 4
+WORKERS = 8
 ON_DEMAND_BUDGET = 12  # fontes buscadas quando alguem abre o feed e os dados estao velhos
 PAGE_SIZE = 20
 PER_SOURCE_VIEW = 12  # no maximo isto de cada fonte na tela, para uma fonte que publica muito nao tomar o feed
 MAX_CANDIDATES = 800
+RECENT_TTL = 30.0  # segundos que a lista de candidatos fica em memoria
 USER_AGENT = "BiomedicalDataDigger/1.0 (agregador de manchetes academicas; +https://github.com/renzormoura/Biomedical-data-digger)"
 FUTURE_TOLERANCE = timedelta(days=2)
 
@@ -224,6 +226,7 @@ def item_id(source_id: str, url: str) -> str:
 class FeedStore:
     def __init__(self, database: Database | None = None) -> None:
         self._db = database or Database()
+        self._recent_cache: tuple[float, int, list[FeedItem]] | None = None  # (quando, limite, itens): evita reler 800 linhas a cada visita
 
     def initialize(self) -> None:
         with self._db.transaction() as tx:
@@ -231,6 +234,7 @@ class FeedStore:
                 tx.execute(statement)
 
     def upsert(self, items: Sequence[FeedItem], fetched_at: str) -> None:
+        self._recent_cache = None
         with self._db.transaction() as tx:
             for item in items:
                 tx.execute(
@@ -243,9 +247,18 @@ class FeedStore:
                 )
 
     def prune(self, cutoff: datetime) -> int:
+        self._recent_cache = None
         return self._db.execute("DELETE FROM feed_items WHERE published_at < ?", (_iso(cutoff),))
 
     def recent(self, limit: int = MAX_CANDIDATES) -> list[FeedItem]:
+        cached = self._recent_cache
+        if cached is not None and cached[1] == limit and time.monotonic() - cached[0] < RECENT_TTL:
+            return cached[2]
+        items = self._load_recent(limit)
+        self._recent_cache = (time.monotonic(), limit, items)
+        return items
+
+    def _load_recent(self, limit: int) -> list[FeedItem]:
         rows = self._db.query(
             "SELECT id, source_id, url, title, snippet, published_at, date_known, topics, areas FROM feed_items "
             "ORDER BY published_at DESC, id LIMIT ?", (limit,),
