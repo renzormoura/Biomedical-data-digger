@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## 2026-10 — Notificações: retratação, mudança regulatória e relatórios
+
+### Adicionado
+- O sininho agora avisa de tudo o que é de prioridade alta ou média: **artigo retratado** na sua biblioteca, listas ou relatórios (alta), **mudança regulatória** de substância confirmada em relatório (alta), **novidades dos relatórios** com artigos novos na lista de origem (média) e os artigos novos dos interesses (média). Cada aviso traz selo do tipo e link direto; os importantes não lidos ficam no topo.
+- **Retratação:** cada artigo guardado é reconferido na fonte uma vez por semana (resultado compartilhado entre contas); detecta onde a fonte informa (Europe PMC, PubMed e OpenAlex). Correções (errata) não são detectadas.
+- **Regulatório:** compara o estado da substância (Conitec, Rename, ANVISA) com a verificação anterior; a primeira só memoriza.
+- Seção **Perfil > Notificações**, para ligar e desligar cada tipo (tudo ligado por padrão). Por enquanto só o sininho; e-mail e outros canais ficam para depois.
+- Módulo `notifications.py`; rota `GET/PUT /api/notifications/prefs`; `GET /api/alerts` passou a devolver a caixa unificada (`kind`, `priority`, `title`, `body`, `href`); a rota agendada também roda o vigia. Exportação de dados e exclusão de conta incluem os avisos.
+
+### Alterado
+- A verificação do sininho agora roda para todas as contas logadas, não só para quem tem interesses. O painel fecha ao trocar de tela.
+
+### Limites
+- Retratação só nas fontes que informam; uma biblioteca grande leva alguns dias para ser conferida inteira. Dados regulatórios mudam só quando um instantâneo novo é publicado e seguem sem revisão de especialista.
 ## 2026-10 — Aba Perfil
 
 ### Adicionado

@@ -20,6 +20,7 @@ from account_store import AccountStore, AccountStoreError, InvalidCredentialsFor
 from alerts import AlertStore
 from domain import AuthRequiredError, DiggerError
 from library_store import LibraryStore
+from notifications import NotificationStore
 from profiles import ProfileStore
 from reports import ReportStore
 
@@ -44,6 +45,7 @@ def register_account_routes(
     reports: ReportStore | None,
     alerts: AlertStore | None,
     profiles: ProfileStore | None,
+    notifications: NotificationStore | None = None,
 ) -> None:
     def require_user(request: Request) -> str:
         user = current_user(request)
@@ -139,6 +141,12 @@ def register_account_routes(
             payload["alerts"] = [
                 {"topic": a.topic, "createdAt": a.created_at, "read": a.read, "work": a.work.to_dict()} for a in alerts.alerts(user, limit=200)
             ]
+        if notifications is not None:
+            payload["notifications"] = [
+                {"kind": n.kind, "title": n.title, "body": n.body, "link": n.link, "createdAt": n.created_at, "read": n.read}
+                for n in notifications.notifications(user, limit=200)
+            ]
+            payload["notificationPrefs"] = notifications.prefs(user)
         return Response(
             json.dumps(payload, ensure_ascii=False, indent=2), media_type="application/json; charset=utf-8",
             headers={"Content-Disposition": 'attachment; filename="meus-dados.json"', "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"},
@@ -157,6 +165,8 @@ def register_account_routes(
             alerts.delete_user_data(user)
         if profiles is not None:
             profiles.delete(user)
+        if notifications is not None:
+            notifications.delete_user_data(user)
         try:
             account_store_factory().delete_user(user)
         except AccountStoreError as error:

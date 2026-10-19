@@ -146,24 +146,25 @@
   async function alertAction(path, options) {
     try { takeBox(await api(path, options)); } catch (error) { if (error.status !== 401) toast(error.message); }
   }
+  const KIND_BADGES = { retratacao: "Retratado", regulatorio: "Regulatório", "relatorio-lista": "Relatório" };
   function paintPanel() {
-    const rows = bell.items.map((item) => h("li", { class: `alert-row${item.read ? "" : " is-unread"}` },
+    const rows = bell.items.map((item) => h("li", { class: `alert-row${item.read ? "" : " is-unread"}${item.priority >= 2 ? " is-important" : ""}` },
+      KIND_BADGES[item.kind] ? h("span", { class: "alert-kind" }, KIND_BADGES[item.kind]) : null,
       h("a", {
-        href: articleHref(item.work),
+        href: item.href,
         onclick: () => { closePanel(); if (!item.read) alertAction("/api/alerts/read", { method: "POST", body: { id: item.id } }); },
-      }, item.work.title),
-      h("small", { class: "muted" }, [metaLine(item.work), item.topic].filter(Boolean).join(" · ")),
-      h("button", { type: "button", class: "alert-dismiss", "aria-label": `Dispensar aviso: ${item.work.title}`, onclick: () => alertAction(`/api/alerts?id=${encodeURIComponent(item.id)}`, { method: "DELETE" }) }, icon("x"))));
-    const empty = bell.hasInterests
-      ? "Nenhum artigo novo por enquanto. Procuramos quando você abre o site; os artigos que já existiam hoje não contam como novos."
-      : "Escolha as áreas, os subtemas e os idiomas que você quer acompanhar, e avisamos quando sair um artigo novo.";
+      }, item.title),
+      h("small", { class: "muted alert-body" }, item.work ? [metaLine(item.work), item.topic].filter(Boolean).join(" · ") : item.body),
+      h("button", { type: "button", class: "alert-dismiss", "aria-label": `Dispensar aviso: ${item.title}`, onclick: () => alertAction(`/api/alerts?id=${encodeURIComponent(item.id)}`, { method: "DELETE" }) }, icon("x"))));
     mount(alertsPanel,
-      h("div", { class: "alerts-head" }, h("strong", {}, "Novidades dos seus interesses"),
-        bell.unread ? h("button", { type: "button", class: "btn btn-ghost btn-sm", onclick: () => alertAction("/api/alerts/read", { method: "POST", body: {} }) }, "Marcar como lidas") : null),
-      rows.length ? h("ul", { class: "plain-list alert-list" }, rows) : h("p", { class: "muted alerts-empty" }, empty),
+      h("div", { class: "alerts-head" }, h("strong", {}, "Avisos"),
+        bell.unread ? h("button", { type: "button", class: "btn btn-ghost btn-sm", onclick: () => alertAction("/api/alerts/read", { method: "POST", body: {} }) }, "Marcar como lidos") : null),
+      rows.length ? h("ul", { class: "plain-list alert-list" }, rows)
+        : h("p", { class: "muted alerts-empty" }, "Nenhum aviso por enquanto. Avisamos de artigos retratados que você guarda, de mudanças regulatórias nas substâncias dos seus relatórios, de novidades nas listas dos relatórios e de artigos novos nos seus interesses."),
       h("div", { class: "alerts-foot" },
-        h("a", { class: "btn btn-secondary btn-sm", href: "#/perfil/interesses", onclick: closePanel }, bell.hasInterests ? "Gerenciar interesses" : "Escolher interesses"),
-        bell.hasInterests ? h("button", { type: "button", class: "btn btn-ghost btn-sm", onclick: () => runCheck(true) }, "Verificar agora") : null));
+        h("a", { class: "btn btn-secondary btn-sm", href: "#/perfil/notificacoes", onclick: closePanel }, "Notificações"),
+        h("a", { class: "btn btn-ghost btn-sm", href: "#/perfil/interesses", onclick: closePanel }, bell.hasInterests ? "Interesses" : "Escolher interesses"),
+        h("button", { type: "button", class: "btn btn-ghost btn-sm", onclick: () => runCheck(true) }, "Verificar agora")));
   }
   function openPanel() { paintPanel(); alertsPanel.hidden = false; bellButton.setAttribute("aria-expanded", "true"); }
   function closePanel() { alertsPanel.hidden = true; bellButton.setAttribute("aria-expanded", "false"); }
@@ -178,8 +179,8 @@
     try {
       const result = await api("/api/alerts/check", { method: "POST", body: { force } });
       takeBox(result);
-      if (result.new > 0) toast(result.new === 1 ? "1 artigo novo nos seus interesses." : `${result.new} artigos novos nos seus interesses.`);
-      else if (force && result.ran) toast(result.baseline ? "Pronto: guardamos os artigos de hoje. Você será avisado dos próximos." : "Nenhum artigo novo por enquanto.");
+      if (result.new > 0) toast(result.new === 1 ? "1 aviso novo no sininho." : `${result.new} avisos novos no sininho.`);
+      else if (force && result.ran) toast(result.baseline ? "Pronto: guardamos os artigos de hoje. Você será avisado dos próximos." : "Nenhum aviso novo por enquanto.");
       else if (force && result.reason === "intervalo") toast("Você verificou há pouco. Tente novamente em alguns minutos.");
       else if (force && result.reason === "fontes") toast("As fontes não responderam agora. Tente mais tarde.");
     } catch (error) {
@@ -196,10 +197,8 @@
       bell.hasInterests = prefs.topics.length > 0 || prefs.terms.length > 0;
       takeBox(box);
     } catch { return; }
-    if (bell.hasInterests) {
-      runCheck(false);
-      bell.timer = setInterval(() => { if (!document.hidden) runCheck(false); }, CHECK_EVERY_MS);
-    }
+    runCheck(false);
+    bell.timer = setInterval(() => { if (!document.hidden) runCheck(false); }, CHECK_EVERY_MS);
   }
   userHook = () => { syncBell(); syncProfile(); };
   syncBell();
@@ -1332,7 +1331,7 @@
   }
 
   // ------------------------------------------------------------------ aba Perfil (visão geral, perfil de uso, interesses, conta e dados)
-  const PROFILE_SECTIONS = [["", "Visão geral"], ["uso", "Perfil de uso"], ["interesses", "Interesses e alertas"], ["conta", "Conta e dados"]];
+  const PROFILE_SECTIONS = [["", "Visão geral"], ["uso", "Perfil de uso"], ["interesses", "Interesses e alertas"], ["notificacoes", "Notificações"], ["conta", "Conta e dados"]];
 
   function profileTabs(active) {
     return h("nav", { class: "profile-tabs", "aria-label": "Seções do perfil" }, PROFILE_SECTIONS.map(([key, label]) =>
@@ -1368,6 +1367,33 @@
           : h("p", { class: "muted" }, "Você ainda não escolheu o que acompanhar. Escolha áreas, subtemas e idiomas e avisamos quando sair artigo novo."),
         h("div", { class: "row" }, h("a", { class: "btn btn-secondary btn-sm", href: "#/perfil/interesses" }, interests.topics || interests.terms ? "Gerenciar" : "Escolher interesses"))),
       h("div", { class: "row" }, h("button", { type: "button", class: "btn btn-outline", onclick: () => logoutButton.click() }, "Sair da conta")));
+  }
+
+  async function profileNotifications(content) {
+    mount(content, loading());
+    const data = await guarded(() => api("/api/notifications/prefs"));
+    if (!data) { mount(content, errorBox("Não foi possível carregar as notificações agora.")); return; }
+    const rows = data.kinds.map((kind) => {
+      const input = h("input", { type: "checkbox", id: `notif-${kind.key}` });
+      input.checked = kind.enabled;
+      input.addEventListener("change", async () => {
+        const saved = await guarded(() => api("/api/notifications/prefs", { method: "PUT", body: { kinds: { [kind.key]: input.checked } } }));
+        if (saved) toast(input.checked ? `Avisos de “${kind.label}” ligados.` : `Avisos de “${kind.label}” desligados.`);
+        else input.checked = !input.checked;
+      });
+      return h("label", { class: "profile-option", for: `notif-${kind.key}` }, input,
+        h("span", {}, h("strong", {}, kind.label, kind.priority >= 2 ? h("span", { class: "alert-kind" }, "Importante") : null), h("small", { class: "muted" }, kind.description)));
+    });
+    mount(content,
+      h("p", { class: "lead" }, "Escolha o que aparece no sininho. Por enquanto o aviso chega só no site; e-mail e outros canais virão depois."),
+      h("section", { class: "card stack" }, h("h2", {}, "O que avisar"), rows),
+      h("section", { class: "card stack" }, h("h2", {}, "Como funciona"),
+        h("ul", { class: "plain-list" },
+          h("li", {}, "As verificações rodam quando você abre o site, no máximo a cada 6 horas."),
+          h("li", {}, "Retratação: cada artigo que você guarda (biblioteca, listas e relatórios) é reconferido na fonte uma vez por semana. Só detectamos quando a fonte informa (Europe PMC, PubMed e OpenAlex); correções não são detectadas."),
+          h("li", {}, "Mudança regulatória: vale para as substâncias que você confirmou em relatórios. Comparamos com o que havia na última verificação."),
+          h("li", {}, "O primeiro aviso de cada tipo só guarda o estado de hoje; você é avisado do que mudar depois.")),
+        h("div", { class: "row" }, h("button", { type: "button", class: "btn btn-secondary btn-sm", onclick: () => runCheck(true) }, "Verificar agora"))));
   }
 
   function profileUse(content) {
@@ -1447,6 +1473,7 @@
     mount($app, h("h1", {}, "Perfil"), profileTabs(active), content);
     if (active === "uso") profileUse(content);
     else if (active === "interesses") renderInterests(content);
+    else if (active === "notificacoes") profileNotifications(content);
     else if (active === "conta") profileAccount(content);
     else profileOverview(content);
   }
@@ -1887,6 +1914,7 @@
   function render() {
     const { view, rest, params } = Lib.parseRoute(location.hash);
     clearCitationMeta();
+    closePanel();
     renderNav(view);
     if (view === "busca") renderSearch(params);
     else if (view === "artigo") renderArticle(params);

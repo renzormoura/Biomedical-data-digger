@@ -47,6 +47,7 @@ from domain import (
     SourceUnavailableError,
 )
 from library_store import LibraryStore
+from notifications import NotificationService
 from presentation import UNVERIFIABLE_FALLBACK, verification_annex_md
 from profiles import DEFAULT as DEFAULT_PROFILE
 from profiles import ProfileStore
@@ -141,6 +142,7 @@ def create_app(
     alerts: AlertService | None = None,
     reports: ReportStore | None = None,
     profiles: ProfileStore | None = None,
+    notifications: NotificationService | None = None,
 ) -> FastAPI:
     app = FastAPI(title="Biomedical Data Digger", docs_url=None, redoc_url=None, openapi_url=None)
     signer = SessionSigner(settings.session_secret or SessionSigner.generate_secret())
@@ -461,12 +463,13 @@ def create_app(
         register_account_routes(
             app, account_store_factory=account_store_factory, current_user=current_user, throttle_auth=throttle_auth, on_deleted=end_account,
             library=library, reports=reports, alerts=alerts.store if alerts is not None else None, profiles=profiles,
+            notifications=notifications.store if notifications is not None else None,
         )
 
     if discovery is not None and library is not None:
         register_browse_routes(
             app, discovery=discovery, library=library, current_user=current_user, identity=identity, alerts=alerts,
-            cron_token=settings.alerts_cron_token, reports=reports, profiles=profiles,
+            cron_token=settings.alerts_cron_token, reports=reports, profiles=profiles, notifications=notifications,
         )
 
     return app

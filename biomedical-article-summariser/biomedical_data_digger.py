@@ -8,6 +8,7 @@ import uvicorn
 
 from alerts import AlertService, AlertStore
 from arxiv_catalog import ArxivCatalog
+from brasil import anvisa, conitec, rename
 from catalog import Catalog
 from config import Settings
 from discovery import DiscoveryService
@@ -16,6 +17,7 @@ from europepmc_catalog import EuropePmcCatalog
 from generation import GenerationPolicy
 from library_store import get_library_store
 from llm_service import get_router
+from notifications import NotificationService, NotificationStore
 from openaire_catalog import OpenAireCatalog
 from openalex_catalog import OpenAlexCatalog
 from profiles import ProfileStore
@@ -26,6 +28,14 @@ from reports import ReportStore
 from usage import UsageLog
 from web import create_app as create_web_app
 from workflow import AnalysisService, ArticleRepository
+
+
+def load_brazil_bases():  # type: ignore[no-untyped-def]
+    """Instantaneos da ANVISA, da Conitec e da Rename; None se algum nao puder ser lido (o vigia regulatorio fica de fora)."""
+    try:
+        return anvisa.carregar(), conitec.carregar(), rename.carregar()
+    except (OSError, ValueError, KeyError):
+        return None
 
 
 def create_app():  # type: ignore[no-untyped-def]
@@ -55,9 +65,17 @@ def create_app():  # type: ignore[no-untyped-def]
         alert_store,
         lambda query, user: discovery.search(query, source=discovery.search_default, client_id=f"alertas:{user}").works,
     )
+    library = get_library_store()
+    notification_store = NotificationStore()
+    notification_store.initialize()
+    notifications = NotificationService(
+        notification_store,
+        fetch_work=lambda ref: discovery.work(ref, client_id="vigia-retratacoes"),
+        library=library, reports=report_store, bases=load_brazil_bases,
+    )
     return create_web_app(
-        service, repository, settings, usage_log=usage_log, discovery=discovery, library=get_library_store(), alerts=alerts,
-        reports=report_store, profiles=profile_store,
+        service, repository, settings, usage_log=usage_log, discovery=discovery, library=library, alerts=alerts,
+        reports=report_store, profiles=profile_store, notifications=notifications,
     )
 
 

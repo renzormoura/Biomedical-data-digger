@@ -246,6 +246,17 @@ class LibraryStore:
             self._owned(tx, user, list_id)
             tx.execute("DELETE FROM reading_list_items WHERE list_id = ? AND ref = ?", (list_id, ref))
 
+    def watched_works(self, user: str) -> list[tuple[str, Work]]:
+        """(onde esta, artigo) para a biblioteca e as listas da conta: o que o vigia de retratacoes acompanha."""
+        found = [("na sua biblioteca", item.work) for item in self.items(user)]
+        for reading_list in self.lists(user):
+            found.extend((f"na lista “{reading_list.name}”", work) for work in reading_list.works)
+        return found
+
+    def all_watched_refs(self) -> set[str]:
+        rows = self._db.query("SELECT ref FROM library_items UNION SELECT ref FROM reading_list_items")
+        return {str(row[0]) for row in rows}
+
     def delete_user_data(self, user: str) -> None:
         """Apaga biblioteca, listas (com seus itens) e analises salvas da conta (exclusao de conta)."""
         with self._db.transaction() as tx:

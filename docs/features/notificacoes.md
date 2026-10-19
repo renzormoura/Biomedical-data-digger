@@ -1,10 +1,49 @@
-# Feature: Interesses e avisos de artigos novos (sininho)
+# Feature: Notificações do sininho (interesses, retratações, mudanças regulatórias e relatórios)
 
 ## Objetivo
 O usuário escolhe o que quer acompanhar (áreas, subtemas, idiomas e palavras-chave) e recebe um aviso no sininho quando aparece um artigo novo sobre isso.
 
 ## Status
-Em produção, com limites. Os avisos aparecem no sininho, ao abrir o site, e por uma verificação agendada que precisa ser ativada (ver "Verificação agendada"). **Não há e-mail nem notificação do navegador.**
+Em produção, com limites. Além dos artigos novos por interesse, o sininho avisa de **retratação**, **mudança regulatória** e **novidades dos relatórios** (ver a seção "Todos os tipos de aviso"). Os avisos aparecem no sininho, ao abrir o site, e por uma verificação agendada que precisa ser ativada (ver "Verificação agendada"). **Não há e-mail nem notificação do navegador.**
+
+## Todos os tipos de aviso do sininho
+
+O sininho é a **única** forma de aviso por enquanto (e-mail, push e outros canais virão depois). Entram os avisos de prioridade **alta** e **média**:
+
+| Tipo | Prioridade | Quando avisa |
+|---|---|---|
+| **Artigo retratado** (`retratacao`) | Alta | Um artigo da sua biblioteca, de uma lista ou de um relatório (estudos incluídos) passou a constar como retratado na fonte |
+| **Mudança regulatória** (`regulatorio`) | Alta | Uma substância confirmada em um relatório teve mudança na Conitec (decisão nova ou removida), na Rename (passou a constar, deixou de constar ou mudou de componente) ou na ANVISA (passou a ter ou perdeu o registro ativo) |
+| **Novidades dos relatórios** (`relatorio-lista`) | Média | Entraram artigos novos na lista de origem de um relatório |
+| **Artigos novos nos interesses** (`novo-artigo`) | Média | O que está descrito acima neste documento |
+
+Avisos de prioridade alta e não lidos aparecem **no topo** do painel, com o selo de cor (Retratado, Regulatório). Cada tipo pode ser ligado ou desligado em **Perfil > Notificações** (tudo vem ligado).
+
+### Como cada aviso é produzido (`notifications.py`)
+- **Retratação.** O sistema junta os artigos que a conta guarda (biblioteca, listas e estudos incluídos em relatórios) e **reconfere cada um na fonte uma vez por semana** (até 15 por verificação de uma conta e 40 por execução agendada, para respeitar o limite das fontes). O resultado fica numa tabela global (`retraction_status`), então o mesmo artigo guardado por várias pessoas é conferido uma vez só. Um artigo que já estava marcado como retratado quando foi guardado também avisa. Só funciona quando a fonte do registro informa a retratação (Europe PMC, PubMed e OpenAlex); **correções (errata) não são detectadas**.
+- **Mudança regulatória.** Para cada substância confirmada em um relatório, guarda um resumo do estado (decisões da Conitec, componente na Rename, registro ativo na ANVISA) e compara com o da verificação seguinte. **A primeira vez só memoriza o estado**, sem avisar. Como as bases são instantâneos do repositório (atualizados por scripts), uma mudança só aparece depois que um instantâneo novo é publicado no site. Um aviso novo da mesma substância substitui o anterior ainda não lido.
+- **Novidades dos relatórios.** Para cada relatório com lista de origem, compara a lista com o que já está no relatório. Um aviso novo do mesmo relatório substitui o anterior ainda não lido, e o mesmo conjunto de artigos não avisa duas vezes.
+- Nenhum texto de aviso é gerado por IA: tudo vem de comparação por código.
+
+### Quando verificam
+- Com o site aberto: ao entrar e a cada 15 minutos (se a aba estiver visível), com intervalo mínimo de 6 horas (15 minutos no "Verificar agora"). **A verificação agora roda sempre**, não só para quem tem interesses, porque retratação e relatórios não dependem deles.
+- Com o site fechado: a rota agendada (`POST /api/internal/alerts/run`) também executa o vigia: reconfere um lote global de artigos e depois verifica as contas vencidas (até 40 por execução). A resposta traz `watch` com `due`, `ran`, `notified`, `failed` e `refreshed`.
+
+### API dos avisos
+| Rota | O que faz |
+|---|---|
+| `GET /api/alerts` | Caixa unificada: cada item traz `kind`, `priority`, `title`, `body`, `href`, `topic`, `read` e, nos artigos novos, `work` |
+| `POST /api/alerts/check` | Verifica agora; devolve `new`, `notified` (por tipo) e a caixa |
+| `POST /api/alerts/read`, `DELETE /api/alerts` | Marcam como lido (um ou todos) e dispensam; valem para os dois tipos de aviso |
+| `GET/PUT /api/notifications/prefs` | Tipos de aviso, o que cada um faz e se estão ligados |
+
+Tabelas: `notifications`, `retraction_status`, `regulatory_state`, `watch_state` e `notification_prefs`, criadas por `NotificationStore.initialize()`. A exportação de dados e a exclusão de conta incluem os avisos.
+
+### Limites dos novos avisos
+- Retratação só é detectada nas fontes que informam; uma biblioteca grande leva alguns dias para ser conferida inteira (15 artigos por verificação, uma vez por semana cada).
+- Mudança regulatória só vale para substâncias confirmadas em relatórios (é onde a pessoa diz que acompanha a substância). Os dados do Brasil seguem sem revisão de farmacêutico ou médico.
+- Os avisos de relatório dependem de o relatório ter lista de origem (relatórios criados antes da fase 3 não têm).
+- O texto "Constar na Rename ou ter registro não significa disponibilidade na unidade" vai em todo aviso regulatório.
 
 ## O que o usuário vê
 - **Sininho** no canto superior direito, só para quem está logado. Mostra o número de avisos não lidos. O painel lista os artigos (título, revista, ano e o tema que gerou o aviso) e oferece "Marcar como lidas", dispensar um aviso, "Verificar agora" e "Gerenciar interesses". No celular o painel desce da barra, em largura total.

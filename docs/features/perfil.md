@@ -1,7 +1,7 @@
 # Feature: aba Perfil (perfil de uso, interesses, conta e dados) e pacote "Saúde no Brasil"
 
 ## Objetivo
-Reunir numa só aba tudo o que é da pessoa: quem ela é no produto, o que ela acompanha e os dados dela. A aba **Perfil** (`#/perfil`) aparece no menu e na barra inferior do celular e tem quatro seções.
+Reunir numa só aba tudo o que é da pessoa: quem ela é no produto, o que ela acompanha e os dados dela. A aba **Perfil** (`#/perfil`) aparece no menu e na barra inferior do celular e tem cinco seções.
 
 Origem do perfil de uso: `docs/roadmap/plano-relatorio-de-tema.md`, seção 2 e fase 4.
 
@@ -12,6 +12,7 @@ Origem do perfil de uso: `docs/roadmap/plano-relatorio-de-tema.md`, seção 2 e 
 | **Visão geral** | `#/perfil` | E-mail e "membro desde"; contadores (artigos salvos, listas, relatórios, análises salvas) que levam à biblioteca; resumo do perfil de uso e dos interesses (temas, palavras-chave, avisos não lidos, última verificação); botão **Sair da conta** |
 | **Perfil de uso** | `#/perfil/uso` | O que a pessoa faz e o pacote de saúde (ver abaixo) |
 | **Interesses e alertas** | `#/perfil/interesses` | Áreas, subtemas, idiomas e palavras-chave dos alertas (a antiga página "Meus interesses", agora dentro do Perfil); `#/interesses` redireciona para cá |
+| **Notificações** | `#/perfil/notificacoes` | Liga e desliga cada tipo de aviso do sininho (retratação, mudança regulatória, novidades dos relatórios e artigos novos nos interesses) e explica como funcionam; botão "Verificar agora" |
 | **Conta e dados** | `#/perfil/conta` | Trocar senha; **baixar uma cópia dos dados** (JSON); **excluir a conta** |
 
 Sem conta, a aba mostra um convite para entrar. O diálogo da conta (cabeçalho) tem o atalho "Meu perfil". O sininho e os atalhos da página inicial apontam para a seção de interesses.

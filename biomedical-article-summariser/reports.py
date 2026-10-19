@@ -346,6 +346,41 @@ class ReportStore:
             tx.execute("DELETE FROM report_log WHERE report_id = ?", (report_id,))
             tx.execute("DELETE FROM reports WHERE id = ?", (report_id,))
 
+    def watched_works(self, user: str) -> list[tuple[str, Work]]:
+        """(onde esta, artigo) para os estudos incluidos nos relatorios da conta."""
+        rows = self._db.query(
+            "SELECT r.title, i.data FROM reports r JOIN report_items i ON i.report_id = r.id "
+            "WHERE r.owner_email = ? AND i.included = 1 ORDER BY r.updated_at DESC, i.position", (user,),
+        )
+        return [(f"no relatório “{title}”", _work(data)) for title, data in rows]
+
+    def all_watched_refs(self) -> set[str]:
+        return {str(row[0]) for row in self._db.query("SELECT DISTINCT ref FROM report_items WHERE included = 1")}
+
+    def substance_terms(self, user: str) -> list[tuple[str, str, str]]:
+        """(substancia, id do relatorio, titulo) das substancias confirmadas; cada substancia uma vez, no relatorio mais recente."""
+        rows = self._db.query(
+            "SELECT s.term, r.id, r.title FROM report_substances s JOIN reports r ON r.id = s.report_id "
+            "WHERE r.owner_email = ? ORDER BY r.updated_at DESC, s.position", (user,),
+        )
+        seen: dict[str, tuple[str, str, str]] = {}
+        for term, report_id, title in rows:
+            seen.setdefault(str(term), (str(term), str(report_id), str(title)))
+        return list(seen.values())
+
+    def sources(self, user: str) -> list[tuple[str, str, str, set[str]]]:
+        """(id, titulo, lista de origem, referencias ja no relatorio) dos relatorios que tem lista de origem."""
+        rows = self._db.query(
+            "SELECT r.id, r.title, s.list_id FROM reports r JOIN report_sources s ON s.report_id = r.id WHERE r.owner_email = ?", (user,)
+        )
+        if not rows:
+            return []
+        marks = ", ".join("?" for _ in rows)
+        present: dict[str, set[str]] = {}
+        for report_id, ref in self._db.query(f"SELECT report_id, ref FROM report_items WHERE report_id IN ({marks})", tuple(r[0] for r in rows)):  # noqa: S608 - so marcadores
+            present.setdefault(str(report_id), set()).add(str(ref))
+        return [(str(rid), str(title), str(list_id), present.get(str(rid), set())) for rid, title, list_id in rows]
+
     def delete_user_data(self, user: str) -> None:
         for summary in self.summaries(user):
             self.delete(user, summary.id)

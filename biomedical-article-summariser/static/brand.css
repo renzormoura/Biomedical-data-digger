@@ -630,3 +630,9 @@ input[type="text"], input[type="search"], input[type="email"], input[type="passw
 .btn-danger:hover:not(:disabled) { filter: brightness(1.1); }
 .btn-danger-outline { color: var(--danger); border-color: var(--danger); }
 .profile-content .field input { max-width: 28rem; width: 100%; }
+
+.alert-kind { display: inline-block; margin: 0 8px 4px 0; padding: 1px 6px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.alert-row.is-important .alert-kind { border-color: var(--danger); color: var(--danger); }
+.alert-row.is-important { border-left: 3px solid var(--danger); }
+.alert-body { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.profile-option strong .alert-kind { display: inline-block; margin-left: 8px; }
