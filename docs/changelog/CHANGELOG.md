@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2026-10 — Roteiro de validação com usuários (fase 5, preparação)
+
+### Adicionado
+- `docs/roadmap/roteiro-validacao-usuarios.md`: 7 hipóteses com critério de confirmação, perfis e triagem de 6 participantes, checklist da equipe, sessão de 45 minutos com fala de abertura, 5 tarefas com critério de sucesso, ficha de observação, perguntas sobre valor, confiança e preço, questionário curto, consentimento (LGPD), forma de análise e a tabela "se isto, então aquilo" para as decisões (CMED, preço, e-mail, revisão por especialista). Nenhuma sessão foi feita.
 ## 2026-10 — Perfil de uso (fase 4 do relatório de tema)
 
 ### Adicionado

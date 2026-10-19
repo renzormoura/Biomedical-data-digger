@@ -1,6 +1,6 @@
 # Plano: relatório de tema (núcleo geral) com o pacote "Saúde no Brasil"
 
-Status: fases 1 a 4 implementadas em 2026-10-18 (ver `docs/features/relatorio-de-tema.md` e `docs/features/perfil.md`); fases 5 e 6 pendentes. Decisão estratégica tomada com o usuário em 2026-10-18: o produto é **um só**, com um núcleo para qualquer área do conhecimento e um pacote vertical opcional para saúde no Brasil.
+Status: fases 1 a 4 implementadas em 2026-10-18 (ver `docs/features/relatorio-de-tema.md` e `docs/features/perfil.md`); fase 5 com o roteiro preparado em `docs/roadmap/roteiro-validacao-usuarios.md` (nenhuma sessão feita); fase 6 pendente. Decisão estratégica tomada com o usuário em 2026-10-18: o produto é **um só**, com um núcleo para qualquer área do conhecimento e um pacote vertical opcional para saúde no Brasil.
 
 ## 1. Problema
 
@@ -52,7 +52,7 @@ O que o relatório **não** faz: não escreve conclusões nem recomenda conduta.
 2. **Encaixe do pacote de saúde:** a seção "Situação no Brasil" entra quando o tema é um medicamento, com a substância confirmada pelo usuário e a data de cada base.
 3. **Versões e atualização:** reabrir um relatório, ver o que é novo desde a última versão e juntar com os alertas ("novidades deste tema desde o seu relatório").
 4. **Seletor de perfil:** na primeira entrada o usuário diz o que faz; o pacote de saúde liga ou desliga conforme o perfil.
-5. **Validação com usuários:** 5 temas reais (3 de áreas diferentes, 2 de medicamentos) e 3 ou 4 pessoas comparando com o que fazem hoje, medindo tempo e o que faltou. Só depois disso decidir preços, CMED e o que mais entra no vertical.
+5. **Validação com usuários:** 5 temas reais (3 de áreas diferentes, 2 de medicamentos) e 3 ou 4 pessoas comparando com o que fazem hoje, medindo tempo e o que faltou. Só depois disso decidir preços, CMED e o que mais entra no vertical. Roteiro pronto (6 pessoas, 7 hipóteses, tarefas, fichas e critérios de decisão): `docs/roadmap/roteiro-validacao-usuarios.md`.
 6. **Camada comercial:** logo e modelo da instituição, compartilhamento por equipe, plano pago.
 
 ## 6. Riscos
