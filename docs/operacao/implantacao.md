@@ -14,7 +14,13 @@
 
 Variáveis de ambiente: ver [Configuração](configuracao.md). Em `render.yaml`, `SESSION_SECRET` é gerado pelo Render; `DATABASE_URL` vem do banco criado pelo próprio Blueprint; `APP_BASE_URL`, `SMTP_*`, `GROQ_API_KEY`, `ALERTS_CRON_TOKEN` e `ADMIN_TOKEN` são informados no painel (`sync: false`).
 
-## O Blueprint (`render.yaml`)
+## Dois Blueprints: gratuito e pago
+- **`render.yaml` (gratuito, o padrão):** só o serviço web no plano `free`. O banco é um PostgreSQL gratuito do **Neon** (o gratuito do Render expira em 30 dias) e a URL vai em `DATABASE_URL`. Passo a passo em [Tutorial: primeiro deploy](tutorial-primeiro-deploy.md).
+- **`render.pago.yaml` (para quando houver receita):** serviço `starter` sempre ligado mais PostgreSQL gerenciado com backup, na mesma região. Para usá-lo, informe esse caminho ao criar o Blueprint.
+
+A descrição abaixo é do desenho **pago**; no gratuito, troque "banco do Render" por "banco do Neon".
+
+## O Blueprint pago (`render.pago.yaml`)
 Cria, na mesma região (`virginia`), o **PostgreSQL** (`biomedical-data-digger-db`, plano pago com backup) e o **serviço web** (plano `starter`, sempre ligado), liga `DATABASE_URL` ao banco, gera `SESSION_SECRET`, define o *health check* em `/healthz` e lista as variáveis que você preenche no painel (`ADMIN_EMAILS`, `LEGAL_CONTROLLER`, `LEGAL_CONTACT`, `PIX_KEY`, `PIX_NAME`, `APP_BASE_URL`, `SMTP_*`, `GROQ_API_KEY`, `ALERTS_CRON_TOKEN`, `ADMIN_TOKEN`). **Confirme os nomes dos planos no painel do Render antes de aplicar** (eles mudam).
 
 ### Banco pronto antes do primeiro tráfego

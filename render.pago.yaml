@@ -1,0 +1,76 @@
+# Blueprint PAGO do Render (para quando houver receita): servico web sempre ligado + PostgreSQL gerenciado com backup, na mesma regiao (a URL interna do banco so funciona assim).
+# Confirme os nomes dos planos no painel do Render antes de aplicar; os valores abaixo sao o ponto de partida recomendado
+# (web sempre ligado + banco pago com backup). O blueprint gratuito esta em render.yaml. Para usar este: no Render, ao criar o
+# Blueprint, informe o caminho do arquivo `render.pago.yaml`.
+
+databases:
+  - name: biomedical-data-digger-db
+    databaseName: bdd
+    user: bdd
+    region: virginia
+    plan: basic-256mb
+
+services:
+  - type: web
+    name: biomedical-data-digger
+    runtime: python
+    region: virginia
+    plan: starter
+    rootDir: biomedical-article-summariser
+    buildCommand: pip install -r requirements.txt
+    startCommand: python biomedical_data_digger.py
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: APP_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: biomedical-data-digger-db
+          property: connectionString
+      - key: SESSION_SECRET
+        generateValue: true
+      # URL publica do site (https, sem barra no fim): base dos links dos e-mails. Obrigatoria se SMTP_HOST estiver definido.
+      - key: APP_BASE_URL
+        sync: false
+      # E-mail transacional (confirmacao de endereco e recuperacao de senha). Sem SMTP_HOST, esses recursos ficam desligados.
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+      # Identificacao exigida pelos Termos de Uso e pela Politica de Privacidade (o servico nao sobe sem estas duas em producao)
+      - key: LEGAL_CONTROLLER
+        sync: false
+      - key: LEGAL_CONTACT
+        sync: false
+      - key: LEGAL_FORUM
+        sync: false
+      # Quem ve a aba de Administracao: e-mails separados por virgula (em producao, com o e-mail confirmado)
+      - key: ADMIN_EMAILS
+        sync: false
+      # Planos e pagamento por Pix. Com BILLING_ENFORCED=1 os limites do plano gratuito passam a valer (exige PIX_KEY e PIX_NAME).
+      - key: BILLING_ENFORCED
+        value: "0"
+      - key: PIX_KEY
+        sync: false
+      - key: PIX_NAME
+        sync: false
+      - key: PIX_CITY
+        sync: false
+      - key: PRO_PRICE_CENTS
+        value: "2900"
+      # Laboratorio de IA (opcional)
+      - key: GROQ_API_KEY
+        sync: false
+      # Rotina agendada de avisos e feed, e relatorio de consumo (>= 24 caracteres cada)
+      - key: ALERTS_CRON_TOKEN
+        sync: false
+      - key: ADMIN_TOKEN
+        sync: false

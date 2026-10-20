@@ -1,20 +1,17 @@
-# Blueprint do Render: servico web + PostgreSQL gerenciado, na mesma regiao (a URL interna do banco so funciona assim).
-# Confirme os nomes dos planos no painel do Render antes de aplicar; os valores abaixo sao o ponto de partida recomendado
-# (web sempre ligado + banco pago com backup). O plano gratuito do banco expira e o do web hiberna: nao use com usuarios reais.
-
-databases:
-  - name: biomedical-data-digger-db
-    databaseName: bdd
-    user: bdd
-    region: virginia
-    plan: basic-256mb
+# Blueprint GRATUITO do Render: so o servico web, no plano free. O banco NAO e criado aqui: o banco gratuito do Render expira
+# em 30 dias, entao usamos um PostgreSQL gratuito e permanente de outro provedor (Neon) e colamos a URL em DATABASE_URL.
+# Passo a passo em docs/operacao/tutorial-primeiro-deploy.md. Para o desenho pago (web sempre ligado + banco com backup),
+# veja render.pago.yaml.
+#
+# Plano free do Render: o servico dorme depois de ~15 min sem acesso. Um monitor gratuito que acessa /healthz a cada 5 minutos
+# (por exemplo UptimeRobot) o mantem acordado; 750 horas por mes cobrem um servico ligado o mes inteiro.
 
 services:
   - type: web
     name: biomedical-data-digger
     runtime: python
     region: virginia
-    plan: starter
+    plan: free
     rootDir: biomedical-article-summariser
     buildCommand: pip install -r requirements.txt
     startCommand: python biomedical_data_digger.py
@@ -24,10 +21,9 @@ services:
         value: 3.11.9
       - key: APP_ENV
         value: production
+      # URL do PostgreSQL (Neon): use a conexao DIRETA (sem "-pooler" no endereco), com ?sslmode=require
       - key: DATABASE_URL
-        fromDatabase:
-          name: biomedical-data-digger-db
-          property: connectionString
+        sync: false
       - key: SESSION_SECRET
         generateValue: true
       # URL publica do site (https, sem barra no fim): base dos links dos e-mails. Obrigatoria se SMTP_HOST estiver definido.
@@ -68,7 +64,7 @@ services:
       # Laboratorio de IA (opcional)
       - key: GROQ_API_KEY
         sync: false
-      # Rotina agendada de avisos e feed, e relatorio de consumo (>= 24 caracteres cada)
+      # Rotina agendada de avisos e feed, e acesso de emergencia ao painel (>= 24 caracteres cada)
       - key: ALERTS_CRON_TOKEN
         sync: false
       - key: ADMIN_TOKEN

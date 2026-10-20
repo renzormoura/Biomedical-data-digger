@@ -1,123 +1,129 @@
-# Tutorial: colocar o produto no ar no Render, do zero
+# Tutorial: colocar o produto no ar, de graça, no Render
 
-Passo a passo para quem nunca fez. Tempo estimado: 1 a 2 horas, fora a espera de verificações de e-mail e domínio. Os nomes de botões e planos no Render e nos provedores mudam com o tempo: se algo não bater, siga a ideia do passo e consulte a documentação do provedor.
+Montagem **sem custo nenhum**, o mais parecida possível com a versão paga. Tempo estimado: 1 a 2 horas, fora a espera de verificações de e-mail. Os nomes de botões e limites dos provedores mudam com o tempo: se algo não bater, siga a ideia do passo e consulte a documentação do provedor.
 
-## Antes de começar (reúna isto)
-| Item | Para quê |
-|---|---|
-| Conta no GitHub com o repositório | O Render lê o código de lá. O repositório **pode ser privado** |
-| Cartão de crédito | Planos pagos do Render (serviço web e banco) |
-| Um e-mail seu para ser administrador | Será o e-mail da sua conta de administrador |
-| Chave Pix e o nome do recebedor | Para receber os pagamentos (pode deixar para depois) |
-| Nome ou razão social e um e-mail de contato | Aparecem nos Termos de Uso e na Política de Privacidade (obrigatórios em produção) |
-| Um provedor de e-mail (SMTP) | Confirmação de e-mail e recuperação de senha (veja a Parte 3) |
-| Um domínio (opcional no começo) | Endereço próprio, como `app.seudominio.com.br` |
+## O desenho gratuito (e o que muda em relação ao pago)
+| Peça | Gratuito | Pago (para depois) | Diferença |
+|---|---|---|---|
+| Serviço web | **Render, plano free** | Render `starter` | O free **dorme** após ~15 min sem acesso; um monitor gratuito acessando o site a cada 5 min o mantém acordado (Parte 6). Memória e CPU menores |
+| Banco de dados | **Neon, plano free** (PostgreSQL permanente) | PostgreSQL do Render com backup | O banco gratuito **do Render** expira em 30 dias, por isso usamos o Neon. Limite de 0,5 GB e suspende quando ocioso (a primeira consulta leva 1 a 2 s). Histórico de recuperação curto |
+| E-mail | **Brevo** (ou Gmail), plano free | Qualquer provedor SMTP | Limite diário de envios (centenas) |
+| Domínio | `*.onrender.com` | Domínio próprio | Nenhuma |
+| Rotina de avisos e feed | **GitHub Actions** | Igual | Nenhuma |
+| Código | GitHub **privado** (grátis) | Igual | Nenhuma |
+| Pix, Termos, painel de administração | Igual | Igual | Nenhuma |
 
-Gere dois segredos de 32 caracteres e guarde num gerenciador de senhas (um para `ALERTS_CRON_TOKEN`, outro para `ADMIN_TOKEN`):
+Tudo é o mesmo código: para ir ao pago basta trocar o plano e a `DATABASE_URL` (Parte 9).
+
+## Antes de começar
+Reúna: o repositório no GitHub (pode ser privado), o e-mail que será o administrador, a chave Pix e o nome do recebedor (pode ficar para depois), seu nome ou razão social e um e-mail de contato (obrigatórios nos Termos). Gere dois segredos de 32 caracteres e guarde num gerenciador de senhas (um para `ALERTS_CRON_TOKEN`, outro para `ADMIN_TOKEN`):
 ```bash
 python -c "import secrets; print(secrets.token_urlsafe(32))"
 ```
 
-## Parte 1: criar o serviço e o banco com o Blueprint
-1. Entre em **render.com** e crie uma conta (pode entrar com o GitHub).
-2. No painel, clique **New +** e depois **Blueprint**.
-3. Conecte o GitHub quando pedir e **autorize o acesso ao repositório** `Biomedical-data-digger` (se for privado, marque-o na lista de repositórios permitidos).
-4. Escolha o repositório e o ramo `main`. O Render lê o arquivo `render.yaml` e mostra o que vai criar: **um banco PostgreSQL** (`biomedical-data-digger-db`) e **um serviço web** (`biomedical-data-digger`).
-5. Confira os **planos** que ele propõe. O arquivo pede serviço `starter` (sempre ligado) e banco `basic-256mb`. Se o nome do plano tiver mudado, escolha o equivalente pago mais barato (nunca o gratuito: o serviço dorme e o banco gratuito expira).
-6. O Render pede os valores das variáveis marcadas como "preencher no painel". Pode preencher agora ou depois (Parte 2). Clique **Apply**/**Create**. O primeiro deploy vai falhar ou demorar enquanto faltar variável obrigatória: é esperado.
-
-## Parte 2: variáveis de ambiente
-No serviço web: **Environment**. Preencha (ou confira) estas variáveis. Depois de alterar, o Render reinicia o serviço.
-
-| Variável | O que colocar | Obrigatória? |
-|---|---|---|
-| `LEGAL_CONTROLLER` | Seu nome ou razão social (ex.: `Empresa Exemplo Ltda.`) | **Sim**, sem ela o serviço não sobe |
-| `LEGAL_CONTACT` | E-mail para solicitações de privacidade (ex.: `privacidade@seudominio.com.br`) | **Sim** |
-| `LEGAL_FORUM` | Comarca (ex.: `São Paulo/SP`) | Não |
-| `ADMIN_EMAILS` | O e-mail da sua conta de administrador (vários, separados por vírgula) | Recomendada |
-| `ADMIN_TOKEN` | Um dos segredos gerados acima | Recomendada (acesso de emergência) |
-| `ALERTS_CRON_TOKEN` | O outro segredo gerado | Recomendada (avisos e feed agendados) |
-| `APP_BASE_URL` | O endereço do site com `https://` e sem barra no fim (ex.: `https://biomedical-data-digger.onrender.com`) | **Sim**, se for usar e-mail |
-| `PIX_KEY` | Sua chave Pix | Para cobrar |
-| `PIX_NAME` | Nome do recebedor, até 25 caracteres, sem acento | Para cobrar |
-| `PIX_CITY` | Sua cidade em maiúsculas (ex.: `SAO PAULO`) | Não (padrão `BRASIL`) |
-| `PRO_PRICE_CENTS` | Preço mensal do Pro em centavos (`2900` = R$ 29,00) | Defina o preço real |
-| `BILLING_ENFORCED` | Deixe `0` no começo. Só mude para `1` quando quiser que os limites do plano gratuito valham | Não |
-| `GROQ_API_KEY` | Chave da Groq, se quiser o Laboratório de IA | Não |
-
-Já vêm prontas pelo Blueprint: `DATABASE_URL` (do banco criado), `SESSION_SECRET` (gerado), `APP_ENV=production`, `PYTHON_VERSION`.
-
-## Parte 3: e-mail (confirmação e recuperação de senha)
-O produto envia e-mail por **SMTP padrão**, então serve qualquer provedor (Resend, Brevo, Amazon SES, Mailgun, Postmark, Google Workspace...). Escolha um e siga o roteiro dele.
-
-1. Crie conta no provedor e **verifique o seu domínio** (ou, para testar, o seu e-mail remetente).
-2. No painel DNS do seu domínio, adicione os registros que o provedor mostrar: **SPF**, **DKIM** e, de preferência, **DMARC**. Sem isso, os e-mails caem no spam.
-3. Crie as credenciais SMTP no provedor. Você vai precisar de: servidor (host), porta (normalmente 587), usuário e senha.
-4. No Render, preencha:
-   - `SMTP_HOST` = servidor do provedor
-   - `SMTP_PORT` = `587` (ou o que o provedor indicar)
-   - `SMTP_USER` e `SMTP_PASSWORD` = as credenciais
-   - `SMTP_FROM` = o remetente verificado (ex.: `no-reply@seudominio.com.br`)
-   - `SMTP_SECURITY` = `starttls` (padrão); use `ssl` se o provedor mandar usar a porta 465
-5. Salve. Quando o serviço reiniciar, crie uma conta de teste e veja se chega o e-mail de confirmação.
-
-> Sem `SMTP_HOST`, em produção, a recuperação de senha fica desligada e a tela avisa. Você ainda consegue administrar com o `ADMIN_TOKEN`.
-
-## Parte 4: conferir que o banco está pronto
-O serviço cria as tabelas sozinho na subida. Se quiser conferir pelo seu computador (opcional):
-1. No Render, abra o banco e copie a **External Database URL** (use só para isso e não a compartilhe).
-2. No seu computador, na pasta do projeto:
+## Parte 1: banco de dados gratuito (Neon)
+1. Crie conta em **neon.tech** (pode entrar com o GitHub).
+2. **Create project**: nome `biomedical-data-digger`, região **AWS US East (N. Virginia)** (a mesma região do serviço no Render, para ficar rápido).
+3. Na tela do projeto, abra **Connect** (ou *Connection Details*) e copie a **connection string**. Dois cuidados:
+   - Use a conexão **direta**, **sem** `-pooler` no endereço (o `pooler` pode atrapalhar o driver).
+   - Ela deve terminar com `?sslmode=require`. Algo como `postgresql://usuario:senha@ep-xxxx.us-east-1.aws.neon.tech/neondb?sslmode=require`.
+4. Guarde essa URL (é a sua `DATABASE_URL`; é uma senha, não a compartilhe).
+5. (Opcional) Confirme que o banco está pronto, no seu computador, na pasta do projeto:
    ```bash
    DATABASE_URL="postgresql://..." python scripts/verificar_banco.py
    ```
-   No Windows PowerShell: `$env:DATABASE_URL="postgresql://..."; python scripts/verificar_banco.py`.
-3. A saída deve terminar com **"Banco pronto."**
-4. Em *Backups* do banco no Render, confirme que o backup automático está ativo no seu plano.
+   No Windows PowerShell: `$env:DATABASE_URL="postgresql://..."; python scripts/verificar_banco.py`. Deve terminar com **"Banco pronto."**
 
-## Parte 5: primeiro acesso e a conta de administrador
-1. Abra o endereço do serviço (algo como `https://biomedical-data-digger.onrender.com`). A primeira abertura pode demorar um pouco. Teste `/healthz`: deve mostrar `{"status":"ok"}`.
-2. Clique em **Entrar → Criar conta** usando **exatamente** o e-mail que você pôs em `ADMIN_EMAILS`. Marque o aceite dos Termos.
-3. Abra o e-mail de confirmação e clique no link. Em produção a aba de administração **só aparece para administradores com e-mail confirmado**.
-4. Entre de novo (ou recarregue). O menu passa a mostrar **Administração**. Se não aparecer, veja a lista de problemas abaixo.
+## Parte 2: criar o serviço no Render (gratuito)
+1. Em **render.com**, crie a conta (pode entrar com o GitHub) e clique em **New + → Blueprint**.
+2. Conecte o GitHub e **autorize o repositório** (se for privado, marque-o na lista).
+3. Escolha o ramo `main`. O Render lê o `render.yaml`, que já está no plano **free** e cria só o serviço web.
+4. O Render pede as variáveis marcadas "preencher no painel". Você pode preencher agora (Parte 3) ou depois. Clique **Apply**. O primeiro deploy falha enquanto faltarem as variáveis obrigatórias: é esperado.
 
-## Parte 6: avisos e feed agendados (GitHub Actions)
-Para o sininho e o feed se atualizarem mesmo sem ninguém no site:
-1. No GitHub, no repositório: **Settings → Secrets and variables → Actions → New repository secret**.
-2. Crie `APP_URL` (o endereço do site, com `https://` e sem barra no fim) e `ALERTS_CRON_TOKEN` (o **mesmo** valor que está no Render).
-3. Em **Actions → Alertas agendados → Run workflow**, rode uma vez à mão e confira que terminou com sucesso.
+## Parte 3: variáveis de ambiente
+No serviço web: **Environment**. Preencha estas:
 
-## Parte 7: domínio próprio (opcional)
-1. No serviço web, **Settings → Custom Domains → Add**, digite o domínio (ex.: `app.seudominio.com.br`).
-2. Crie no DNS do domínio o registro que o Render mostrar (normalmente um `CNAME`). Espere a verificação e o certificado HTTPS ficarem prontos.
-3. Atualize `APP_BASE_URL` e o segredo `APP_URL` do GitHub para o novo endereço.
+| Variável | O que colocar | Obrigatória? |
+|---|---|---|
+| `DATABASE_URL` | A URL do Neon (Parte 1) | **Sim** |
+| `LEGAL_CONTROLLER` | Seu nome ou razão social | **Sim** (sem ela o serviço não sobe) |
+| `LEGAL_CONTACT` | E-mail para pedidos de privacidade | **Sim** |
+| `APP_BASE_URL` | `https://` + o endereço do serviço (aparece no topo da página do serviço, algo como `https://biomedical-data-digger.onrender.com`), sem barra no fim | **Sim**, se usar e-mail |
+| `ADMIN_EMAILS` | O e-mail da sua conta de administrador | Recomendada |
+| `ADMIN_TOKEN`, `ALERTS_CRON_TOKEN` | Os dois segredos gerados | Recomendadas |
+| `PIX_KEY`, `PIX_NAME`, `PRO_PRICE_CENTS` | Chave Pix, nome do recebedor (até 25 caracteres, sem acento) e preço em centavos (`2900` = R$ 29,00) | Para cobrar |
+| `BILLING_ENFORCED` | Deixe `0` | Não |
+| `GROQ_API_KEY` | Chave da Groq (tem plano gratuito), se quiser o Laboratório de IA | Não |
 
-## Parte 8: receber pagamentos por Pix
-1. Confirme que `PIX_KEY`, `PIX_NAME` e `PRO_PRICE_CENTS` estão corretos.
-2. Em **Planos**, crie um pedido de teste de uma conta sua e pague o valor (ou apenas confira que o código "copia e cola" abre certo no app do banco, sem pagar).
-3. Em **Administração → Pagamentos**, o pedido aparece como pendente. Confira o extrato do banco e clique **Confirmar pagamento**: a assinatura é ativada e a pessoa recebe e-mail.
-4. Quando estiver tudo certo e você quiser que os limites do plano gratuito passem a valer, mude `BILLING_ENFORCED` para `1`.
+`SESSION_SECRET` é gerada sozinha. Depois de salvar, o Render reinicia o serviço.
+
+## Parte 4: e-mail grátis (confirmação e recuperação de senha)
+**Opção A: Brevo (recomendada para começar).**
+1. Crie conta em **brevo.com** (plano gratuito).
+2. Em *SMTP & API → SMTP*, copie o servidor (`smtp-relay.brevo.com`), a porta (587), o **login** e gere uma **chave SMTP**.
+3. Em *Senders*, cadastre e **verifique** o e-mail remetente (chega um link na caixa dele). Quando tiver domínio próprio, autentique o domínio (SPF/DKIM) para os e-mails não caírem no spam.
+4. No Render: `SMTP_HOST=smtp-relay.brevo.com`, `SMTP_PORT=587`, `SMTP_USER` = login do Brevo, `SMTP_PASSWORD` = chave SMTP, `SMTP_FROM` = o remetente verificado.
+
+**Opção B: Gmail (para testar).** Ative a verificação em duas etapas na conta Google, crie uma **senha de app** e use `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=587`, `SMTP_USER` = seu Gmail, `SMTP_PASSWORD` = a senha de app, `SMTP_FROM` = seu Gmail. Serve para poucas pessoas; para público, prefira o Brevo com domínio.
+
+> Sem `SMTP_HOST`, em produção, a recuperação de senha fica desligada. Você ainda administra com o `ADMIN_TOKEN`.
+
+## Parte 5: primeiro acesso e conta de administrador
+1. Abra o endereço do serviço (a primeira abertura leva até um minuto). Teste `/healthz`: deve mostrar `{"status":"ok"}`.
+2. **Entrar → Criar conta** com **exatamente** o e-mail de `ADMIN_EMAILS` e marque o aceite dos Termos.
+3. Clique no link do e-mail de confirmação. Em produção, a aba **Administração** só aparece para administradores com e-mail confirmado.
+4. Recarregue. Se a aba não aparecer, abra `#/admin` e entre com o `ADMIN_TOKEN`; em **Usuários** marque o seu e-mail como confirmado.
+
+## Parte 6: manter o serviço acordado (grátis)
+O plano free do Render dorme sem visitas. Para evitar a lentidão da primeira visita:
+1. Crie conta em **uptimerobot.com** (plano gratuito).
+2. **Add New Monitor**: tipo *HTTP(s)*, URL `https://SEU-SERVICO.onrender.com/healthz`, intervalo de **5 minutos**.
+3. Com isso o serviço fica sempre acordado (os 750 horas gratuitas por mês do Render cobrem um serviço ligado o mês todo).
+
+Sem o monitor, tudo funciona, só que a primeira visita depois de um tempo parado demora cerca de um minuto e a memória do servidor (caches e limites de uso) zera a cada despertar.
+
+## Parte 7: avisos e feed agendados (GitHub Actions, grátis)
+1. No GitHub: **Settings → Secrets and variables → Actions → New repository secret**.
+2. Crie `APP_URL` (o endereço do site, com `https://` e sem barra no fim) e `ALERTS_CRON_TOKEN` (o **mesmo** valor do Render).
+3. Em **Actions → Alertas agendados → Run workflow**, rode uma vez para conferir. Depois roda sozinho a cada 6 horas (poucas execuções por mês, dentro do limite gratuito do GitHub).
+
+## Parte 8: receber por Pix
+1. Confira `PIX_KEY`, `PIX_NAME` e `PRO_PRICE_CENTS`.
+2. Em **Planos**, crie um pedido de teste e veja o código "copia e cola" (abra no app do banco sem pagar, só para conferir).
+3. Em **Administração → Pagamentos**, o pedido aparece pendente. Quando um pagamento de verdade cair, confira o extrato e clique **Confirmar pagamento**.
+4. Só mude `BILLING_ENFORCED` para `1` quando quiser que os limites do plano gratuito valham.
+
+## Parte 9: quando houver receita (subir para o pago)
+1. **Banco:** crie o PostgreSQL pago (no Render ou outro), troque a `DATABASE_URL` e rode `scripts/verificar_banco.py`. Para levar os dados do Neon, faça `pg_dump` do Neon e restaure no novo banco (o Neon também oferece exportação).
+2. **Serviço:** em *Settings → Instance Type*, escolha um plano pago (sempre ligado, mais memória) e desligue o monitor do UptimeRobot.
+3. **Domínio próprio:** *Custom Domains* no serviço, crie o `CNAME` no DNS, depois atualize `APP_BASE_URL` e o segredo `APP_URL` do GitHub e autentique o domínio no provedor de e-mail.
+4. Se preferir tudo no Render, aplique o `render.pago.yaml` (serviço + banco com backup) em vez do `render.yaml`.
 
 ## Lista de conferência antes de divulgar
-- [ ] `/healthz` responde `ok`
+- [ ] `/healthz` responde `ok` e o monitor está ativo
 - [ ] Cadastro, login, busca e página de um artigo funcionam
-- [ ] E-mail de confirmação chega (fora do spam) e o "Esqueci a senha" funciona
-- [ ] Você vê a aba **Administração** com a sua conta
-- [ ] Termos e Política abrem e mostram o seu nome e contato (sem "[a definir]")
+- [ ] E-mail de confirmação chega (fora do spam) e "Esqueci a senha" funciona
+- [ ] Você vê a aba **Administração**
+- [ ] Termos e Política mostram o seu nome e contato (sem "[a definir]")
 - [ ] Os textos legais foram revisados por um advogado
-- [ ] Backup do banco ativo e restauração testada
+- [ ] Você sabe restaurar/exportar o banco (no plano gratuito, **faça cópias do banco com frequência**: exportação do Neon ou `pg_dump`)
 - [ ] Repositório do GitHub privado
-- [ ] Segredos guardados num gerenciador de senhas (nunca no código nem em conversas)
+- [ ] Segredos só no gerenciador de senhas e nos painéis (nunca no código nem em conversas)
+
+## Limites do modelo gratuito (seja honesto com você mesmo)
+- **Sem backup robusto:** o Neon gratuito guarda só um histórico curto. Exporte o banco regularmente enquanto houver usuários reais.
+- **Desempenho modesto:** CPU e memória pequenas; ótimo para começar e para dezenas de usuários, não para picos.
+- **Reinícios:** o Render pode reiniciar o serviço; sessões continuam válidas (o cookie é assinado), mas caches e limites de uso zeram.
+- **Limites de uso dos provedores** (envios de e-mail por dia, tamanho do banco) podem mudar: confira nas páginas deles.
 
 ## Problemas comuns
 | Sintoma | Causa provável e solução |
 |---|---|
-| Deploy falha com "Defina LEGAL_CONTROLLER e LEGAL_CONTACT" | Faltam essas variáveis. Preencha e reinicie |
-| Falha dizendo `APP_BASE_URL … obrigatória` | Com `SMTP_HOST` definido, `APP_BASE_URL` precisa começar com `https://` |
-| Falha dizendo `SESSION_SECRET` | Era para ser gerada pelo Blueprint; se criou o serviço à mão, defina uma com 32+ caracteres |
-| Falha ao conectar no banco | Banco e serviço precisam estar na **mesma região**; use a URL interna do banco |
-| A aba Administração não aparece | O e-mail da conta não é igual ao de `ADMIN_EMAILS`, ou o e-mail ainda não foi confirmado. Use o `ADMIN_TOKEN` em `#/admin` para entrar e marcar o e-mail como confirmado em **Usuários** |
-| E-mails não chegam | Confira `SMTP_*`, o remetente verificado e os registros SPF/DKIM; veja os logs do serviço por "Falha ao enviar e-mail" |
-| A primeira visita demora | Plano gratuito dormindo; no plano `starter` isso não ocorre |
-| Painel diz "desativado" | Faltam `ADMIN_EMAILS` e `ADMIN_TOKEN` |
+| "Defina LEGAL_CONTROLLER e LEGAL_CONTACT" | Faltam essas variáveis |
+| Falha citando `APP_BASE_URL` | Com `SMTP_HOST` definido, ela precisa começar com `https://` |
+| Falha ao conectar no banco | Confira a `DATABASE_URL` (conexão direta, `?sslmode=require`); no Neon, o banco acorda em 1 a 2 segundos na primeira consulta |
+| E-mails não chegam | Confira `SMTP_*`, o remetente verificado no Brevo e os logs ("Falha ao enviar e-mail") |
+| A aba Administração não aparece | E-mail diferente do de `ADMIN_EMAILS` ou ainda não confirmado: use o `ADMIN_TOKEN` em `#/admin` |
+| Primeira visita lenta | O serviço dormiu: configure o monitor (Parte 6) |
 
 Mais detalhes: [Implantação](implantacao.md), [Configuração](configuracao.md), [Rotinas agendadas](rotinas-agendadas.md) e [Runbook](runbook.md).

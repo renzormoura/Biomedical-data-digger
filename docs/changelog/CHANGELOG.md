@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 2026-10 — Montagem 100% gratuita no Render
+
+### Alterado
+- `render.yaml` agora é o **Blueprint gratuito** (serviço no plano `free`, banco externo via `DATABASE_URL`); o desenho pago ficou em `render.pago.yaml`.
+- Novo tutorial de primeiro deploy sem custo: Render free + PostgreSQL gratuito do **Neon** + e-mail pelo **Brevo** (ou Gmail) + monitor gratuito (UptimeRobot) para o serviço não dormir + GitHub Actions para os avisos agendados, com os limites do modelo gratuito e o caminho para subir ao pago.
+
 ## 2026-10 — Aba de Administração na própria conta
 
 ### Adicionado
