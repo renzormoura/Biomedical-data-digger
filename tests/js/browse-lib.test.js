@@ -8,6 +8,8 @@ test("parseRoute reconhece as telas e ignora o desconhecido", () => {
   assert.deepEqual(Lib.parseRoute("#/busca?q=sepsis").view, "busca");
   assert.equal(Lib.parseRoute("#/busca?q=sepsis").params.get("q"), "sepsis");
   assert.equal(Lib.parseRoute("#/interesses").view, "interesses");
+  assert.equal(Lib.parseRoute("#/redefinir?token=x").view, "redefinir");
+  assert.equal(Lib.parseRoute("#/confirmar?token=x").params.get("token"), "x");
   assert.equal(Lib.parseRoute("#/perfil").view, "perfil");
   assert.deepEqual(Lib.parseRoute("#/perfil/interesses").rest, ["interesses"]);
   assert.equal(Lib.parseRoute("#/perfil/conta").view, "perfil");

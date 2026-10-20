@@ -49,6 +49,7 @@ Para quem não consegue entrar (senha perdida): verificar a identidade por canal
 | Render (hospedagem) | Todo o tráfego e os dados do serviço | Verificar região e cláusulas contratuais (infraestrutura nos EUA/Europa) |
 | Provedor do PostgreSQL | Dados da conta | Idem; confirmar região, criptografia e backups |
 | Groq | Título e resumo do artigo enviados ao Laboratório de IA | Sem dados pessoais; verificar política de retenção e de treinamento do plano contratado |
+| Provedor de e-mail (a definir) | E-mail da pessoa e o texto das mensagens de confirmação e recuperação | Escolher com contrato (DPA) e região; configurar SPF/DKIM |
 | GitHub | Código; *Actions* chama a rotina agendada com um token | Sem dados pessoais |
 | Fontes de artigos e feeds | Termos de busca (parâmetros enviados pelo servidor, sem identificar a pessoa) | O servidor consulta em nome da pessoa; **a pessoa não é identificada** |
 
@@ -67,6 +68,6 @@ Ver [Segurança](../arquitetura/seguranca.md): senhas com PBKDF2 (600 mil itera�
 1. Política de Privacidade e Termos de Uso redigidos por advogado.
 2. Indicação do encarregado (DPO) e canal de contato.
 3. Aviso de privacidade e consentimento visíveis no cadastro.
-4. E-mail transacional (confirmação de endereço e recuperação de senha) com base legal e opt-out.
+4. E-mail transacional: confirmação e recuperação **já implementadas**; falta o provedor contratado (operador de dados, listar na tabela acima), a base legal documentada (execução de contrato) e o consentimento/opt-out antes de qualquer aviso por e-mail.
 5. Registro das operações de tratamento (ROPA) e RIPD se o escopo crescer.
 6. Política de retenção para contas inativas.

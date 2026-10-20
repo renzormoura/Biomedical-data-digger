@@ -1,20 +1,54 @@
+# Blueprint do Render: servico web + PostgreSQL gerenciado, na mesma regiao (a URL interna do banco so funciona assim).
+# Confirme os nomes dos planos no painel do Render antes de aplicar; os valores abaixo sao o ponto de partida recomendado
+# (web sempre ligado + banco pago com backup). O plano gratuito do banco expira e o do web hiberna: nao use com usuarios reais.
+
+databases:
+  - name: biomedical-data-digger-db
+    databaseName: bdd
+    user: bdd
+    region: virginia
+    plan: basic-256mb
+
 services:
   - type: web
     name: biomedical-data-digger
     runtime: python
+    region: virginia
+    plan: starter
     rootDir: biomedical-article-summariser
     buildCommand: pip install -r requirements.txt
     startCommand: python biomedical_data_digger.py
+    healthCheckPath: /healthz
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
       - key: APP_ENV
         value: production
-      - key: GROQ_API_KEY
-        sync: false
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: biomedical-data-digger-db
+          property: connectionString
       - key: SESSION_SECRET
         generateValue: true
+      # URL publica do site (https, sem barra no fim): base dos links dos e-mails. Obrigatoria se SMTP_HOST estiver definido.
+      - key: APP_BASE_URL
+        sync: false
+      # E-mail transacional (confirmacao de endereco e recuperacao de senha). Sem SMTP_HOST, esses recursos ficam desligados.
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+      # Laboratorio de IA (opcional)
+      - key: GROQ_API_KEY
+        sync: false
+      # Rotina agendada de avisos e feed, e relatorio de consumo (>= 24 caracteres cada)
       - key: ALERTS_CRON_TOKEN
+        sync: false
+      - key: ADMIN_TOKEN
         sync: false

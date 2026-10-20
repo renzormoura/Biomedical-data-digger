@@ -37,6 +37,10 @@ API JSON interna do produto, consumida pela própria SPA. Todas as rotas ficam s
 | POST | `/api/auth/register` | pública | `{email, password}` | Cria a conta e inicia a sessão |
 | POST | `/api/auth/login` | pública | `{email, password}` | Inicia a sessão |
 | POST | `/api/auth/logout` | pública | — | Encerra a sessão |
+| POST | `/api/auth/forgot` | pública | `{email}` | Pede o link de redefinição. A resposta é **sempre a mesma** (a conta exista ou não); 503 se o servidor não tem e-mail configurado |
+| POST | `/api/auth/reset` | pública | `{token, password}` | Troca a senha com o token do link (1 hora, uso único). Senha fraca não gasta o link |
+| POST | `/api/auth/verify` | pública | `{token}` | Confirma o e-mail com o token do link (48 horas, uso único) |
+| POST | `/api/account/resend-verification` | conta | — | Reenvia a confirmação: `{sent: true}`, `{sent: false, reason: "wait"}` (1 por minuto) ou `{alreadyVerified: true}` |
 
 ## Descoberta e artigo
 | Método | Rota | Acesso | Parâmetros | Descrição |
@@ -112,7 +116,7 @@ API JSON interna do produto, consumida pela própria SPA. Todas as rotas ficam s
 |---|---|---|---|---|
 | GET | `/api/profile/options` | pública | — | Perfis de uso disponíveis |
 | GET/PUT | `/api/profile` | conta | `{profile, healthPack?}` | Perfil de uso e pacote de saúde |
-| GET | `/api/account` | conta | — | Resumo: e-mail, desde quando, contadores |
+| GET | `/api/account` | conta | — | Resumo: e-mail, desde quando, contadores, `emailVerified` e `emailEnabled` (se o servidor envia e-mails) |
 | POST | `/api/account/password` | conta | `{current, new}` | Troca a senha |
 | GET | `/api/account/export` | conta | — | `meus-dados.json` com todos os dados |
 | DELETE | `/api/account` | conta | `{password}` | Exclui a conta e os dados (irreversível) |

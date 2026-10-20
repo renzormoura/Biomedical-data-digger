@@ -28,7 +28,7 @@ Itens que **bloqueiam ou condicionam a cobrança**. Ordem sugerida:
 | 4 | Resolver a licença da **Rename** (CC BY-NC-SA 4.0) | Uso não comercial | [Licenças e termos](../legal/licencas-e-termos.md) |
 | 5 | Revisar os termos de cada fonte do feed e de cada API de busca | Uso comercial e agregação | idem |
 | 6 | Revisão dos dados do Brasil por farmacêutico/médico (e dos textos de aviso) | Dados sensíveis para decisão | [Saúde no Brasil](../features/saude-no-brasil.md) |
-| 7 | E-mail transacional: confirmação de endereço, recuperação de senha, avisos por e-mail | Sem recuperação de senha, o suporte é manual | [Conta e sessões](../features/conta-e-sessoes.md) |
+| 7 | E-mail transacional: **confirmação e recuperação já implementadas**; falta contratar o provedor SMTP, configurar `SMTP_*`, `APP_BASE_URL` e SPF/DKIM, e depois criar os avisos por e-mail (com consentimento) | Sem provedor, a recuperação fica desligada em produção | [Conta e sessões](../features/conta-e-sessoes.md) |
 | 8 | Termos de Uso e Política de Privacidade; encarregado (DPO) | LGPD | [Privacidade e LGPD](../legal/privacidade-e-lgpd.md) |
 | 9 | Plano de hospedagem sempre ligado, backups testados e monitoramento | Hoje hiberna e não há alertas de operação | [Implantação](../operacao/implantacao.md) |
 | 10 | Rodar o roteiro de validação com usuários e decidir o que priorizar | Evidência de valor antes de investir | [Roteiro de validação](roteiro-validacao-usuarios.md) |

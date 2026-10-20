@@ -16,7 +16,8 @@ Resumo dos controles existentes, o que cada um protege e o que **não** cobre. C
 - Senhas: PBKDF2-HMAC-SHA256, 600.000 iterações, sal de 32 bytes, 8 a 128 caracteres. O hash nunca sai da API.
 - Sessão: cookie `bdd_session` = `usuário.expiração.assinatura` (HMAC-SHA256 com `SESSION_SECRET`), 7 dias, `HttpOnly`, `SameSite=Lax`, `Secure` em produção. Em produção `SESSION_SECRET` com ≥32 caracteres é obrigatório.
 - Cookie de conta excluída para de valer em até 30 s (verificação de existência com cache).
-- **Limitações conhecidas:** sem 2FA; trocar a senha não encerra as sessões em outros aparelhos; sem confirmação de e-mail nem recuperação de senha.
+- **Recuperação de senha e confirmação de e-mail:** tokens aleatórios de 32 bytes, guardados só como hash SHA-256, de uso único, com validade (1 h e 48 h) e por finalidade; resposta idêntica para contas existentes e inexistentes; no máximo um e-mail por minuto por endereço e limite por IP; links montados com `APP_BASE_URL` (nunca `Host`) e token no fragmento da URL. Senha fraca não gasta o link.
+- **Limitações conhecidas:** sem 2FA; trocar ou redefinir a senha não encerra as sessões em outros aparelhos. A latência do `forgot` difere um pouco entre conta existente (envia e-mail) e inexistente (não envia): o conteúdo da resposta é idêntico, mas o tempo pode vazar a existência (risco baixo, aceito).
 
 ## Cabeçalhos e política de conteúdo
 Aplicados a **todas** as respostas pelo middleware (`web.py`):
@@ -73,7 +74,7 @@ A identidade é `u:<e-mail>` para quem tem conta e `ip:<ip>` para visitantes; o 
 
 ## Pendências de segurança conhecidas
 1. Revisão de segurança externa antes do lançamento comercial.
-2. 2FA, recuperação de senha e invalidação de sessões ao trocar a senha.
+2. 2FA e invalidação de sessões ao trocar ou redefinir a senha (a recuperação por e-mail já existe).
 3. Limitadores e cotas compartilhados (Redis ou banco) antes de rodar mais de uma instância.
 4. Mitigação completa de DNS rebinding.
 5. Rotação documentada de segredos (hoje manual).

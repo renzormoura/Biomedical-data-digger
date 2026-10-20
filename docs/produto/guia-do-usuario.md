@@ -27,7 +27,7 @@ Clique no título. Você vê:
 > Constar na Rename ou ter registro ativo na ANVISA **não** significa que o medicamento esteja disponível na sua unidade de saúde.
 
 ## 4. Criar uma conta
-Clique em **Entrar** → **Criar conta** (e-mail e senha de 8 a 128 caracteres). Com conta você pode salvar artigos, acompanhar interesses, montar listas e relatórios. Seus dados ficam só com você: dá para **baixar uma cópia** e **excluir a conta** em *Perfil → Conta e dados*.
+Clique em **Entrar** → **Criar conta** (e-mail e senha de 8 a 128 caracteres). Enviamos um link para **confirmar o e-mail** (ele também permite recuperar a senha); a conta funciona antes disso. Com conta você pode salvar artigos, acompanhar interesses, montar listas e relatórios. Seus dados ficam só com você: dá para **baixar uma cópia** e **excluir a conta** em *Perfil → Conta e dados*.
 
 ## 5. Salvar e organizar
 - **Salvar** em um resultado ou no artigo coloca-o na **Biblioteca**. Adicione **etiquetas** para filtrar depois.
@@ -73,6 +73,6 @@ Acessível em **Laboratório de IA**: análises geradas por modelo de linguagem 
 
 **O texto completo está disponível?** Só quando a fonte informa que o artigo é de acesso aberto (via Europe PMC). PDFs de editoras abrem no site de origem.
 
-**Perdi minha senha.** Ainda não há recuperação automática; fale com o suporte.
+**Esqueci minha senha.** Na janela de entrada, digite o e-mail e clique em **Esqueci a senha**. Enviamos um link (vale por 1 hora, uso único) para você escolher uma nova senha.
 
 **Como apago meus dados?** *Perfil → Conta e dados → Excluir conta*. É irreversível.

@@ -208,6 +208,7 @@
 
   function openAuth(hint) {
     authError.hidden = true;
+    document.getElementById("auth-note").hidden = true;
     document.getElementById("auth-hint").textContent = hint || "Entre para salvar artigos, criar listas e exportar. Buscar e ler não exige conta.";
     if (!dialog.open) dialog.showModal();
   }
@@ -238,6 +239,18 @@
   }
   dialog.querySelector("[data-auth='login']").addEventListener("click", () => authenticate("login"));
   dialog.querySelector("[data-auth='register']").addEventListener("click", () => authenticate("register"));
+  dialog.querySelector("[data-auth='forgot']").addEventListener("click", async () => {
+    const note = document.getElementById("auth-note");
+    const email = document.getElementById("auth-email").value.trim();
+    authError.hidden = true;
+    note.hidden = true;
+    if (!email) { authError.textContent = "Digite o seu e-mail acima e clique em “Esqueci a senha”."; authError.hidden = false; return; }
+    try {
+      const data = await api("/api/auth/forgot", { method: "POST", body: { email } });
+      note.textContent = data.message;
+      note.hidden = false;
+    } catch (error) { authError.textContent = error.message; authError.hidden = false; }
+  });
   dialog.querySelector("[data-auth='cancel']").addEventListener("click", () => dialog.close());
   profileLink.addEventListener("click", () => dialog.close());
   logoutButton.addEventListener("click", async () => {
@@ -1616,7 +1629,25 @@
     const startDelete = h("button", { type: "button", class: "btn btn-outline btn-danger-outline", onclick: showDelete }, "Excluir minha conta…");
     mount(deleteBox, startDelete);
 
+    const emailBox = h("div", { class: "stack" }, h("p", { class: "muted" }, "Carregando…"));
+    api("/api/account").then((account) => {
+      if (account.emailVerified === null || account.emailVerified === undefined) { emailBox.remove(); return; }
+      const resend = h("button", { type: "button", class: "btn btn-secondary btn-sm", onclick: async () => {
+        resend.disabled = true;
+        try {
+          const result = await api("/api/account/resend-verification", { method: "POST", body: {} });
+          toast(result.sent ? "Enviamos um novo link para o seu e-mail." : result.alreadyVerified ? "Seu e-mail já está confirmado." : "Aguarde um minuto para pedir outro link.");
+        } catch (error) { toast(error.message); } finally { resend.disabled = false; }
+      } }, "Reenviar e-mail de confirmação");
+      mount(emailBox,
+        h("p", {}, h("strong", {}, account.email), " ", h("span", { class: account.emailVerified ? "mail-state is-ok" : "mail-state" }, account.emailVerified ? "Confirmado" : "Não confirmado")),
+        account.emailVerified ? h("p", { class: "note" }, "Usamos o seu e-mail para recuperar a senha e, no futuro, para os avisos por e-mail.")
+          : h("p", { class: "note" }, account.emailEnabled ? "Confirme o seu e-mail pelo link que enviamos ao se cadastrar. Ele também permite recuperar a senha." : "O envio de e-mails não está ativo neste ambiente."),
+        !account.emailVerified && account.emailEnabled ? h("div", { class: "row" }, resend) : null);
+    }).catch(() => emailBox.remove());
+
     mount(content,
+      h("section", { class: "card stack" }, h("h2", {}, "E-mail"), emailBox),
       h("section", { class: "card stack" }, h("h2", {}, "Senha"), passwordForm),
       h("section", { class: "card stack" }, h("h2", {}, "Seus dados"),
         h("p", {}, "Baixe uma cópia de tudo o que a sua conta guarda: biblioteca, listas, análises salvas, relatórios, interesses, avisos e perfil. A senha não entra no arquivo."),
@@ -2077,6 +2108,53 @@
       h("p", { class: "note" }, "Como funciona: ao salvar, guardamos os artigos recentes que já existem e avisamos só dos que surgirem depois. Procuramos quando você abre o site, no máximo a cada 6 horas. Ainda não enviamos e-mail."));
   }
 
+  /** Pega o token do link e o tira da barra de endereço (não fica no histórico nem em capturas de tela). */
+  function takeLinkToken(params, route) {
+    const token = params.get("token") || "";
+    history.replaceState(null, "", `#/${route}`);
+    return token;
+  }
+
+  function renderResetPassword(params) {
+    setTitle("Redefinir senha");
+    const token = takeLinkToken(params, "redefinir");
+    const status = h("p", { class: "note", role: "status" });
+    const field = (id, label) => {
+      const input = h("input", { type: "password", id, autocomplete: "new-password", maxlength: "128", required: "" });
+      return [h("div", { class: "field" }, h("label", { for: id }, label), input), input];
+    };
+    const [firstField, first] = field("reset-new", "Nova senha (mínimo de 8 caracteres)");
+    const [secondField, second] = field("reset-repeat", "Repita a nova senha");
+    const submit = h("button", { type: "submit", class: "btn btn-primary" }, "Salvar nova senha");
+    const form = h("form", { class: "card stack", onsubmit: async (event) => {
+      event.preventDefault();
+      status.textContent = "";
+      if (first.value !== second.value) { status.textContent = "As senhas não são iguais."; return; }
+      submit.disabled = true;
+      try {
+        await api("/api/auth/reset", { method: "POST", body: { token, password: first.value } });
+        mount($app, h("section", { class: "narrow stack" }, h("h1", {}, "Senha redefinida"),
+          h("p", { class: "lead" }, "Pronto! Entre com a sua nova senha."),
+          h("div", { class: "row" }, h("button", { type: "button", class: "btn btn-primary", onclick: () => { location.hash = "#/"; openAuth("Entre com a sua nova senha."); } }, "Entrar"))));
+      } catch (error) { status.textContent = error.message; submit.disabled = false; }
+    } }, firstField, secondField, status, h("div", { class: "row" }, submit));
+    mount($app, h("section", { class: "narrow stack" }, h("h1", {}, "Redefinir senha"),
+      token ? form : h("p", { class: "note" }, "Abra o link que enviamos ao seu e-mail para escolher uma nova senha. Se ele expirou, peça outro em “Esqueci a senha”.")));
+  }
+
+  async function renderConfirmEmail(params) {
+    setTitle("Confirmar e-mail");
+    const token = takeLinkToken(params, "confirmar");
+    const body = h("div", { class: "stack" }, loading("Confirmando…"));
+    mount($app, h("section", { class: "narrow stack" }, h("h1", {}, "Confirmar e-mail"), body));
+    if (!token) { mount(body, h("p", { class: "note" }, "Abra o link que enviamos ao seu e-mail. Se ele expirou, peça outro em Perfil, Conta e dados.")); return; }
+    try {
+      const data = await api("/api/auth/verify", { method: "POST", body: { token } });
+      mount(body, h("p", { class: "lead" }, `E-mail confirmado: ${data.email}.`),
+        h("div", { class: "row" }, h("a", { class: "btn btn-primary", href: "#/" }, "Ir para o início")));
+    } catch (error) { mount(body, errorBox(error.message)); }
+  }
+
   function render() {
     const { view, rest, params } = Lib.parseRoute(location.hash);
     clearCitationMeta();
@@ -2086,6 +2164,8 @@
     else if (view === "artigo") renderArticle(params);
     else if (view === "biblioteca") renderLibrary(params);
     else if (view === "feed") renderFeed(params);
+    else if (view === "redefinir") renderResetPassword(params);
+    else if (view === "confirmar") renderConfirmEmail(params);
     else if (view === "interesses") location.replace("#/perfil/interesses");
     else if (view === "perfil") renderProfile(rest[0] || "");
     else if (view === "relatorio" && rest[0]) renderReport(rest[0]);

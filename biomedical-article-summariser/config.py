@@ -53,6 +53,7 @@ class Settings:
     ncbi_api_key: str = field(default="", repr=False)
     daily_token_budget_guest: int = 60_000
     daily_token_budget_user: int = 200_000
+    app_base_url: str = "http://localhost:7860"  # base dos links enviados por e-mail (nunca vem do cabecalho Host)
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -66,8 +67,12 @@ class Settings:
         cron_token = os.environ.get("ALERTS_CRON_TOKEN", "").strip()
         if cron_token and len(cron_token) < 24:
             raise ConfigurationError("ALERTS_CRON_TOKEN deve ter ao menos 24 caracteres (ou ficar vazio para desativar).")
+        base_url = os.environ.get("APP_BASE_URL", "").strip().rstrip("/")
+        if production and os.environ.get("SMTP_HOST", "").strip() and not base_url.startswith("https://"):
+            raise ConfigurationError("APP_BASE_URL (https://...) e obrigatoria em producao quando SMTP_HOST esta definido.")
         return cls(
             production=production,
+            app_base_url=base_url or "http://localhost:7860",
             alerts_cron_token=cron_token,
             session_secret=secret,
             admin_token=admin_token,

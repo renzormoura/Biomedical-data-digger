@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 2026-10 — Recuperação de senha, confirmação de e-mail e banco pronto para o Render
+
+### Adicionado
+- **Esqueci a senha** (link por e-mail, 1 hora, uso único) e **confirmação de e-mail** (48 horas, uso único), com telas `#/redefinir` e `#/confirmar`, estado "Confirmado/Não confirmado" e botão de reenvio em *Perfil → Conta e dados*. Tokens guardados só como hash; resposta idêntica para contas existentes e inexistentes; um e-mail por minuto por endereço; links com `APP_BASE_URL` (nunca `Host`) e token no fragmento da URL. Rotas `POST /api/auth/forgot`, `/api/auth/reset`, `/api/auth/verify` e `/api/account/resend-verification`.
+- Envio de e-mail por SMTP padrão (`mailer.py`; qualquer provedor), com modo log em desenvolvimento e desligado em produção sem `SMTP_HOST`.
+- Tabelas `account_tokens` e `email_verification`, incluídas na exportação e na exclusão de dados da conta.
+- **Banco pronto para o Render:** o `render.yaml` agora cria o PostgreSQL gerenciado junto com o serviço (`DATABASE_URL` por `fromDatabase`, região única, *health check*); `scripts/verificar_banco.py` confere conexão, as 25 tabelas e um ciclo de escrita e leitura sem rastros; as contas passam a ser inicializadas na subida (o serviço falha rápido se o banco estiver fora).
+
+### Alterado
+- `GET /api/account` e a cópia de dados trazem `emailVerified` (e `emailEnabled` no resumo).
+
 ## 2026-10 — Refatoração estrutural (sem mudança de comportamento)
 
 ### Adicionado

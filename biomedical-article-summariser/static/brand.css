@@ -727,3 +727,9 @@ input[type="text"], input[type="search"], input[type="email"], input[type="passw
   .pano-stats { gap: 12px 28px; }
   .pano-legend { grid-template-columns: 1fr; }
 }
+
+/* estado de confirmacao do e-mail (perfil) */
+.mail-state { display: inline-block; padding: 2px 10px; border-radius: 999px; border: 1px solid var(--border); font-size: 0.78rem; color: var(--muted); }
+.mail-state.is-ok { color: var(--ok); border-color: var(--ok); }
+
+.narrow { max-width: 34rem; margin-inline: auto; }

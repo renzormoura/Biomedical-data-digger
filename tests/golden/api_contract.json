@@ -58,7 +58,7 @@
  },
  "GET /": {
   "status": 200,
-  "text": "<!doctype html>\n<html lang=\"pt-BR\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <meta name=\"color-scheme\" content=\"dark light\">\n  <meta name=\"description\" content=\"Encontre, entenda e organize artigos científicos: busca com filtros, versão aberta, citações e listas de leitura.\">\n  <title>Biomedical Data Digger — navegador de artigos</title>\n  <link rel=\"icon\" href=\"/static/favicon.svg\" type=\"image/svg+xml\">\n  <link rel=\"stylesheet\" href=\"/static/browse.css?v=6ad58a44\">\n  <link rel=\"stylesheet\" href=\"/static/brand.css?v=6ad58a44\">\n  <",
+  "text": "<!doctype html>\n<html lang=\"pt-BR\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <meta name=\"color-scheme\" content=\"dark light\">\n  <meta name=\"description\" content=\"Encontre, entenda e organize artigos científicos: busca com filtros, versão aberta, citações e listas de leitura.\">\n  <title>Biomedical Data Digger — navegador de artigos</title>\n  <link rel=\"icon\" href=\"/static/favicon.svg\" type=\"image/svg+xml\">\n  <link rel=\"stylesheet\" href=\"/static/browse.css?v=<hash>\">\n  <link rel=\"stylesheet\" href=\"/static/brand.css?v=<hash>\">\n  <scri",
   "type": "text/html"
  },
  "GET /api/account": {
@@ -71,6 +71,8 @@
    },
    "createdAt": "<ts>",
    "email": "contrato@exemplo.com",
+   "emailEnabled": true,
+   "emailVerified": true,
    "interests": {
     "languages": 0,
     "lastChecked": null,
@@ -92,7 +94,8 @@
   "json": {
    "account": {
     "createdAt": "<ts>",
-    "email": "contrato@exemplo.com"
+    "email": "contrato@exemplo.com",
+    "emailVerified": true
    },
    "alerts": [],
    "analyses": [],
@@ -2932,12 +2935,27 @@
  },
  "GET /ia": {
   "status": 200,
-  "text": "<!doctype html>\n<html lang=\"pt-BR\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <meta name=\"color-scheme\" content=\"dark light\">\n  <meta name=\"description\" content=\"Análise de artigos científicos com IA, fiel ao texto-fonte, para estudantes e profissionais.\">\n  <title>Laboratório de IA — Biomedical Data Digger</title>\n  <link rel=\"icon\" href=\"/static/favicon.svg\" type=\"image/svg+xml\">\n  <link rel=\"stylesheet\" href=\"/static/app.css?v=6ad58a44\">\n  <link rel=\"stylesheet\" href=\"/static/brand.css?v=6ad58a44\">\n  <script src=\"/static/app.js?",
+  "text": "<!doctype html>\n<html lang=\"pt-BR\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <meta name=\"color-scheme\" content=\"dark light\">\n  <meta name=\"description\" content=\"Análise de artigos científicos com IA, fiel ao texto-fonte, para estudantes e profissionais.\">\n  <title>Laboratório de IA — Biomedical Data Digger</title>\n  <link rel=\"icon\" href=\"/static/favicon.svg\" type=\"image/svg+xml\">\n  <link rel=\"stylesheet\" href=\"/static/app.css?v=<hash>\">\n  <link rel=\"stylesheet\" href=\"/static/brand.css?v=<hash>\">\n  <script src=\"/static/app.js?v=<h",
   "type": "text/html"
  },
  "POST /api/account/password": {
   "json": {
    "ok": true
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/account/resend-verification [ja confirmado]": {
+  "json": {
+   "alreadyVerified": true
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/account/resend-verification [no intervalo]": {
+  "json": {
+   "reason": "wait",
+   "sent": false
   },
   "status": 200,
   "type": "application/json"
@@ -3025,6 +3043,22 @@
   "status": 200,
   "type": "application/json"
  },
+ "POST /api/auth/forgot [conhecido]": {
+  "json": {
+   "message": "Se este e-mail tiver uma conta, enviamos um link para redefinir a senha. Ele vale por 1 hora.",
+   "ok": true
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/auth/forgot [desconhecido]": {
+  "json": {
+   "message": "Se este e-mail tiver uma conta, enviamos um link para redefinir a senha. Ele vale por 1 hora.",
+   "ok": true
+  },
+  "status": 200,
+  "type": "application/json"
+ },
  "POST /api/auth/login": {
   "json": {
    "user": "contrato@exemplo.com"
@@ -3042,6 +3076,28 @@
  "POST /api/auth/register": {
   "json": {
    "user": "contrato@exemplo.com"
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/auth/reset [invalido]": {
+  "json": {
+   "error": "Este link é inválido ou expirou. Peça um novo link de redefinição."
+  },
+  "status": 400,
+  "type": "application/json"
+ },
+ "POST /api/auth/verify [invalido]": {
+  "json": {
+   "error": "Este link de confirmação é inválido ou expirou. Peça um novo na sua conta."
+  },
+  "status": 400,
+  "type": "application/json"
+ },
+ "POST /api/auth/verify [valido]": {
+  "json": {
+   "email": "contrato@exemplo.com",
+   "verified": true
   },
   "status": 200,
   "type": "application/json"

@@ -16,6 +16,7 @@ from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, Field
 
 from account_store import AccountStore, AccountStoreError, InvalidCredentialsFormat, validate_credentials
+from account_tokens import AccountTokens
 from alerts import AlertStore
 from domain import AuthRequiredError, DiggerError
 from library_store import LibraryStore
@@ -46,6 +47,8 @@ def register_account_routes(
     alerts: AlertStore | None,
     profiles: ProfileStore | None,
     notifications: NotificationStore | None = None,
+    tokens: AccountTokens | None = None,
+    mail_enabled: bool = False,
 ) -> None:
     def require_user(request: Request) -> str:
         user = current_user(request)
@@ -82,6 +85,7 @@ def register_account_routes(
         profile = profiles.get(user) if profiles else None
         return {
             "email": user, "createdAt": created, "counts": counts, "interests": interests,
+            "emailVerified": tokens.is_verified(user) if tokens is not None else None, "emailEnabled": mail_enabled,
             "profile": {"profile": profile.key, "healthPack": profile.health_pack, "configured": profile.configured} if profile else None,
         }
 
@@ -113,7 +117,7 @@ def register_account_routes(
         profile = profiles.get(user) if profiles else None
         payload: dict[str, Any] = {
             "exportedAt": utcnow_iso(),
-            "account": {"email": user, "createdAt": created},
+            "account": {"email": user, "createdAt": created, "emailVerified": tokens.is_verified(user) if tokens is not None else None},
             "profile": {"profile": profile.key, "healthPack": profile.health_pack} if profile else None,
             "library": [{**item.work.to_dict(), "tags": list(item.tags), "savedAt": item.saved_at} for item in library.items(user)],
             "lists": [
@@ -167,6 +171,8 @@ def register_account_routes(
             profiles.delete(user)
         if notifications is not None:
             notifications.delete_user_data(user)
+        if tokens is not None:
+            tokens.delete_user_data(user)
         try:
             account_store_factory().delete_user(user)
         except AccountStoreError as error:

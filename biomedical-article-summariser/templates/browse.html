@@ -43,11 +43,13 @@
       <div class="field"><label for="auth-password">Senha</label>
         <input type="password" id="auth-password" autocomplete="current-password" minlength="8" maxlength="128" required></div>
       <p class="auth-error" id="auth-error" role="alert" hidden></p>
+      <p class="hint" id="auth-note" role="status" hidden></p>
       <div class="row">
         <button type="button" class="btn btn-primary" data-auth="login">Entrar</button>
         <button type="button" class="btn btn-secondary" data-auth="register">Criar conta</button>
         <button type="button" class="btn btn-ghost" data-auth="cancel">Cancelar</button>
       </div>
+      <button type="button" class="btn btn-ghost btn-sm" data-auth="forgot">Esqueci a senha</button>
       <a class="btn btn-outline" id="profile-link" href="#/perfil" hidden>Meu perfil</a>
       <button type="button" class="btn btn-outline" id="logout-button" hidden>Sair da conta</button>
     </form>

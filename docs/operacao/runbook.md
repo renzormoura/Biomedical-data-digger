@@ -58,7 +58,14 @@ Um IP/conta passou do limite (ver [Segurança](../arquitetura/seguranca.md#limit
 - Senha errada repetidas vezes → limite de tentativas (aguardar 1 min).
 - Cookie bloqueado pelo navegador (cookies de terceiros não importam; é do próprio domínio).
 - Conta excluída: o cookie deixa de valer em até 30 s.
-- Recuperação de senha **não existe ainda**: não há como redefinir sem intervenção manual no banco. Ver o procedimento abaixo.
+- Esqueceu a senha: a própria pessoa usa **Esqueci a senha** (link por e-mail). Se o e-mail não chegar, ver "E-mails não chegam" abaixo; sem e-mail configurado, use o procedimento manual no final.
+
+### E-mails não chegam (confirmação ou recuperação)
+1. A interface diz "A recuperação de senha por e-mail não está disponível"? Faltam `SMTP_HOST` e companhia no Render (ver [Configuração](configuracao.md)).
+2. Nos logs, procure "Falha ao enviar e-mail de conta": o provedor recusou (credencial, remetente não verificado, limite de envio).
+3. Chegou, mas no spam: configure SPF, DKIM e DMARC do domínio do remetente.
+4. Link abre "inválido ou expirou": o link de redefinição vale 1 hora e o de confirmação 48 horas, e só funcionam uma vez; peça outro.
+5. `APP_BASE_URL` errada gera links para o endereço errado: confira (https, sem barra no fim).
 
 ### Pedido de exclusão ou cópia de dados
 A própria pessoa faz em *Perfil → Conta e dados*. Se não conseguir entrar, siga o procedimento de [Privacidade e LGPD](../legal/privacidade-e-lgpd.md#atendimento-de-solicitações) (verificar identidade e executar manualmente).
@@ -73,11 +80,11 @@ Aviso na interface após 60 dias (ANVISA e Conitec). Rodar o procedimento de [At
 
 ## Procedimentos manuais
 
-### Redefinir a senha de uma conta (sem recuperação automática)
+### Redefinir a senha de uma conta (somente se o e-mail não estiver configurado)
 1. Confirmar a identidade da pessoa por um canal acordado.
 2. Gerar um novo hash com o mesmo algoritmo (PBKDF2-SHA256, 600.000 iterações, sal novo de 32 bytes) usando `account_store.py` em um console com acesso ao banco, e atualizar `password_hash`/`password_salt`.
 3. Orientar a pessoa a trocar a senha ao entrar.
-> Substituir este procedimento por recuperação por e-mail é prioridade antes do lançamento comercial.
+> Com SMTP configurado, a pessoa resolve sozinha pelo "Esqueci a senha"; este procedimento fica para exceções.
 
 ### Remover uma fonte do feed
 Remover a entrada de `feed_sources.py` e fazer o deploy; os itens dela somem em até 45 dias.

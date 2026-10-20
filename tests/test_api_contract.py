@@ -23,6 +23,7 @@ import downloads
 import enrichment
 import pages
 from account_store import AccountStore
+from account_tokens import AccountTokens
 from alerts import AlertService, AlertStore
 from config import Settings
 from db import Database
@@ -50,9 +51,11 @@ _DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 _DATE_BR = re.compile(r"\b\d{1,2}/\d{1,2}/\d{4}\b")
 _HEX_ID = re.compile(r"\b[0-9a-f]{32}\b")
 _TOKEN_IN_PATH = re.compile(r"(/lista/)[\w-]{8,}")
+_ASSET_VERSION = re.compile(r"\?v=[0-9a-f]+")  # hash dos arquivos estaticos: muda a cada alteracao de JS/CSS
 
 
 def _norm_text(text: str) -> str:
+    text = _ASSET_VERSION.sub("?v=<hash>", text)
     text = _TIMESTAMP.sub("<ts>", text)
     text = _HEX_ID.sub("<id>", text)
     text = _TOKEN_IN_PATH.sub(r"\1<token>", text)
@@ -76,6 +79,19 @@ ABSTRACT = (
     "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). "
     "Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567."
 )
+
+
+class Inbox:
+    """E-mail de teste: guarda as mensagens para o roteiro pegar os tokens dos links."""
+
+    def __init__(self) -> None:
+        self.sent: list[Any] = []
+
+    def send(self, message: Any) -> None:
+        self.sent.append(message)
+
+    def token(self) -> str:
+        return re.search(r"token=([\w%-]+)", self.sent[-1].text).group(1)  # type: ignore[union-attr]
 
 
 class Recorder:
@@ -123,8 +139,10 @@ def recorder(tmp_path, monkeypatch):
     database = Database(database_url="", sqlite_path=str(tmp_path / "contract.sqlite3"))
     library, reports, alert_store = LibraryStore(database), ReportStore(database), AlertStore(database)
     profiles, notification_store, feed_store = ProfileStore(database), NotificationStore(database), FeedStore(database)
-    for store in (library, reports, alert_store, profiles, notification_store, feed_store):
+    account_tokens = AccountTokens(database)
+    for store in (library, reports, alert_store, profiles, notification_store, feed_store, account_tokens):
         store.initialize()
+    inbox = Inbox()
 
     works = [make_work(str(n), title=f"Estudo de contrato {n}", abstract=ABSTRACT, year=2024) for n in (1, 2, 3)]
     catalogs = [FakeCatalog(works=works), FakeCatalog(id="pubmed", name="PubMed (MEDLINE)", works=works[:2])]
@@ -160,10 +178,11 @@ def recorder(tmp_path, monkeypatch):
             "title": "T 1", "journal": "J", "year": 2024, "pmid": "1", "source": "MED", "url": "https://x/1", "doi": "10.1/x",
             "reliability": "Alta", "reliability_score": 0.95}],
         usage_log=UsageLog(), discovery=discovery, library=library, alerts=alerts, reports=reports, profiles=profiles,
-        notifications=notifications, feed=feed_service,
+        notifications=notifications, feed=feed_service, account_tokens=account_tokens, mailer=inbox,
     )
     recorder = Recorder(TestClient(app, base_url="http://testserver"))
     recorder.app = app  # type: ignore[attr-defined]
+    recorder.inbox = inbox  # type: ignore[attr-defined]
     return recorder
 
 
@@ -212,6 +231,14 @@ def run_scenario(r: Recorder) -> None:  # noqa: C901 - e um roteiro linear de pr
     c("POST", "/api/auth/logout")
     c("POST", "/api/auth/login", json={"email": EMAIL, "password": PASSWORD})
     c("GET", "/api/auth/me", label="logado")
+    # confirmacao de e-mail e recuperacao de senha (a conta ja recebeu o link de confirmacao ao se cadastrar)
+    c("POST", "/api/account/resend-verification", label="no intervalo")
+    c("POST", "/api/auth/verify", json={"token": "invalido"}, label="invalido")
+    c("POST", "/api/auth/verify", json={"token": r.inbox.token()}, label="valido")  # type: ignore[attr-defined]
+    c("POST", "/api/account/resend-verification", label="ja confirmado")
+    c("POST", "/api/auth/forgot", json={"email": "ninguem@exemplo.com"}, label="desconhecido")
+    c("POST", "/api/auth/forgot", json={"email": EMAIL}, label="conhecido")
+    c("POST", "/api/auth/reset", json={"token": "invalido", "password": "outra-senha-forte-789"}, label="invalido")
     c("GET", "/api/account")
     c("GET", "/api/profile", label="inicial")
     c("PUT", "/api/profile", json={"profile": "saude"})

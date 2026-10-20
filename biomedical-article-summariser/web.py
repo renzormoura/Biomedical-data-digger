@@ -28,6 +28,7 @@ from account_store import (
     get_account_store,
     validate_credentials,
 )
+from account_tokens import AccountTokens
 from alerts import AlertService
 from browse_api import register_browse_routes
 from cache import TTLCache
@@ -39,6 +40,7 @@ from domain import (
 )
 from feed import FeedService
 from library_store import LibraryStore
+from mailer import Mailer
 from notifications import NotificationService
 from profiles import DEFAULT as DEFAULT_PROFILE
 from profiles import ProfileStore
@@ -46,6 +48,7 @@ from ratelimit import RateLimitExceeded, SlidingWindowLimiter, client_key
 from reports import ReportStore
 from routes.hardening import install_http_hardening
 from routes.lab import LabContext, register_lab_routes
+from routes.recovery import RecoveryContext, register_recovery_routes
 from sessions import SessionSigner
 from usage import UsageLog
 from workflow import AnalysisService, ArticleRepository
@@ -79,6 +82,8 @@ def create_app(
     profiles: ProfileStore | None = None,
     notifications: NotificationService | None = None,
     feed: FeedService | None = None,
+    account_tokens: AccountTokens | None = None,
+    mailer: Mailer | None = None,
 ) -> FastAPI:
     app = FastAPI(title="Biomedical Data Digger", docs_url=None, redoc_url=None, openapi_url=None)
     signer = SessionSigner(settings.session_secret or SessionSigner.generate_secret())
@@ -188,6 +193,14 @@ def create_app(
         return {"status": "ok"}
 
     # -- autenticacao ----------------------------------------------------------
+    recovery: RecoveryContext | None = None
+    if account_tokens is not None:
+        recovery = RecoveryContext(
+            account_store_factory=account_store_factory, tokens=account_tokens, mailer=mailer, base_url=settings.app_base_url,
+            throttle_auth=throttle_auth, current_user=current_user,
+        )
+        register_recovery_routes(app, recovery)
+
     @app.get("/api/auth/me")
     def me(request: Request) -> dict[str, Any]:
         return {"user": current_user(request)}
@@ -208,6 +221,8 @@ def create_app(
             raise DiggerError(str(error)) from error
         if not created:
             return JSONResponse({"error": "Este e-mail já está cadastrado."}, status_code=409)
+        if recovery is not None:
+            recovery.send_verification(email)
         response = JSONResponse({"user": email})
         start_session(response, email)
         return response
@@ -244,6 +259,7 @@ def create_app(
             app, account_store_factory=account_store_factory, current_user=current_user, throttle_auth=throttle_auth, on_deleted=end_account,
             library=library, reports=reports, alerts=alerts.store if alerts is not None else None, profiles=profiles,
             notifications=notifications.store if notifications is not None else None,
+            tokens=account_tokens, mail_enabled=recovery is not None and recovery.enabled,
         )
 
     if discovery is not None and library is not None:

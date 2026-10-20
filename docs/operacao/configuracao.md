@@ -11,6 +11,18 @@ Toda a configuração vem de **variáveis de ambiente**, lidas e validadas em um
 | `SESSION_SECRET` | Segredo de assinatura das sessões, **mínimo 32 caracteres**. No Render é gerado automaticamente (`generateValue`). Trocá-lo **encerra todas as sessões** |
 | `DATABASE_URL` | URL do PostgreSQL. Em produção, sem ela o serviço **não inicia** |
 
+### Para e-mail (confirmação de endereço e recuperação de senha)
+| Variável | Descrição |
+|---|---|
+| `APP_BASE_URL` | URL pública do site, `https://…` sem barra no fim. Base dos links dos e-mails. **Obrigatória em produção se `SMTP_HOST` estiver definido** (o serviço não sobe sem ela) |
+| `SMTP_HOST` | Servidor SMTP do provedor de e-mail. Sem ele, em produção, a recuperação de senha fica desligada |
+| `SMTP_PORT` | Padrão 587 |
+| `SMTP_USER`, `SMTP_PASSWORD` | Credenciais do provedor |
+| `SMTP_FROM` | Remetente (ex.: `no-reply@seudominio.com`); obrigatório com `SMTP_HOST` |
+| `SMTP_SECURITY` | `starttls` (padrão), `ssl` ou `none` |
+
+Configure SPF, DKIM e DMARC no domínio do remetente (o provedor orienta), senão as mensagens caem no spam.
+
 ### Recomendadas
 | Variável | Descrição |
 |---|---|

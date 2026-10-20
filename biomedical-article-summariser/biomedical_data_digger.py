@@ -7,6 +7,8 @@ import os
 import uvicorn
 from fastapi import FastAPI
 
+from account_store import get_account_store
+from account_tokens import AccountTokens
 from alerts import AlertService, AlertStore
 from arxiv_catalog import ArxivCatalog
 from brasil import anvisa, conitec, rename
@@ -19,6 +21,7 @@ from feed import FeedService, FeedStore
 from generation import GenerationPolicy
 from library_store import get_library_store
 from llm_service import get_router
+from mailer import mailer_from_env
 from notifications import NotificationService, NotificationStore
 from openaire_catalog import OpenAireCatalog
 from openalex_catalog import OpenAlexCatalog
@@ -77,9 +80,13 @@ def create_app() -> FastAPI:
         fetch_work=lambda ref: discovery.work(ref, client_id="vigia-retratacoes"),
         library=library, reports=report_store, bases=load_brazil_bases,
     )
+    get_account_store()  # cria a tabela de contas na subida: sem banco, o servico falha aqui e nao no primeiro login
+    account_tokens = AccountTokens()
+    account_tokens.initialize()
     return create_web_app(
         service, repository, settings, usage_log=usage_log, discovery=discovery, library=library, alerts=alerts,
         reports=report_store, profiles=profile_store, notifications=notifications, feed=FeedService(feed_store),
+        account_tokens=account_tokens, mailer=mailer_from_env(settings.production),
     )
 
 
