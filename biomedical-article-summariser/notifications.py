@@ -21,7 +21,7 @@ import json
 import uuid
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from typing import Any
 
 from brasil import anvisa, conitec, consulta, rename
@@ -31,6 +31,8 @@ from domain import DiggerError, RateLimitedError
 from library_store import LibraryStore
 from report_brasil import display_name
 from reports import ReportStore
+from timeutil import iso as _iso
+from timeutil import utcnow as _now
 
 AUTO_INTERVAL = timedelta(hours=6)
 MANUAL_INTERVAL = timedelta(minutes=15)
@@ -102,12 +104,6 @@ class WatchResult:
         return sum(self.created.values())
 
 
-def _now() -> datetime:
-    return datetime.now(timezone.utc)
-
-
-def _iso(moment: datetime) -> str:
-    return moment.isoformat(timespec="seconds")
 
 
 def _digest(value: object) -> str:

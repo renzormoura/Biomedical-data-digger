@@ -13,7 +13,7 @@ import json
 import uuid
 from collections import Counter
 from dataclasses import dataclass
-from datetime import date, datetime, timezone
+from datetime import date
 from functools import lru_cache
 
 import citations
@@ -26,6 +26,7 @@ from domain import LimitReachedError, NotFoundError
 from downloads import Block
 from extraction import Finding, extract_findings, split_sections
 from report_brasil import BrasilSection
+from timeutil import utcnow_iso as _now
 
 MAX_REPORTS = 30
 MAX_ITEMS = 200
@@ -130,8 +131,6 @@ class StudyAssessment:
     findings: tuple[Finding, ...]
 
 
-def _now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
 def _clean(text: str, limit: int) -> str:

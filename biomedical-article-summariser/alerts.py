@@ -14,12 +14,14 @@ import uuid
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timedelta
 
 from catalog import SearchQuery, Work
 from db import Database
 from domain import DiggerError, NotFoundError
 from interests import Preferences, Topic, carregar, mentions
+from timeutil import iso as _iso
+from timeutil import utcnow as _now
 
 AUTO_INTERVAL = timedelta(hours=6)
 MANUAL_INTERVAL = timedelta(minutes=15)
@@ -65,12 +67,6 @@ class CheckResult:
     notes: tuple[str, ...] = field(default_factory=tuple)
 
 
-def _now() -> datetime:
-    return datetime.now(timezone.utc)
-
-
-def _iso(moment: datetime) -> str:
-    return moment.isoformat(timespec="seconds")
 
 
 def eligible(work: Work, now: datetime) -> bool:

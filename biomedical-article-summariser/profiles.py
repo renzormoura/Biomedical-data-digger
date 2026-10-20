@@ -8,10 +8,10 @@ para nao esconder o diferencial de quem ainda nao disse o que faz.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
 
 from db import Database
 from domain import DiggerError
+from timeutil import utcnow_iso
 
 # (chave, rotulo, descricao, pacote de saude ligado por padrao)
 PROFILES: tuple[tuple[str, str, str, bool], ...] = (
@@ -78,6 +78,6 @@ class ProfileStore:
             """INSERT INTO user_profiles (user_email, profile, health_pack, updated_at) VALUES (?, ?, ?, ?)
                ON CONFLICT (user_email) DO UPDATE SET profile = excluded.profile, health_pack = excluded.health_pack,
                updated_at = excluded.updated_at""",
-            (user, key, 1 if pack else 0, datetime.now(timezone.utc).isoformat(timespec="seconds")),
+            (user, key, 1 if pack else 0, utcnow_iso()),
         )
         return Profile(key, pack)

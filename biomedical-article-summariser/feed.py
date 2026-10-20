@@ -28,6 +28,8 @@ import interests
 from catalog import CatalogError
 from db import Database
 from feed_sources import ARTICLE_TIERS, SOURCE_BY_ID, SOURCES, TIERS, Source
+from timeutil import iso_utc as _iso
+from timeutil import utcnow as _now
 from xmlutil import parse_xml, text_of
 
 REFRESH_INTERVAL = timedelta(hours=3)  # intervalo minimo entre buscas de uma mesma fonte
@@ -113,12 +115,6 @@ class FeedPage:
     notes: list[str] = field(default_factory=list)
 
 
-def _now() -> datetime:
-    return datetime.now(timezone.utc)
-
-
-def _iso(moment: datetime) -> str:
-    return moment.astimezone(timezone.utc).isoformat(timespec="seconds")
 
 
 # ---------------------------------------------------------------------- leitura dos feeds (puro)

@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import json
 from collections.abc import Callable
-from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import FastAPI, Request
@@ -23,6 +22,7 @@ from library_store import LibraryStore
 from notifications import NotificationStore
 from profiles import ProfileStore
 from reports import ReportStore
+from timeutil import utcnow_iso
 
 
 class PasswordIn(BaseModel):
@@ -112,7 +112,7 @@ def register_account_routes(
             raise DiggerError(str(error)) from error
         profile = profiles.get(user) if profiles else None
         payload: dict[str, Any] = {
-            "exportedAt": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "exportedAt": utcnow_iso(),
             "account": {"email": user, "createdAt": created},
             "profile": {"profile": profile.key, "healthPack": profile.health_pack} if profile else None,
             "library": [{**item.work.to_dict(), "tags": list(item.tags), "savedAt": item.saved_at} for item in library.items(user)],

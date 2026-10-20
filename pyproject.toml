@@ -52,6 +52,7 @@ python_version = "3.10"
 mypy_path = "biomedical-article-summariser"
 files = [
     "biomedical-article-summariser/security.py",
+    "biomedical-article-summariser/timeutil.py",
     "biomedical-article-summariser/biomedical_data_digger.py",
     "biomedical-article-summariser/contexto_brasil.py",
     "biomedical-article-summariser/prompt_specs.py",

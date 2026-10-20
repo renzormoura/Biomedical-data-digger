@@ -16,6 +16,8 @@ from typing import Any
 
 from dotenv import load_dotenv
 
+from timeutil import utcnow
+
 load_dotenv()
 
 _PASSWORD_ITERATIONS = 600_000
@@ -133,7 +135,7 @@ class AccountStore:
         normalized_email = email.strip().lower()
         salt = secrets.token_bytes(32)
         password_hash = self._password_digest(password, salt)
-        created_at = datetime.now(timezone.utc)
+        created_at = utcnow()
 
         try:
             with self._connection() as connection:

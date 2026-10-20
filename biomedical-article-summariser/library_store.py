@@ -11,12 +11,12 @@ import json
 import secrets
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from functools import lru_cache
 
 from catalog import Work
 from db import Database, Transaction
 from domain import LimitReachedError, NotFoundError
+from timeutil import utcnow_iso as _now
 
 MAX_ITEMS = 500
 MAX_LISTS = 50
@@ -74,8 +74,6 @@ class SavedAnalysis:
     created_at: str
 
 
-def _now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
 def _snapshot(work: Work) -> str:
