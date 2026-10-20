@@ -4,6 +4,7 @@
 | Camada | Ferramenta | Onde | Quantidade |
 |---|---|---|---|
 | Unitários e de integração do servidor | `pytest` | `tests/*.py` (57 arquivos) | **1.471 testes** (inclui parametrizados e 15 subtestes) |
+| Contrato da API | `pytest` | `tests/test_api_contract.py`, retrato em `tests/golden/api_contract.json` | 96 chamadas cobrindo **todas** as rotas |
 | Propriedades | `hypothesis` | `tests/test_properties.py` | Parsing de identificadores, verificação de números, chaves canônicas |
 | Front-end (funções puras) | `node --test` | `tests/js/browse-lib.test.js` | 11 testes |
 | Fidelidade com modelo real | `pytest -m live` | `evals/test_fidelity_live.py` | Fora da suíte padrão (chama o Groq) |

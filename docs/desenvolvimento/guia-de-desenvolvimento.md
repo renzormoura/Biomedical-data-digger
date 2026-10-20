@@ -50,10 +50,11 @@ Mudar pesos altera **todas** as notas já exibidas e os relatórios: documente e
 Use `CREATE TABLE IF NOT EXISTS` em `initialize()` do armazém (**mudanças só aditivas**: não há migração). Garanta SQL compatível com SQLite e PostgreSQL (`?` como marcador; evite funções específicas). Implemente `delete_user_data` e inclua o dado na exportação da conta. Atualize [Modelo de dados](../arquitetura/dados.md).
 
 ### Adicionar uma rota
-1. Modelo Pydantic com limites (ou `Query(max_length=…)`).
+Coloque-a no módulo do domínio em `routes/` (ou crie um e registre-o em `browse_api.py`); as dependências chegam pelo `ApiContext`.
+1. Modelo Pydantic com limites em `routes/schemas.py` (ou `Query(max_length=…)`).
 2. Rotas pessoais começam com `require_user(request)`; rotas que chamam fontes usam `identity(request)` para o limitador.
 3. Resposta em JSON simples; erros por exceção de domínio.
-4. Teste em `tests/test_browse_api.py` (ou próprio) e linha em [Referência da API](../api/referencia.md).
+4. Teste em `tests/test_browse_api.py` (ou próprio), a chamada em `tests/test_api_contract.py` (o teste falha se uma rota ficar sem cobertura; regrave o retrato com `UPDATE_GOLDEN=1`) e a linha em [Referência da API](../api/referencia.md).
 
 ### Alterar o front-end
 - Sem `style` nem `<script>` inline (CSP). Dimensões dinâmicas: `elemento.style.width = …` em JavaScript.
