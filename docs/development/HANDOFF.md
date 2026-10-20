@@ -15,6 +15,7 @@ Estado do projeto para quem vai continuar. Atualizado em **19/10/2026**. O panor
 | PostgreSQL | Suíte completa passa em PostgreSQL 16 local (`TEST_POSTGRES_URL`, ver [Testes](../desenvolvimento/testes.md)) | Apontar `DATABASE_URL` de produção, conferir backups e restauração |
 | Dados do Brasil | Instantâneos de 17/10/2026 | Revisão por farmacêutico/médico; resolver a licença da Rename |
 | Feed | 51 fontes verificadas em 18/10/2026 | Revisar os termos de cada fonte |
+| Planos e pagamento por Pix | Implementado (Fase A, conciliação manual); limites desligados (`BILLING_ENFORCED=0`) | Definir preço, chave Pix (`PIX_KEY`, `PIX_NAME`), CNPJ/MEI; ligar `BILLING_ENFORCED`; depois provedor com webhook |
 | Termos de Uso e Política de Privacidade | Rascunhos no produto (`#/termos`, `#/privacidade`) com aceite registrado | Revisão jurídica; definir `LEGAL_CONTROLLER` e `LEGAL_CONTACT` no Render (sem eles o serviço não sobe em produção) |
 | E-mail (confirmação e recuperação de senha) | Implementado e testado; Render ainda sem provedor | Contratar SMTP, definir `APP_BASE_URL` e `SMTP_*`, configurar SPF/DKIM |
 | Banco no Render | `render.yaml` cria PostgreSQL + serviço; `scripts/verificar_banco.py` confere o banco | Aplicar o Blueprint, rodar o verificador, testar backup |

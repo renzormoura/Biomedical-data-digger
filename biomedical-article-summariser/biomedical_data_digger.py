@@ -12,6 +12,7 @@ from account_store import get_account_store
 from account_tokens import AccountTokens
 from alerts import AlertService, AlertStore
 from arxiv_catalog import ArxivCatalog
+from billing import BillingStore
 from brasil import anvisa, conitec, rename
 from catalog import Catalog
 from config import Settings
@@ -86,10 +87,12 @@ def create_app() -> FastAPI:
     account_tokens.initialize()
     consent = ConsentStore()
     consent.initialize()
+    billing = BillingStore()
+    billing.initialize()
     return create_web_app(
         service, repository, settings, usage_log=usage_log, discovery=discovery, library=library, alerts=alerts,
         reports=report_store, profiles=profile_store, notifications=notifications, feed=FeedService(feed_store),
-        account_tokens=account_tokens, mailer=mailer_from_env(settings.production), consent=consent,
+        account_tokens=account_tokens, mailer=mailer_from_env(settings.production), consent=consent, billing=billing,
     )
 
 

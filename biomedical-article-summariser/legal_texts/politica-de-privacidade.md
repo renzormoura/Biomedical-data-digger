@@ -11,6 +11,7 @@
 - **E-mail e senha** (a senha é guardada só como resumo criptográfico, nunca em texto): identificar a conta e entrar. Ficam até você excluir a conta.
 - **Confirmação do e-mail e links temporários** de confirmação (48 horas) e de redefinição de senha (1 hora): segurança da conta. Só o resumo criptográfico dos links é guardado.
 - **Registro do aceite** destes documentos (versão e data): comprovar o aceite. Fica até você excluir a conta.
+- **Plano e pagamentos** (plano, validade, pedidos de pagamento por Pix com valor e data; o seu banco guarda os dados do pagamento, nós não vemos o cartão nem a conta): prestar o plano contratado e cumprir obrigações fiscais. A assinatura some com a conta; os registros de pagamento confirmados ficam pelo prazo exigido pela lei fiscal.
 - **Biblioteca, etiquetas, listas, análises salvas, relatórios, interesses, perfil de uso e avisos**: fazer o Serviço funcionar para você. Ficam até você remover ou excluir a conta.
 - **Cookie de sessão**: manter você conectado, por 7 dias.
 - **Endereço IP**: limitar abuso (fica só na memória do servidor) e registros técnicos do provedor de hospedagem. Na memória, até o reinício do servidor; nos logs do provedor, conforme o contrato dele.

@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 2026-10 — Planos e pagamento por Pix
+
+### Adicionado
+- **Planos** (Gratuito e Pro) com limites de artigos na biblioteca, listas e relatórios; tela **Planos** (`#/planos`) e *Perfil → Assinatura*. Os limites só valem com `BILLING_ENFORCED=1` (desligado por padrão: todas as contas mantêm os limites atuais).
+- **Pagamento por Pix sem provedor:** pedido com valor e identificador, código **copia e cola** (BR Code do Banco Central, CRC16), confirmação pelo administrador depois de conferir o extrato, ativação e prorrogação da assinatura, e e-mail de ativação.
+- **Painel de administração** (`#/admin`, `ADMIN_TOKEN`): pedidos pendentes, contas com plano, confirmar, cancelar, conceder cortesia e remover assinatura. Rotas `/api/admin/billing/*` e `/api/admin/accounts`.
+- Tabelas `subscriptions` e `payment_requests`; pedidos confirmados são mantidos após a exclusão da conta (obrigação fiscal). Seção "Planos e pagamento" nos Termos (rascunho; versão dos textos legais mantida porque ainda não foram publicados).
+- Variáveis `BILLING_ENFORCED`, `PIX_KEY`, `PIX_NAME`, `PIX_CITY`, `PRO_PRICE_CENTS`.
+
 ## 2026-10 — Termos de Uso e Política de Privacidade no produto
 
 ### Adicionado

@@ -14,13 +14,17 @@ from collections.abc import Callable
 from fastapi import FastAPI, Request
 
 from alerts import AlertService
+from billing import BillingStore
+from config import Settings
 from discovery import DiscoveryService
 from feed import FeedService
 from library_store import LibraryStore
+from mailer import Mailer
 from notifications import NotificationService
 from profiles import ProfileStore
 from reports import ReportStore
 from routes.analyses import register_analyses_routes
+from routes.billing import register_billing_routes
 from routes.context import ApiContext
 from routes.discover import register_discover_routes
 from routes.feed import register_feed_routes
@@ -43,10 +47,17 @@ def register_browse_routes(
     profiles: ProfileStore | None = None,
     notifications: NotificationService | None = None,
     feed: FeedService | None = None,
+    billing: BillingStore | None = None,
+    settings: Settings | None = None,
+    admin_token: str = "",
+    mailer: Mailer | None = None,
+    account_exists: Callable[[str], bool] | None = None,
 ) -> None:
     ctx = ApiContext(
         discovery=discovery, library=library, current_user=current_user, identity=identity, alerts=alerts,
         cron_token=cron_token, reports=reports, profiles=profiles, notifications=notifications, feed=feed,
+        billing=billing, settings=settings, admin_token=admin_token, mailer=mailer,
+        account_exists=account_exists or (lambda email: False),
     )
     register_discover_routes(app, ctx)
     register_analyses_routes(app, ctx)
@@ -55,3 +66,4 @@ def register_browse_routes(
     register_reports_routes(app, ctx)
     register_watch_routes(app, ctx)
     register_library_routes(app, ctx)
+    register_billing_routes(app, ctx)

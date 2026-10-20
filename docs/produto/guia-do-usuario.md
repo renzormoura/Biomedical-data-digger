@@ -59,7 +59,10 @@ O relatório não conclui nem recomenda conduta: organiza o que você escolheu, 
 ## 9. Perfil
 Em *Perfil → Perfil de uso* diga como vai usar (estudante, pesquisador, profissional de saúde ou farmácia, consultoria ou outro). Isso apenas destaca ferramentas e liga ou desliga o pacote Saúde no Brasil.
 
-## 10. Laboratório de IA (opcional)
+## 10. Planos e pagamento
+Em **Planos** você vê o que cada plano inclui. O plano gratuito já dá acesso a busca, feed e nota de confiabilidade; o Pro amplia biblioteca, listas e relatórios. Para assinar, escolha o período, clique em **Assinar com Pix**, cole o código no app do seu banco e pague o valor exato. Confirmamos o pagamento manualmente (algumas horas em dia útil) e avisamos por e-mail. Não há cobrança automática: ao fim do período a conta volta ao gratuito sem perder dados. Acompanhe tudo em *Perfil → Assinatura*.
+
+## 11. Laboratório de IA (opcional)
 Acessível em **Laboratório de IA**: análises geradas por modelo de linguagem em 16 áreas, comparação de dois artigos e auditoria de respostas. Tudo é rotulado como gerado por IA, com avisos e verificação de números. Há uma **cota diária** (maior com conta). Modelos de linguagem podem errar: leia o artigo antes de qualquer decisão.
 
 ## Perguntas frequentes

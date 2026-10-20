@@ -32,6 +32,7 @@ from account_store import (
 )
 from account_tokens import AccountTokens
 from alerts import AlertService
+from billing import BillingStore
 from browse_api import register_browse_routes
 from cache import TTLCache
 from config import Settings
@@ -90,6 +91,7 @@ def create_app(
     account_tokens: AccountTokens | None = None,
     mailer: Mailer | None = None,
     consent: ConsentStore | None = None,
+    billing: BillingStore | None = None,
 ) -> FastAPI:
     app = FastAPI(title="Biomedical Data Digger", docs_url=None, redoc_url=None, openapi_url=None)
     signer = SessionSigner(settings.session_secret or SessionSigner.generate_secret())
@@ -278,6 +280,8 @@ def create_app(
         register_browse_routes(
             app, discovery=discovery, library=library, current_user=current_user, identity=identity, alerts=alerts,
             cron_token=settings.alerts_cron_token, reports=reports, profiles=profiles, notifications=notifications, feed=feed,
+            billing=billing, settings=settings, admin_token=settings.admin_token, mailer=mailer,
+            account_exists=lambda email: account_store_factory().exists(email),
         )
 
     return app

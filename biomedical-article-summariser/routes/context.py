@@ -7,12 +7,16 @@ from dataclasses import dataclass, field
 
 from fastapi import Request
 
+import plans
 from alerts import AlertService
+from billing import BillingStore
 from brasil import anvisa, conitec, rename
+from config import Settings
 from discovery import DiscoveryService
-from domain import AuthRequiredError, RateLimitedError, SourceUnavailableError
+from domain import AuthRequiredError, LimitReachedError, RateLimitedError, SourceUnavailableError
 from feed import FeedService
 from library_store import LibraryStore
+from mailer import Mailer
 from notifications import NotificationService
 from profiles import ProfileStore
 from ratelimit import RateLimitExceeded, SlidingWindowLimiter
@@ -36,6 +40,12 @@ class ApiContext:
     profiles: ProfileStore | None = None
     notifications: NotificationService | None = None
     feed: FeedService | None = None
+    billing: BillingStore | None = None
+    settings: Settings | None = None
+    admin_token: str = ""
+    mailer: Mailer | None = None
+    account_exists: Callable[[str], bool] = lambda email: False  # noqa: E731
+    admin_limiter: SlidingWindowLimiter = field(default_factory=lambda: SlidingWindowLimiter(60, window=60.0))
     shared_limiter: SlidingWindowLimiter = field(default_factory=lambda: SlidingWindowLimiter(60, window=60.0))
     brasil_limiter: SlidingWindowLimiter = field(default_factory=lambda: SlidingWindowLimiter(120, window=60.0))
 
@@ -51,6 +61,27 @@ class ApiContext:
 
     def brasil_meta(self, bases: Bases) -> dict[str, object]:
         return {"anvisa": anvisa_meta(bases[0]), "conitec": conitec_meta(bases[1]), "rename": rename_meta(bases[2])}
+
+    def plan_for(self, user: str) -> plans.Plan:
+        """Plano em vigor da conta. Sem cobranca ativa (`BILLING_ENFORCED`), todas as contas tem os limites do Pro (os tecnicos atuais)."""
+        catalog = plans.catalog(self.settings or Settings())
+        if self.billing is None or self.settings is None or not self.settings.billing_enforced:
+            return catalog[plans.PRO_KEY]
+        return catalog.get(self.billing.plan_key(user), catalog[plans.FREE_KEY])
+
+    def usage_for(self, user: str) -> dict[str, int]:
+        return {
+            "library": len(self.library.items(user)), "lists": len(self.library.lists(user)),
+            "reports": len(self.reports.summaries(user)) if self.reports is not None else 0,
+        }
+
+    def check_limit(self, user: str, kind: str, current: int) -> None:
+        """Levanta `LimitReachedError` (409) se a conta ja usou todo o limite `kind` do plano."""
+        plan = self.plan_for(user)
+        allowed = getattr(plan, kind)
+        if current >= allowed:
+            names = {"library": "artigos na biblioteca", "lists": "listas de leitura", "reports": "relatórios"}
+            raise LimitReachedError(f"O plano {plan.name} permite até {allowed} {names[kind]}. Veja os planos em #/planos para ampliar.")
 
     def require_user(self, request: Request) -> str:
         user = self.current_user(request)

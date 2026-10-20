@@ -11,6 +11,17 @@ Toda a configuração vem de **variáveis de ambiente**, lidas e validadas em um
 | `SESSION_SECRET` | Segredo de assinatura das sessões, **mínimo 32 caracteres**. No Render é gerado automaticamente (`generateValue`). Trocá-lo **encerra todas as sessões** |
 | `DATABASE_URL` | URL do PostgreSQL. Em produção, sem ela o serviço **não inicia** |
 
+### Para planos e pagamento (Pix)
+| Variável | Descrição |
+|---|---|
+| `BILLING_ENFORCED` | `1` faz valerem os limites do plano gratuito. Desligado (padrão), todas as contas têm os limites do Pro. Em produção, ligado exige `PIX_KEY` e `PIX_NAME` |
+| `PIX_KEY` | Chave Pix que recebe os pagamentos (e-mail, CPF/CNPJ, telefone ou chave aleatória) |
+| `PIX_NAME` | Nome do recebedor mostrado no Pix (ASCII, até 25 caracteres) |
+| `PIX_CITY` | Cidade do recebedor (padrão `BRASIL`, até 15 caracteres) |
+| `PRO_PRICE_CENTS` | Preço do Pro por mês em centavos (padrão 2900, **provisório**) |
+
+O painel de administração e a conciliação usam `ADMIN_TOKEN` (já listado abaixo).
+
 ### Para os textos legais (obrigatórias em produção)
 | Variável | Descrição |
 |---|---|

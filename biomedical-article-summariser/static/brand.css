@@ -740,3 +740,12 @@ input[type="text"], input[type="search"], input[type="email"], input[type="passw
 .legal-text p, .legal-text li { line-height: 1.6; }
 .auth-terms { display: flex; gap: 8px; align-items: flex-start; font-size: 0.85rem; }
 .auth-terms input { margin-top: 3px; }
+
+/* planos e pagamento por Pix */
+.plan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.plan-card.is-current { border-color: var(--accent); }
+.plan-price strong { font-size: 1.9rem; letter-spacing: -0.02em; }
+.pix-card { border-color: var(--accent); }
+.pix-amount strong { font-size: 1.5rem; }
+.pix-code { width: 100%; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.78rem; resize: vertical; background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; word-break: break-all; }
+.admin-list li { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }

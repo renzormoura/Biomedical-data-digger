@@ -60,6 +60,14 @@ Um IP/conta passou do limite (ver [Segurança](../arquitetura/seguranca.md#limit
 - Conta excluída: o cookie deixa de valer em até 30 s.
 - Esqueceu a senha: a própria pessoa usa **Esqueci a senha** (link por e-mail). Se o e-mail não chegar, ver "E-mails não chegam" abaixo; sem e-mail configurado, use o procedimento manual no final.
 
+### Conciliar pagamentos Pix e ativar assinaturas
+1. Abra `#/admin` e entre com o `ADMIN_TOKEN`.
+2. Em **Pedidos pendentes**, compare cada pedido (e-mail, valor, identificador) com o extrato do banco da chave Pix. O banco costuma mostrar valor, data e nome do pagador; o identificador `BDD…` aparece só em alguns bancos.
+3. Bateu: **Confirmar pagamento** (a assinatura é ativada ou prorrogada e a pessoa recebe e-mail). Não bateu e faz mais de alguns dias: **Cancelar**.
+4. Pagamento recebido sem pedido: ache a conta em **Contas** e use **Dar 30 dias de Pro** (ou peça à pessoa que crie o pedido).
+5. Problemas comuns: valor diferente do pedido (não confirme; combine com a pessoa), pagamento duplicado (confirme um e devolva o outro), "Painel desativado" (falta `ADMIN_TOKEN` no servidor), 401 (token errado).
+6. Emita o recibo e, quando devida, a nota fiscal (fora do sistema).
+
 ### E-mails não chegam (confirmação ou recuperação)
 1. A interface diz "A recuperação de senha por e-mail não está disponível"? Faltam `SMTP_HOST` e companhia no Render (ver [Configuração](configuracao.md)).
 2. Nos logs, procure "Falha ao enviar e-mail de conta": o provedor recusou (credencial, remetente não verificado, limite de envio).

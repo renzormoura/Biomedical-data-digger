@@ -53,6 +53,11 @@ class Settings:
     ncbi_api_key: str = field(default="", repr=False)
     daily_token_budget_guest: int = 60_000
     daily_token_budget_user: int = 200_000
+    billing_enforced: bool = False  # limites por plano valendo (desligado: todas as contas tem os limites do Pro)
+    pix_key: str = ""  # chave Pix que recebe os pagamentos
+    pix_name: str = ""  # nome do recebedor no Pix (ate 25 caracteres)
+    pix_city: str = "BRASIL"
+    pro_price_cents: int = 2900  # preco do plano Pro por mes, em centavos (valor provisorio: defina o preco real)
     require_terms: bool = False  # cadastro exige aceitar Termos e Politica (padrao em producao)
     legal_controller: str = ""  # quem e o controlador dos dados (nome ou razao social)
     legal_contact: str = ""  # e-mail do encarregado / para solicitacoes de titulares
@@ -82,8 +87,14 @@ class Settings:
                 "Defina LEGAL_CONTROLLER e LEGAL_CONTACT: os Termos de Uso e a Politica de Privacidade "
                 "precisam identificar o controlador dos dados e um contato (ou use REQUIRE_TERMS=0)."
             )
+        billing_enforced = os.environ.get("BILLING_ENFORCED", "").strip().lower() in ("1", "true", "yes", "on")
+        pix_key, pix_name = os.environ.get("PIX_KEY", "").strip(), os.environ.get("PIX_NAME", "").strip()
+        if billing_enforced and production and not (pix_key and pix_name):
+            raise ConfigurationError("BILLING_ENFORCED exige PIX_KEY e PIX_NAME (chave e nome do recebedor do Pix).")
         return cls(
             production=production,
+            billing_enforced=billing_enforced, pix_key=pix_key, pix_name=pix_name,
+            pix_city=os.environ.get("PIX_CITY", "").strip() or "BRASIL", pro_price_cents=_int_env("PRO_PRICE_CENTS", 2900, minimum=1),
             require_terms=require_terms, legal_controller=legal_controller, legal_contact=legal_contact,
             legal_forum=os.environ.get("LEGAL_FORUM", "").strip(),
             app_base_url=base_url or "http://localhost:7860",

@@ -17,7 +17,7 @@ test("parseRoute reconhece as telas e ignora o desconhecido", () => {
   assert.equal(Lib.parseRoute("#/feed?tipo=noticias").params.get("tipo"), "noticias");
   assert.equal(Lib.parseRoute("").view, "");
   assert.equal(Lib.parseRoute("#/").view, "");
-  assert.equal(Lib.parseRoute("#/admin/segredo").view, "");
+  assert.equal(Lib.parseRoute("#/nada-aqui/segredo").view, "");
   assert.deepEqual(Lib.parseRoute("#/lista/Ab3-xyz").rest, ["Ab3-xyz"]);
   assert.deepEqual(Lib.parseRoute("#/artigo?ref=10.1038%2Fnature").params.get("ref"), "10.1038/nature");
 });

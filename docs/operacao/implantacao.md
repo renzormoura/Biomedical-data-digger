@@ -15,7 +15,7 @@
 Variáveis de ambiente: ver [Configuração](configuracao.md). Em `render.yaml`, `SESSION_SECRET` é gerado pelo Render; `DATABASE_URL` vem do banco criado pelo próprio Blueprint; `APP_BASE_URL`, `SMTP_*`, `GROQ_API_KEY`, `ALERTS_CRON_TOKEN` e `ADMIN_TOKEN` são informados no painel (`sync: false`).
 
 ## O Blueprint (`render.yaml`)
-Cria, na mesma região (`virginia`), o **PostgreSQL** (`biomedical-data-digger-db`, plano pago com backup) e o **serviço web** (plano `starter`, sempre ligado), liga `DATABASE_URL` ao banco, gera `SESSION_SECRET`, define o *health check* em `/healthz` e lista as variáveis que você preenche no painel (`LEGAL_CONTROLLER`, `LEGAL_CONTACT`, `APP_BASE_URL`, `SMTP_*`, `GROQ_API_KEY`, `ALERTS_CRON_TOKEN`, `ADMIN_TOKEN`). **Confirme os nomes dos planos no painel do Render antes de aplicar** (eles mudam).
+Cria, na mesma região (`virginia`), o **PostgreSQL** (`biomedical-data-digger-db`, plano pago com backup) e o **serviço web** (plano `starter`, sempre ligado), liga `DATABASE_URL` ao banco, gera `SESSION_SECRET`, define o *health check* em `/healthz` e lista as variáveis que você preenche no painel (`LEGAL_CONTROLLER`, `LEGAL_CONTACT`, `PIX_KEY`, `PIX_NAME`, `APP_BASE_URL`, `SMTP_*`, `GROQ_API_KEY`, `ALERTS_CRON_TOKEN`, `ADMIN_TOKEN`). **Confirme os nomes dos planos no painel do Render antes de aplicar** (eles mudam).
 
 ### Banco pronto antes do primeiro tráfego
 1. Aplique o Blueprint (*New → Blueprint*) e espere o banco ficar disponível.
@@ -23,7 +23,7 @@ Cria, na mesma região (`virginia`), o **PostgreSQL** (`biomedical-data-digger-d
    ```bash
    DATABASE_URL="postgresql://..." python scripts/verificar_banco.py
    ```
-   Ele conecta, cria as 26 tabelas que faltarem (só `CREATE TABLE IF NOT EXISTS`), confere se todas existem e faz uma escrita e leitura de teste sem deixar rastro. Saída esperada: "Banco pronto."
+   Ele conecta, cria as 28 tabelas que faltarem (só `CREATE TABLE IF NOT EXISTS`), confere se todas existem e faz uma escrita e leitura de teste sem deixar rastro. Saída esperada: "Banco pronto."
 3. O serviço também cria as tabelas na subida e **falha rápido** se o banco estiver fora (melhor do que falhar no primeiro login).
 4. Confirme o **backup automático** do plano contratado e teste uma restauração (ver *Backup e recuperação* abaixo).
 

@@ -26,6 +26,7 @@ from account_consent import ConsentStore
 from account_store import AccountStore
 from account_tokens import AccountTokens
 from alerts import AlertService, AlertStore
+from billing import BillingStore
 from config import Settings
 from db import Database
 from discovery import DiscoveryService
@@ -70,7 +71,8 @@ def normalize(value: Any, key: str = "") -> Any:
     if isinstance(value, list):
         return [normalize(v, key) for v in value]
     if isinstance(value, str):
-        return "<token>" if key == "token" else _norm_text(value)
+        masked = {"token": "<token>", "reference": "<ref>", "copyPaste": "<pix>"}  # valores aleatorios (o BR Code leva o identificador e o CRC)
+        return masked.get(key) or _norm_text(value)
     if key == "since" and isinstance(value, int):  # epoch de inicio do registro de uso
         return "<epoch>"
     return value
@@ -140,8 +142,8 @@ def recorder(tmp_path, monkeypatch):
     database = Database(database_url="", sqlite_path=str(tmp_path / "contract.sqlite3"))
     library, reports, alert_store = LibraryStore(database), ReportStore(database), AlertStore(database)
     profiles, notification_store, feed_store = ProfileStore(database), NotificationStore(database), FeedStore(database)
-    account_tokens, consent = AccountTokens(database), ConsentStore(database)
-    for store in (library, reports, alert_store, profiles, notification_store, feed_store, account_tokens, consent):
+    account_tokens, consent, billing = AccountTokens(database), ConsentStore(database), BillingStore(database)
+    for store in (library, reports, alert_store, profiles, notification_store, feed_store, account_tokens, consent, billing):
         store.initialize()
     inbox = Inbox()
 
@@ -173,13 +175,14 @@ def recorder(tmp_path, monkeypatch):
 
     repository = ArticleRepository(lambda raw: ("Metformina e desfechos", ABSTRACT, "Fonte"))
     service = AnalysisService(repository, FakeGenerator(), SlidingWindowLimiter(1000, 60))
-    settings = Settings(session_secret="k" * 40, login_attempts_per_minute=1000, alerts_cron_token="t" * 30, admin_token="a" * 30)
+    settings = Settings(session_secret="k" * 40, login_attempts_per_minute=1000, alerts_cron_token="t" * 30, admin_token="a" * 30,
+                        pix_key="chave@exemplo.com", pix_name="Empresa Exemplo", pix_city="SAO PAULO")
     app = create_app(
         service, repository, settings, account_store_factory=lambda: accounts, search_fn=lambda query, limit, area: [{
             "title": "T 1", "journal": "J", "year": 2024, "pmid": "1", "source": "MED", "url": "https://x/1", "doi": "10.1/x",
             "reliability": "Alta", "reliability_score": 0.95}],
         usage_log=UsageLog(), discovery=discovery, library=library, alerts=alerts, reports=reports, profiles=profiles,
-        notifications=notifications, feed=feed_service, account_tokens=account_tokens, mailer=inbox, consent=consent,
+        notifications=notifications, feed=feed_service, account_tokens=account_tokens, mailer=inbox, consent=consent, billing=billing,
     )
     recorder = Recorder(TestClient(app, base_url="http://testserver"))
     recorder.app = app  # type: ignore[attr-defined]
@@ -298,6 +301,22 @@ def run_scenario(r: Recorder) -> None:  # noqa: C901 - e um roteiro linear de pr
     # rotina agendada
     c("POST", "/api/internal/alerts/run", label="sem token")
     c("POST", "/api/internal/alerts/run", label="com token", headers={"Authorization": "Bearer " + "t" * 30})
+    # planos e pagamento por Pix
+    c("GET", "/api/billing/plans")
+    c("GET", "/api/billing/me", label="gratuito")
+    pedido = c("POST", "/api/billing/requests", json={"plan": "pro", "months": 1}).json()
+    cancelavel = c("POST", "/api/billing/requests", json={"plan": "pro", "months": 3}, label="para cancelar").json()
+    c("DELETE", "/api/billing/requests/{request_id}", f"/api/billing/requests/{cancelavel['id']}")
+    admin = {"Authorization": "Bearer " + "a" * 30}
+    c("GET", "/api/admin/billing/requests", label="sem token")
+    c("GET", "/api/admin/billing/requests", headers=admin, label="pendentes")
+    c("POST", "/api/admin/billing/requests/{request_id}/confirm", f"/api/admin/billing/requests/{pedido['id']}/confirm", headers=admin, json={"note": "extrato conferido"})
+    c("GET", "/api/billing/me", label="pro")
+    c("GET", "/api/admin/accounts", headers=admin)
+    c("POST", "/api/admin/billing/grant", headers=admin, json={"email": EMAIL, "plan": "pro", "days": 10})
+    outro = c("POST", "/api/billing/requests", json={"plan": "pro", "months": 12}, label="outro").json()
+    c("POST", "/api/admin/billing/requests/{request_id}/cancel", f"/api/admin/billing/requests/{outro['id']}/cancel", headers=admin)
+    c("POST", "/api/admin/billing/revoke", headers=admin, json={"email": EMAIL})
     # remocoes
     c("DELETE", "/api/library", params={"ref": "2"})
     c("DELETE", "/api/reports/{report_id}", rp)

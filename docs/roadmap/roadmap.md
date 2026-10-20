@@ -33,7 +33,7 @@ Itens que **bloqueiam ou condicionam a cobrança**. Ordem sugerida:
 | 9 | Plano de hospedagem sempre ligado, backups testados e monitoramento | Hoje hiberna e não há alertas de operação | [Implantação](../operacao/implantacao.md) |
 | 10 | Rodar o roteiro de validação com usuários e decidir o que priorizar | Evidência de valor antes de investir | [Roteiro de validação](roteiro-validacao-usuarios.md) |
 | 11 | Revisão de segurança independente | Antes de abrir para clientes | [Segurança](../arquitetura/seguranca.md) |
-| 12 | Planos, cobrança e limites por plano | Modelo de negócio | a definir |
+| 12 | Planos, cobrança e limites por plano: **Fase A pronta** (planos, assinatura, Pix "copia e cola" e confirmação pelo administrador, limites por plano desligados por padrão). Faltam definir o preço, ter CNPJ/chave Pix e ligar `BILLING_ENFORCED`; depois, integrar um provedor com Pix dinâmico e webhook | Modelo de negócio | [Planos e Pix](../features/assinaturas.md) |
 
 ## Depois
 Ideias candidatas, **sem compromisso de ordem** (cada uma exige validação com usuários):

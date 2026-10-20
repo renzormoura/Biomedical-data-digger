@@ -46,7 +46,10 @@ def register_library_routes(app: FastAPI, ctx: ApiContext) -> None:
     @app.post("/api/library")
     def save_to_library(body: RefIn, request: Request) -> dict[str, Any]:
         user = require_user(request)
-        library.save(user, discovery.work(body.ref, source=body.source, client_id=identity(request)))
+        work = discovery.work(body.ref, source=body.source, client_id=identity(request))
+        if not library.saved_refs(user, [work.ref]):  # salvar de novo o mesmo artigo nao ocupa mais um lugar
+            ctx.check_limit(user, "library", len(library.items(user)))
+        library.save(user, work)
         return {"saved": True}
 
     @app.delete("/api/library")
@@ -89,7 +92,9 @@ def register_library_routes(app: FastAPI, ctx: ApiContext) -> None:
 
     @app.post("/api/lists")
     def create_list(body: ListIn, request: Request) -> dict[str, Any]:
-        return list_payload(library.create_list(require_user(request), body.name))
+        user = require_user(request)
+        ctx.check_limit(user, "lists", len(library.lists(user)))
+        return list_payload(library.create_list(user, body.name))
 
     @app.delete("/api/lists/{list_id}")
     def delete_list(list_id: str, request: Request) -> dict[str, Any]:

@@ -137,10 +137,26 @@ API JSON interna do produto, consumida pela própria SPA. Todas as rotas ficam s
 | POST | `/api/search` | pública | `{query, area, limit}` | Busca simples herdada do Laboratório |
 | POST | `/api/export/analysis` | pública | `{title, label, markdown, format}` | Converte uma análise em txt/md/html/docx |
 
+## Planos e pagamento (Pix)
+| Método | Rota | Acesso | Corpo | Descrição |
+|---|---|---|---|---|
+| GET | `/api/billing/plans` | pública | — | Planos com preço e limites, períodos (1, 3, 12), `enforced` e `pixAvailable` |
+| GET | `/api/billing/me` | conta | — | Plano, validade, limites, uso e pedidos (com o Pix dos pendentes) |
+| POST | `/api/billing/requests` | conta | `{plan, months}` | Cria (ou reaproveita) o pedido e devolve o Pix "copia e cola". 503 sem `PIX_KEY`; 409 com 3 pedidos pendentes |
+| DELETE | `/api/billing/requests/{id}` | conta | — | Cancela um pedido pendente próprio |
+
 ## Administração
-| Método | Rota | Acesso | Descrição |
+Todas com `Authorization: Bearer ADMIN_TOKEN` (comparação em tempo constante, limite por identidade); sem `ADMIN_TOKEN` configurado respondem 404; com token errado, 401.
+
+| Método | Rota | Corpo | Descrição |
 |---|---|---|---|
-| GET | `/api/admin/usage` | **token** `Bearer ADMIN_TOKEN` | Consumo agregado de tokens (sem conteúdo). Desativada sem o token |
+| GET | `/api/admin/usage` | — | Consumo agregado de tokens (sem conteúdo) |
+| GET | `/api/admin/billing/requests` | — | Pedidos de pagamento pendentes (com e-mail) |
+| POST | `/api/admin/billing/requests/{id}/confirm` | `{note?}` | Confirma o pagamento, ativa ou prorroga a assinatura e avisa por e-mail |
+| POST | `/api/admin/billing/requests/{id}/cancel` | — | Cancela um pedido pendente |
+| GET | `/api/admin/accounts?q=` | — | Contas (até 50) com plano e validade; `q` filtra por e-mail |
+| POST | `/api/admin/billing/grant` | `{email, plan, days}` | Cortesia: concede o plano por `days` dias |
+| POST | `/api/admin/billing/revoke` | `{email}` | Remove a assinatura da conta |
 
 ## Estabilidade
 A API existe para a SPA. Não há versionamento de rotas nem garantia de compatibilidade para terceiros. Se o produto abrir uma API pública comercial, ela deverá ser projetada à parte (autenticação por chave, versionamento e limites por plano), usando esta como base. As rotas `GET /api/discover/*` e `GET /api/feed*` são candidatas naturais.

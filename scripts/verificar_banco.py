@@ -20,6 +20,7 @@ from account_consent import ConsentStore  # noqa: E402
 from account_store import AccountStore  # noqa: E402
 from account_tokens import AccountTokens  # noqa: E402
 from alerts import AlertStore  # noqa: E402
+from billing import BillingStore  # noqa: E402
 from db import Database, DatabaseError  # noqa: E402
 from feed import FeedStore  # noqa: E402
 from library_store import LibraryStore  # noqa: E402
@@ -28,7 +29,7 @@ from profiles import ProfileStore  # noqa: E402
 from reports import ReportStore  # noqa: E402
 
 EXPECTED_TABLES = (
-    "users", "account_tokens", "email_verification", "terms_acceptance", "user_profiles", "library_items", "reading_lists", "reading_list_items",
+    "users", "account_tokens", "email_verification", "terms_acceptance", "subscriptions", "payment_requests", "user_profiles", "library_items", "reading_lists", "reading_list_items",
     "saved_analyses", "reports", "report_items", "report_substances", "report_versions", "report_sources", "report_log",
     "interest_prefs", "interest_baselines", "alert_seen", "alerts", "notifications", "retraction_status", "regulatory_state",
     "watch_state", "notification_prefs", "feed_items", "feed_state",
@@ -52,7 +53,7 @@ def main() -> int:
         print(f"FALHA ao conectar em {kind}: {type(error).__name__}", file=sys.stderr)
         return 1
     print(f"Conectado: {kind}")
-    for store in (AccountStore(), AccountTokens(database), ConsentStore(database), ProfileStore(database), LibraryStore(database), ReportStore(database),
+    for store in (AccountStore(), AccountTokens(database), ConsentStore(database), BillingStore(database), ProfileStore(database), LibraryStore(database), ReportStore(database),
                   AlertStore(database), NotificationStore(database), FeedStore(database)):
         store.initialize()
     present = existing_tables(database)

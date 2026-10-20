@@ -79,6 +79,7 @@ def register_reports_routes(app: FastAPI, ctx: ApiContext) -> None:
         @app.post("/api/reports")
         def create_report(body: ReportCreateIn, request: Request) -> dict[str, Any]:
             user = require_user(request)
+            ctx.check_limit(user, "reports", len(report_store.summaries(user)))
             chosen = next((item for item in library.lists(user) if item.id == body.list_id), None)
             if chosen is None:
                 raise NotFoundError("Lista não encontrada.")

@@ -61,12 +61,12 @@
   }
 
   // ------------------------------------------------------------------ API
-  async function api(path, { method = "GET", body, signal } = {}) {
+  async function api(path, { method = "GET", body, signal, headers = {} } = {}) {
     let response;
     try {
       response = await fetch(path, {
         method, signal, credentials: "same-origin",
-        headers: body === undefined ? {} : { "Content-Type": "application/json" },
+        headers: body === undefined ? headers : { "Content-Type": "application/json", ...headers },
         body: body === undefined ? undefined : JSON.stringify(body),
       });
     } catch (error) {
@@ -1514,7 +1514,7 @@
   }
 
   // ------------------------------------------------------------------ aba Perfil (visão geral, perfil de uso, interesses, conta e dados)
-  const PROFILE_SECTIONS = [["", "Visão geral"], ["uso", "Perfil de uso"], ["interesses", "Interesses e alertas"], ["notificacoes", "Notificações"], ["conta", "Conta e dados"]];
+  const PROFILE_SECTIONS = [["", "Visão geral"], ["uso", "Perfil de uso"], ["interesses", "Interesses e alertas"], ["notificacoes", "Notificações"], ["assinatura", "Assinatura"], ["conta", "Conta e dados"]];
 
   function profileTabs(active) {
     return h("nav", { class: "profile-tabs", "aria-label": "Seções do perfil" }, PROFILE_SECTIONS.map(([key, label]) =>
@@ -1675,6 +1675,7 @@
     if (active === "uso") profileUse(content);
     else if (active === "interesses") renderInterests(content);
     else if (active === "notificacoes") profileNotifications(content);
+    else if (active === "assinatura") profileSubscription(content);
     else if (active === "conta") profileAccount(content);
     else profileOverview(content);
   }
@@ -2119,6 +2120,134 @@
     return token;
   }
 
+  const BRL_STATUS = { pendente: "Aguardando pagamento", confirmado: "Pago", cancelado: "Cancelado" };
+  const fmtDay = (iso) => (iso ? new Date(iso).toLocaleDateString("pt-BR") : "");
+
+  /** Cartão com o Pix do pedido: valor, "copia e cola" e identificador. */
+  function pixCard(request, { onCancel } = {}) {
+    const code = h("textarea", { class: "pix-code", readonly: "", rows: "4", "aria-label": "Pix copia e cola" }, request.pix ? request.pix.copyPaste : "");
+    return h("div", { class: "card stack pix-card" },
+      h("h3", {}, `Plano ${request.planName}: ${request.months} ${request.months === 1 ? "mês" : "meses"}`),
+      h("p", { class: "pix-amount" }, h("strong", {}, request.amount), h("span", { class: "muted" }, ` · ${BRL_STATUS[request.status] || request.status}`)),
+      request.pix ? [
+        h("p", { class: "note" }, "Abra o app do seu banco, escolha Pix, Copia e Cola, cole o código abaixo e pague o valor exato."),
+        code,
+        h("div", { class: "row" },
+          h("button", { type: "button", class: "btn btn-primary btn-sm", onclick: async () => {
+            try { await navigator.clipboard.writeText(request.pix.copyPaste); toast("Código Pix copiado."); } catch { code.select(); toast("Selecione e copie o código."); }
+          } }, "Copiar código"),
+          onCancel ? h("button", { type: "button", class: "btn btn-ghost btn-sm", onclick: onCancel }, "Cancelar pedido") : null),
+        h("p", { class: "note" }, `Chave Pix: ${request.pix.key} · Recebedor: ${request.pix.name} · Identificador: ${request.reference}`),
+        h("p", { class: "note" }, "Depois do pagamento, confirmamos manualmente e avisamos por e-mail. Costuma levar algumas horas em dia útil."),
+      ] : null);
+  }
+
+  async function renderPlans() {
+    setTitle("Planos");
+    const body = h("div", { class: "stack" }, loading());
+    mount($app, h("section", { class: "stack" }, h("p", { class: "eyebrow" }, "Planos"), h("h1", {}, "Escolha o seu plano"), body));
+    try {
+      const [info, mine] = await Promise.all([api("/api/billing/plans"), session.user ? api("/api/billing/me").catch(() => null) : Promise.resolve(null)]);
+      const periods = info.periods;
+      let months = periods[0];
+      const detail = h("div", { class: "stack" });
+      const cards = h("div", { class: "plan-grid" });
+      const paint = () => mount(cards, info.plans.map((plan) => {
+        const current = mine && mine.plan === plan.key;
+        const total = plan.priceCents * months;
+        return h("div", { class: `card stack plan-card${current ? " is-current" : ""}` },
+          h("h2", {}, plan.name), h("p", { class: "muted" }, plan.description),
+          h("p", { class: "plan-price" }, plan.priceCents ? h("strong", {}, `R$ ${(total / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`) : h("strong", {}, "Grátis"),
+            plan.priceCents ? h("span", { class: "muted" }, ` por ${months} ${months === 1 ? "mês" : "meses"}`) : null),
+          h("ul", { class: "checklist" },
+            h("li", {}, icon("check"), h("span", {}, `${plan.limits.library} artigos na biblioteca`)),
+            h("li", {}, icon("check"), h("span", {}, `${plan.limits.lists} listas de leitura`)),
+            h("li", {}, icon("check"), h("span", {}, plan.limits.reports ? `${plan.limits.reports} relatórios de tema` : "Sem relatórios de tema"))),
+          current ? h("p", { class: "note" }, mine.active && plan.priceCents ? `Plano atual, até ${fmtDay(mine.expiresAt)}.` : "Plano atual.")
+            : plan.priceCents ? h("button", { type: "button", class: "btn btn-primary", onclick: () => choose(plan) }, "Assinar com Pix") : null);
+      }));
+      const choose = async (plan) => {
+        if (!requireUser("Entre ou crie uma conta para assinar.")) return;
+        try {
+          const request = await api("/api/billing/requests", { method: "POST", body: { plan: plan.key, months } });
+          mount(detail, pixCard(request, { onCancel: async () => { await api(`/api/billing/requests/${request.id}`, { method: "DELETE" }); mount(detail); toast("Pedido cancelado."); } }));
+          detail.scrollIntoView({ behavior: "smooth", block: "start" });
+        } catch (error) { toast(error.message); }
+      };
+      const picker = h("div", { class: "row", role: "group", "aria-label": "Período" }, periods.map((value) =>
+        h("button", { type: "button", class: "btn btn-secondary btn-sm", onclick: () => { months = value; paint(); } }, value === 1 ? "1 mês" : `${value} meses`)));
+      paint();
+      const pending = (mine ? mine.requests : []).filter((item) => item.status === "pendente" && item.pix);
+      mount(body,
+        info.pixAvailable ? picker : h("p", { class: "note" }, "O pagamento por Pix ainda não está ativo. Fale com o suporte."),
+        cards, detail,
+        pending.length ? h("section", { class: "stack" }, h("h2", {}, "Pedidos em aberto"), pending.map((item) => pixCard(item, { onCancel: async () => { await api(`/api/billing/requests/${item.id}`, { method: "DELETE" }); renderPlans(); } }))) : null,
+        info.enforced ? null : h("p", { class: "note" }, "No momento todos os recursos estão liberados para todas as contas. Os limites do plano gratuito passam a valer quando a cobrança for ativada."));
+    } catch (error) { mount(body, errorBox(error.message)); }
+  }
+
+  async function profileSubscription(content) {
+    mount(content, loading());
+    try {
+      const mine = await api("/api/billing/me");
+      const usage = (label, used, limit) => h("li", {}, `${label}: ${used} de ${limit}`);
+      mount(content,
+        h("section", { class: "card stack" }, h("h2", {}, "Seu plano"),
+          h("p", {}, h("strong", {}, mine.planName), mine.active ? ` até ${fmtDay(mine.expiresAt)}` : ""),
+          h("ul", { class: "plain-list" }, usage("Artigos na biblioteca", mine.usage.library, mine.limits.library), usage("Listas de leitura", mine.usage.lists, mine.limits.lists), usage("Relatórios", mine.usage.reports, mine.limits.reports)),
+          mine.enforced ? null : h("p", { class: "note" }, "Os limites ainda não estão sendo aplicados: todos os recursos estão liberados."),
+          h("div", { class: "row" }, h("a", { class: "btn btn-primary", href: "#/planos" }, mine.active ? "Renovar ou mudar de plano" : "Ver planos"))),
+        mine.requests.length ? h("section", { class: "card stack" }, h("h2", {}, "Pedidos"),
+          h("ul", { class: "plain-list" }, mine.requests.map((item) => h("li", {}, `${fmtDay(item.createdAt)} · ${item.planName}, ${item.months} ${item.months === 1 ? "mês" : "meses"} · ${item.amount} · ${BRL_STATUS[item.status] || item.status}`)))) : null);
+    } catch (error) { mount(content, errorBox(error.message)); }
+  }
+
+  /** Painel do administrador: cola o token, vê pedidos de Pix pendentes e contas, confirma pagamentos. */
+  function renderAdmin() {
+    setTitle("Administração");
+    const body = h("div", { class: "stack" });
+    mount($app, h("section", { class: "stack" }, h("p", { class: "eyebrow" }, "Administração"), h("h1", {}, "Pagamentos e contas"), body));
+    let token = "";
+    try { token = sessionStorage.getItem("bdd-admin") || ""; } catch { /* sem armazenamento */ }
+    const call = (path, options = {}) => api(path, { ...options, headers: { Authorization: `Bearer ${token}` } });
+    const askToken = (message = "") => {
+      const input = h("input", { type: "password", id: "admin-token", autocomplete: "off", maxlength: "200", "aria-label": "Token de administrador" });
+      mount(body, h("form", { class: "card stack", onsubmit: (event) => {
+        event.preventDefault();
+        token = input.value.trim();
+        try { sessionStorage.setItem("bdd-admin", token); } catch { /* ignora */ }
+        load();
+      } }, message ? h("p", { class: "note", role: "alert" }, message) : null,
+        h("div", { class: "field" }, h("label", { for: "admin-token" }, "Token de administrador"), input), h("div", { class: "row" }, h("button", { type: "submit", class: "btn btn-primary" }, "Entrar"))));
+    };
+    async function load() {
+      if (!token) { askToken(); return; }
+      try {
+        const [pending, accounts] = await Promise.all([call("/api/admin/billing/requests"), call("/api/admin/accounts")]);
+        const act = (path, done) => async () => { try { await call(path, { method: "POST", body: {} }); toast(done); load(); } catch (error) { toast(error.message); } };
+        mount(body,
+          h("section", { class: "card stack" }, h("h2", {}, `Pedidos pendentes (${pending.requests.length})`),
+            pending.requests.length ? h("ul", { class: "plain-list admin-list" }, pending.requests.map((item) => h("li", {},
+              h("span", {}, `${item.email} · ${item.planName} ${item.months} m · `, h("strong", {}, item.amount), ` · ${item.reference} · ${fmtDay(item.createdAt)}`),
+              h("span", { class: "row" },
+                h("button", { type: "button", class: "btn btn-primary btn-sm", onclick: act(`/api/admin/billing/requests/${item.id}/confirm`, "Pagamento confirmado.") }, "Confirmar pagamento"),
+                h("button", { type: "button", class: "btn btn-ghost btn-sm", onclick: act(`/api/admin/billing/requests/${item.id}/cancel`, "Pedido cancelado.") }, "Cancelar")))))
+              : h("p", { class: "muted" }, "Nenhum pedido pendente.")),
+          h("section", { class: "card stack" }, h("h2", {}, `Contas (${accounts.accounts.length})`),
+            h("ul", { class: "plain-list admin-list" }, accounts.accounts.map((account) => h("li", {},
+              h("span", {}, `${account.email} · ${account.plan}${account.active === "1" ? ` até ${fmtDay(account.expiresAt)}` : ""}`),
+              h("span", { class: "row" },
+                h("button", { type: "button", class: "btn btn-secondary btn-sm", onclick: async () => { try { await call("/api/admin/billing/grant", { method: "POST", body: { email: account.email, plan: "pro", days: 30 } }); toast("Pro por 30 dias concedido."); load(); } catch (error) { toast(error.message); } } }, "Dar 30 dias de Pro"),
+                h("button", { type: "button", class: "btn btn-ghost btn-sm", onclick: async () => { try { await call("/api/admin/billing/revoke", { method: "POST", body: { email: account.email } }); toast("Assinatura removida."); load(); } catch (error) { toast(error.message); } } }, "Remover")))))),
+          h("div", { class: "row" }, h("button", { type: "button", class: "btn btn-ghost btn-sm", onclick: () => { token = ""; try { sessionStorage.removeItem("bdd-admin"); } catch { /* ignora */ } askToken(); } }, "Sair do painel")));
+      } catch (error) {
+        if (error.status === 401 || error.status === 404) { token = ""; try { sessionStorage.removeItem("bdd-admin"); } catch { /* ignora */ } askToken(error.status === 404 ? "O painel está desativado neste servidor (sem ADMIN_TOKEN)." : "Token inválido."); }
+        else mount(body, errorBox(error.message));
+      }
+    }
+    load();
+  }
+
   async function renderLegal(doc) {
     setTitle(doc === "termos" ? "Termos de Uso" : "Política de Privacidade");
     const body = h("div", { class: "stack" }, loading());
@@ -2181,6 +2310,8 @@
     else if (view === "biblioteca") renderLibrary(params);
     else if (view === "feed") renderFeed(params);
     else if (view === "termos" || view === "privacidade") renderLegal(view);
+    else if (view === "planos") renderPlans();
+    else if (view === "admin") renderAdmin();
     else if (view === "redefinir") renderResetPassword(params);
     else if (view === "confirmar") renderConfirmEmail(params);
     else if (view === "interesses") location.replace("#/perfil/interesses");

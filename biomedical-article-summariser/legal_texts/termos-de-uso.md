@@ -19,23 +19,29 @@ Títulos, resumos, metadados, notícias e dados vêm de fontes públicas (por ex
 - Você pode baixar uma cópia dos seus dados e excluir a conta a qualquer momento em *Perfil → Conta e dados*.
 - Podemos suspender ou encerrar contas que violem estes Termos, mediante aviso quando possível.
 
-## 5. Uso aceitável
+## 5. Planos e pagamento
+- Há um plano gratuito e planos pagos, com os limites e preços mostrados em [Planos](/#/planos). O que cada plano inclui pode mudar; avisaremos antes de mudanças que reduzam o que você já contratou.
+- O pagamento é feito por **Pix**, por período adiantado (1, 3 ou 12 meses). A assinatura é ativada depois que **confirmamos o pagamento**, o que costuma levar algumas horas em dia útil. **Não há renovação automática:** ao fim do período a conta volta ao plano gratuito, sem perder seus dados (os limites do plano gratuito passam a valer só para novas gravações).
+- **Arrependimento e reembolso:** em compra feita pela internet você pode desistir em até 7 dias a partir do pagamento, com devolução do valor, nos termos do art. 49 do Código de Defesa do Consumidor. Peça por **{{contato}}**.
+- Emitimos o recibo e, quando devida, a nota fiscal, no e-mail da conta. Registros de pagamento são mantidos pelo prazo exigido pela legislação fiscal, mesmo se a conta for excluída.
+
+## 6. Uso aceitável
 Você concorda em **não**: (a) tentar acessar contas, dados ou sistemas de terceiros; (b) sobrecarregar ou atacar o Serviço, ou contornar limites de uso; (c) coletar o conteúdo do Serviço em massa por meios automatizados sem autorização; (d) usar o Serviço para atividade ilegal ou para inserir conteúdo malicioso; (e) revender ou redistribuir o Serviço sem autorização.
 
-## 6. Conteúdo que você cria
+## 7. Conteúdo que você cria
 Listas, etiquetas, notas, relatórios e interesses são seus. Você nos autoriza apenas a armazená-los e processá-los para prestar o Serviço a você. Relatórios gerados são organizados a partir do que você escolheu; **você é responsável pelo uso que fizer deles**, inclusive perante clientes ou terceiros.
 
-## 7. Propriedade intelectual
+## 8. Propriedade intelectual
 O Serviço (software, interface, marca, textos e a curadoria de dados) pertence a {{controlador}} e é protegido por lei. Nenhum código-fonte é cedido ou licenciado por estes Termos. Você recebe um direito pessoal, limitado, revogável e não exclusivo de usar o Serviço conforme estes Termos.
 
-## 8. Disponibilidade e mudanças
+## 9. Disponibilidade e mudanças
 O Serviço é oferecido "como está". Pode haver interrupções, lentidão ou indisponibilidade de fontes externas. Podemos alterar, suspender ou encerrar recursos, e atualizar estes Termos; mudanças relevantes serão avisadas e a versão vigente fica sempre nesta página.
 
-## 9. Limitação de responsabilidade
+## 10. Limitação de responsabilidade
 Na máxima extensão permitida pela lei, não respondemos por decisões tomadas com base no Serviço, por perdas indiretas, lucros cessantes ou danos decorrentes de indisponibilidade ou de erros de fontes de terceiros. Nada aqui exclui responsabilidades que a lei não permita excluir, inclusive as previstas no Código de Defesa do Consumidor, quando aplicável.
 
-## 10. Privacidade
+## 11. Privacidade
 O tratamento de dados pessoais segue a [Política de Privacidade](/#/privacidade).
 
-## 11. Lei aplicável e contato
+## 12. Lei aplicável e contato
 Estes Termos seguem a lei brasileira; fica eleito o foro da comarca do domicílio do consumidor, quando houver relação de consumo, e, nos demais casos, o foro de {{foro}}. Dúvidas e solicitações: **{{contato}}**.
