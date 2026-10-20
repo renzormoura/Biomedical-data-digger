@@ -51,7 +51,7 @@ Cada documento explica o objetivo, o que a pessoa vê, como funciona por dentro,
 - [Referência da API](api/referencia.md)
 
 ### Operação
-- [Implantação](operacao/implantacao.md) · [Configuração](operacao/configuracao.md) · [Rotinas agendadas](operacao/rotinas-agendadas.md) · [Atualização dos dados do Brasil](operacao/dados-brasil.md) · [Runbook](operacao/runbook.md) · [Publicação da documentação](operacao/publicacao-da-documentacao.md)
+- [Tutorial: primeiro deploy no Render](operacao/tutorial-primeiro-deploy.md) · [Implantação](operacao/implantacao.md) · [Configuração](operacao/configuracao.md) · [Rotinas agendadas](operacao/rotinas-agendadas.md) · [Atualização dos dados do Brasil](operacao/dados-brasil.md) · [Runbook](operacao/runbook.md) · [Publicação da documentação](operacao/publicacao-da-documentacao.md)
 
 ### Desenvolvimento
 - [Guia de desenvolvimento](desenvolvimento/guia-de-desenvolvimento.md) · [Estratégia de testes](desenvolvimento/testes.md) · [Preparar o ambiente](development/setup.md) · [Passagem de bastão](development/HANDOFF.md)
