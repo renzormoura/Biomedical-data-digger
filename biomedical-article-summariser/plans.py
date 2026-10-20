@@ -36,5 +36,10 @@ def catalog(settings: Settings) -> dict[str, Plan]:
     return {FREE_KEY: FREE, PRO_KEY: replace(PRO, price_cents=settings.pro_price_cents)}
 
 
+def money(cents: int) -> str:
+    """`2900` -> `R$ 29,00` (ponto nos milhares)."""
+    return f"R$ {cents // 100:,}".replace(",", ".") + f",{cents % 100:02d}"
+
+
 def amount_cents(plan: Plan, months: int) -> int:
     return plan.price_cents * months

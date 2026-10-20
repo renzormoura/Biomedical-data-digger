@@ -8,7 +8,11 @@ import pytest
 from fastapi.testclient import TestClient
 
 import plans
+from account_consent import ConsentStore
+from account_flags import AccountFlags
 from account_store import AccountStore
+from account_tokens import AccountTokens
+from admin_service import AdminService
 from billing import CANCELLED, CONFIRMED, PENDING, BillingStore
 from config import ConfigurationError, Settings
 from db import Database
@@ -99,17 +103,10 @@ def test_confirming_activates_extends_and_expires_with_the_clock(store):
     assert store.plan_key(EMAIL) == plans.FREE_KEY  # vencida: volta ao gratuito
 
 
-def test_grant_revoke_and_account_listing(store):
-    AccountStore().initialize()
-    database = store._db  # noqa: SLF001
-    database.execute("CREATE TABLE IF NOT EXISTS users (email TEXT PRIMARY KEY, password_hash TEXT, password_salt TEXT, created_at TEXT)")
-    for address in (EMAIL, "bia@exemplo.com"):
-        database.execute("INSERT INTO users VALUES (?, 'h', 's', '2026-10-01T10:00:00')", (address,))
-    store.grant(EMAIL, "pro", 15)
-    listed = {row["email"]: row for row in store.accounts()}
-    assert listed[EMAIL]["plan"] == "pro" and listed["bia@exemplo.com"]["plan"] == "gratuito"
-    assert [row["email"] for row in store.accounts("bia")] == ["bia@exemplo.com"]
-    assert store.accounts("%") == []  # curinga do usuario nao vira "todos"
+def test_grant_extends_the_same_plan_and_revoke_removes_it(store):
+    first = store.grant(EMAIL, "pro", 15)
+    assert first.expires_at == START + timedelta(days=15) and store.plan_key(EMAIL) == plans.PRO_KEY
+    assert store.grant(EMAIL, "pro", 15).expires_at == START + timedelta(days=30)  # soma ao vencimento atual
     assert store.revoke(EMAIL) and store.plan_key(EMAIL) == plans.FREE_KEY and not store.revoke(EMAIL)
 
 
@@ -141,8 +138,10 @@ def env(tmp_path, monkeypatch):
     clock = Clock()
     billing = BillingStore(database, clock=clock)
     library, reports = LibraryStore(database), ReportStore(database)
-    for item in (billing, library, reports):
+    tokens, consent, flags = AccountTokens(database), ConsentStore(database), AccountFlags(database)
+    for item in (billing, library, reports, tokens, consent, flags):
         item.initialize()
+    admin = AdminService(database, billing, tokens, consent, flags)
     catalog = FakeCatalog(works=[make_work(str(n)) for n in range(1, 6)])
     discovery = DiscoveryService([catalog], SlidingWindowLimiter(1000, 60), fallback=None)
     repository = ArticleRepository(lambda raw: ("T", "Resumo suficiente para o teste.", "s"))
@@ -153,7 +152,8 @@ def env(tmp_path, monkeypatch):
         values = {"session_secret": "k" * 40, "login_attempts_per_minute": 1000, "admin_token": "a" * 30,
                   "pix_key": "chave@exemplo.com", "pix_name": "Empresa Exemplo", "pix_city": "SAO PAULO", **overrides}
         app = create_app(service, repository, Settings(**values), account_store_factory=lambda: accounts, search_fn=lambda *a, **k: [],
-                         discovery=discovery, library=library, reports=reports, billing=billing, mailer=inbox)
+                         discovery=discovery, library=library, reports=reports, billing=billing, mailer=inbox,
+                         account_tokens=tokens, consent=consent, flags=flags, admin=admin)
         client = TestClient(app, base_url="http://testserver")
         client.post("/api/auth/register", json={"email": EMAIL, "password": PASSWORD})
         return client
@@ -210,8 +210,8 @@ def test_admin_can_grant_revoke_cancel_and_list_accounts(env):
     assert client.post("/api/admin/billing/grant", headers=ADMIN, json={"email": EMAIL, "plan": "gratuito", "days": 5}).status_code == 400
     granted = client.post("/api/admin/billing/grant", headers=ADMIN, json={"email": EMAIL, "plan": "pro", "days": 30}).json()
     assert granted["plan"] == "pro"
-    accounts = client.get("/api/admin/accounts", headers=ADMIN).json()["accounts"]
-    assert accounts[0]["email"] == EMAIL and accounts[0]["plan"] == "pro"
+    listed = client.get("/api/admin/users", headers=ADMIN).json()["users"]
+    assert listed[0]["email"] == EMAIL and listed[0]["plan"] == "pro"
     assert client.post("/api/admin/billing/revoke", headers=ADMIN, json={"email": EMAIL}).json() == {"revoked": True}
     request_id = client.post("/api/billing/requests", json={"plan": "pro", "months": 1}).json()["id"]
     assert client.post(f"/api/admin/billing/requests/{request_id}/cancel", headers=ADMIN).json() == {"cancelled": True}

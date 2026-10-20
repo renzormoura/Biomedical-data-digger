@@ -22,7 +22,8 @@ import legal
 import markdown_lite
 import pages
 from account_consent import ConsentStore
-from account_routes import register_account_routes
+from account_flags import AccountFlags
+from account_routes import make_account_purger, register_account_routes
 from account_store import (
     AccountStore,
     AccountStoreError,
@@ -31,6 +32,7 @@ from account_store import (
     validate_credentials,
 )
 from account_tokens import AccountTokens
+from admin_service import AdminService
 from alerts import AlertService
 from billing import BillingStore
 from browse_api import register_browse_routes
@@ -92,6 +94,8 @@ def create_app(
     mailer: Mailer | None = None,
     consent: ConsentStore | None = None,
     billing: BillingStore | None = None,
+    flags: AccountFlags | None = None,
+    admin: AdminService | None = None,
 ) -> FastAPI:
     app = FastAPI(title="Biomedical Data Digger", docs_url=None, redoc_url=None, openapi_url=None)
     signer = SessionSigner(settings.session_secret or SessionSigner.generate_secret())
@@ -127,7 +131,7 @@ def create_app(
         known = exists_cache.get(user)
         if known is None:
             try:
-                known = account_store_factory().exists(user)
+                known = account_store_factory().exists(user) and not (flags is not None and flags.is_suspended(user))
             except AccountStoreError:
                 known = True  # banco de contas fora do ar: nao derruba a sessao
             exists_cache.set(user, known)
@@ -253,6 +257,8 @@ def create_app(
             raise DiggerError(str(error)) from error
         if not ok:
             return JSONResponse({"error": "E-mail ou senha inválidos."}, status_code=401)
+        if flags is not None and flags.is_suspended(email):
+            return JSONResponse({"error": "Esta conta está suspensa. Fale com o suporte."}, status_code=403)
         response = JSONResponse({"user": email})
         start_session(response, email)
         return response
@@ -268,12 +274,19 @@ def create_app(
         identity=identity, validated_model=validated_model, throttle_auth=throttle_auth, search_fn=search_fn,
     ))
 
+    purge: Callable[[str], None] | None = None
     if library is not None:
+        purge = make_account_purger(
+            account_store_factory=account_store_factory, library=library, reports=reports, alerts=alerts.store if alerts is not None else None,
+            profiles=profiles, notifications=notifications.store if notifications is not None else None, tokens=account_tokens,
+            consent=consent, billing=billing, flags=flags,
+        )
         register_account_routes(
             app, account_store_factory=account_store_factory, current_user=current_user, throttle_auth=throttle_auth, on_deleted=end_account,
             library=library, reports=reports, alerts=alerts.store if alerts is not None else None, profiles=profiles,
             notifications=notifications.store if notifications is not None else None,
             tokens=account_tokens, mail_enabled=recovery is not None and recovery.enabled, consent=consent,
+            billing=billing, purge=purge,
         )
 
     if discovery is not None and library is not None:
@@ -282,6 +295,12 @@ def create_app(
             cron_token=settings.alerts_cron_token, reports=reports, profiles=profiles, notifications=notifications, feed=feed,
             billing=billing, settings=settings, admin_token=settings.admin_token, mailer=mailer,
             account_exists=lambda email: account_store_factory().exists(email),
+            admin=admin, flags=flags, purge_account=purge,
+            email_verified=(lambda email: account_tokens.is_verified(email)) if account_tokens is not None else None,
+            mark_verified=account_tokens.mark_verified if account_tokens is not None else None,
+            send_reset=recovery.send_reset if recovery is not None else None,
+            session_changed=lambda email, allowed: exists_cache.set(email, allowed),
+            usage_snapshot=usage_log.snapshot if usage_log is not None else None,
         )
 
     return app

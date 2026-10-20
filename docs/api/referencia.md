@@ -146,17 +146,26 @@ API JSON interna do produto, consumida pela própria SPA. Todas as rotas ficam s
 | DELETE | `/api/billing/requests/{id}` | conta | — | Cancela um pedido pendente próprio |
 
 ## Administração
-Todas com `Authorization: Bearer ADMIN_TOKEN` (comparação em tempo constante, limite por identidade); sem `ADMIN_TOKEN` configurado respondem 404; com token errado, 401.
+Quem pode: conta cujo e-mail está em `ADMIN_EMAILS` (em produção, com o e-mail confirmado) **ou** `Authorization: Bearer ADMIN_TOKEN`. Sem nenhum dos dois configurados, tudo responde 404; sem permissão, 401. Escritas vão para o log. Limite de 60 chamadas por minuto por identidade. Ver [Aba de Administração](../features/administracao.md).
 
 | Método | Rota | Corpo | Descrição |
 |---|---|---|---|
-| GET | `/api/admin/usage` | — | Consumo agregado de tokens (sem conteúdo) |
-| GET | `/api/admin/billing/requests` | — | Pedidos de pagamento pendentes (com e-mail) |
+| GET | `/api/admin/session` | — | **Pública, nunca dá erro:** `{admin, email}` (a interface usa para mostrar a aba) |
+| GET | `/api/admin/overview` | — | Contagens: contas, confirmadas, suspensas, por plano, novas em 7 dias, pagamentos pendentes, vencendo em 7 dias, receita em 30 dias e total |
+| GET | `/api/admin/system` | — | Banco, produção, cobrança, Pix, e-mail, termos, dados legais, administradores e consumo de IA |
+| GET | `/api/admin/users?q=&offset=&limit=` | — | Contas com plano, validade, confirmação, suspensão e uso; `total` para paginar (limite 100) |
+| GET | `/api/admin/users/{email}` | — | Detalhe: aceite dos termos, suspensão, pagamentos e `isAdmin` |
+| POST | `/api/admin/users/{email}/suspend` | `{reason?}` | Suspende (a sessão aberta cai na hora). Não vale para administradores |
+| POST | `/api/admin/users/{email}/unsuspend` | — | Reativa |
+| POST | `/api/admin/users/{email}/reset-password` | — | Envia ao dono o link de redefinição (1 por minuto) |
+| POST | `/api/admin/users/{email}/verify` | — | Marca o e-mail como confirmado |
+| DELETE | `/api/admin/users/{email}` | `{confirm}` | Exclui conta e dados (`confirm` = o e-mail). Pagamentos confirmados ficam. Não vale para administradores |
+| GET | `/api/admin/billing/requests?status=` | — | Pedidos `pendente` (padrão) ou `confirmado` |
 | POST | `/api/admin/billing/requests/{id}/confirm` | `{note?}` | Confirma o pagamento, ativa ou prorroga a assinatura e avisa por e-mail |
 | POST | `/api/admin/billing/requests/{id}/cancel` | — | Cancela um pedido pendente |
-| GET | `/api/admin/accounts?q=` | — | Contas (até 50) com plano e validade; `q` filtra por e-mail |
-| POST | `/api/admin/billing/grant` | `{email, plan, days}` | Cortesia: concede o plano por `days` dias |
-| POST | `/api/admin/billing/revoke` | `{email}` | Remove a assinatura da conta |
+| POST | `/api/admin/billing/grant` | `{email, plan, days}` | Cortesia de plano por `days` dias |
+| POST | `/api/admin/billing/revoke` | `{email}` | Remove a assinatura |
+| GET | `/api/admin/usage` | — | Consumo agregado de tokens do Laboratório (só com `ADMIN_TOKEN`) |
 
 ## Estabilidade
 A API existe para a SPA. Não há versionamento de rotas nem garantia de compatibilidade para terceiros. Se o produto abrir uma API pública comercial, ela deverá ser projetada à parte (autenticação por chave, versionamento e limites por plano), usando esta como base. As rotas `GET /api/discover/*` e `GET /api/feed*` são candidatas naturais.

@@ -111,7 +111,7 @@
   const authError = document.getElementById("auth-error");
   const logoutButton = document.getElementById("logout-button");
   const profileLink = document.getElementById("profile-link");
-  const session = { user: accountButton.dataset.user || "", profile: accountButton.dataset.profile || "", healthPack: accountButton.dataset.healthPack !== "0" };
+  const session = { admin: false, user: accountButton.dataset.user || "", profile: accountButton.dataset.profile || "", healthPack: accountButton.dataset.healthPack !== "0" };
 
   let userHook = null; // o sininho se registra aqui depois de montado
   function setUser(user) {
@@ -121,9 +121,22 @@
     accountButton.title = user ? "Meu perfil" : "Entrar na conta";
     logoutButton.hidden = !user;
     profileLink.hidden = !user;
+    if (!user) paintAdmin(false);
     dialog.querySelectorAll(".field, [data-auth='login'], [data-auth='register']").forEach((el) => { el.hidden = Boolean(user); });
     if (userHook) userHook();
   }
+  const adminLink = document.getElementById("admin-link");
+  /** Mostra (ou esconde) a aba de Administração no menu e na janela da conta. */
+  function paintAdmin(isAdmin) {
+    session.admin = isAdmin;
+    adminLink.hidden = !isAdmin;
+    if (typeof currentView === "string") renderNav(currentView);
+  }
+  async function syncAdmin() {
+    if (!session.user) { paintAdmin(false); return; }
+    try { paintAdmin((await api("/api/admin/session")).admin === true); } catch { paintAdmin(false); }
+  }
+  let currentView = "";
   setUser(session.user);
 
   // ------------------------------------------------------------------ avisos (sininho)
@@ -202,8 +215,9 @@
     runCheck(false);
     bell.timer = setInterval(() => { if (!document.hidden) runCheck(false); }, CHECK_EVERY_MS);
   }
-  userHook = () => { syncBell(); syncProfile(); };
+  userHook = () => { syncBell(); syncProfile(); syncAdmin(); };
   syncBell();
+  syncAdmin();
 
 
   function openAuth(hint) {
@@ -257,6 +271,7 @@
   });
   dialog.querySelector("[data-auth='cancel']").addEventListener("click", () => dialog.close());
   profileLink.addEventListener("click", () => dialog.close());
+  adminLink.addEventListener("click", () => dialog.close());
   logoutButton.addEventListener("click", async () => {
     try { await api("/api/auth/logout", { method: "POST", body: {} }); } catch { /* sessão já inválida */ }
     setUser("");
@@ -290,7 +305,8 @@
     const items = [["#/", "Início", ""], ["#/feed", "Feed", "feed"], ["#/busca", "Busca", "busca"], ["#/biblioteca", "Biblioteca", "biblioteca"]];
     mount(document.getElementById("mainnav"),
       items.map(([href, label, key]) => h("a", { href, "aria-current": key === view || (key === "busca" && view === "artigo") ? "page" : null }, label)),
-      h("a", { href: "/ia", title: "Resumos e análises com IA (opcional)" }, "Laboratório de IA"));
+      h("a", { href: "/ia", title: "Resumos e análises com IA (opcional)" }, "Laboratório de IA"),
+      session.admin ? h("a", { href: "#/admin", "aria-current": view === "admin" ? "page" : null }, "Administração") : null);
   }
 
   // ------------------------------------------------------------------ componentes
@@ -2202,50 +2218,149 @@
     } catch (error) { mount(content, errorBox(error.message)); }
   }
 
-  /** Painel do administrador: cola o token, vê pedidos de Pix pendentes e contas, confirma pagamentos. */
-  function renderAdmin() {
+  /** Aba de Administração: visão geral, usuários (com plano e ações), pagamentos e sistema. Só aparece para administradores. */
+  const ADMIN_TABS = [["", "Visão geral"], ["usuarios", "Usuários"], ["pagamentos", "Pagamentos"], ["sistema", "Sistema"]];
+  const brl = (cents) => `R$ ${(cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+  const PLAN_NAMES = { gratuito: "Gratuito", pro: "Pro" };
+
+  function renderAdmin(tab = "") {
     setTitle("Administração");
-    const body = h("div", { class: "stack" });
-    mount($app, h("section", { class: "stack" }, h("p", { class: "eyebrow" }, "Administração"), h("h1", {}, "Pagamentos e contas"), body));
+    const active = ADMIN_TABS.some(([key]) => key === tab) ? tab : "";
+    const content = h("div", { class: "stack" });
+    mount($app, h("section", { class: "stack" },
+      h("p", { class: "eyebrow" }, "Administração"), h("h1", {}, "Painel do administrador"),
+      h("nav", { class: "profile-tabs", "aria-label": "Seções da administração" }, ADMIN_TABS.map(([key, label]) =>
+        h("a", { href: key ? `#/admin/${key}` : "#/admin", "aria-current": key === active ? "page" : null }, label))),
+      content));
+
+    // acesso: a propria sessao de administrador; o token (so para emergencia) fica apenas na aba do navegador
     let token = "";
     try { token = sessionStorage.getItem("bdd-admin") || ""; } catch { /* sem armazenamento */ }
-    const call = (path, options = {}) => api(path, { ...options, headers: { Authorization: `Bearer ${token}` } });
-    const askToken = (message = "") => {
+    const call = (path, options = {}) => api(path, { ...options, headers: token ? { Authorization: `Bearer ${token}` } : {} });
+    const refresh = () => renderAdmin(active);
+    const run = (action, done) => async () => {
+      try { await action(); if (done) toast(done); refresh(); } catch (error) { toast(error.message); }
+    };
+    const stat = (label, value) => h("div", { class: "admin-stat" }, h("strong", {}, String(value)), h("span", {}, label));
+
+    function askToken(message) {
       const input = h("input", { type: "password", id: "admin-token", autocomplete: "off", maxlength: "200", "aria-label": "Token de administrador" });
-      mount(body, h("form", { class: "card stack", onsubmit: (event) => {
+      mount(content, h("form", { class: "card stack", onsubmit: (event) => {
         event.preventDefault();
         token = input.value.trim();
         try { sessionStorage.setItem("bdd-admin", token); } catch { /* ignora */ }
-        load();
-      } }, message ? h("p", { class: "note", role: "alert" }, message) : null,
-        h("div", { class: "field" }, h("label", { for: "admin-token" }, "Token de administrador"), input), h("div", { class: "row" }, h("button", { type: "submit", class: "btn btn-primary" }, "Entrar"))));
-    };
-    async function load() {
-      if (!token) { askToken(); return; }
-      try {
-        const [pending, accounts] = await Promise.all([call("/api/admin/billing/requests"), call("/api/admin/accounts")]);
-        const act = (path, done) => async () => { try { await call(path, { method: "POST", body: {} }); toast(done); load(); } catch (error) { toast(error.message); } };
-        mount(body,
-          h("section", { class: "card stack" }, h("h2", {}, `Pedidos pendentes (${pending.requests.length})`),
-            pending.requests.length ? h("ul", { class: "plain-list admin-list" }, pending.requests.map((item) => h("li", {},
-              h("span", {}, `${item.email} · ${item.planName} ${item.months} m · `, h("strong", {}, item.amount), ` · ${item.reference} · ${fmtDay(item.createdAt)}`),
-              h("span", { class: "row" },
-                h("button", { type: "button", class: "btn btn-primary btn-sm", onclick: act(`/api/admin/billing/requests/${item.id}/confirm`, "Pagamento confirmado.") }, "Confirmar pagamento"),
-                h("button", { type: "button", class: "btn btn-ghost btn-sm", onclick: act(`/api/admin/billing/requests/${item.id}/cancel`, "Pedido cancelado.") }, "Cancelar")))))
-              : h("p", { class: "muted" }, "Nenhum pedido pendente.")),
-          h("section", { class: "card stack" }, h("h2", {}, `Contas (${accounts.accounts.length})`),
-            h("ul", { class: "plain-list admin-list" }, accounts.accounts.map((account) => h("li", {},
-              h("span", {}, `${account.email} · ${account.plan}${account.active === "1" ? ` até ${fmtDay(account.expiresAt)}` : ""}`),
-              h("span", { class: "row" },
-                h("button", { type: "button", class: "btn btn-secondary btn-sm", onclick: async () => { try { await call("/api/admin/billing/grant", { method: "POST", body: { email: account.email, plan: "pro", days: 30 } }); toast("Pro por 30 dias concedido."); load(); } catch (error) { toast(error.message); } } }, "Dar 30 dias de Pro"),
-                h("button", { type: "button", class: "btn btn-ghost btn-sm", onclick: async () => { try { await call("/api/admin/billing/revoke", { method: "POST", body: { email: account.email } }); toast("Assinatura removida."); load(); } catch (error) { toast(error.message); } } }, "Remover")))))),
-          h("div", { class: "row" }, h("button", { type: "button", class: "btn btn-ghost btn-sm", onclick: () => { token = ""; try { sessionStorage.removeItem("bdd-admin"); } catch { /* ignora */ } askToken(); } }, "Sair do painel")));
-      } catch (error) {
-        if (error.status === 401 || error.status === 404) { token = ""; try { sessionStorage.removeItem("bdd-admin"); } catch { /* ignora */ } askToken(error.status === 404 ? "O painel está desativado neste servidor (sem ADMIN_TOKEN)." : "Token inválido."); }
-        else mount(body, errorBox(error.message));
-      }
+        refresh();
+      } }, h("p", { class: message ? "note" : "muted", role: "alert" }, message || "Entre com uma conta de administrador ou use o token de emergência."),
+      h("div", { class: "field" }, h("label", { for: "admin-token" }, "Token de administrador"), input),
+      h("div", { class: "row" }, h("button", { type: "submit", class: "btn btn-primary" }, "Entrar com token"))));
     }
-    load();
+
+    async function overview() {
+      const data = await call("/api/admin/overview");
+      mount(content,
+        h("div", { class: "admin-stats" }, stat("contas", data.users), stat("com e-mail confirmado", data.verified), stat("novas em 7 dias", data.newLast7Days),
+          stat("no plano Pro", data.byPlan.pro), stat("no plano gratuito", data.byPlan.gratuito), stat("assinaturas vencendo em 7 dias", data.expiringSoon),
+          stat("suspensas", data.suspended), stat("pagamentos a conferir", data.pendingPayments), stat("receita em 30 dias", brl(data.revenueLast30DaysCents)),
+          stat("receita total", brl(data.revenueTotalCents))),
+        data.pendingPayments ? h("p", {}, h("a", { class: "btn btn-primary", href: "#/admin/pagamentos" }, `Conferir ${data.pendingPayments} pagamento(s) pendente(s)`)) : null);
+    }
+
+    async function users(page = 0, query = "") {
+      const limit = 25;
+      const data = await call(`/api/admin/users?${new URLSearchParams({ q: query, offset: String(page * limit), limit: String(limit) })}`);
+      const detail = h("div", { class: "stack" });
+      const search = h("input", { type: "search", value: query, placeholder: "Buscar por e-mail", "aria-label": "Buscar por e-mail", maxlength: "100" });
+      const rows = data.users.map((user) => h("tr", { class: user.suspended ? "is-suspended" : "" },
+        h("td", {}, h("button", { type: "button", class: "link-button", onclick: () => openUser(user.email) }, user.email)),
+        h("td", {}, h("span", { class: `plan-badge${user.plan === "pro" ? " is-pro" : ""}` }, PLAN_NAMES[user.plan] || user.plan), user.expiresAt ? h("small", { class: "muted" }, ` até ${fmtDay(user.expiresAt)}`) : null),
+        h("td", {}, user.verified ? "Sim" : "Não"),
+        h("td", {}, `${user.usage.library} / ${user.usage.lists} / ${user.usage.reports}`),
+        h("td", {}, fmtDay(user.createdAt)),
+        h("td", {}, user.suspended ? "Suspensa" : "Ativa")));
+      const pages = Math.max(1, Math.ceil(data.total / limit));
+
+      async function openUser(email) {
+        const info = await call(`/api/admin/users/${encodeURIComponent(email)}`);
+        const reason = h("input", { type: "text", placeholder: "Motivo (opcional)", maxlength: "300", "aria-label": "Motivo da suspensão" });
+        const confirmDelete = h("input", { type: "text", placeholder: "Digite o e-mail para confirmar", maxlength: "320", "aria-label": "Confirmar e-mail para excluir" });
+        const enc = encodeURIComponent(email);
+        const post = (path, body = {}) => call(path, { method: "POST", body });
+        mount(detail, h("div", { class: "card stack" },
+          h("h2", {}, info.email, info.isAdmin ? h("span", { class: "plan-badge is-pro" }, "Administrador") : null),
+          h("p", { class: "muted" }, `Criada em ${fmtDay(info.createdAt)} · e-mail ${info.verified ? "confirmado" : "não confirmado"} · aceite dos termos: ${info.terms ? `${info.terms.version} (${fmtDay(info.terms.acceptedAt)})` : "sem registro"}`),
+          h("p", {}, `Plano: ${PLAN_NAMES[info.plan] || info.plan}${info.expiresAt ? ` até ${fmtDay(info.expiresAt)}` : ""} · Uso: ${info.usage.library} artigos, ${info.usage.lists} listas, ${info.usage.reports} relatórios`),
+          info.suspension ? h("p", { class: "note" }, `Conta suspensa desde ${fmtDay(info.suspension.since)}${info.suspension.reason ? `: ${info.suspension.reason}` : ""}.`) : null,
+          h("h3", {}, "Plano"),
+          h("div", { class: "row" },
+            [30, 90, 365].map((days) => h("button", { type: "button", class: "btn btn-secondary btn-sm", onclick: run(() => post("/api/admin/billing/grant", { email: info.email, plan: "pro", days }), `Pro por ${days} dias concedido.`) }, `Dar ${days} dias de Pro`)),
+            h("button", { type: "button", class: "btn btn-ghost btn-sm", onclick: run(() => post("/api/admin/billing/revoke", { email: info.email }), "Assinatura removida.") }, "Remover assinatura")),
+          h("h3", {}, "Conta"),
+          h("div", { class: "row" },
+            h("button", { type: "button", class: "btn btn-secondary btn-sm", onclick: run(async () => { const result = await post(`/api/admin/users/${enc}/reset-password`); toast(result.sent ? "Link de redefinição enviado ao e-mail da conta." : "Já há um link recente; aguarde um minuto."); }) }, "Enviar link de redefinição de senha"),
+            info.verified ? null : h("button", { type: "button", class: "btn btn-secondary btn-sm", onclick: run(() => post(`/api/admin/users/${enc}/verify`), "E-mail marcado como confirmado.") }, "Marcar e-mail como confirmado")),
+          info.isAdmin ? null : h("div", { class: "stack" },
+            info.suspension
+              ? h("div", { class: "row" }, h("button", { type: "button", class: "btn btn-secondary btn-sm", onclick: run(() => post(`/api/admin/users/${enc}/unsuspend`), "Conta reativada.") }, "Reativar conta"))
+              : h("div", { class: "row" }, reason, h("button", { type: "button", class: "btn btn-outline btn-sm", onclick: run(() => post(`/api/admin/users/${enc}/suspend`, { reason: reason.value }), "Conta suspensa.") }, "Suspender")),
+            h("div", { class: "row" }, confirmDelete, h("button", { type: "button", class: "btn btn-danger btn-sm", onclick: run(() => call(`/api/admin/users/${enc}`, { method: "DELETE", body: { confirm: confirmDelete.value } }), "Conta excluída.") }, "Excluir conta e dados"))),
+          h("h3", {}, "Pagamentos"),
+          info.payments.length ? h("ul", { class: "plain-list" }, info.payments.map((item) => h("li", {}, `${fmtDay(item.createdAt)} · ${PLAN_NAMES[item.plan] || item.plan}, ${item.months} ${item.months === 1 ? "mês" : "meses"} · ${brl(item.amountCents)} · ${BRL_STATUS[item.status] || item.status}${item.note ? ` · ${item.note}` : ""}`))) : h("p", { class: "muted" }, "Nenhum pedido.")));
+        detail.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      mount(content,
+        h("form", { class: "row", onsubmit: (event) => { event.preventDefault(); load(users(0, search.value.trim())); } }, search, h("button", { type: "submit", class: "btn btn-secondary btn-sm" }, "Buscar")),
+        h("div", { class: "table-wrap" }, h("table", { class: "admin-table" },
+          h("thead", {}, h("tr", {}, ["E-mail", "Plano", "E-mail confirmado", "Biblioteca / listas / relatórios", "Criada em", "Situação"].map((label) => h("th", { scope: "col" }, label)))),
+          h("tbody", {}, rows))),
+        h("p", { class: "muted" }, `${data.total} conta(s)${query ? ` para “${query}”` : ""} · página ${page + 1} de ${pages}`),
+        h("div", { class: "row" },
+          h("button", { type: "button", class: "btn btn-ghost btn-sm", disabled: page === 0, onclick: () => load(users(page - 1, query)) }, "Anterior"),
+          h("button", { type: "button", class: "btn btn-ghost btn-sm", disabled: page + 1 >= pages, onclick: () => load(users(page + 1, query)) }, "Próxima")),
+        detail);
+    }
+
+    async function payments() {
+      const [pending, history] = await Promise.all([call("/api/admin/billing/requests"), call("/api/admin/billing/requests?status=confirmado")]);
+      const note = h("input", { type: "text", placeholder: "Anotação (opcional)", maxlength: "300", "aria-label": "Anotação do pagamento" });
+      mount(content,
+        h("section", { class: "card stack" }, h("h2", {}, `Pedidos pendentes (${pending.requests.length})`),
+          h("p", { class: "note" }, "Confira cada pedido com o extrato do banco (valor, data, nome do pagador e, quando aparecer, o identificador) antes de confirmar."), note,
+          pending.requests.length ? h("ul", { class: "plain-list admin-list" }, pending.requests.map((item) => h("li", {},
+            h("span", {}, `${item.email} · ${item.planName} ${item.months} m · `, h("strong", {}, item.amount), ` · ${item.reference} · ${fmtDay(item.createdAt)}`),
+            h("span", { class: "row" },
+              h("button", { type: "button", class: "btn btn-primary btn-sm", onclick: run(() => call(`/api/admin/billing/requests/${item.id}/confirm`, { method: "POST", body: { note: note.value } }), "Pagamento confirmado.") }, "Confirmar pagamento"),
+              h("button", { type: "button", class: "btn btn-ghost btn-sm", onclick: run(() => call(`/api/admin/billing/requests/${item.id}/cancel`, { method: "POST", body: {} }), "Pedido cancelado.") }, "Cancelar")))))
+            : h("p", { class: "muted" }, "Nenhum pedido pendente.")),
+        h("section", { class: "card stack" }, h("h2", {}, "Pagamentos confirmados"),
+          history.requests.length ? h("ul", { class: "plain-list" }, history.requests.map((item) => h("li", {}, `${fmtDay(item.confirmedAt)} · ${item.email} · ${item.planName} ${item.months} m · ${item.amount}${item.note ? ` · ${item.note}` : ""}`)))
+            : h("p", { class: "muted" }, "Nenhum ainda.")));
+    }
+
+    async function system() {
+      const data = await call("/api/admin/system");
+      const yes = (value) => (value ? "Sim" : "Não");
+      const totals = (data.usage && data.usage.totals) || {};
+      mount(content, h("section", { class: "card stack" }, h("h2", {}, "Estado do servidor"),
+        h("ul", { class: "plain-list" },
+          h("li", {}, `Banco de dados: ${data.database}`), h("li", {}, `Ambiente de produção: ${yes(data.production)}`),
+          h("li", {}, `Cobrança por plano ligada (limites valendo): ${yes(data.billingEnforced)}`), h("li", {}, `Chave Pix configurada: ${yes(data.pixConfigured)}`),
+          h("li", {}, `Envio de e-mail configurado: ${yes(data.mailEnabled)}`), h("li", {}, `Aceite dos termos obrigatório: ${yes(data.termsRequired)}`),
+          h("li", {}, `Dados legais (controlador e contato) completos: ${yes(data.legalComplete)}`),
+          h("li", {}, `Administradores: ${data.adminEmails.length ? data.adminEmails.join(", ") : "nenhum por e-mail"}${data.tokenEnabled ? " (token de emergência ativo)" : ""}`),
+          h("li", {}, `Laboratório de IA desde o último início: ${totals.calls || 0} chamadas, ${(totals.prompt_tokens || 0) + (totals.completion_tokens || 0)} tokens`))));
+    }
+
+    const load = async (promise) => {
+      try { await promise; } catch (error) {
+        if (error.status === 401 || error.status === 404) {
+          if (token) { token = ""; try { sessionStorage.removeItem("bdd-admin"); } catch { /* ignora */ } }
+          askToken(error.status === 404 ? "O painel está desativado neste servidor (defina ADMIN_EMAILS ou ADMIN_TOKEN)." : "Esta conta não é de administrador (ou o token está errado).");
+        } else mount(content, errorBox(error.message));
+      }
+    };
+    mount(content, loading());
+    load({ "": overview, usuarios: () => users(), pagamentos: payments, sistema: system }[active]());
   }
 
   async function renderLegal(doc) {
@@ -2302,6 +2417,7 @@
 
   function render() {
     const { view, rest, params } = Lib.parseRoute(location.hash);
+    currentView = view;
     clearCitationMeta();
     closePanel();
     renderNav(view);
@@ -2311,7 +2427,7 @@
     else if (view === "feed") renderFeed(params);
     else if (view === "termos" || view === "privacidade") renderLegal(view);
     else if (view === "planos") renderPlans();
-    else if (view === "admin") renderAdmin();
+    else if (view === "admin") renderAdmin(rest[0] || "");
     else if (view === "redefinir") renderResetPassword(params);
     else if (view === "confirmar") renderConfirmEmail(params);
     else if (view === "interesses") location.replace("#/perfil/interesses");

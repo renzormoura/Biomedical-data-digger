@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 2026-10 — Aba de Administração na própria conta
+
+### Adicionado
+- **Aba Administração** (`#/admin`) para contas listadas em `ADMIN_EMAILS` (em produção, com o e-mail confirmado): visão geral (contas, planos, receita, pagamentos a conferir), **usuários** com plano, validade, uso e busca, **pagamentos** (pendentes e histórico) e **sistema**. Ações por conta: dar plano ou remover assinatura, enviar link de redefinição de senha, marcar e-mail como confirmado, **suspender e reativar** e **excluir conta e dados** (digitando o e-mail). Administradores não podem ser suspensos nem excluídos por aqui; toda escrita vai para o log.
+- Contas **suspensas** (tabela `suspended_accounts`): não entram e a sessão aberta deixa de valer na hora.
+- O `ADMIN_TOKEN` continua valendo como acesso de emergência e para scripts.
+
+### Alterado
+- A rota `GET /api/admin/accounts` foi substituída por `GET /api/admin/users` (com paginação, busca, confirmação e uso) e `GET /api/admin/users/{email}`.
+
+### Corrigido
+- **Excluir a própria conta não apagava a assinatura** (tabela `subscriptions`), contrariando o que a documentação dizia; agora apaga, e a cópia de dados inclui assinatura e pagamentos. A exclusão passou a ser uma só rotina, usada pela pessoa e pelo administrador.
+
 ## 2026-10 — Planos e pagamento por Pix
 
 ### Adicionado

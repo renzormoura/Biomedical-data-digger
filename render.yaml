@@ -51,6 +51,9 @@ services:
         sync: false
       - key: LEGAL_FORUM
         sync: false
+      # Quem ve a aba de Administracao: e-mails separados por virgula (em producao, com o e-mail confirmado)
+      - key: ADMIN_EMAILS
+        sync: false
       # Planos e pagamento por Pix. Com BILLING_ENFORCED=1 os limites do plano gratuito passam a valer (exige PIX_KEY e PIX_NAME).
       - key: BILLING_ENFORCED
         value: "0"

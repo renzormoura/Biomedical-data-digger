@@ -27,6 +27,11 @@
 | `subscriptions` | `email` (PK), `plan`, `expires_at`, `updated_at` | Plano pago em vigor e validade (vencida = plano gratuito) |
 | `payment_requests` | `id` (PK), `email`, `plan`, `months`, `amount_cents`, `reference` (único), `status` (`pendente`/`confirmado`/`cancelado`), `created_at`, `confirmed_at`, `note` | Pedidos de pagamento por Pix; os **confirmados** são registro fiscal e sobrevivem à exclusão da conta |
 
+### Administração (`account_flags.py`)
+| Tabela | Colunas | Uso |
+|---|---|---|
+| `suspended_accounts` | `email` (PK), `reason`, `suspended_at` | Contas suspensas pelo administrador |
+
 ### Biblioteca (`library_store.py`)
 | Tabela | Colunas | Uso |
 |---|---|---|

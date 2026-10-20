@@ -11,6 +11,11 @@ Toda a configuração vem de **variáveis de ambiente**, lidas e validadas em um
 | `SESSION_SECRET` | Segredo de assinatura das sessões, **mínimo 32 caracteres**. No Render é gerado automaticamente (`generateValue`). Trocá-lo **encerra todas as sessões** |
 | `DATABASE_URL` | URL do PostgreSQL. Em produção, sem ela o serviço **não inicia** |
 
+### Para a aba de Administração
+| Variável | Descrição |
+|---|---|
+| `ADMIN_EMAILS` | E-mails (separados por vírgula) das contas que veem a aba **Administração**. Em produção, a conta também precisa ter o e-mail confirmado. Sem ela e sem `ADMIN_TOKEN`, o painel fica desativado |
+
 ### Para planos e pagamento (Pix)
 | Variável | Descrição |
 |---|---|

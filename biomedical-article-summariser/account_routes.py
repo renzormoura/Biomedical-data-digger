@@ -16,9 +16,11 @@ from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, Field
 
 from account_consent import ConsentStore
+from account_flags import AccountFlags
 from account_store import AccountStore, AccountStoreError, InvalidCredentialsFormat, validate_credentials
 from account_tokens import AccountTokens
 from alerts import AlertStore
+from billing import BillingStore
 from domain import AuthRequiredError, DiggerError
 from library_store import LibraryStore
 from notifications import NotificationStore
@@ -41,6 +43,39 @@ def _terms(consent: ConsentStore | None, user: str) -> dict[str, str] | None:
     return {"version": accepted[0], "acceptedAt": accepted[1]} if accepted else None
 
 
+def make_account_purger(
+    *, account_store_factory: Callable[[], AccountStore], library: LibraryStore, reports: ReportStore | None, alerts: AlertStore | None,
+    profiles: ProfileStore | None, notifications: NotificationStore | None, tokens: AccountTokens | None,
+    consent: ConsentStore | None, billing: BillingStore | None, flags: AccountFlags | None,
+) -> Callable[[str], None]:
+    """Apaga a conta e tudo o que ela guardou, em todos os armazens (usada pela propria pessoa e pelo administrador)."""
+
+    def purge(user: str) -> None:
+        library.delete_user_data(user)
+        if reports is not None:
+            reports.delete_user_data(user)
+        if alerts is not None:
+            alerts.delete_user_data(user)
+        if profiles is not None:
+            profiles.delete(user)
+        if notifications is not None:
+            notifications.delete_user_data(user)
+        if tokens is not None:
+            tokens.delete_user_data(user)
+        if consent is not None:
+            consent.delete_user_data(user)
+        if billing is not None:
+            billing.delete_user_data(user)  # os pagamentos confirmados ficam (registro fiscal)
+        if flags is not None:
+            flags.delete_user_data(user)
+        try:
+            account_store_factory().delete_user(user)
+        except AccountStoreError as error:
+            raise DiggerError(str(error)) from error
+
+    return purge
+
+
 def register_account_routes(
     app: FastAPI,
     *,
@@ -56,12 +91,23 @@ def register_account_routes(
     tokens: AccountTokens | None = None,
     mail_enabled: bool = False,
     consent: ConsentStore | None = None,
+    billing: BillingStore | None = None,
+    purge: Callable[[str], None] | None = None,
 ) -> None:
     def require_user(request: Request) -> str:
         user = current_user(request)
         if user is None:
             raise AuthRequiredError("Entre na sua conta para ver o perfil.")
         return user
+
+    def purge_account(user: str) -> None:
+        if purge is not None:
+            purge(user)
+            return
+        make_account_purger(
+            account_store_factory=account_store_factory, library=library, reports=reports, alerts=alerts, profiles=profiles,
+            notifications=notifications, tokens=tokens, consent=consent, billing=billing, flags=None,
+        )(user)
 
     def confirm_password(user: str, password: str) -> None:
         try:
@@ -153,6 +199,14 @@ def register_account_routes(
             payload["alerts"] = [
                 {"topic": a.topic, "createdAt": a.created_at, "read": a.read, "work": a.work.to_dict()} for a in alerts.alerts(user, limit=200)
             ]
+        if billing is not None:
+            current = billing.subscription(user)
+            payload["subscription"] = {"plan": current.plan, "expiresAt": current.expires_at.isoformat(timespec="seconds")} if current else None
+            payload["payments"] = [
+                {"plan": r.plan, "months": r.months, "amountCents": r.amount_cents, "status": r.status, "reference": r.reference,
+                 "createdAt": r.created_at, "confirmedAt": r.confirmed_at}
+                for r in billing.requests(user)
+            ]
         if notifications is not None:
             payload["notifications"] = [
                 {"kind": n.kind, "title": n.title, "body": n.body, "link": n.link, "createdAt": n.created_at, "read": n.read}
@@ -170,23 +224,7 @@ def register_account_routes(
         user = require_user(request)
         throttle_auth(request)
         confirm_password(user, body.password)
-        library.delete_user_data(user)
-        if reports is not None:
-            reports.delete_user_data(user)
-        if alerts is not None:
-            alerts.delete_user_data(user)
-        if profiles is not None:
-            profiles.delete(user)
-        if notifications is not None:
-            notifications.delete_user_data(user)
-        if tokens is not None:
-            tokens.delete_user_data(user)
-        if consent is not None:
-            consent.delete_user_data(user)
-        try:
-            account_store_factory().delete_user(user)
-        except AccountStoreError as error:
-            raise DiggerError(str(error)) from error
+        purge_account(user)
         response = JSONResponse({"deleted": True})
         on_deleted(response, user)
         return response

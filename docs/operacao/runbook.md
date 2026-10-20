@@ -61,10 +61,10 @@ Um IP/conta passou do limite (ver [Segurança](../arquitetura/seguranca.md#limit
 - Esqueceu a senha: a própria pessoa usa **Esqueci a senha** (link por e-mail). Se o e-mail não chegar, ver "E-mails não chegam" abaixo; sem e-mail configurado, use o procedimento manual no final.
 
 ### Conciliar pagamentos Pix e ativar assinaturas
-1. Abra `#/admin` e entre com o `ADMIN_TOKEN`.
+1. Entre com a sua conta de administrador (e-mail em `ADMIN_EMAILS`) e abra **Administração → Pagamentos** (ou `#/admin/pagamentos`). Sem conta de administrador, o `ADMIN_TOKEN` funciona na mesma tela.
 2. Em **Pedidos pendentes**, compare cada pedido (e-mail, valor, identificador) com o extrato do banco da chave Pix. O banco costuma mostrar valor, data e nome do pagador; o identificador `BDD…` aparece só em alguns bancos.
 3. Bateu: **Confirmar pagamento** (a assinatura é ativada ou prorrogada e a pessoa recebe e-mail). Não bateu e faz mais de alguns dias: **Cancelar**.
-4. Pagamento recebido sem pedido: ache a conta em **Contas** e use **Dar 30 dias de Pro** (ou peça à pessoa que crie o pedido).
+4. Pagamento recebido sem pedido: ache a conta em **Administração → Usuários** e use **Dar 30 dias de Pro** (ou peça à pessoa que crie o pedido).
 5. Problemas comuns: valor diferente do pedido (não confirme; combine com a pessoa), pagamento duplicado (confirme um e devolva o outro), "Painel desativado" (falta `ADMIN_TOKEN` no servidor), 401 (token errado).
 6. Emita o recibo e, quando devida, a nota fiscal (fora do sistema).
 
@@ -74,6 +74,9 @@ Um IP/conta passou do limite (ver [Segurança](../arquitetura/seguranca.md#limit
 3. Chegou, mas no spam: configure SPF, DKIM e DMARC do domínio do remetente.
 4. Link abre "inválido ou expirou": o link de redefinição vale 1 hora e o de confirmação 48 horas, e só funcionam uma vez; peça outro.
 5. `APP_BASE_URL` errada gera links para o endereço errado: confira (https, sem barra no fim).
+
+### Suspender, reativar ou excluir uma conta
+*Administração → Usuários →* clique no e-mail. **Suspender** bloqueia o acesso na hora (sem apagar nada) e **Reativar** devolve. **Excluir conta e dados** pede o e-mail de novo e é irreversível (pagamentos confirmados ficam). Administradores não podem ser suspensos nem excluídos por aqui: tire o e-mail de `ADMIN_EMAILS` antes, se for o caso.
 
 ### Pedido de exclusão ou cópia de dados
 A própria pessoa faz em *Perfil → Conta e dados*. Se não conseguir entrar, siga o procedimento de [Privacidade e LGPD](../legal/privacidade-e-lgpd.md#atendimento-de-solicitações) (verificar identidade e executar manualmente).

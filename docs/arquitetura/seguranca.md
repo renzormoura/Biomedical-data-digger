@@ -55,6 +55,9 @@ Cache-Control: no-store (em /api/) · public, max-age=3600 (em /static/)
 
 A identidade é `u:<e-mail>` para quem tem conta e `ip:<ip>` para visitantes; o IP vem do `X-Forwarded-For` contando `TRUSTED_PROXY_HOPS` proxies confiáveis a partir do fim. **Os limitadores e cotas ficam em memória do processo.**
 
+## Administração
+A aba e a API de administração aceitam (a) conta cujo e-mail está em `ADMIN_EMAILS` (em produção, com e-mail confirmado) ou (b) `Bearer ADMIN_TOKEN`. A autorização é conferida **no servidor em cada requisição**; a interface só esconde o menu. Administradores não podem ser suspensos nem excluídos pela API; exclusão exige digitar o e-mail; toda escrita é registrada em log (`admin_action`). Detalhes em [Aba de Administração](../features/administracao.md). **Risco principal:** conta de administrador comprometida = acesso a dados de todos; sem 2FA ainda, use e-mails dedicados, senhas fortes e o mínimo de administradores.
+
 ## Rotas protegidas por token
 - `POST /api/internal/alerts/run`: `Authorization: Bearer <ALERTS_CRON_TOKEN>` (≥24 caracteres), comparação em tempo constante; sem o token configurado, responde 404.
 - `GET /api/admin/usage`: `Bearer <ADMIN_TOKEN>` (≥24 caracteres); sem o token, desativada.

@@ -8,6 +8,8 @@ from dataclasses import dataclass, field
 from fastapi import Request
 
 import plans
+from account_flags import AccountFlags
+from admin_service import AdminService
 from alerts import AlertService
 from billing import BillingStore
 from brasil import anvisa, conitec, rename
@@ -45,6 +47,14 @@ class ApiContext:
     admin_token: str = ""
     mailer: Mailer | None = None
     account_exists: Callable[[str], bool] = lambda email: False  # noqa: E731
+    admin: AdminService | None = None
+    flags: AccountFlags | None = None
+    email_verified: Callable[[str], bool] = lambda email: False  # noqa: E731
+    mark_verified: Callable[[str], None] = lambda email: None  # noqa: E731
+    purge_account: Callable[[str], None] = lambda email: None  # noqa: E731
+    send_reset: Callable[[str], bool] = lambda email: False  # noqa: E731
+    session_changed: Callable[[str, bool], None] = lambda email, allowed: None  # noqa: E731
+    usage_snapshot: Callable[[], dict[str, object]] = dict  # noqa: E731
     admin_limiter: SlidingWindowLimiter = field(default_factory=lambda: SlidingWindowLimiter(60, window=60.0))
     shared_limiter: SlidingWindowLimiter = field(default_factory=lambda: SlidingWindowLimiter(60, window=60.0))
     brasil_limiter: SlidingWindowLimiter = field(default_factory=lambda: SlidingWindowLimiter(120, window=60.0))
@@ -61,6 +71,10 @@ class ApiContext:
 
     def brasil_meta(self, bases: Bases) -> dict[str, object]:
         return {"anvisa": anvisa_meta(bases[0]), "conitec": conitec_meta(bases[1]), "rename": rename_meta(bases[2])}
+
+    @staticmethod
+    def money(cents: int) -> str:
+        return plans.money(cents)
 
     def plan_for(self, user: str) -> plans.Plan:
         """Plano em vigor da conta. Sem cobranca ativa (`BILLING_ENFORCED`), todas as contas tem os limites do Pro (os tecnicos atuais)."""

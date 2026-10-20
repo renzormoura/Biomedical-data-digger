@@ -12,7 +12,7 @@ from __future__ import annotations
 import json
 import os
 import re
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -23,8 +23,10 @@ import downloads
 import enrichment
 import pages
 from account_consent import ConsentStore
+from account_flags import AccountFlags
 from account_store import AccountStore
 from account_tokens import AccountTokens
+from admin_service import AdminService
 from alerts import AlertService, AlertStore
 from billing import BillingStore
 from config import Settings
@@ -71,7 +73,7 @@ def normalize(value: Any, key: str = "") -> Any:
     if isinstance(value, list):
         return [normalize(v, key) for v in value]
     if isinstance(value, str):
-        masked = {"token": "<token>", "reference": "<ref>", "copyPaste": "<pix>"}  # valores aleatorios (o BR Code leva o identificador e o CRC)
+        masked = {"token": "<token>", "reference": "<ref>", "copyPaste": "<pix>", "database": "<banco>"}  # valores aleatorios (o BR Code leva o identificador e o CRC)
         return masked.get(key) or _norm_text(value)
     if key == "since" and isinstance(value, int):  # epoch de inicio do registro de uso
         return "<epoch>"
@@ -143,8 +145,10 @@ def recorder(tmp_path, monkeypatch):
     library, reports, alert_store = LibraryStore(database), ReportStore(database), AlertStore(database)
     profiles, notification_store, feed_store = ProfileStore(database), NotificationStore(database), FeedStore(database)
     account_tokens, consent, billing = AccountTokens(database), ConsentStore(database), BillingStore(database)
-    for store in (library, reports, alert_store, profiles, notification_store, feed_store, account_tokens, consent, billing):
+    flags = AccountFlags(database)
+    for store in (library, reports, alert_store, profiles, notification_store, feed_store, account_tokens, consent, billing, flags):
         store.initialize()
+    admin_service = AdminService(database, billing, account_tokens, consent, flags)
     inbox = Inbox()
 
     works = [make_work(str(n), title=f"Estudo de contrato {n}", abstract=ABSTRACT, year=2024) for n in (1, 2, 3)]
@@ -165,7 +169,7 @@ def recorder(tmp_path, monkeypatch):
         bases=lambda: (anvisa.carregar(), conitec.carregar(), rename.carregar()),
     )
     feed_service = FeedService(feed_store, fetcher=lambda url, etag, modified: (_ for _ in ()).throw(AssertionError("sem rede")))
-    now = date.today().isoformat() + "T12:00:00+00:00"
+    now = datetime.now(timezone.utc).isoformat(timespec="seconds")  # fontes recem-atualizadas: a rotina agendada nao tenta a rede
     feed_store.upsert(
         [FeedItem("a" * 24, SOURCES[0].id, "https://exemplo.com/a", "Vacinas em pediatria", "Resumo curto.", now, True, ("medicina/pediatria",), ("medicina",))],
         now,
@@ -182,7 +186,7 @@ def recorder(tmp_path, monkeypatch):
             "title": "T 1", "journal": "J", "year": 2024, "pmid": "1", "source": "MED", "url": "https://x/1", "doi": "10.1/x",
             "reliability": "Alta", "reliability_score": 0.95}],
         usage_log=UsageLog(), discovery=discovery, library=library, alerts=alerts, reports=reports, profiles=profiles,
-        notifications=notifications, feed=feed_service, account_tokens=account_tokens, mailer=inbox, consent=consent, billing=billing,
+        notifications=notifications, feed=feed_service, account_tokens=account_tokens, mailer=inbox, consent=consent, billing=billing, flags=flags, admin=admin_service,
     )
     recorder = Recorder(TestClient(app, base_url="http://testserver"))
     recorder.app = app  # type: ignore[attr-defined]
@@ -312,7 +316,18 @@ def run_scenario(r: Recorder) -> None:  # noqa: C901 - e um roteiro linear de pr
     c("GET", "/api/admin/billing/requests", headers=admin, label="pendentes")
     c("POST", "/api/admin/billing/requests/{request_id}/confirm", f"/api/admin/billing/requests/{pedido['id']}/confirm", headers=admin, json={"note": "extrato conferido"})
     c("GET", "/api/billing/me", label="pro")
-    c("GET", "/api/admin/accounts", headers=admin)
+    c("GET", "/api/admin/session", label="administrador por token", headers=admin)
+    c("GET", "/api/admin/session", label="pessoa comum")
+    c("GET", "/api/admin/overview", headers=admin)
+    c("GET", "/api/admin/system", headers=admin)
+    c("GET", "/api/admin/users", headers=admin, params={"q": "contrato"})
+    c("GET", "/api/admin/users/{email}", f"/api/admin/users/{EMAIL}", headers=admin)
+    c("POST", "/api/admin/users/{email}/verify", f"/api/admin/users/{EMAIL}/verify", headers=admin)
+    c("POST", "/api/admin/users/{email}/reset-password", f"/api/admin/users/{EMAIL}/reset-password", headers=admin)
+    c("POST", "/api/admin/users/{email}/suspend", f"/api/admin/users/{EMAIL}/suspend", headers=admin, json={"reason": "teste"})
+    c("POST", "/api/admin/users/{email}/unsuspend", f"/api/admin/users/{EMAIL}/unsuspend", headers=admin)
+    c("DELETE", "/api/admin/users/{email}", f"/api/admin/users/{EMAIL}", headers=admin, json={"confirm": "outro@exemplo.com"}, label="confirmacao errada")
+    c("GET", "/api/admin/billing/requests", headers=admin, params={"status": "confirmado"}, label="historico")
     c("POST", "/api/admin/billing/grant", headers=admin, json={"email": EMAIL, "plan": "pro", "days": 10})
     outro = c("POST", "/api/billing/requests", json={"plan": "pro", "months": 12}, label="outro").json()
     c("POST", "/api/admin/billing/requests/{request_id}/cancel", f"/api/admin/billing/requests/{outro['id']}/cancel", headers=admin)

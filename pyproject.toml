@@ -57,6 +57,8 @@ files = [
     "biomedical-article-summariser/pix.py",
     "biomedical-article-summariser/plans.py",
     "biomedical-article-summariser/billing.py",
+    "biomedical-article-summariser/account_flags.py",
+    "biomedical-article-summariser/admin_service.py",
     "biomedical-article-summariser/legal.py",
     "biomedical-article-summariser/account_consent.py",
     "biomedical-article-summariser/account_tokens.py",

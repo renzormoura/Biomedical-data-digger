@@ -143,6 +143,24 @@ class BillingStore:
         rows = self._db.query(f"SELECT {_COLUMNS} FROM payment_requests WHERE status = ? ORDER BY created_at", (PENDING,))  # noqa: S608
         return [_request(row) for row in rows]
 
+    def confirmed(self, limit: int = 50) -> list[PaymentRequest]:
+        """Pagamentos confirmados, do mais recente para o mais antigo (historico do painel)."""
+        rows = self._db.query(
+            f"SELECT {_COLUMNS} FROM payment_requests WHERE status = ? ORDER BY confirmed_at DESC LIMIT ?",  # noqa: S608
+            (CONFIRMED, max(1, min(limit, 500))),
+        )
+        return [_request(row) for row in rows]
+
+    def revenue_cents(self, since: datetime | None = None) -> int:
+        """Soma dos pagamentos confirmados (desde `since`, se informado)."""
+        if since is None:
+            rows = self._db.query("SELECT COALESCE(SUM(amount_cents), 0) FROM payment_requests WHERE status = ?", (CONFIRMED,))
+        else:
+            rows = self._db.query(
+                "SELECT COALESCE(SUM(amount_cents), 0) FROM payment_requests WHERE status = ? AND confirmed_at >= ?", (CONFIRMED, iso(since)),
+            )
+        return int(rows[0][0])
+
     def get(self, request_id: str) -> PaymentRequest | None:
         rows = self._db.query(f"SELECT {_COLUMNS} FROM payment_requests WHERE id = ?", (request_id,))  # noqa: S608
         return _request(rows[0]) if rows else None
@@ -167,22 +185,6 @@ class BillingStore:
             raise NotFoundError("Pedido não encontrado ou já tratado.")
         expires = self._extend(request.email, request.plan, timedelta(days=DAYS_PER_MONTH * request.months))
         return self._set_subscription(request.email, request.plan, expires)
-
-    # -- administracao ----------------------------------------------------------------------------
-    def accounts(self, query: str = "", limit: int = 50) -> list[dict[str, str]]:
-        """Contas com o plano e a validade (so para o painel de administracao)."""
-        like = "%" + query.strip().lower().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
-        rows = self._db.query(
-            "SELECT u.email, u.created_at, s.plan, s.expires_at FROM users u LEFT JOIN subscriptions s ON s.email = u.email "
-            "WHERE u.email LIKE ? ESCAPE '\\' ORDER BY u.email LIMIT ?", (like, max(1, min(limit, 200))),
-        )
-        now = self._clock()
-        out = []
-        for email, created, plan, expires in rows:
-            active = bool(plan and expires and datetime.fromisoformat(str(expires)) > now)
-            out.append({"email": str(email), "createdAt": _created(created), "plan": str(plan) if active else FREE_KEY,
-                        "expiresAt": str(expires) if expires else "", "active": "1" if active else "0"})
-        return out
 
     def delete_user_data(self, email: str) -> None:
         """Apaga a assinatura e os pedidos nao confirmados; os confirmados ficam (registro de pagamento)."""

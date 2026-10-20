@@ -13,6 +13,8 @@ from collections.abc import Callable
 
 from fastapi import FastAPI, Request
 
+from account_flags import AccountFlags
+from admin_service import AdminService
 from alerts import AlertService
 from billing import BillingStore
 from config import Settings
@@ -23,6 +25,7 @@ from mailer import Mailer
 from notifications import NotificationService
 from profiles import ProfileStore
 from reports import ReportStore
+from routes.admin import register_admin_routes
 from routes.analyses import register_analyses_routes
 from routes.billing import register_billing_routes
 from routes.context import ApiContext
@@ -52,12 +55,23 @@ def register_browse_routes(
     admin_token: str = "",
     mailer: Mailer | None = None,
     account_exists: Callable[[str], bool] | None = None,
+    admin: AdminService | None = None,
+    flags: AccountFlags | None = None,
+    email_verified: Callable[[str], bool] | None = None,
+    mark_verified: Callable[[str], None] | None = None,
+    purge_account: Callable[[str], None] | None = None,
+    send_reset: Callable[[str], bool] | None = None,
+    session_changed: Callable[[str, bool], None] | None = None,
+    usage_snapshot: Callable[[], dict[str, object]] | None = None,
 ) -> None:
     ctx = ApiContext(
         discovery=discovery, library=library, current_user=current_user, identity=identity, alerts=alerts,
         cron_token=cron_token, reports=reports, profiles=profiles, notifications=notifications, feed=feed,
         billing=billing, settings=settings, admin_token=admin_token, mailer=mailer,
-        account_exists=account_exists or (lambda email: False),
+        account_exists=account_exists or (lambda email: False), admin=admin, flags=flags,
+        email_verified=email_verified or (lambda email: False), mark_verified=mark_verified or (lambda email: None),
+        purge_account=purge_account or (lambda email: None), send_reset=send_reset or (lambda email: False),
+        session_changed=session_changed or (lambda email, allowed: None), usage_snapshot=usage_snapshot or (dict),
     )
     register_discover_routes(app, ctx)
     register_analyses_routes(app, ctx)
@@ -67,3 +81,4 @@ def register_browse_routes(
     register_watch_routes(app, ctx)
     register_library_routes(app, ctx)
     register_billing_routes(app, ctx)
+    register_admin_routes(app, ctx)

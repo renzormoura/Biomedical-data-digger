@@ -30,7 +30,7 @@ Ao atingir um limite, a API responde 409 com a mensagem "O plano Gratuito permit
 6. **Cortesia e ajustes:** *Dar 30 dias de Pro* e *Remover* no painel (`grant`/`revoke`), por exemplo para testadores e parceiros.
 
 ## Administração
-Painel em `#/admin` (token no `sessionStorage` só da aba; desativado se não houver `ADMIN_TOKEN`). Rotas em [Referência da API](../api/referencia.md#administração). Procedimento diário sugerido: abrir o painel, conferir os pedidos pendentes contra o extrato, confirmar os que bateram e cancelar os abandonados (mais de alguns dias).
+Na aba **Administração** (`#/admin`), visível para contas em `ADMIN_EMAILS`; o `ADMIN_TOKEN` continua valendo como acesso de emergência. Ver [Aba de Administração](administracao.md) e a [Referência da API](../api/referencia.md#administração). Procedimento diário sugerido: abrir o painel, conferir os pedidos pendentes contra o extrato, confirmar os que bateram e cancelar os abandonados (mais de alguns dias).
 
 ## Dados
 Tabelas `subscriptions` (conta, plano, validade) e `payment_requests` (pedidos, com valor, identificador, status e data). **Pedidos confirmados são registro de pagamento (obrigação fiscal) e permanecem mesmo se a conta for excluída**; a assinatura e os pedidos não confirmados são apagados. Ver [Modelo de dados](../arquitetura/dados.md).

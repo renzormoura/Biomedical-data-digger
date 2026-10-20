@@ -34,7 +34,7 @@ Cada documento explica o objetivo, o que a pessoa vê, como funciona por dentro,
 - [Relatório de tema](features/relatorio-de-tema.md)
 - [Citações e exportação](features/citacoes-exportacao.md)
 - [Pacote Saúde no Brasil (ANVISA, Conitec, Rename)](features/saude-no-brasil.md)
-- [Planos, assinatura e pagamento por Pix](features/assinaturas.md)
+- [Planos, assinatura e pagamento por Pix](features/assinaturas.md) e [Aba de Administração](features/administracao.md)
 - [Perfil e conta](features/perfil.md) e [Conta, sessões e dados pessoais](features/conta-e-sessoes.md)
 - [Laboratório de IA (opcional)](features/analises-clinicas.md)
 

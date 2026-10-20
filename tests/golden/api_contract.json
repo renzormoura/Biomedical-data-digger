@@ -6,6 +6,13 @@
   "status": 200,
   "type": "application/json"
  },
+ "DELETE /api/admin/users/{email} [confirmacao errada]": {
+  "json": {
+   "error": "Digite o e-mail da conta para confirmar a exclusão."
+  },
+  "status": 400,
+  "type": "application/json"
+ },
  "DELETE /api/alerts": {
   "json": {
    "alerts": [],
@@ -175,24 +182,62 @@
     "retratacao": false
    },
    "notifications": [],
+   "payments": [
+    {
+     "amountCents": 34800,
+     "confirmedAt": null,
+     "createdAt": "<ts>",
+     "months": 12,
+     "plan": "pro",
+     "reference": "<ref>",
+     "status": "cancelado"
+    },
+    {
+     "amountCents": 8700,
+     "confirmedAt": null,
+     "createdAt": "<ts>",
+     "months": 3,
+     "plan": "pro",
+     "reference": "<ref>",
+     "status": "cancelado"
+    },
+    {
+     "amountCents": 2900,
+     "confirmedAt": "<ts>",
+     "createdAt": "<ts>",
+     "months": 1,
+     "plan": "pro",
+     "reference": "<ref>",
+     "status": "confirmado"
+    }
+   ],
    "profile": {
     "healthPack": true,
     "profile": "saude"
    },
-   "reports": []
+   "reports": [],
+   "subscription": null
   },
   "status": 200,
   "type": "application/json"
  },
- "GET /api/admin/accounts": {
+ "GET /api/admin/billing/requests [historico]": {
   "json": {
-   "accounts": [
+   "requests": [
     {
-     "active": "1",
+     "amount": "R$ 29,00",
+     "amountCents": 2900,
+     "confirmedAt": "<ts>",
      "createdAt": "<ts>",
      "email": "contrato@exemplo.com",
-     "expiresAt": "<ts>",
-     "plan": "pro"
+     "id": "<id>",
+     "months": 1,
+     "note": "extrato conferido",
+     "pending": false,
+     "plan": "pro",
+     "planName": "Pro",
+     "reference": "<ref>",
+     "status": "confirmado"
     }
    ]
   },
@@ -210,11 +255,8 @@
      "email": "contrato@exemplo.com",
      "id": "<id>",
      "months": 1,
-     "pix": {
-      "copyPaste": "<pix>",
-      "key": "chave@exemplo.com",
-      "name": "Empresa Exemplo"
-     },
+     "note": "",
+     "pending": true,
      "plan": "pro",
      "planName": "Pro",
      "reference": "<ref>",
@@ -230,6 +272,66 @@
    "error": "Não autorizado."
   },
   "status": 401,
+  "type": "application/json"
+ },
+ "GET /api/admin/overview": {
+  "json": {
+   "byPlan": {
+    "gratuito": 0,
+    "pro": 1
+   },
+   "expiringSoon": 0,
+   "newLast7Days": 1,
+   "pendingPayments": 0,
+   "revenueLast30DaysCents": 2900,
+   "revenueTotalCents": 2900,
+   "suspended": 0,
+   "users": 1,
+   "verified": 1
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/admin/session [administrador por token]": {
+  "json": {
+   "admin": true,
+   "email": null
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/admin/session [pessoa comum]": {
+  "json": {
+   "admin": false,
+   "email": null
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/admin/system": {
+  "json": {
+   "adminEmails": [],
+   "billingEnforced": false,
+   "database": "<banco>",
+   "legalComplete": false,
+   "mailEnabled": true,
+   "pixConfigured": true,
+   "production": false,
+   "termsRequired": false,
+   "tokenEnabled": true,
+   "usage": {
+    "by_key": {},
+    "since": "<epoch>",
+    "totals": {
+     "cache_hits": 0,
+     "calls": 0,
+     "completion_tokens": 0,
+     "prompt_tokens": 0,
+     "total_tokens": 0
+    }
+   }
+  },
+  "status": 200,
   "type": "application/json"
  },
  "GET /api/admin/usage [com token]": {
@@ -252,6 +354,79 @@
    "error": "Não autorizado."
   },
   "status": 401,
+  "type": "application/json"
+ },
+ "GET /api/admin/users": {
+  "json": {
+   "limit": 25,
+   "offset": 0,
+   "total": 1,
+   "users": [
+    {
+     "createdAt": "<ts>",
+     "email": "contrato@exemplo.com",
+     "expiresAt": "<ts>",
+     "plan": "pro",
+     "suspended": false,
+     "usage": {
+      "library": 2,
+      "lists": 1,
+      "reports": 1
+     },
+     "verified": true
+    }
+   ]
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/admin/users/{email}": {
+  "json": {
+   "createdAt": "<ts>",
+   "email": "contrato@exemplo.com",
+   "expiresAt": "<ts>",
+   "isAdmin": false,
+   "payments": [
+    {
+     "amountCents": 8700,
+     "confirmedAt": null,
+     "createdAt": "<ts>",
+     "email": "contrato@exemplo.com",
+     "id": "<id>",
+     "months": 3,
+     "note": "",
+     "pending": false,
+     "plan": "pro",
+     "status": "cancelado"
+    },
+    {
+     "amountCents": 2900,
+     "confirmedAt": "<ts>",
+     "createdAt": "<ts>",
+     "email": "contrato@exemplo.com",
+     "id": "<id>",
+     "months": 1,
+     "note": "extrato conferido",
+     "pending": false,
+     "plan": "pro",
+     "status": "confirmado"
+    }
+   ],
+   "plan": "pro",
+   "suspended": false,
+   "suspension": null,
+   "terms": {
+    "acceptedAt": "<ts>",
+    "version": "<date>"
+   },
+   "usage": {
+    "library": 2,
+    "lists": 1,
+    "reports": 1
+   },
+   "verified": true
+  },
+  "status": 200,
   "type": "application/json"
  },
  "GET /api/alerts": {
@@ -3181,6 +3356,34 @@
  "POST /api/admin/billing/revoke": {
   "json": {
    "revoked": true
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/admin/users/{email}/reset-password": {
+  "json": {
+   "sent": false
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/admin/users/{email}/suspend": {
+  "json": {
+   "suspended": true
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/admin/users/{email}/unsuspend": {
+  "json": {
+   "unsuspended": true
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/admin/users/{email}/verify": {
+  "json": {
+   "verified": true
   },
   "status": 200,
   "type": "application/json"

@@ -8,14 +8,17 @@ import uvicorn
 from fastapi import FastAPI
 
 from account_consent import ConsentStore
+from account_flags import AccountFlags
 from account_store import get_account_store
 from account_tokens import AccountTokens
+from admin_service import AdminService
 from alerts import AlertService, AlertStore
 from arxiv_catalog import ArxivCatalog
 from billing import BillingStore
 from brasil import anvisa, conitec, rename
 from catalog import Catalog
 from config import Settings
+from db import Database
 from discovery import DiscoveryService
 from doaj_catalog import DoajCatalog
 from europepmc_catalog import EuropePmcCatalog
@@ -89,10 +92,14 @@ def create_app() -> FastAPI:
     consent.initialize()
     billing = BillingStore()
     billing.initialize()
+    flags = AccountFlags()
+    flags.initialize()
+    account_tokens_db = Database()
+    admin = AdminService(account_tokens_db, billing, account_tokens, consent, flags)
     return create_web_app(
         service, repository, settings, usage_log=usage_log, discovery=discovery, library=library, alerts=alerts,
         reports=report_store, profiles=profile_store, notifications=notifications, feed=FeedService(feed_store),
-        account_tokens=account_tokens, mailer=mailer_from_env(settings.production), consent=consent, billing=billing,
+        account_tokens=account_tokens, mailer=mailer_from_env(settings.production), consent=consent, billing=billing, flags=flags, admin=admin,
     )
 
 

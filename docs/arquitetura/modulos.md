@@ -8,7 +8,7 @@ Código em `biomedical-article-summariser/` (Python, plano). Os módulos não t�
 | `biomedical_data_digger.py` | Ponto de entrada: monta as dependências (catálogos, stores, serviços), carrega as bases do Brasil e sobe o `uvicorn` na porta `PORT` (padrão 7860) |
 | `web.py` | Fábrica da aplicação FastAPI: sessão por cookie, identidade, páginas e autenticação; instala o endurecimento HTTP e registra os grupos de rotas |
 | `browse_api.py` | Monta o `ApiContext` e registra os grupos de rotas do navegador de artigos, na ordem de sempre |
-| `routes/` | Rotas por domínio, cada uma com `register_<domínio>_routes(app, ctx)`: `discover` (busca, obra, semelhantes, enriquecimento, downloads, Brasil, panorama), `analyses`, `profile`, `feed`, `reports`, `watch` (interesses, alertas, notificações, rotina agendada), `library` (biblioteca, listas, compartilhamento) `recovery` (recuperação de senha e confirmação de e-mail), `legal` (textos legais), `billing` (planos, Pix e administração) e `lab` (Laboratório de IA, consumo). Também `context.py` (dependências), `schemas.py` (modelos de entrada), `payloads.py` (JSON de resposta) e `hardening.py` (cabeçalhos de segurança, checagem de origem e tratamento de erros) |
+| `routes/` | Rotas por domínio, cada uma com `register_<domínio>_routes(app, ctx)`: `discover` (busca, obra, semelhantes, enriquecimento, downloads, Brasil, panorama), `analyses`, `profile`, `feed`, `reports`, `watch` (interesses, alertas, notificações, rotina agendada), `library` (biblioteca, listas, compartilhamento) `recovery` (recuperação de senha e confirmação de e-mail), `legal` (textos legais), `billing` (planos e Pix do lado da pessoa) e `admin` (painel de administração) e `lab` (Laboratório de IA, consumo). Também `context.py` (dependências), `schemas.py` (modelos de entrada), `payloads.py` (JSON de resposta) e `hardening.py` (cabeçalhos de segurança, checagem de origem e tratamento de erros) |
 | `timeutil.py` | Relógio UTC e formato ISO únicos |
 | `account_routes.py` | Resumo da conta, troca de senha, exportação de dados e exclusão (LGPD) |
 | `config.py` | `Settings` lidas do ambiente, com validação em um só lugar |
@@ -34,6 +34,7 @@ Código em `biomedical-article-summariser/` (Python, plano). Os módulos não t�
 |---|---|
 | `account_store.py` | Contas (PBKDF2), existência, troca de senha, exclusão |
 | `account_tokens.py` | Tokens de uso único (redefinir senha, confirmar e-mail), guardados como hash, e o estado de confirmação |
+| `admin_service.py`, `account_flags.py` | Consultas do painel de administração (visão geral, usuários, detalhe) e contas suspensas |
 | `plans.py`, `billing.py`, `pix.py` | Planos e limites; assinaturas e pedidos de pagamento; BR Code do Pix |
 | `account_consent.py`, `legal.py`, `legal_texts/` | Registro do aceite dos Termos e da Política (versão e data); renderização dos textos legais com os dados do controlador; os textos em Markdown |
 | `mailer.py` | Envio de e-mail transacional: SMTP padrão, modo log em desenvolvimento, desligado em produção sem `SMTP_HOST` |
