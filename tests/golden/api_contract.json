@@ -1,0 +1,3913 @@
+{
+ "DELETE /api/account": {
+  "json": {
+   "deleted": true
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "DELETE /api/alerts": {
+  "json": {
+   "alerts": [],
+   "unread": 0
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "DELETE /api/analyses/{analysis_id}": {
+  "json": {
+   "ok": true
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "DELETE /api/library": {
+  "json": {
+   "saved": false
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "DELETE /api/lists/{list_id}": {
+  "json": {
+   "deleted": true
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "DELETE /api/lists/{list_id}/items": {
+  "json": {
+   "removed": true
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "DELETE /api/lists/{list_id}/share": {
+  "json": {
+   "shared": false
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "DELETE /api/reports/{report_id}": {
+  "json": {
+   "ok": true
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /": {
+  "status": 200,
+  "text": "<!doctype html>\n<html lang=\"pt-BR\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <meta name=\"color-scheme\" content=\"dark light\">\n  <meta name=\"description\" content=\"Encontre, entenda e organize artigos científicos: busca com filtros, versão aberta, citações e listas de leitura.\">\n  <title>Biomedical Data Digger — navegador de artigos</title>\n  <link rel=\"icon\" href=\"/static/favicon.svg\" type=\"image/svg+xml\">\n  <link rel=\"stylesheet\" href=\"/static/browse.css?v=6ad58a44\">\n  <link rel=\"stylesheet\" href=\"/static/brand.css?v=6ad58a44\">\n  <",
+  "type": "text/html"
+ },
+ "GET /api/account": {
+  "json": {
+   "counts": {
+    "analyses": 0,
+    "library": 0,
+    "lists": 0,
+    "reports": 0
+   },
+   "createdAt": "<ts>",
+   "email": "contrato@exemplo.com",
+   "interests": {
+    "languages": 0,
+    "lastChecked": null,
+    "terms": 0,
+    "topics": 0,
+    "unread": 0
+   },
+   "profile": {
+    "configured": false,
+    "healthPack": true,
+    "profile": null
+   }
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/account/export": {
+  "disposition": "attachment; filename=\"meus-dados.json\"",
+  "json": {
+   "account": {
+    "createdAt": "<ts>",
+    "email": "contrato@exemplo.com"
+   },
+   "alerts": [],
+   "analyses": [],
+   "exportedAt": "<ts>",
+   "interests": {
+    "languages": [
+     "pt"
+    ],
+    "terms": [
+     "metformina"
+    ],
+    "topics": [
+     {
+      "area": "medicina",
+      "subtopics": []
+     }
+    ]
+   },
+   "library": [
+    {
+     "abstract": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
+     "authors": [
+      {
+       "family": "Weber",
+       "given": "Anika"
+      },
+      {
+       "family": "Suzuki",
+       "given": "Hiro"
+      }
+     ],
+     "cited_by": 10,
+     "doi": "10.0000/1",
+     "issue": "5",
+     "journal": "Example Journal",
+     "keywords": [
+      "metformin",
+      "diabetes",
+      "heart"
+     ],
+     "language": "",
+     "oa_url": "",
+     "open_access": false,
+     "pages": "890-903",
+     "pmcid": "",
+     "pmid": "1",
+     "published": "",
+     "ref": "1",
+     "retracted": false,
+     "savedAt": "<ts>",
+     "source": "Europe PMC",
+     "study_types": [],
+     "tags": [
+      "diabetes"
+     ],
+     "title": "Estudo de contrato 1",
+     "volume": "27",
+     "year": 2024
+    }
+   ],
+   "lists": [],
+   "notificationPrefs": {
+    "novo-artigo": true,
+    "regulatorio": true,
+    "relatorio-lista": true,
+    "retratacao": false
+   },
+   "notifications": [],
+   "profile": {
+    "healthPack": true,
+    "profile": "saude"
+   },
+   "reports": []
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/admin/usage [com token]": {
+  "json": {
+   "by_key": {},
+   "since": "<epoch>",
+   "totals": {
+    "cache_hits": 0,
+    "calls": 0,
+    "completion_tokens": 0,
+    "prompt_tokens": 0,
+    "total_tokens": 0
+   }
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/admin/usage [sem token]": {
+  "json": {
+   "error": "Não autorizado."
+  },
+  "status": 401,
+  "type": "application/json"
+ },
+ "GET /api/alerts": {
+  "json": {
+   "alerts": [],
+   "unread": 0
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/analyses": {
+  "json": {
+   "analyses": [
+    {
+     "createdAt": "<ts>",
+     "id": "<id>",
+     "label": "Sumário",
+     "page": "geral",
+     "ref": "1",
+     "title": "Estudo de contrato 1"
+    }
+   ]
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/analyses/{analysis_id}": {
+  "json": {
+   "createdAt": "<ts>",
+   "html": "<h2>T</h2>\n<p>texto</p>",
+   "id": "<id>",
+   "label": "Sumário",
+   "markdown": "## T\n\ntexto",
+   "page": "geral",
+   "ref": "1",
+   "title": "Estudo de contrato 1"
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/analyses/{analysis_id}/download": {
+  "disposition": "attachment; filename=\"sumario-estudo-de-contrato-1.md\"",
+  "status": 200,
+  "text": "# Sumário\n\nArtigo: Estudo de contrato 1  \n\n### T\n\ntexto\n\nGerado em <date> no Laboratório do Biomedical Data Digger. Análises com IA podem conter erros: confira sempre com o artigo original.\n",
+  "type": "text/markdown"
+ },
+ "GET /api/auth/me [apos exclusao]": {
+  "json": {
+   "user": null
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/auth/me [logado]": {
+  "json": {
+   "user": "contrato@exemplo.com"
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/auth/me [visitante]": {
+  "json": {
+   "user": null
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/brasil/conitec": {
+  "json": {
+   "consulta": "metformina",
+   "meta": {
+    "arquivoUrl": "https://www.gov.br/conitec/pt-br/midias/dados-em-excel/recomendacoesdaconitec_20260615.xlsx/@@download/file",
+    "defasado": false,
+    "dias": 3,
+    "extraidoEm": "<date>",
+    "fonte": "CONITEC, recomendacoes sobre tecnologias avaliadas (planilha oficial)",
+    "medicamentos": 782,
+    "paginaUrl": "https://www.gov.br/conitec/pt-br/assuntos/avaliacao-de-tecnologias-em-saude/recomendacoes-da-conitec"
+   },
+   "registros": []
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/brasil/medicamento": {
+  "json": {
+   "anvisa": [
+    {
+     "active": 1144,
+     "activeAlone": 487,
+     "categories": {
+      "Genérico": 715,
+      "Novo": 127,
+      "Similar": 302
+     },
+     "classes": [
+      "Antidiabeticos"
+     ],
+     "companies": 34,
+     "inactive": 989,
+     "key": "metformina",
+     "name": "metformina",
+     "validUntil": "2036-09"
+    }
+   ],
+   "conitec": [],
+   "consulta": "metformina",
+   "meta": {
+    "anvisa": {
+     "arquivoModificado": "<date>",
+     "arquivoUrl": "https://dados.anvisa.gov.br/dados/DADOS_ABERTOS_MEDICAMENTOS.csv",
+     "defasado": false,
+     "dias": 3,
+     "dicionarioUrl": "https://dados.anvisa.gov.br/dados/Documentacao_e_Dicionario_de_Dados_Registros_Validos_Medicamento_V1.pdf",
+     "extraidoEm": "<date>",
+     "fonte": "ANVISA, dados abertos de medicamentos registrados (DATAVISA)",
+     "substancias": 3857
+    },
+    "conitec": {
+     "arquivoUrl": "https://www.gov.br/conitec/pt-br/midias/dados-em-excel/recomendacoesdaconitec_20260615.xlsx/@@download/file",
+     "defasado": false,
+     "dias": 3,
+     "extraidoEm": "<date>",
+     "fonte": "CONITEC, recomendacoes sobre tecnologias avaliadas (planilha oficial)",
+     "medicamentos": 782,
+     "paginaUrl": "https://www.gov.br/conitec/pt-br/assuntos/avaliacao-de-tecnologias-em-saude/recomendacoes-da-conitec"
+    },
+    "rename": {
+     "arquivoUrl": "https://bvsms.saude.gov.br/bvs/publicacoes/relacao_nacional_medicamentos_2024_2ed.pdf",
+     "defasado": false,
+     "dias": 3,
+     "extraidoEm": "<date>",
+     "fonte": "RENAME 2024 (2ª edição, 2025)",
+     "licenca": "CC BY-NC-SA 4.0 (uso não comercial, com atribuição e mesma licença)",
+     "substancias": 514
+    }
+   },
+   "rename": [
+    {
+     "atc": [
+      "A10BA02"
+     ],
+     "components": [
+      "Básico"
+     ],
+     "key": "metformina",
+     "name": "cloridrato de metformina",
+     "presentations": [
+      {
+       "atc": "A10BA02",
+       "component": "Básico",
+       "page": 28,
+       "text": "500 mg comprimido"
+      },
+      {
+       "atc": "A10BA02",
+       "component": "Básico",
+       "page": 28,
+       "text": "850 mg comprimido"
+      }
+     ],
+     "totalPresentations": 2
+    }
+   ]
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/discover/brasil": {
+  "json": {
+   "candidatos": [
+    {
+     "anvisa": [
+      {
+       "active": 1144,
+       "activeAlone": 487,
+       "categories": {
+        "Genérico": 715,
+        "Novo": 127,
+        "Similar": 302
+       },
+       "classes": [
+        "Antidiabeticos"
+       ],
+       "companies": 34,
+       "inactive": 989,
+       "key": "metformina",
+       "name": "metformina",
+       "validUntil": "2036-09"
+      }
+     ],
+     "conitec": [],
+     "en": "metformin",
+     "metodo": "cognato",
+     "pt": "Metformina",
+     "rename": [
+      {
+       "atc": [
+        "A10BA02"
+       ],
+       "components": [
+        "Básico"
+       ],
+       "key": "metformina",
+       "name": "cloridrato de metformina",
+       "presentations": [
+        {
+         "atc": "A10BA02",
+         "component": "Básico",
+         "page": 28,
+         "text": "500 mg comprimido"
+        },
+        {
+         "atc": "A10BA02",
+         "component": "Básico",
+         "page": 28,
+         "text": "850 mg comprimido"
+        }
+       ],
+       "totalPresentations": 2
+      }
+     ]
+    }
+   ],
+   "meta": {
+    "anvisa": {
+     "arquivoModificado": "<date>",
+     "arquivoUrl": "https://dados.anvisa.gov.br/dados/DADOS_ABERTOS_MEDICAMENTOS.csv",
+     "defasado": false,
+     "dias": 3,
+     "dicionarioUrl": "https://dados.anvisa.gov.br/dados/Documentacao_e_Dicionario_de_Dados_Registros_Validos_Medicamento_V1.pdf",
+     "extraidoEm": "<date>",
+     "fonte": "ANVISA, dados abertos de medicamentos registrados (DATAVISA)",
+     "substancias": 3857
+    },
+    "conitec": {
+     "arquivoUrl": "https://www.gov.br/conitec/pt-br/midias/dados-em-excel/recomendacoesdaconitec_20260615.xlsx/@@download/file",
+     "defasado": false,
+     "dias": 3,
+     "extraidoEm": "<date>",
+     "fonte": "CONITEC, recomendacoes sobre tecnologias avaliadas (planilha oficial)",
+     "medicamentos": 782,
+     "paginaUrl": "https://www.gov.br/conitec/pt-br/assuntos/avaliacao-de-tecnologias-em-saude/recomendacoes-da-conitec"
+    },
+    "rename": {
+     "arquivoUrl": "https://bvsms.saude.gov.br/bvs/publicacoes/relacao_nacional_medicamentos_2024_2ed.pdf",
+     "defasado": false,
+     "dias": 3,
+     "extraidoEm": "<date>",
+     "fonte": "RENAME 2024 (2ª edição, 2025)",
+     "licenca": "CC BY-NC-SA 4.0 (uso não comercial, com atribuição e mesma licença)",
+     "substancias": 514
+    }
+   }
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/discover/brief": {
+  "json": {
+   "reliability": {
+    "band": "Alta",
+    "coverage": 70,
+    "score": 100
+   },
+   "work": {
+    "authors": "Anika Weber, Hiro Suzuki",
+    "citedBy": 10,
+    "doi": "10.0000/1",
+    "journal": "Example Journal",
+    "keywords": [
+     "metformin",
+     "diabetes",
+     "heart"
+    ],
+    "language": "",
+    "oaUrl": "",
+    "openAccess": false,
+    "pmid": "1",
+    "ref": "1",
+    "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
+    "source": "Europe PMC",
+    "studyTypes": [],
+    "title": "Estudo de contrato 1",
+    "year": 2024
+   }
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/discover/cite": {
+  "bytes": true,
+  "disposition": "attachment; filename=\"referencia.ris\"",
+  "status": 200,
+  "type": "application/x-research-info-systems"
+ },
+ "GET /api/discover/download [abstract-md]": {
+  "disposition": "attachment; filename=\"estudo-de-contrato-1-2024-resumo.md\"",
+  "status": 200,
+  "text": "# Estudo de contrato 1\n\nAnika Weber, Hiro Suzuki  \nExample Journal, v. 27, n. 5, p. 890-903 · 2024  \nDOI: https://doi.org/10.0000/1 · PMID: 1  \nFonte: Europe PMC  \n\n## Resumo\n\n### Contexto\n\nMetformin is widely used.\n\n### Métodos\n\nWe pooled 14 trials (n=18,450).\n\n### Resultados\n\nLower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02).\n\n### Conclusões\n\nA modest reduction. Registered NCT01234567.\n\nDocumento gerado em <date> pelo Biomedical Data Digger a partir do registro Europe PMC. O texto foi copiado do registro; nada foi gerado por IA.\n",
+  "type": "text/markdown"
+ },
+ "GET /api/discover/download [citation-bibtex]": {
+  "bytes": true,
+  "disposition": "attachment; filename=\"estudo-de-contrato-1-2024-referencia-bibtex.bib\"",
+  "status": 200,
+  "type": "application/x-bibtex"
+ },
+ "GET /api/discover/download [fulltext-txt]": {
+  "json": {
+   "error": "Este artigo não tem texto completo aberto disponível."
+  },
+  "status": 404,
+  "type": "application/json"
+ },
+ "GET /api/discover/download [sheet-txt]": {
+  "disposition": "attachment; filename=\"estudo-de-contrato-1-2024-ficha.txt\"",
+  "status": 200,
+  "text": "ESTUDO DE CONTRATO 1\n====================\n\nAnika Weber, Hiro Suzuki\nExample Journal, v. 27, n. 5, p. 890-903 · 2024\nDOI: https://doi.org/10.0000/1 · PMID: 1\nFonte: Europe PMC\n\nRESUMO\n------\n\nContexto\n\nMetformin is widely used.\n\n\nMétodos\n\nWe pooled 14 trials (n=18,450).\n\n\nResultados\n\nLower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02).\n\n\nConclusões\n\nA modest reduction. Registered NCT01234567.\n\n\nNÚMEROS E DADOS ESTATÍSTICOS (COM A FRASE DE ORIGEM)\n----------------------------------------------------\n  “tamanho da amostra: Methods: We pooled 14 trials (n=18,450).”\n\n  “medida de efeito, intervalo de co",
+  "type": "text/plain"
+ },
+ "GET /api/discover/downloads": {
+  "json": {
+   "links": [
+    {
+     "label": "Página do editor (DOI)",
+     "url": "https://doi.org/10.0000/1"
+    }
+   ],
+   "note": "PDFs de editoras abrem no site de origem; só oferecemos o que a fonte informa como aberto.",
+   "options": [
+    {
+     "available": true,
+     "description": "Título, autores, identificação e o resumo com as seções originais.",
+     "formats": [
+      {
+       "id": "txt",
+       "label": "Texto (.txt)"
+      },
+      {
+       "id": "md",
+       "label": "Markdown (.md)"
+      },
+      {
+       "id": "html",
+       "label": "Página web (.html)"
+      },
+      {
+       "id": "docx",
+       "label": "Word (.docx)"
+      },
+      {
+       "id": "json",
+       "label": "Dados (.json)"
+      }
+     ],
+     "kind": "abstract",
+     "label": "Apenas o resumo"
+    },
+    {
+     "available": true,
+     "description": "Resumo, números com a frase de origem, nota de confiabilidade explicada, registro e dados, e citações.",
+     "formats": [
+      {
+       "id": "txt",
+       "label": "Texto (.txt)"
+      },
+      {
+       "id": "md",
+       "label": "Markdown (.md)"
+      },
+      {
+       "id": "html",
+       "label": "Página web (.html)"
+      },
+      {
+       "id": "docx",
+       "label": "Word (.docx)"
+      },
+      {
+       "id": "json",
+       "label": "Dados (.json)"
+      }
+     ],
+     "kind": "sheet",
+     "label": "Ficha de leitura"
+    },
+    {
+     "available": true,
+     "description": "Referência pronta para o gerenciador de bibliografia ou para o trabalho.",
+     "formats": [
+      {
+       "id": "bibtex",
+       "label": "BibTeX (.bib)"
+      },
+      {
+       "id": "ris",
+       "label": "RIS (.ris)"
+      },
+      {
+       "id": "abnt",
+       "label": "ABNT (.txt)"
+      },
+      {
+       "id": "apa",
+       "label": "APA (.txt)"
+      },
+      {
+       "id": "vancouver",
+       "label": "Vancouver (.txt)"
+      }
+     ],
+     "kind": "citation",
+     "label": "Só a referência"
+    },
+    {
+     "available": false,
+     "description": "Sem texto completo aberto na Europe PMC para este artigo.",
+     "formats": [
+      {
+       "id": "txt",
+       "label": "Texto (.txt)"
+      },
+      {
+       "id": "md",
+       "label": "Markdown (.md)"
+      },
+      {
+       "id": "html",
+       "label": "Página web (.html)"
+      },
+      {
+       "id": "docx",
+       "label": "Word (.docx)"
+      },
+      {
+       "id": "xml",
+       "label": "Original JATS (.xml)"
+      }
+     ],
+     "kind": "fulltext",
+     "label": "Texto completo (acesso aberto)"
+    }
+   ]
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/discover/enrichment": {
+  "json": {
+   "citations": 7,
+   "mentionedTrials": [
+    "NCT01234567"
+   ],
+   "relatedData": [],
+   "trials": []
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/discover/options": {
+  "json": {
+   "languages": [
+    {
+     "id": "",
+     "name": "Todos"
+    },
+    {
+     "id": "pt",
+     "name": "Português"
+    },
+    {
+     "id": "en",
+     "name": "Inglês"
+    },
+    {
+     "id": "es",
+     "name": "Espanhol"
+    }
+   ],
+   "sorts": [
+    {
+     "id": "relevance",
+     "name": "Relevância"
+    },
+    {
+     "id": "recent",
+     "name": "Mais recentes"
+    },
+    {
+     "id": "cited",
+     "name": "Mais citados"
+    }
+   ],
+   "sources": [
+    {
+     "default": true,
+     "id": "all",
+     "name": "Todas as fontes",
+     "studyTypes": [
+      "Revisão"
+     ]
+    },
+    {
+     "default": false,
+     "id": "europepmc",
+     "name": "Europe PMC (ciências da vida)",
+     "studyTypes": [
+      "Revisão"
+     ]
+    },
+    {
+     "default": false,
+     "id": "pubmed",
+     "name": "PubMed (MEDLINE)",
+     "studyTypes": [
+      "Revisão"
+     ]
+    }
+   ]
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/discover/panorama": {
+  "json": {
+   "designs": [
+    {
+     "count": 3,
+     "key": "desconhecido",
+     "label": "Tipo de estudo não informado"
+    }
+   ],
+   "openAccess": 0,
+   "retracted": 0,
+   "sample": 3,
+   "sources": [
+    {
+     "count": 3,
+     "name": "Europe PMC"
+    }
+   ],
+   "strongest": {
+    "authors": "Anika Weber, Hiro Suzuki",
+    "band": "Alta",
+    "design": "Tipo de estudo não informado",
+    "journal": "Example Journal",
+    "ref": "1",
+    "score": 100,
+    "source": "Europe PMC",
+    "title": "Estudo de contrato 1",
+    "year": 2024
+   },
+   "timeline": [
+    {
+     "count": 3,
+     "year": 2024
+    }
+   ],
+   "total": 5
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/discover/search": {
+  "json": {
+   "notes": [],
+   "page": 1,
+   "pages": 1,
+   "perPage": 5,
+   "source": "all",
+   "total": 5,
+   "works": [
+    {
+     "authors": "Anika Weber, Hiro Suzuki",
+     "citedBy": 10,
+     "doi": "10.0000/1",
+     "journal": "Example Journal",
+     "keywords": [
+      "metformin",
+      "diabetes",
+      "heart"
+     ],
+     "language": "",
+     "oaUrl": "",
+     "openAccess": false,
+     "pmid": "1",
+     "ref": "1",
+     "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
+     "source": "Europe PMC",
+     "studyTypes": [],
+     "title": "Estudo de contrato 1",
+     "year": 2024
+    },
+    {
+     "authors": "Anika Weber, Hiro Suzuki",
+     "citedBy": 10,
+     "doi": "10.0000/2",
+     "journal": "Example Journal",
+     "keywords": [
+      "metformin",
+      "diabetes",
+      "heart"
+     ],
+     "language": "",
+     "oaUrl": "",
+     "openAccess": false,
+     "pmid": "2",
+     "ref": "2",
+     "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
+     "source": "Europe PMC",
+     "studyTypes": [],
+     "title": "Estudo de contrato 2",
+     "year": 2024
+    },
+    {
+     "authors": "Anika Weber, Hiro Suzuki",
+     "citedBy": 10,
+     "doi": "10.0000/3",
+     "journal": "Example Journal",
+     "keywords": [
+      "metformin",
+      "diabetes",
+      "heart"
+     ],
+     "language": "",
+     "oaUrl": "",
+     "openAccess": false,
+     "pmid": "3",
+     "ref": "3",
+     "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
+     "source": "Europe PMC",
+     "studyTypes": [],
+     "title": "Estudo de contrato 3",
+     "year": 2024
+    }
+   ]
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/discover/search [uma fonte]": {
+  "json": {
+   "notes": [],
+   "page": 1,
+   "pages": 1,
+   "perPage": 10,
+   "source": "pubmed",
+   "total": 2,
+   "works": [
+    {
+     "authors": "Anika Weber, Hiro Suzuki",
+     "citedBy": 10,
+     "doi": "10.0000/1",
+     "journal": "Example Journal",
+     "keywords": [
+      "metformin",
+      "diabetes",
+      "heart"
+     ],
+     "language": "",
+     "oaUrl": "",
+     "openAccess": false,
+     "pmid": "1",
+     "ref": "1",
+     "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
+     "source": "Europe PMC",
+     "studyTypes": [],
+     "title": "Estudo de contrato 1",
+     "year": 2024
+    },
+    {
+     "authors": "Anika Weber, Hiro Suzuki",
+     "citedBy": 10,
+     "doi": "10.0000/2",
+     "journal": "Example Journal",
+     "keywords": [
+      "metformin",
+      "diabetes",
+      "heart"
+     ],
+     "language": "",
+     "oaUrl": "",
+     "openAccess": false,
+     "pmid": "2",
+     "ref": "2",
+     "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
+     "source": "Europe PMC",
+     "studyTypes": [],
+     "title": "Estudo de contrato 2",
+     "year": 2024
+    }
+   ]
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/discover/similar": {
+  "json": {
+   "terms": [
+    "metformin",
+    "diabetes",
+    "contrato"
+   ],
+   "works": [
+    {
+     "authors": "Anika Weber, Hiro Suzuki",
+     "citedBy": 10,
+     "doi": "10.0000/2",
+     "journal": "Example Journal",
+     "keywords": [
+      "metformin",
+      "diabetes",
+      "heart"
+     ],
+     "language": "",
+     "oaUrl": "",
+     "openAccess": false,
+     "pmid": "2",
+     "ref": "2",
+     "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
+     "source": "Europe PMC",
+     "studyTypes": [],
+     "title": "Estudo de contrato 2",
+     "year": 2024
+    },
+    {
+     "authors": "Anika Weber, Hiro Suzuki",
+     "citedBy": 10,
+     "doi": "10.0000/3",
+     "journal": "Example Journal",
+     "keywords": [
+      "metformin",
+      "diabetes",
+      "heart"
+     ],
+     "language": "",
+     "oaUrl": "",
+     "openAccess": false,
+     "pmid": "3",
+     "ref": "3",
+     "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
+     "source": "Europe PMC",
+     "studyTypes": [],
+     "title": "Estudo de contrato 3",
+     "year": 2024
+    }
+   ]
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/discover/work": {
+  "json": {
+   "citations": {
+    "ABNT": "WEBER, A.; SUZUKI, H. Estudo de contrato 1. Example Journal, v. 27, n. 5, p. 890-903, 2024. DOI: 10.0000/1.",
+    "APA": "Weber, A., & Suzuki, H. (2024). Estudo de contrato 1. *Example Journal*, *27*(5), 890–903. https://doi.org/10.0000/1",
+    "Harvard": "Weber, A. and Suzuki, H. (2024) 'Estudo de contrato 1', *Example Journal*, 27(5), pp. 890–903. doi:10.0000/1.",
+    "IEEE": "A. Weber and H. Suzuki, \"Estudo de contrato 1,\" *Example Journal*, vol. 27, no. 5, pp. 890–903, 2024, doi: 10.0000/1.",
+    "MLA": "Weber, Anika, and Hiro Suzuki. \"Estudo de contrato 1.\" *Example Journal*, vol. 27, no. 5, 2024, pp. 890-903, https://doi.org/10.0000/1.",
+    "Vancouver": "Weber A, Suzuki H. Estudo de contrato 1. Example Journal. 2024;27(5):890-903. doi:10.0000/1"
+   },
+   "findings": [
+    {
+     "sentence": "Methods: We pooled 14 trials (n=18,450).",
+     "tags": [
+      "tamanho da amostra"
+     ]
+    },
+    {
+     "sentence": "Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02).",
+     "tags": [
+      "medida de efeito",
+      "intervalo de confiança",
+      "valor de p"
+     ]
+    }
+   ],
+   "reliability": {
+    "band": "Alta",
+    "coverage": 70,
+    "criteria": [
+     {
+      "detail": "Sem marca de retratação no registro de Europe PMC. A checagem cobre só essa fonte; retratações recentes podem ainda não constar.",
+      "evidence": "",
+      "how": "Consulta a marca de retratação no registro da fonte (Europe PMC ou OpenAlex).",
+      "key": "integridade",
+      "name": "Integridade (retratação)",
+      "points": 20,
+      "status": "met",
+      "weight": 20
+     },
+     {
+      "detail": "A fonte não informa o tipo de estudo. O critério não entra no cálculo.",
+      "evidence": "",
+      "how": "Usa o tipo de estudo do registro oficial. Revisão sistemática e meta-análise pontuam mais; ensaio randomizado vem a seguir; estudos observacionais, revisões narrativas e relatos de caso pontuam menos.",
+      "key": "desenho",
+      "name": "Desenho do estudo",
+      "points": 0,
+      "status": "unknown",
+      "weight": 25
+     },
+     {
+      "detail": "Publicado em periódico. O registro não informa o rigor da revisão de cada periódico.",
+      "evidence": "Example Journal",
+      "how": "Preprint não passou por revisão por pares; artigo em periódico indexado é considerado revisado.",
+      "key": "revisao_pares",
+      "name": "Revisão por pares",
+      "points": 10,
+      "status": "met",
+      "weight": 10
+     },
+     {
+      "detail": "O resumo informa o tamanho da amostra.",
+      "evidence": "Methods: We pooled 14 trials (n=18,450).",
+      "how": "Procura no resumo o tamanho da amostra (n = ..., N participantes) ou o número de estudos incluídos.",
+      "key": "amostra",
+      "name": "Tamanho da amostra informado",
+      "points": 10,
+      "status": "met",
+      "weight": 10
+     },
+     {
+      "detail": "O resumo traz uma medida de efeito numérica.",
+      "evidence": "Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02).",
+      "how": "Procura no resumo uma medida de efeito (HR, OR, RR, diferença de médias) com valor numérico.",
+      "key": "resultados",
+      "name": "Resultado principal quantificado",
+      "points": 10,
+      "status": "met",
+      "weight": 10
+     },
+     {
+      "detail": "O resumo informa intervalo de confiança.",
+      "evidence": "Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02).",
+      "how": "Procura no resumo um intervalo de confiança (melhor) ou valor de p (parcial).",
+      "key": "precisao",
+      "name": "Precisão estatística (IC ou p)",
+      "points": 10,
+      "status": "met",
+      "weight": 10
+     },
+     {
+      "detail": "O resumo traz uma seção de métodos.",
+      "evidence": "We pooled 14 trials (n=18,450).",
+      "how": "Verifica se o resumo é estruturado e traz a seção de métodos (desenho, participantes, intervenção).",
+      "key": "metodos",
+      "name": "Método descrito no resumo",
+      "points": 10,
+      "status": "met",
+      "weight": 10
+     },
+     {
+      "detail": "Não se aplica: o artigo não é identificado como ensaio clínico.",
+      "evidence": "",
+      "how": "Para ensaios clínicos: procura número de registro prévio (ClinicalTrials.gov, ReBEC, ISRCTN e outros) no resumo.",
+      "key": "registro",
+      "name": "Registro prévio do ensaio",
+      "points": 0,
+      "status": "na",
+      "weight": 5
+     }
+    ],
+    "disclaimer": "Esta nota resume sinais verificáveis no registro e no resumo do artigo. Ela não avalia a qualidade da execução do estudo, o risco de viés nem a validade clínica, e não substitui a leitura crítica do texto completo.",
+    "score": 100,
+    "summary": "100/100 (Alta), com 70% dos critérios avaliados.",
+    "warnings": [
+     "Nota calculada com 70% dos critérios avaliáveis; o restante não pôde ser verificado."
+    ]
+   },
+   "sections": [
+    {
+     "heading": "Contexto",
+     "label": "Background",
+     "text": "Metformin is widely used."
+    },
+    {
+     "heading": "Métodos",
+     "label": "Methods",
+     "text": "We pooled 14 trials (n=18,450)."
+    },
+    {
+     "heading": "Resultados",
+     "label": "Results",
+     "text": "Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02)."
+    },
+    {
+     "heading": "Conclusões",
+     "label": "Conclusions",
+     "text": "A modest reduction. Registered NCT01234567."
+    }
+   ],
+   "work": {
+    "abstract": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
+    "authorList": [
+     {
+      "family": "Weber",
+      "given": "Anika"
+     },
+     {
+      "family": "Suzuki",
+      "given": "Hiro"
+     }
+    ],
+    "authors": "Anika Weber, Hiro Suzuki",
+    "citedBy": 10,
+    "doi": "10.0000/1",
+    "issue": "5",
+    "journal": "Example Journal",
+    "keywords": [
+     "metformin",
+     "diabetes",
+     "heart"
+    ],
+    "language": "",
+    "oaUrl": "",
+    "openAccess": false,
+    "pages": "890-903",
+    "pmcid": "",
+    "pmid": "1",
+    "published": "",
+    "ref": "1",
+    "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
+    "source": "Europe PMC",
+    "studyTypes": [],
+    "title": "Estudo de contrato 1",
+    "volume": "27",
+    "year": 2024
+   }
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/feed": {
+  "json": {
+   "hasInterests": false,
+   "hasMore": false,
+   "items": [
+    {
+     "areas": [
+      "Medicina"
+     ],
+     "dateKnown": true,
+     "id": "aaaaaaaaaaaaaaaaaaaaaaaa",
+     "kind": "noticia",
+     "matched": [],
+     "publishedAt": "<ts>",
+     "snippet": "Resumo curto.",
+     "source": {
+      "id": "fiocruz",
+      "language": "pt",
+      "name": "Agência Fiocruz de Notícias",
+      "site": "https://agencia.fiocruz.br/",
+      "tier": "instituicao",
+      "tierLabel": "Instituição"
+     },
+     "title": "Vacinas em pediatria",
+     "url": "https://exemplo.com/a"
+    }
+   ],
+   "page": 1,
+   "personalized": false,
+   "refreshing": false,
+   "total": 1,
+   "updatedAt": "<ts>"
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/feed/sources": {
+  "json": {
+   "sources": [
+    {
+     "areas": [
+      "Medicina",
+      "Farmácia e farmacologia",
+      "Biologia e biotecnologia",
+      "Enfermagem"
+     ],
+     "failing": false,
+     "id": "fiocruz",
+     "language": "pt",
+     "lastOk": "<ts>",
+     "name": "Agência Fiocruz de Notícias",
+     "site": "https://agencia.fiocruz.br/",
+     "tier": "instituicao",
+     "tierLabel": "Instituição"
+    },
+    {
+     "areas": [
+      "Medicina",
+      "Enfermagem"
+     ],
+     "failing": false,
+     "id": "opas",
+     "language": "pt",
+     "lastOk": "<ts>",
+     "name": "OPAS/OMS (português)",
+     "site": "https://www.paho.org/pt",
+     "tier": "instituicao",
+     "tierLabel": "Instituição"
+    },
+    {
+     "areas": [
+      "Medicina",
+      "Farmácia e farmacologia",
+      "Enfermagem",
+      "Nutrição e educação física"
+     ],
+     "failing": false,
+     "id": "agencia-brasil-saude",
+     "language": "pt",
+     "lastOk": "<ts>",
+     "name": "Agência Brasil: Saúde",
+     "site": "https://agenciabrasil.ebc.com.br/saude",
+     "tier": "jornal",
+     "tierLabel": "Jornal"
+    },
+    {
+     "areas": [
+      "Medicina",
+      "Nutrição e educação física",
+      "Psicologia e neurociência"
+     ],
+     "failing": false,
+     "id": "folha-saude",
+     "language": "pt",
+     "lastOk": "<ts>",
+     "name": "Folha de S.Paulo: Equilíbrio e Saúde",
+     "site": "https://www1.folha.uol.com.br/equilibrioesaude/",
+     "tier": "jornal",
+     "tierLabel": "Jornal"
+    },
+    {
+     "areas": [
+      "Medicina",
+      "Biologia e biotecnologia",
+      "Meio ambiente e ciências da Terra"
+     ],
+     "failing": false,
+     "id": "g1-ciencia-saude",
+     "language": "pt",
+     "lastOk": "<ts>",
+     "name": "G1: Ciência e Saúde",
+     "site": "https://g1.globo.com/ciencia-e-saude/",
+     "tier": "jornal",
+     "tierLabel": "Jornal"
+    },
+    {
+     "areas": [
+      "Medicina"
+     ],
+     "failing": false,
+     "id": "oms",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "Organização Mundial da Saúde",
+     "site": "https://www.who.int/news",
+     "tier": "instituicao",
+     "tierLabel": "Instituição"
+    },
+    {
+     "areas": [
+      "Medicina"
+     ],
+     "failing": false,
+     "id": "cdc-mmwr",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "CDC: Morbidity and Mortality Weekly Report",
+     "site": "https://www.cdc.gov/mmwr/",
+     "tier": "instituicao",
+     "tierLabel": "Instituição"
+    },
+    {
+     "areas": [
+      "Medicina"
+     ],
+     "failing": false,
+     "id": "bmj",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "The BMJ",
+     "site": "https://www.bmj.com/",
+     "tier": "revista",
+     "tierLabel": "Revista"
+    },
+    {
+     "areas": [
+      "Medicina"
+     ],
+     "failing": false,
+     "id": "jama",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "JAMA Network",
+     "site": "https://jamanetwork.com/",
+     "tier": "revista",
+     "tierLabel": "Revista"
+    },
+    {
+     "areas": [
+      "Medicina"
+     ],
+     "failing": false,
+     "id": "plos-medicine",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "PLOS Medicine",
+     "site": "https://journals.plos.org/plosmedicine/",
+     "tier": "revista",
+     "tierLabel": "Revista"
+    },
+    {
+     "areas": [
+      "Medicina"
+     ],
+     "failing": false,
+     "id": "medrxiv",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "medRxiv (preprints)",
+     "site": "https://www.medrxiv.org/",
+     "tier": "preprint",
+     "tierLabel": "Preprint"
+    },
+    {
+     "areas": [
+      "Medicina",
+      "Nutrição e educação física",
+      "Enfermagem"
+     ],
+     "failing": false,
+     "id": "sciencedaily-saude",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "ScienceDaily: Saúde",
+     "site": "https://www.sciencedaily.com/news/health_medicine/",
+     "tier": "divulgacao",
+     "tierLabel": "Divulgação científica"
+    },
+    {
+     "areas": [
+      "Medicina",
+      "Farmácia e farmacologia",
+      "Odontologia"
+     ],
+     "failing": false,
+     "id": "medicalxpress",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "Medical Xpress",
+     "site": "https://medicalxpress.com/",
+     "tier": "divulgacao",
+     "tierLabel": "Divulgação científica"
+    },
+    {
+     "areas": [
+      "Qualquer área"
+     ],
+     "failing": false,
+     "id": "pesquisa-fapesp",
+     "language": "pt",
+     "lastOk": "<ts>",
+     "name": "Revista Pesquisa FAPESP",
+     "site": "https://revistapesquisa.fapesp.br/",
+     "tier": "divulgacao",
+     "tierLabel": "Divulgação científica"
+    },
+    {
+     "areas": [
+      "Qualquer área"
+     ],
+     "failing": false,
+     "id": "jornal-usp",
+     "language": "pt",
+     "lastOk": "<ts>",
+     "name": "Jornal da USP",
+     "site": "https://jornal.usp.br/",
+     "tier": "instituicao",
+     "tierLabel": "Instituição"
+    },
+    {
+     "areas": [
+      "Qualquer área"
+     ],
+     "failing": false,
+     "id": "conversation-br",
+     "language": "pt",
+     "lastOk": "<ts>",
+     "name": "The Conversation Brasil",
+     "site": "https://theconversation.com/br",
+     "tier": "divulgacao",
+     "tierLabel": "Divulgação científica"
+    },
+    {
+     "areas": [
+      "Qualquer área"
+     ],
+     "failing": false,
+     "id": "folha-ciencia",
+     "language": "pt",
+     "lastOk": "<ts>",
+     "name": "Folha de S.Paulo: Ciência",
+     "site": "https://www1.folha.uol.com.br/ciencia/",
+     "tier": "jornal",
+     "tierLabel": "Jornal"
+    },
+    {
+     "areas": [
+      "Qualquer área"
+     ],
+     "failing": false,
+     "id": "conversation",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "The Conversation (global)",
+     "site": "https://theconversation.com/global",
+     "tier": "divulgacao",
+     "tierLabel": "Divulgação científica"
+    },
+    {
+     "areas": [
+      "Qualquer área"
+     ],
+     "failing": false,
+     "id": "nature",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "Nature",
+     "site": "https://www.nature.com/nature/",
+     "tier": "revista",
+     "tierLabel": "Revista"
+    },
+    {
+     "areas": [
+      "Qualquer área"
+     ],
+     "failing": false,
+     "id": "plos-one",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "PLOS ONE",
+     "site": "https://journals.plos.org/plosone/",
+     "tier": "revista",
+     "tierLabel": "Revista"
+    },
+    {
+     "areas": [
+      "Biologia e biotecnologia",
+      "Medicina",
+      "Psicologia e neurociência"
+     ],
+     "failing": false,
+     "id": "elife",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "eLife",
+     "site": "https://elifesciences.org/",
+     "tier": "revista",
+     "tierLabel": "Revista"
+    },
+    {
+     "areas": [
+      "Biologia e biotecnologia"
+     ],
+     "failing": false,
+     "id": "biorxiv",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "bioRxiv (preprints)",
+     "site": "https://www.biorxiv.org/",
+     "tier": "preprint",
+     "tierLabel": "Preprint"
+    },
+    {
+     "areas": [
+      "Engenharias e tecnologia",
+      "Computação e IA",
+      "Física, química e matemática",
+      "Biologia e biotecnologia"
+     ],
+     "failing": false,
+     "id": "mit-news",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "MIT News",
+     "site": "https://news.mit.edu/",
+     "tier": "instituicao",
+     "tierLabel": "Instituição"
+    },
+    {
+     "areas": [
+      "Engenharias e tecnologia",
+      "Computação e IA"
+     ],
+     "failing": false,
+     "id": "ieee-spectrum",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "IEEE Spectrum",
+     "site": "https://spectrum.ieee.org/",
+     "tier": "revista",
+     "tierLabel": "Revista"
+    },
+    {
+     "areas": [
+      "Engenharias e tecnologia",
+      "Computação e IA"
+     ],
+     "failing": false,
+     "id": "techxplore",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "Tech Xplore",
+     "site": "https://techxplore.com/",
+     "tier": "divulgacao",
+     "tierLabel": "Divulgação científica"
+    },
+    {
+     "areas": [
+      "Computação e IA",
+      "Física, química e matemática"
+     ],
+     "failing": false,
+     "id": "sciencedaily-computacao",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "ScienceDaily: Computação e Matemática",
+     "site": "https://www.sciencedaily.com/news/computers_math/",
+     "tier": "divulgacao",
+     "tierLabel": "Divulgação científica"
+    },
+    {
+     "areas": [
+      "Física, química e matemática",
+      "Engenharias e tecnologia"
+     ],
+     "failing": false,
+     "id": "sciencedaily-materia",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "ScienceDaily: Matéria e Energia",
+     "site": "https://www.sciencedaily.com/news/matter_energy/",
+     "tier": "divulgacao",
+     "tierLabel": "Divulgação científica"
+    },
+    {
+     "areas": [
+      "Física, química e matemática",
+      "Engenharias e tecnologia"
+     ],
+     "failing": false,
+     "id": "phys-org",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "Phys.org",
+     "site": "https://phys.org/",
+     "tier": "divulgacao",
+     "tierLabel": "Divulgação científica"
+    },
+    {
+     "areas": [
+      "Física, química e matemática",
+      "Computação e IA"
+     ],
+     "failing": false,
+     "id": "quanta",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "Quanta Magazine",
+     "site": "https://www.quantamagazine.org/",
+     "tier": "divulgacao",
+     "tierLabel": "Divulgação científica"
+    },
+    {
+     "areas": [
+      "Meio ambiente e ciências da Terra",
+      "Ciências agrárias e veterinária"
+     ],
+     "failing": false,
+     "id": "sciencedaily-ambiente",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "ScienceDaily: Meio ambiente",
+     "site": "https://www.sciencedaily.com/news/earth_climate/",
+     "tier": "divulgacao",
+     "tierLabel": "Divulgação científica"
+    },
+    {
+     "areas": [
+      "Meio ambiente e ciências da Terra"
+     ],
+     "failing": false,
+     "id": "eos",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "Eos (AGU)",
+     "site": "https://eos.org/",
+     "tier": "divulgacao",
+     "tierLabel": "Divulgação científica"
+    },
+    {
+     "areas": [
+      "Meio ambiente e ciências da Terra"
+     ],
+     "failing": false,
+     "id": "carbon-brief",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "Carbon Brief",
+     "site": "https://www.carbonbrief.org/",
+     "tier": "divulgacao",
+     "tierLabel": "Divulgação científica"
+    },
+    {
+     "areas": [
+      "Psicologia e neurociência"
+     ],
+     "failing": false,
+     "id": "sciencedaily-mente",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "ScienceDaily: Mente e cérebro",
+     "site": "https://www.sciencedaily.com/news/mind_brain/",
+     "tier": "divulgacao",
+     "tierLabel": "Divulgação científica"
+    },
+    {
+     "areas": [
+      "Ciências sociais e humanas",
+      "Educação"
+     ],
+     "failing": false,
+     "id": "sciencedaily-sociedade",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "ScienceDaily: Sociedade",
+     "site": "https://www.sciencedaily.com/news/science_society/",
+     "tier": "divulgacao",
+     "tierLabel": "Divulgação científica"
+    },
+    {
+     "areas": [
+      "Educação"
+     ],
+     "failing": false,
+     "id": "agencia-brasil-educacao",
+     "language": "pt",
+     "lastOk": "<ts>",
+     "name": "Agência Brasil: Educação",
+     "site": "https://agenciabrasil.ebc.com.br/educacao",
+     "tier": "jornal",
+     "tierLabel": "Jornal"
+    },
+    {
+     "areas": [
+      "Educação"
+     ],
+     "failing": false,
+     "id": "g1-educacao",
+     "language": "pt",
+     "lastOk": "<ts>",
+     "name": "G1: Educação",
+     "site": "https://g1.globo.com/educacao/",
+     "tier": "jornal",
+     "tierLabel": "Jornal"
+    },
+    {
+     "areas": [
+      "Ciências agrárias e veterinária"
+     ],
+     "failing": false,
+     "id": "sciencedaily-agricultura",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "ScienceDaily: Agricultura e alimentos",
+     "site": "https://www.sciencedaily.com/news/plants_animals/agriculture_and_food/",
+     "tier": "divulgacao",
+     "tierLabel": "Divulgação científica"
+    },
+    {
+     "areas": [
+      "Ciências agrárias e veterinária",
+      "Biologia e biotecnologia",
+      "Meio ambiente e ciências da Terra"
+     ],
+     "failing": false,
+     "id": "sciencedaily-plantas",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "ScienceDaily: Plantas e animais",
+     "site": "https://www.sciencedaily.com/news/plants_animals/",
+     "tier": "divulgacao",
+     "tierLabel": "Divulgação científica"
+    },
+    {
+     "areas": [
+      "Ciências agrárias e veterinária",
+      "Biologia e biotecnologia"
+     ],
+     "failing": false,
+     "id": "phys-plantas",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "Phys.org: Plantas e animais",
+     "site": "https://phys.org/biology-news/plants-animals/",
+     "tier": "divulgacao",
+     "tierLabel": "Divulgação científica"
+    },
+    {
+     "areas": [
+      "Meio ambiente e ciências da Terra",
+      "Ciências agrárias e veterinária"
+     ],
+     "failing": false,
+     "id": "mongabay",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "Mongabay",
+     "site": "https://news.mongabay.com/",
+     "tier": "jornal",
+     "tierLabel": "Jornal"
+    },
+    {
+     "areas": [
+      "Meio ambiente e ciências da Terra",
+      "Ciências agrárias e veterinária"
+     ],
+     "failing": false,
+     "id": "agencia-brasil-ambiente",
+     "language": "pt",
+     "lastOk": "<ts>",
+     "name": "Agência Brasil: Meio ambiente",
+     "site": "https://agenciabrasil.ebc.com.br/meio-ambiente",
+     "tier": "jornal",
+     "tierLabel": "Jornal"
+    },
+    {
+     "areas": [
+      "Ciências sociais e humanas"
+     ],
+     "failing": false,
+     "id": "verfassungsblog",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "Verfassungsblog",
+     "site": "https://verfassungsblog.de/",
+     "tier": "blog",
+     "tierLabel": "Blog acadêmico"
+    },
+    {
+     "areas": [
+      "Ciências sociais e humanas"
+     ],
+     "failing": false,
+     "id": "ejil-talk",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "EJIL: Talk!",
+     "site": "https://www.ejiltalk.org/",
+     "tier": "blog",
+     "tierLabel": "Blog acadêmico"
+    },
+    {
+     "areas": [
+      "Ciências sociais e humanas"
+     ],
+     "failing": false,
+     "id": "ohrh",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "Oxford Human Rights Hub",
+     "site": "https://ohrh.law.ox.ac.uk/",
+     "tier": "blog",
+     "tierLabel": "Blog acadêmico"
+    },
+    {
+     "areas": [
+      "Ciências sociais e humanas"
+     ],
+     "failing": false,
+     "id": "voxeu",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "VoxEU (CEPR)",
+     "site": "https://cepr.org/voxeu",
+     "tier": "blog",
+     "tierLabel": "Blog acadêmico"
+    },
+    {
+     "areas": [
+      "Ciências sociais e humanas"
+     ],
+     "failing": false,
+     "id": "nber",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "NBER: novos working papers",
+     "site": "https://www.nber.org/papers",
+     "tier": "preprint",
+     "tierLabel": "Preprint"
+    },
+    {
+     "areas": [
+      "Ciências sociais e humanas"
+     ],
+     "failing": false,
+     "id": "ipea",
+     "language": "pt",
+     "lastOk": "<ts>",
+     "name": "Ipea",
+     "site": "https://www.ipea.gov.br/portal/",
+     "tier": "instituicao",
+     "tierLabel": "Instituição"
+    },
+    {
+     "areas": [
+      "Qualquer área"
+     ],
+     "failing": false,
+     "id": "owid",
+     "language": "en",
+     "lastOk": "<ts>",
+     "name": "Our World in Data",
+     "site": "https://ourworldindata.org/",
+     "tier": "instituicao",
+     "tierLabel": "Instituição"
+    },
+    {
+     "areas": [
+      "Ciências sociais e humanas"
+     ],
+     "failing": false,
+     "id": "agencia-brasil-economia",
+     "language": "pt",
+     "lastOk": "<ts>",
+     "name": "Agência Brasil: Economia",
+     "site": "https://agenciabrasil.ebc.com.br/economia",
+     "tier": "jornal",
+     "tierLabel": "Jornal"
+    },
+    {
+     "areas": [
+      "Qualquer área"
+     ],
+     "failing": false,
+     "id": "scielo",
+     "language": "pt",
+     "lastOk": "<ts>",
+     "name": "SciELO em Perspectiva",
+     "site": "https://blog.scielo.org/",
+     "tier": "blog",
+     "tierLabel": "Blog acadêmico"
+    },
+    {
+     "areas": [
+      "Qualquer área"
+     ],
+     "failing": false,
+     "id": "jornal-unesp",
+     "language": "pt",
+     "lastOk": "<ts>",
+     "name": "Jornal da Unesp",
+     "site": "https://jornal.unesp.br/",
+     "tier": "instituicao",
+     "tierLabel": "Instituição"
+    }
+   ],
+   "tiers": [
+    {
+     "description": "Instituição de pesquisa, universidade ou órgão público de saúde.",
+     "key": "instituicao",
+     "label": "Instituição"
+    },
+    {
+     "description": "Revista científica; o feed pode trazer artigos e notícias da própria revista.",
+     "key": "revista",
+     "label": "Revista"
+    },
+    {
+     "description": "Trabalho ainda sem revisão por pares.",
+     "key": "preprint",
+     "label": "Preprint"
+    },
+    {
+     "description": "Divulgação de pesquisas e comunicados de imprensa de instituições.",
+     "key": "divulgacao",
+     "label": "Divulgação científica"
+    },
+    {
+     "description": "Imprensa geral; reportagens que passam pela redação do jornal. Só entram as que citam pesquisa ou ciência.",
+     "key": "jornal",
+     "label": "Jornal"
+    },
+    {
+     "description": "Análises de pesquisadores publicadas em blogs de revistas e universidades; não passam por revisão por pares.",
+     "key": "blog",
+     "label": "Blog acadêmico"
+    }
+   ]
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/interests [inicial]": {
+  "json": {
+   "languages": [],
+   "lastChecked": null,
+   "terms": [],
+   "topics": []
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/interests/options": {
+  "json": {
+   "areas": [
+    {
+     "key": "medicina",
+     "label": "Medicina",
+     "subtopics": [
+      {
+       "key": "pediatria",
+       "label": "Pediatria"
+      },
+      {
+       "key": "oncologia",
+       "label": "Oncologia"
+      },
+      {
+       "key": "cardiologia",
+       "label": "Cardiologia"
+      },
+      {
+       "key": "neurologia",
+       "label": "Neurologia"
+      },
+      {
+       "key": "psiquiatria",
+       "label": "Psiquiatria"
+      },
+      {
+       "key": "infectologia",
+       "label": "Infectologia"
+      },
+      {
+       "key": "endocrinologia",
+       "label": "Endocrinologia e diabetes"
+      },
+      {
+       "key": "ginecologia",
+       "label": "Ginecologia e obstetrícia"
+      },
+      {
+       "key": "geriatria",
+       "label": "Geriatria"
+      },
+      {
+       "key": "ortopedia",
+       "label": "Ortopedia"
+      },
+      {
+       "key": "dermatologia",
+       "label": "Dermatologia"
+      },
+      {
+       "key": "saude-publica",
+       "label": "Saúde pública"
+      },
+      {
+       "key": "emergencia",
+       "label": "Emergência e terapia intensiva"
+      },
+      {
+       "key": "anestesia",
+       "label": "Anestesiologia"
+      }
+     ]
+    },
+    {
+     "key": "farmacia",
+     "label": "Farmácia e farmacologia",
+     "subtopics": [
+      {
+       "key": "farmacologia-clinica",
+       "label": "Farmacologia clínica"
+      },
+      {
+       "key": "farmacovigilancia",
+       "label": "Farmacovigilância"
+      },
+      {
+       "key": "farmacia-hospitalar",
+       "label": "Farmácia hospitalar"
+      },
+      {
+       "key": "fitoterapia",
+       "label": "Fitoterapia"
+      },
+      {
+       "key": "medicamentos-biologicos",
+       "label": "Medicamentos biológicos"
+      }
+     ]
+    },
+    {
+     "key": "enfermagem",
+     "label": "Enfermagem",
+     "subtopics": [
+      {
+       "key": "cuidado-critico",
+       "label": "Cuidado crítico"
+      },
+      {
+       "key": "saude-mulher",
+       "label": "Saúde da mulher e da criança"
+      },
+      {
+       "key": "seguranca-paciente",
+       "label": "Segurança do paciente"
+      }
+     ]
+    },
+    {
+     "key": "odontologia",
+     "label": "Odontologia",
+     "subtopics": [
+      {
+       "key": "endodontia",
+       "label": "Endodontia"
+      },
+      {
+       "key": "ortodontia",
+       "label": "Ortodontia"
+      },
+      {
+       "key": "periodontia",
+       "label": "Periodontia"
+      }
+     ]
+    },
+    {
+     "key": "nutricao",
+     "label": "Nutrição e educação física",
+     "subtopics": [
+      {
+       "key": "nutricao-clinica",
+       "label": "Nutrição clínica"
+      },
+      {
+       "key": "esporte",
+       "label": "Ciências do esporte"
+      },
+      {
+       "key": "obesidade",
+       "label": "Obesidade"
+      }
+     ]
+    },
+    {
+     "key": "biologia",
+     "label": "Biologia e biotecnologia",
+     "subtopics": [
+      {
+       "key": "genetica",
+       "label": "Genética e genômica"
+      },
+      {
+       "key": "microbiologia",
+       "label": "Microbiologia"
+      },
+      {
+       "key": "imunologia",
+       "label": "Imunologia"
+      },
+      {
+       "key": "bioinformatica",
+       "label": "Bioinformática"
+      },
+      {
+       "key": "ecologia",
+       "label": "Ecologia"
+      }
+     ]
+    },
+    {
+     "key": "psicologia",
+     "label": "Psicologia e neurociência",
+     "subtopics": [
+      {
+       "key": "psicologia-clinica",
+       "label": "Psicologia clínica"
+      },
+      {
+       "key": "neurociencia-cognitiva",
+       "label": "Neurociência cognitiva"
+      },
+      {
+       "key": "desenvolvimento",
+       "label": "Desenvolvimento humano"
+      }
+     ]
+    },
+    {
+     "key": "computacao",
+     "label": "Computação e IA",
+     "subtopics": [
+      {
+       "key": "aprendizado-maquina",
+       "label": "Aprendizado de máquina"
+      },
+      {
+       "key": "llm",
+       "label": "Modelos de linguagem"
+      },
+      {
+       "key": "seguranca-informacao",
+       "label": "Segurança da informação"
+      },
+      {
+       "key": "saude-digital",
+       "label": "Saúde digital"
+      },
+      {
+       "key": "engenharia-software",
+       "label": "Engenharia de software"
+      }
+     ]
+    },
+    {
+     "key": "engenharia",
+     "label": "Engenharias e tecnologia",
+     "subtopics": [
+      {
+       "key": "materiais",
+       "label": "Ciência dos materiais"
+      },
+      {
+       "key": "energia",
+       "label": "Energia"
+      },
+      {
+       "key": "civil",
+       "label": "Engenharia civil"
+      },
+      {
+       "key": "eletrica",
+       "label": "Engenharia elétrica e eletrônica"
+      },
+      {
+       "key": "biomedica",
+       "label": "Engenharia biomédica"
+      }
+     ]
+    },
+    {
+     "key": "exatas",
+     "label": "Física, química e matemática",
+     "subtopics": [
+      {
+       "key": "fisica",
+       "label": "Física"
+      },
+      {
+       "key": "quimica",
+       "label": "Química"
+      },
+      {
+       "key": "matematica",
+       "label": "Matemática e estatística"
+      },
+      {
+       "key": "astronomia",
+       "label": "Astronomia"
+      }
+     ]
+    },
+    {
+     "key": "ambiente",
+     "label": "Meio ambiente e ciências da Terra",
+     "subtopics": [
+      {
+       "key": "clima",
+       "label": "Mudanças climáticas"
+      },
+      {
+       "key": "geologia",
+       "label": "Geologia"
+      },
+      {
+       "key": "biodiversidade",
+       "label": "Biodiversidade"
+      },
+      {
+       "key": "recursos-hidricos",
+       "label": "Recursos hídricos"
+      }
+     ]
+    },
+    {
+     "key": "agrarias",
+     "label": "Ciências agrárias e veterinária",
+     "subtopics": [
+      {
+       "key": "agronomia",
+       "label": "Agronomia"
+      },
+      {
+       "key": "veterinaria",
+       "label": "Medicina veterinária"
+      },
+      {
+       "key": "zootecnia",
+       "label": "Zootecnia"
+      },
+      {
+       "key": "alimentos",
+       "label": "Ciência de alimentos"
+      }
+     ]
+    },
+    {
+     "key": "sociais",
+     "label": "Ciências sociais e humanas",
+     "subtopics": [
+      {
+       "key": "sociologia",
+       "label": "Sociologia"
+      },
+      {
+       "key": "economia",
+       "label": "Economia"
+      },
+      {
+       "key": "direito",
+       "label": "Direito"
+      },
+      {
+       "key": "politicas-publicas",
+       "label": "Políticas públicas"
+      },
+      {
+       "key": "historia",
+       "label": "História"
+      }
+     ]
+    },
+    {
+     "key": "educacao",
+     "label": "Educação",
+     "subtopics": [
+      {
+       "key": "educacao-superior",
+       "label": "Ensino superior"
+      },
+      {
+       "key": "educacao-medica",
+       "label": "Educação em saúde"
+      },
+      {
+       "key": "tecnologia-educacional",
+       "label": "Tecnologia educacional"
+      }
+     ]
+    }
+   ],
+   "languages": [
+    {
+     "code": "pt",
+     "label": "Português"
+    },
+    {
+     "code": "en",
+     "label": "Inglês"
+    },
+    {
+     "code": "es",
+     "label": "Espanhol"
+    },
+    {
+     "code": "fr",
+     "label": "Francês"
+    },
+    {
+     "code": "de",
+     "label": "Alemão"
+    },
+    {
+     "code": "it",
+     "label": "Italiano"
+    },
+    {
+     "code": "zh",
+     "label": "Chinês"
+    },
+    {
+     "code": "ja",
+     "label": "Japonês"
+    }
+   ],
+   "limits": {
+    "languages": 4,
+    "termChars": 60,
+    "terms": 5,
+    "topics": 15
+   }
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/library": {
+  "json": {
+   "items": [
+    {
+     "authors": "Anika Weber, Hiro Suzuki",
+     "citedBy": 10,
+     "doi": "10.0000/1",
+     "journal": "Example Journal",
+     "keywords": [
+      "metformin",
+      "diabetes",
+      "heart"
+     ],
+     "language": "",
+     "oaUrl": "",
+     "openAccess": false,
+     "pmid": "1",
+     "ref": "1",
+     "saved": true,
+     "savedAt": "<ts>",
+     "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
+     "source": "Europe PMC",
+     "studyTypes": [],
+     "tags": [
+      "diabetes"
+     ],
+     "title": "Estudo de contrato 1",
+     "year": 2024
+    },
+    {
+     "authors": "Anika Weber, Hiro Suzuki",
+     "citedBy": 10,
+     "doi": "10.0000/2",
+     "journal": "Example Journal",
+     "keywords": [
+      "metformin",
+      "diabetes",
+      "heart"
+     ],
+     "language": "",
+     "oaUrl": "",
+     "openAccess": false,
+     "pmid": "2",
+     "ref": "2",
+     "saved": true,
+     "savedAt": "<ts>",
+     "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
+     "source": "Europe PMC",
+     "studyTypes": [],
+     "tags": [],
+     "title": "Estudo de contrato 2",
+     "year": 2024
+    }
+   ],
+   "lists": []
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/library [sem conta]": {
+  "json": {
+   "error": "Entre na sua conta para usar a biblioteca e as listas."
+  },
+  "status": 401,
+  "type": "application/json"
+ },
+ "GET /api/library/export [bibtex]": {
+  "bytes": true,
+  "disposition": "attachment; filename=\"biblioteca.bib\"",
+  "status": 200,
+  "type": "application/x-bibtex"
+ },
+ "GET /api/library/export [csv]": {
+  "disposition": "attachment; filename=\"biblioteca.csv\"",
+  "status": 200,
+  "text": "﻿titulo,autores,periodico,ano,volume,numero,paginas,doi,pmid,pmcid,tipo_de_estudo,acesso_aberto,link_aberto,fonte,citacoes,resumo\r\nEstudo de contrato 1,\"Weber, Anika; Suzuki, Hiro\",Example Journal,2024,27,5,890-903,10.0000/1,1,,,nao,,Europe PMC,10,\"Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.\"\r\nEstudo de contrato 2,\"Weber, Anika; Suzuki, Hiro\",Example Journal,2024,27,5,890-903,10.0000/2,2,,,nao,,Europe PMC,10,\"Background: Metformin is widely used. ",
+  "type": "text/csv"
+ },
+ "GET /api/library/export [json]": {
+  "disposition": "attachment; filename=\"biblioteca.json\"",
+  "json": [
+   {
+    "abstract": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
+    "authors": [
+     {
+      "family": "Weber",
+      "given": "Anika"
+     },
+     {
+      "family": "Suzuki",
+      "given": "Hiro"
+     }
+    ],
+    "cited_by": 10,
+    "doi": "10.0000/1",
+    "issue": "5",
+    "journal": "Example Journal",
+    "keywords": [
+     "metformin",
+     "diabetes",
+     "heart"
+    ],
+    "language": "",
+    "oa_url": "",
+    "open_access": false,
+    "pages": "890-903",
+    "pmcid": "",
+    "pmid": "1",
+    "published": "",
+    "ref": "1",
+    "retracted": false,
+    "source": "Europe PMC",
+    "study_types": [],
+    "title": "Estudo de contrato 1",
+    "volume": "27",
+    "year": 2024
+   },
+   {
+    "abstract": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
+    "authors": [
+     {
+      "family": "Weber",
+      "given": "Anika"
+     },
+     {
+      "family": "Suzuki",
+      "given": "Hiro"
+     }
+    ],
+    "cited_by": 10,
+    "doi": "10.0000/2",
+    "issue": "5",
+    "journal": "Example Journal",
+    "keywords": [
+     "metformin",
+     "diabetes",
+     "heart"
+    ],
+    "language": "",
+    "oa_url": "",
+    "open_access": false,
+    "pages": "890-903",
+    "pmcid": "",
+    "pmid": "2",
+    "published": "",
+    "ref": "2",
+    "retracted": false,
+    "source": "Europe PMC",
+    "study_types": [],
+    "title": "Estudo de contrato 2",
+    "volume": "27",
+    "year": 2024
+   }
+  ],
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/library/export [ris]": {
+  "bytes": true,
+  "disposition": "attachment; filename=\"biblioteca.ris\"",
+  "status": 200,
+  "type": "application/x-research-info-systems"
+ },
+ "GET /api/lists": {
+  "json": {
+   "lists": [
+    {
+     "createdAt": "<ts>",
+     "id": "<id>",
+     "name": "Minha lista",
+     "shareToken": null,
+     "works": [
+      {
+       "authors": "Anika Weber, Hiro Suzuki",
+       "citedBy": 10,
+       "doi": "10.0000/1",
+       "journal": "Example Journal",
+       "keywords": [
+        "metformin",
+        "diabetes",
+        "heart"
+       ],
+       "language": "",
+       "oaUrl": "",
+       "openAccess": false,
+       "pmid": "1",
+       "ref": "1",
+       "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
+       "source": "Europe PMC",
+       "studyTypes": [],
+       "title": "Estudo de contrato 1",
+       "year": 2024
+      },
+      {
+       "authors": "Anika Weber, Hiro Suzuki",
+       "citedBy": 10,
+       "doi": "10.0000/2",
+       "journal": "Example Journal",
+       "keywords": [
+        "metformin",
+        "diabetes",
+        "heart"
+       ],
+       "language": "",
+       "oaUrl": "",
+       "openAccess": false,
+       "pmid": "2",
+       "ref": "2",
+       "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
+       "source": "Europe PMC",
+       "studyTypes": [],
+       "title": "Estudo de contrato 2",
+       "year": 2024
+      }
+     ]
+    }
+   ]
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/notifications/prefs": {
+  "json": {
+   "channel": "sininho",
+   "kinds": [
+    {
+     "description": "Um artigo da sua biblioteca, de uma lista ou de um relatório passou a constar como retratado na fonte.",
+     "enabled": true,
+     "key": "retratacao",
+     "label": "Artigo retratado",
+     "priority": 2
+    },
+    {
+     "description": "Uma substância confirmada em um relatório mudou na ANVISA, na Conitec ou na Rename.",
+     "enabled": true,
+     "key": "regulatorio",
+     "label": "Mudança regulatória",
+     "priority": 2
+    },
+    {
+     "description": "Entraram artigos novos na lista de origem de um relatório.",
+     "enabled": true,
+     "key": "relatorio-lista",
+     "label": "Novidades dos relatórios",
+     "priority": 1
+    },
+    {
+     "description": "Artigos novos sobre as áreas, os subtemas e as palavras-chave que você acompanha.",
+     "enabled": true,
+     "key": "novo-artigo",
+     "label": "Artigos novos nos interesses",
+     "priority": 1
+    }
+   ]
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/profile [inicial]": {
+  "json": {
+   "configured": false,
+   "healthPack": true,
+   "profile": null
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/profile/options": {
+  "json": {
+   "profiles": [
+    {
+     "description": "Graduação, TCC, dissertação ou tese.",
+     "healthPack": false,
+     "key": "estudante",
+     "label": "Estudante"
+    },
+    {
+     "description": "Pesquisa acadêmica em qualquer área.",
+     "healthPack": false,
+     "key": "pesquisador",
+     "label": "Pesquisador"
+    },
+    {
+     "description": "Clínica, farmácia hospitalar, saúde pública ou gestão em saúde.",
+     "healthPack": true,
+     "key": "saude",
+     "label": "Profissional de saúde ou farmácia"
+    },
+    {
+     "description": "Panoramas e relatórios de evidência para clientes.",
+     "healthPack": false,
+     "key": "consultoria",
+     "label": "Consultoria ou assessoria"
+    },
+    {
+     "description": "Leitura e acompanhamento de artigos.",
+     "healthPack": false,
+     "key": "outro",
+     "label": "Outro uso"
+    }
+   ]
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/reports": {
+  "json": {
+   "reports": [
+    {
+     "id": "<id>",
+     "included": 1,
+     "listName": "Minha lista",
+     "title": "Relatório",
+     "total": 1,
+     "updatedAt": "<ts>",
+     "version": 1
+    }
+   ]
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/reports/{report_id}": {
+  "json": {
+   "createdAt": "<ts>",
+   "criteria": [
+    {
+     "how": "Consulta a marca de retratação no registro da fonte (Europe PMC ou OpenAlex).",
+     "name": "Integridade (retratação)",
+     "weight": 20
+    },
+    {
+     "how": "Usa o tipo de estudo do registro oficial. Revisão sistemática e meta-análise pontuam mais; ensaio randomizado vem a seguir; estudos observacionais, revisões narrativas e relatos de caso pontuam menos.",
+     "name": "Desenho do estudo",
+     "weight": 25
+    },
+    {
+     "how": "Preprint não passou por revisão por pares; artigo em periódico indexado é considerado revisado.",
+     "name": "Revisão por pares",
+     "weight": 10
+    },
+    {
+     "how": "Procura no resumo o tamanho da amostra (n = ..., N participantes) ou o número de estudos incluídos.",
+     "name": "Tamanho da amostra informado",
+     "weight": 10
+    },
+    {
+     "how": "Procura no resumo uma medida de efeito (HR, OR, RR, diferença de médias) com valor numérico.",
+     "name": "Resultado principal quantificado",
+     "weight": 10
+    },
+    {
+     "how": "Procura no resumo um intervalo de confiança (melhor) ou valor de p (parcial).",
+     "name": "Precisão estatística (IC ou p)",
+     "weight": 10
+    },
+    {
+     "how": "Verifica se o resumo é estruturado e traz a seção de métodos (desenho, participantes, intervenção).",
+     "name": "Método descrito no resumo",
+     "weight": 10
+    },
+    {
+     "how": "Para ensaios clínicos: procura número de registro prévio (ClinicalTrials.gov, ReBEC, ISRCTN e outros) no resumo.",
+     "name": "Registro prévio do ensaio",
+     "weight": 5
+    }
+   ],
+   "id": "<id>",
+   "items": [
+    {
+     "findings": [
+      {
+       "sentence": "Methods: We pooled 14 trials (n=18,450).",
+       "tags": [
+        "tamanho da amostra"
+       ]
+      },
+      {
+       "sentence": "Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02).",
+       "tags": [
+        "medida de efeito",
+        "intervalo de confiança",
+        "valor de p"
+       ]
+      }
+     ],
+     "included": true,
+     "note": "",
+     "ref": "1",
+     "reliability": {
+      "band": "Alta",
+      "coverage": 70,
+      "score": 100,
+      "warnings": [
+       "Nota calculada com 70% dos critérios avaliáveis; o restante não pôde ser verificado."
+      ]
+     },
+     "work": {
+      "authors": "Anika Weber, Hiro Suzuki",
+      "citedBy": 10,
+      "doi": "10.0000/1",
+      "journal": "Example Journal",
+      "keywords": [
+       "metformin",
+       "diabetes",
+       "heart"
+      ],
+      "language": "",
+      "oaUrl": "",
+      "openAccess": false,
+      "pmid": "1",
+      "ref": "1",
+      "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
+      "source": "Europe PMC",
+      "studyTypes": [],
+      "title": "Estudo de contrato 1",
+      "year": 2024
+     }
+    }
+   ],
+   "listName": "Minha lista",
+   "method": [
+    "Os estudos foram reunidos manualmente pelo autor na lista de leitura “Minha lista” e congelados neste relatório em <date>. As buscas usadas para encontrá-los não são registradas nesta versão do relatório.",
+    "Fontes dos registros: Europe PMC (1).",
+    "Foram reunidos 1 estudos; 1 foram incluídos e 0 excluídos pelo autor, sem critério automático.",
+    "Para cada estudo incluído, a nota de confiabilidade (0 a 100) soma os critérios abaixo, cada um com seu peso; critérios que não puderam ser verificados no registro ficam fora do cálculo e a cobertura é informada.",
+    "A nota de confiabilidade é calculada por código somente com o título, o resumo e os metadados do registro. Ela indica sinais verificáveis no registro e não substitui a leitura crítica do artigo.",
+    "Os dados estatísticos são frases copiadas do resumo, escolhidas por palavras-chave. A seleção pode omitir frases e foi lido apenas o resumo, não o texto completo.",
+    "Relatório na versão 1, gerado em <date> pelo Biomedical Data Digger. Nenhum texto deste relatório foi gerado por IA."
+   ],
+   "methodNote": "",
+   "panorama": {
+    "languages": [
+     [
+      "Idioma não informado",
+      1
+     ]
+    ],
+    "openAccess": 0,
+    "retracted": 0,
+    "sources": [
+     [
+      "Europe PMC",
+      1
+     ]
+    ],
+    "total": 1,
+    "types": [
+     [
+      "Tipo de estudo não informado",
+      1
+     ]
+    ],
+    "withoutAbstract": 0,
+    "years": [
+     [
+      "2024",
+      1
+     ]
+    ]
+   },
+   "question": "Metformina?",
+   "substances": [],
+   "title": "Relatório",
+   "updatedAt": "<ts>",
+   "version": 1
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/reports/{report_id}/brasil": {
+  "json": {
+   "confirmed": [],
+   "meta": {
+    "anvisa": {
+     "arquivoModificado": "<date>",
+     "arquivoUrl": "https://dados.anvisa.gov.br/dados/DADOS_ABERTOS_MEDICAMENTOS.csv",
+     "defasado": false,
+     "dias": 3,
+     "dicionarioUrl": "https://dados.anvisa.gov.br/dados/Documentacao_e_Dicionario_de_Dados_Registros_Validos_Medicamento_V1.pdf",
+     "extraidoEm": "<date>",
+     "fonte": "ANVISA, dados abertos de medicamentos registrados (DATAVISA)",
+     "substancias": 3857
+    },
+    "conitec": {
+     "arquivoUrl": "https://www.gov.br/conitec/pt-br/midias/dados-em-excel/recomendacoesdaconitec_20260615.xlsx/@@download/file",
+     "defasado": false,
+     "dias": 3,
+     "extraidoEm": "<date>",
+     "fonte": "CONITEC, recomendacoes sobre tecnologias avaliadas (planilha oficial)",
+     "medicamentos": 782,
+     "paginaUrl": "https://www.gov.br/conitec/pt-br/assuntos/avaliacao-de-tecnologias-em-saude/recomendacoes-da-conitec"
+    },
+    "rename": {
+     "arquivoUrl": "https://bvsms.saude.gov.br/bvs/publicacoes/relacao_nacional_medicamentos_2024_2ed.pdf",
+     "defasado": false,
+     "dias": 3,
+     "extraidoEm": "<date>",
+     "fonte": "RENAME 2024 (2ª edição, 2025)",
+     "licenca": "CC BY-NC-SA 4.0 (uso não comercial, com atribuição e mesma licença)",
+     "substancias": 514
+    }
+   },
+   "suggestions": [
+    {
+     "en": "metformin",
+     "metodo": "cognato",
+     "nome": "Metformina",
+     "studies": 1,
+     "termo": "metformina"
+    }
+   ]
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/reports/{report_id}/download [docx]": {
+  "bytes": true,
+  "disposition": "attachment; filename=\"relatorio-relatorio.docx\"",
+  "status": 200,
+  "type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+ },
+ "GET /api/reports/{report_id}/download [html]": {
+  "disposition": "attachment; filename=\"relatorio-relatorio.html\"",
+  "status": 200,
+  "text": "<!doctype html>\n<html lang=\"pt-BR\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Relatório</title><style>body{font:16px/1.6 system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;max-width:46rem;margin:2rem auto;padding:0 1rem;color:#111}h1{font-size:1.7rem;line-height:1.25}h2{font-size:1.25rem;margin-top:2rem}h3{font-size:1.05rem}h4{font-size:1rem}.meta{color:#555;font-size:.9rem;margin:.2rem 0}blockquote{border-left:3px solid #ea580c;margin:1rem 0;padding:.1rem 1rem;color:#222}li{margin:.3rem 0}</style></head><body>\n<h1>Relatório</h",
+  "type": "text/html"
+ },
+ "GET /api/reports/{report_id}/download [md]": {
+  "disposition": "attachment; filename=\"relatorio-relatorio.md\"",
+  "status": 200,
+  "text": "# Relatório\n\nRelatório de tema · versão 3 · 1 estudos incluídos  \n\n## Pergunta ou tema\n\nMetformina?\n\n## Panorama dos estudos incluídos\n\n1 estudos; 0 com acesso aberto; 0 retratados; 0 sem resumo no registro.\n\n- Tipo de estudo: Tipo de estudo não informado (1)\n- Ano: 2024 (1)\n- Idioma: Idioma não informado (1)\n- Fonte: Europe PMC (1)\n\n## Estudos incluídos\n\n### 1. Estudo de contrato 1\n\nAnika Weber, Hiro Suzuki  \nExample Journal, v. 27, n. 5, p. 890-903 · 2024  \nDOI: https://doi.org/10.0000/1 · PMID: 1  \nFonte: Europe PMC  \n\nConfiabilidade: 100/100 (Alta), cobertura de 70% dos critérios.\n\nNota ca",
+  "type": "text/markdown"
+ },
+ "GET /api/reports/{report_id}/download [txt]": {
+  "disposition": "attachment; filename=\"relatorio-relatorio.txt\"",
+  "status": 200,
+  "text": "RELATÓRIO\n=========\n\nRelatório de tema · versão 3 · 1 estudos incluídos\n\nPERGUNTA OU TEMA\n----------------\nMetformina?\n\n\nPANORAMA DOS ESTUDOS INCLUÍDOS\n------------------------------\n1 estudos; 0 com acesso aberto; 0 retratados; 0 sem resumo no registro.\n\n- Tipo de estudo: Tipo de estudo não informado (1)\n- Ano: 2024 (1)\n- Idioma: Idioma não informado (1)\n- Fonte: Europe PMC (1)\n\nESTUDOS INCLUÍDOS\n-----------------\n\n1. Estudo de contrato 1\n\nAnika Weber, Hiro Suzuki\nExample Journal, v. 27, n. 5, p. 890-903 · 2024\nDOI: https://doi.org/10.0000/1 · PMID: 1\nFonte: Europe PMC\nConfiabilidade: 100/100",
+  "type": "text/plain"
+ },
+ "GET /api/reports/{report_id}/history": {
+  "json": {
+   "listAvailable": true,
+   "listName": "Minha lista",
+   "log": [],
+   "newInList": [],
+   "versions": [
+    {
+     "current": true,
+     "savedAt": "<ts>",
+     "summary": "Título alterado; nota do método alterada; notas alteradas em 1 estudo; substâncias do Brasil alteradas.",
+     "version": 2
+    },
+    {
+     "current": false,
+     "savedAt": "<ts>",
+     "summary": "Criado a partir da lista “Minha lista”.",
+     "version": 1
+    }
+   ]
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/shared/{token} [compartilhada]": {
+  "json": {
+   "name": "Minha lista",
+   "works": [
+    {
+     "authors": "Anika Weber, Hiro Suzuki",
+     "citedBy": 10,
+     "doi": "10.0000/1",
+     "journal": "Example Journal",
+     "keywords": [
+      "metformin",
+      "diabetes",
+      "heart"
+     ],
+     "language": "",
+     "oaUrl": "",
+     "openAccess": false,
+     "pmid": "1",
+     "ref": "1",
+     "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
+     "source": "Europe PMC",
+     "studyTypes": [],
+     "title": "Estudo de contrato 1",
+     "year": 2024
+    },
+    {
+     "authors": "Anika Weber, Hiro Suzuki",
+     "citedBy": 10,
+     "doi": "10.0000/2",
+     "journal": "Example Journal",
+     "keywords": [
+      "metformin",
+      "diabetes",
+      "heart"
+     ],
+     "language": "",
+     "oaUrl": "",
+     "openAccess": false,
+     "pmid": "2",
+     "ref": "2",
+     "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
+     "source": "Europe PMC",
+     "studyTypes": [],
+     "title": "Estudo de contrato 2",
+     "year": 2024
+    }
+   ]
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/shared/{token} [inexistente]": {
+  "json": {
+   "error": "Lista não encontrada ou o link foi desativado."
+  },
+  "status": 404,
+  "type": "application/json"
+ },
+ "GET /healthz": {
+  "json": {
+   "status": "ok"
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /ia": {
+  "status": 200,
+  "text": "<!doctype html>\n<html lang=\"pt-BR\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <meta name=\"color-scheme\" content=\"dark light\">\n  <meta name=\"description\" content=\"Análise de artigos científicos com IA, fiel ao texto-fonte, para estudantes e profissionais.\">\n  <title>Laboratório de IA — Biomedical Data Digger</title>\n  <link rel=\"icon\" href=\"/static/favicon.svg\" type=\"image/svg+xml\">\n  <link rel=\"stylesheet\" href=\"/static/app.css?v=6ad58a44\">\n  <link rel=\"stylesheet\" href=\"/static/brand.css?v=6ad58a44\">\n  <script src=\"/static/app.js?",
+  "type": "text/html"
+ },
+ "POST /api/account/password": {
+  "json": {
+   "ok": true
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/alerts/check [primeira]": {
+  "json": {
+   "alerts": [],
+   "baseline": true,
+   "new": 0,
+   "notes": [],
+   "notified": {},
+   "ran": true,
+   "reason": "",
+   "unread": 0
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/alerts/check [segunda]": {
+  "json": {
+   "alerts": [],
+   "baseline": false,
+   "new": 0,
+   "notes": [],
+   "notified": {},
+   "ran": false,
+   "reason": "intervalo",
+   "unread": 0
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/alerts/read [todos]": {
+  "json": {
+   "alerts": [],
+   "unread": 0
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/alerts/read [um]": {
+  "json": {
+   "error": "Aviso não encontrado."
+  },
+  "status": 404,
+  "type": "application/json"
+ },
+ "POST /api/analyses": {
+  "json": {
+   "createdAt": "<ts>",
+   "id": "<id>",
+   "label": "Sumário",
+   "page": "geral",
+   "ref": "1",
+   "title": "Estudo de contrato 1"
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/analyze": {
+  "json": {
+   "article_id": "33984217",
+   "html": "<hr>\n<blockquote><p><strong>Sumário</strong>  ·  Filtros: <em>Padrão</em></p></blockquote>\n<hr>\n<h2>Título do Artigo: Metformina e desfechos</h2>\n<h3>Resumo:</h3>\n<p>Mortalidade caiu de 12,5% para 8,1%.</p>\n<hr>\n<blockquote><p><strong>Verificação automática de números:</strong> os valores abaixo aparecem na resposta mas <strong>não foram encontrados</strong> no título/resumo-fonte: <code>12,5%</code>, <code>8,1%</code>. Confira no artigo original antes de usar.</p></blockquote>",
+   "markdown": "---\n> **Sumário**  ·  Filtros: *Padrão*\n\n---\n## Título do Artigo: Metformina e desfechos\n\n### Resumo:\nMortalidade caiu de 12,5% para 8,1%.\n\n---\n> **Verificação automática de números:** os valores abaixo aparecem na resposta mas **não foram encontrados** no título/resumo-fonte: `12,5%`, `8,1%`. Confira no artigo original antes de usar.",
+   "meta": {
+    "cached": false,
+    "quota_remaining": null,
+    "tokens": 200
+   },
+   "title": "Metformina e desfechos"
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/audit": {
+  "json": {
+   "html": "<hr>\n<blockquote><p><strong>Auditoria da Resposta</strong></p></blockquote>\n<hr>\n<p>Mortalidade caiu de 12,5% para 8,1%.</p>",
+   "markdown": "---\n> **Auditoria da Resposta**\n\n---\nMortalidade caiu de 12,5% para 8,1%.",
+   "meta": {
+    "cached": false,
+    "quota_remaining": null,
+    "tokens": 200
+   }
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/auth/login": {
+  "json": {
+   "user": "contrato@exemplo.com"
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/auth/logout": {
+  "json": {
+   "user": null
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/auth/register": {
+  "json": {
+   "user": "contrato@exemplo.com"
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/cite": {
+  "json": {
+   "html": "<hr>\n<blockquote><p><strong>Referência · ABNT</strong></p></blockquote>\n<hr>\n<p>PIMENTEL, J. et al. Factores clínicos y demográficos asociados con la mortalidad por dengue en Colombia: estudio de casos y controles. Salud publica de Mexico, v. 63, n. 1, ene-feb, p. 42-50, 2020. DOI: 10.21149/11193.</p>\n<blockquote><p>Gerada automaticamente a partir do registro oficial (Crossref ou Europe PMC), sem uso de IA. Confira com as normas do seu curso antes de entregar.</p></blockquote>",
+   "markdown": "---\n> **Referência · ABNT**\n\n---\nPIMENTEL, J. et al. Factores clínicos y demográficos asociados con la mortalidad por dengue en Colombia: estudio de casos y controles. Salud publica de Mexico, v. 63, n. 1, ene-feb, p. 42-50, 2020. DOI: 10.21149/11193.\n\n> Gerada automaticamente a partir do registro oficial (Crossref ou Europe PMC), sem uso de IA. Confira com as normas do seu curso antes de entregar."
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/compare": {
+  "json": {
+   "html": "<hr>\n<blockquote><p><strong>Comparação entre Artigos</strong></p></blockquote>\n<hr>\n<p>Mortalidade caiu de 12,5% para 8,1%.</p>",
+   "markdown": "---\n> **Comparação entre Artigos**\n\n---\nMortalidade caiu de 12,5% para 8,1%.",
+   "meta": {
+    "cached": false,
+    "quota_remaining": null,
+    "tokens": 200
+   }
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/export/analysis": {
+  "disposition": "attachment; filename=\"sumario-t.md\"",
+  "status": 200,
+  "text": "# Sumário\n\nArtigo: T  \n\n### Título\n\n- item\nGerado em <date> no Laboratório do Biomedical Data Digger. Análises com IA podem conter erros: confira sempre com o artigo original.\n",
+  "type": "text/markdown"
+ },
+ "POST /api/extract": {
+  "json": {
+   "article_id": "33984217",
+   "html": "<hr>\n<blockquote><p><strong>Extraído do artigo (sem IA)</strong>  ·  nenhum texto foi gerado ou interpretado por IA; os trechos abaixo foram copiados do artigo</p></blockquote>\n<hr>\n<h2>Título do Artigo: Metformina e desfechos</h2>\n<h3>Tipo de estudo (rótulo do registro oficial)</h3>\n<ul><li>O registro não informa um tipo de estudo específico.</li></ul>\n<h3>Resumo organizado (texto original)</h3>\n<p><strong>Contexto</strong> <em>(rótulo original: Background)</em><br>Metformin is widely used.</p>\n<p><strong>Métodos</strong> <em>(rótulo original: Methods)</em><br>We pooled 14 trials (n=18,450).</p>\n<p><strong>Resultados</strong> <em>(rótulo original: Results)</em><br>Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02).</p>\n<p><strong>Conclusões</strong> <em>(rótulo original: Conclusions)</em><br>A modest reduction. Registered NCT01234567.</p>\n<h3>Números e dados estatísticos (com a frase de origem)</h3>\n<ul><li><em>tamanho da amostra</em> — Methods: We pooled 14 trials (n=18,450).</li><li><em>medida de efeito · intervalo de confiança · valor de p</em> — Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02).</li></ul>\n<h3>Metadados do registro</h3>\n<ul><li>Revista: Salud publica de Mexico (2020) · Acesso aberto: não · Citações: 2 · Idioma: spa</li><li>Termos MeSH: Humans, Dengue, Case-Control Studies, Demography, Colombia</li></ul>\n<blockquote><p>Lido apenas o título e o resumo; o texto completo do artigo não foi consultado.</p></blockquote>",
+   "markdown": "---\n> **Extraído do artigo (sem IA)**  ·  nenhum texto foi gerado ou interpretado por IA; os trechos abaixo foram copiados do artigo\n\n---\n\n## Título do Artigo: Metformina e desfechos\n\n### Tipo de estudo (rótulo do registro oficial)\n- O registro não informa um tipo de estudo específico.\n\n### Resumo organizado (texto original)\n**Contexto** *(rótulo original: Background)*\nMetformin is widely used.\n\n**Métodos** *(rótulo original: Methods)*\nWe pooled 14 trials (n=18,450).\n\n**Resultados** *(rótulo original: Results)*\nLower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02).\n\n**Conclusões** *(rótulo original: Conclusions)*\nA modest reduction. Registered NCT01234567.\n\n### Números e dados estatísticos (com a frase de origem)\n- *tamanho da amostra* — Methods: We pooled 14 trials (n=18,450).\n- *medida de efeito · intervalo de confiança · valor de p* — Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02).\n\n### Metadados do registro\n- Revista: Salud publica de Mexico (2020) · Acesso aberto: não · Citações: 2 · Idioma: spa\n- Termos MeSH: Humans, Dengue, Case-Control Studies, Demography, Colombia\n\n> Lido apenas o título e o resumo; o texto completo do artigo não foi consultado.",
+   "meta": {
+    "cached": false,
+    "quota_remaining": null,
+    "tokens": 0
+   },
+   "title": "Metformina e desfechos"
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/internal/alerts/run [com token]": {
+  "json": {
+   "due": 0,
+   "failed": 0,
+   "feed": {
+    "due": 0,
+    "failed": 0,
+    "items": 0,
+    "refreshed": 0,
+    "skipped": 0
+   },
+   "new": 0,
+   "ran": 0,
+   "watch": {
+    "due": 0,
+    "failed": 0,
+    "notified": 0,
+    "ran": 0,
+    "refreshed": 0
+   }
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/internal/alerts/run [sem token]": {
+  "json": {
+   "error": "Não autorizado."
+  },
+  "status": 401,
+  "type": "application/json"
+ },
+ "POST /api/library": {
+  "json": {
+   "saved": true
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/library [segundo]": {
+  "json": {
+   "saved": true
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/lists": {
+  "json": {
+   "createdAt": "<ts>",
+   "id": "<id>",
+   "name": "Minha lista",
+   "shareToken": null,
+   "works": []
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/lists/{list_id}/items [1]": {
+  "json": {
+   "added": true
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/lists/{list_id}/items [2]": {
+  "json": {
+   "added": true
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/lists/{list_id}/share": {
+  "json": {
+   "path": "/#/lista/<token>",
+   "token": "<token>"
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/reports": {
+  "json": {
+   "createdAt": "<ts>",
+   "criteria": [
+    {
+     "how": "Consulta a marca de retratação no registro da fonte (Europe PMC ou OpenAlex).",
+     "name": "Integridade (retratação)",
+     "weight": 20
+    },
+    {
+     "how": "Usa o tipo de estudo do registro oficial. Revisão sistemática e meta-análise pontuam mais; ensaio randomizado vem a seguir; estudos observacionais, revisões narrativas e relatos de caso pontuam menos.",
+     "name": "Desenho do estudo",
+     "weight": 25
+    },
+    {
+     "how": "Preprint não passou por revisão por pares; artigo em periódico indexado é considerado revisado.",
+     "name": "Revisão por pares",
+     "weight": 10
+    },
+    {
+     "how": "Procura no resumo o tamanho da amostra (n = ..., N participantes) ou o número de estudos incluídos.",
+     "name": "Tamanho da amostra informado",
+     "weight": 10
+    },
+    {
+     "how": "Procura no resumo uma medida de efeito (HR, OR, RR, diferença de médias) com valor numérico.",
+     "name": "Resultado principal quantificado",
+     "weight": 10
+    },
+    {
+     "how": "Procura no resumo um intervalo de confiança (melhor) ou valor de p (parcial).",
+     "name": "Precisão estatística (IC ou p)",
+     "weight": 10
+    },
+    {
+     "how": "Verifica se o resumo é estruturado e traz a seção de métodos (desenho, participantes, intervenção).",
+     "name": "Método descrito no resumo",
+     "weight": 10
+    },
+    {
+     "how": "Para ensaios clínicos: procura número de registro prévio (ClinicalTrials.gov, ReBEC, ISRCTN e outros) no resumo.",
+     "name": "Registro prévio do ensaio",
+     "weight": 5
+    }
+   ],
+   "id": "<id>",
+   "items": [
+    {
+     "findings": [
+      {
+       "sentence": "Methods: We pooled 14 trials (n=18,450).",
+       "tags": [
+        "tamanho da amostra"
+       ]
+      },
+      {
+       "sentence": "Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02).",
+       "tags": [
+        "medida de efeito",
+        "intervalo de confiança",
+        "valor de p"
+       ]
+      }
+     ],
+     "included": true,
+     "note": "",
+     "ref": "1",
+     "reliability": {
+      "band": "Alta",
+      "coverage": 70,
+      "score": 100,
+      "warnings": [
+       "Nota calculada com 70% dos critérios avaliáveis; o restante não pôde ser verificado."
+      ]
+     },
+     "work": {
+      "authors": "Anika Weber, Hiro Suzuki",
+      "citedBy": 10,
+      "doi": "10.0000/1",
+      "journal": "Example Journal",
+      "keywords": [
+       "metformin",
+       "diabetes",
+       "heart"
+      ],
+      "language": "",
+      "oaUrl": "",
+      "openAccess": false,
+      "pmid": "1",
+      "ref": "1",
+      "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
+      "source": "Europe PMC",
+      "studyTypes": [],
+      "title": "Estudo de contrato 1",
+      "year": 2024
+     }
+    }
+   ],
+   "listName": "Minha lista",
+   "method": [
+    "Os estudos foram reunidos manualmente pelo autor na lista de leitura “Minha lista” e congelados neste relatório em <date>. As buscas usadas para encontrá-los não são registradas nesta versão do relatório.",
+    "Fontes dos registros: Europe PMC (1).",
+    "Foram reunidos 1 estudos; 1 foram incluídos e 0 excluídos pelo autor, sem critério automático.",
+    "Para cada estudo incluído, a nota de confiabilidade (0 a 100) soma os critérios abaixo, cada um com seu peso; critérios que não puderam ser verificados no registro ficam fora do cálculo e a cobertura é informada.",
+    "A nota de confiabilidade é calculada por código somente com o título, o resumo e os metadados do registro. Ela indica sinais verificáveis no registro e não substitui a leitura crítica do artigo.",
+    "Os dados estatísticos são frases copiadas do resumo, escolhidas por palavras-chave. A seleção pode omitir frases e foi lido apenas o resumo, não o texto completo.",
+    "Relatório na versão 1, gerado em <date> pelo Biomedical Data Digger. Nenhum texto deste relatório foi gerado por IA."
+   ],
+   "methodNote": "",
+   "panorama": {
+    "languages": [
+     [
+      "Idioma não informado",
+      1
+     ]
+    ],
+    "openAccess": 0,
+    "retracted": 0,
+    "sources": [
+     [
+      "Europe PMC",
+      1
+     ]
+    ],
+    "total": 1,
+    "types": [
+     [
+      "Tipo de estudo não informado",
+      1
+     ]
+    ],
+    "withoutAbstract": 0,
+    "years": [
+     [
+      "2024",
+      1
+     ]
+    ]
+   },
+   "question": "Metformina?",
+   "substances": [],
+   "title": "Relatório",
+   "updatedAt": "<ts>",
+   "version": 1
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/reports/{report_id}/add": {
+  "json": {
+   "added": 0,
+   "report": {
+    "createdAt": "<ts>",
+    "criteria": [
+     {
+      "how": "Consulta a marca de retratação no registro da fonte (Europe PMC ou OpenAlex).",
+      "name": "Integridade (retratação)",
+      "weight": 20
+     },
+     {
+      "how": "Usa o tipo de estudo do registro oficial. Revisão sistemática e meta-análise pontuam mais; ensaio randomizado vem a seguir; estudos observacionais, revisões narrativas e relatos de caso pontuam menos.",
+      "name": "Desenho do estudo",
+      "weight": 25
+     },
+     {
+      "how": "Preprint não passou por revisão por pares; artigo em periódico indexado é considerado revisado.",
+      "name": "Revisão por pares",
+      "weight": 10
+     },
+     {
+      "how": "Procura no resumo o tamanho da amostra (n = ..., N participantes) ou o número de estudos incluídos.",
+      "name": "Tamanho da amostra informado",
+      "weight": 10
+     },
+     {
+      "how": "Procura no resumo uma medida de efeito (HR, OR, RR, diferença de médias) com valor numérico.",
+      "name": "Resultado principal quantificado",
+      "weight": 10
+     },
+     {
+      "how": "Procura no resumo um intervalo de confiança (melhor) ou valor de p (parcial).",
+      "name": "Precisão estatística (IC ou p)",
+      "weight": 10
+     },
+     {
+      "how": "Verifica se o resumo é estruturado e traz a seção de métodos (desenho, participantes, intervenção).",
+      "name": "Método descrito no resumo",
+      "weight": 10
+     },
+     {
+      "how": "Para ensaios clínicos: procura número de registro prévio (ClinicalTrials.gov, ReBEC, ISRCTN e outros) no resumo.",
+      "name": "Registro prévio do ensaio",
+      "weight": 5
+     }
+    ],
+    "id": "<id>",
+    "items": [
+     {
+      "findings": [
+       {
+        "sentence": "Methods: We pooled 14 trials (n=18,450).",
+        "tags": [
+         "tamanho da amostra"
+        ]
+       },
+       {
+        "sentence": "Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02).",
+        "tags": [
+         "medida de efeito",
+         "intervalo de confiança",
+         "valor de p"
+        ]
+       }
+      ],
+      "included": true,
+      "note": "ok",
+      "ref": "1",
+      "reliability": {
+       "band": "Alta",
+       "coverage": 70,
+       "score": 100,
+       "warnings": [
+        "Nota calculada com 70% dos critérios avaliáveis; o restante não pôde ser verificado."
+       ]
+      },
+      "work": {
+       "authors": "Anika Weber, Hiro Suzuki",
+       "citedBy": 10,
+       "doi": "10.0000/1",
+       "journal": "Example Journal",
+       "keywords": [
+        "metformin",
+        "diabetes",
+        "heart"
+       ],
+       "language": "",
+       "oaUrl": "",
+       "openAccess": false,
+       "pmid": "1",
+       "ref": "1",
+       "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
+       "source": "Europe PMC",
+       "studyTypes": [],
+       "title": "Estudo de contrato 1",
+       "year": 2024
+      }
+     }
+    ],
+    "listName": "Minha lista",
+    "method": [
+     "Os estudos foram reunidos manualmente pelo autor na lista de leitura “Minha lista” e congelados neste relatório em <date>. As buscas feitas a partir deste relatório estão no histórico de atualizações abaixo; a busca que levou aos estudos da lista de origem não foi registrada.",
+     "Fontes dos registros: Europe PMC (1).",
+     "Foram reunidos 1 estudos; 1 foram incluídos e 0 excluídos pelo autor, sem critério automático.",
+     "Para cada estudo incluído, a nota de confiabilidade (0 a 100) soma os critérios abaixo, cada um com seu peso; critérios que não puderam ser verificados no registro ficam fora do cálculo e a cobertura é informada.",
+     "A nota de confiabilidade é calculada por código somente com o título, o resumo e os metadados do registro. Ela indica sinais verificáveis no registro e não substitui a leitura crítica do artigo.",
+     "Os dados estatísticos são frases copiadas do resumo, escolhidas por palavras-chave. A seleção pode omitir frases e foi lido apenas o resumo, não o texto completo.",
+     "Relatório na versão 2, gerado em <date> pelo Biomedical Data Digger. Nenhum texto deste relatório foi gerado por IA."
+    ],
+    "methodNote": "nota",
+    "panorama": {
+     "languages": [
+      [
+       "Idioma não informado",
+       1
+      ]
+     ],
+     "openAccess": 0,
+     "retracted": 0,
+     "sources": [
+      [
+       "Europe PMC",
+       1
+      ]
+     ],
+     "total": 1,
+     "types": [
+      [
+       "Tipo de estudo não informado",
+       1
+      ]
+     ],
+     "withoutAbstract": 0,
+     "years": [
+      [
+       "2024",
+       1
+      ]
+     ]
+    },
+    "question": "Metformina?",
+    "substances": [
+     "metformina"
+    ],
+    "title": "Relatório 2",
+    "updatedAt": "<ts>",
+    "version": 2
+   }
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/reports/{report_id}/restore": {
+  "json": {
+   "createdAt": "<ts>",
+   "criteria": [
+    {
+     "how": "Consulta a marca de retratação no registro da fonte (Europe PMC ou OpenAlex).",
+     "name": "Integridade (retratação)",
+     "weight": 20
+    },
+    {
+     "how": "Usa o tipo de estudo do registro oficial. Revisão sistemática e meta-análise pontuam mais; ensaio randomizado vem a seguir; estudos observacionais, revisões narrativas e relatos de caso pontuam menos.",
+     "name": "Desenho do estudo",
+     "weight": 25
+    },
+    {
+     "how": "Preprint não passou por revisão por pares; artigo em periódico indexado é considerado revisado.",
+     "name": "Revisão por pares",
+     "weight": 10
+    },
+    {
+     "how": "Procura no resumo o tamanho da amostra (n = ..., N participantes) ou o número de estudos incluídos.",
+     "name": "Tamanho da amostra informado",
+     "weight": 10
+    },
+    {
+     "how": "Procura no resumo uma medida de efeito (HR, OR, RR, diferença de médias) com valor numérico.",
+     "name": "Resultado principal quantificado",
+     "weight": 10
+    },
+    {
+     "how": "Procura no resumo um intervalo de confiança (melhor) ou valor de p (parcial).",
+     "name": "Precisão estatística (IC ou p)",
+     "weight": 10
+    },
+    {
+     "how": "Verifica se o resumo é estruturado e traz a seção de métodos (desenho, participantes, intervenção).",
+     "name": "Método descrito no resumo",
+     "weight": 10
+    },
+    {
+     "how": "Para ensaios clínicos: procura número de registro prévio (ClinicalTrials.gov, ReBEC, ISRCTN e outros) no resumo.",
+     "name": "Registro prévio do ensaio",
+     "weight": 5
+    }
+   ],
+   "id": "<id>",
+   "items": [
+    {
+     "findings": [
+      {
+       "sentence": "Methods: We pooled 14 trials (n=18,450).",
+       "tags": [
+        "tamanho da amostra"
+       ]
+      },
+      {
+       "sentence": "Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02).",
+       "tags": [
+        "medida de efeito",
+        "intervalo de confiança",
+        "valor de p"
+       ]
+      }
+     ],
+     "included": true,
+     "note": "",
+     "ref": "1",
+     "reliability": {
+      "band": "Alta",
+      "coverage": 70,
+      "score": 100,
+      "warnings": [
+       "Nota calculada com 70% dos critérios avaliáveis; o restante não pôde ser verificado."
+      ]
+     },
+     "work": {
+      "authors": "Anika Weber, Hiro Suzuki",
+      "citedBy": 10,
+      "doi": "10.0000/1",
+      "journal": "Example Journal",
+      "keywords": [
+       "metformin",
+       "diabetes",
+       "heart"
+      ],
+      "language": "",
+      "oaUrl": "",
+      "openAccess": false,
+      "pmid": "1",
+      "ref": "1",
+      "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
+      "source": "Europe PMC",
+      "studyTypes": [],
+      "title": "Estudo de contrato 1",
+      "year": 2024
+     }
+    }
+   ],
+   "listName": "Minha lista",
+   "method": [
+    "Os estudos foram reunidos manualmente pelo autor na lista de leitura “Minha lista” e congelados neste relatório em <date>. As buscas feitas a partir deste relatório estão no histórico de atualizações abaixo; a busca que levou aos estudos da lista de origem não foi registrada.",
+    "Fontes dos registros: Europe PMC (1).",
+    "Foram reunidos 1 estudos; 1 foram incluídos e 0 excluídos pelo autor, sem critério automático.",
+    "Para cada estudo incluído, a nota de confiabilidade (0 a 100) soma os critérios abaixo, cada um com seu peso; critérios que não puderam ser verificados no registro ficam fora do cálculo e a cobertura é informada.",
+    "A nota de confiabilidade é calculada por código somente com o título, o resumo e os metadados do registro. Ela indica sinais verificáveis no registro e não substitui a leitura crítica do artigo.",
+    "Os dados estatísticos são frases copiadas do resumo, escolhidas por palavras-chave. A seleção pode omitir frases e foi lido apenas o resumo, não o texto completo.",
+    "Relatório na versão 3, gerado em <date> pelo Biomedical Data Digger. Nenhum texto deste relatório foi gerado por IA."
+   ],
+   "methodNote": "",
+   "panorama": {
+    "languages": [
+     [
+      "Idioma não informado",
+      1
+     ]
+    ],
+    "openAccess": 0,
+    "retracted": 0,
+    "sources": [
+     [
+      "Europe PMC",
+      1
+     ]
+    ],
+    "total": 1,
+    "types": [
+     [
+      "Tipo de estudo não informado",
+      1
+     ]
+    ],
+    "withoutAbstract": 0,
+    "years": [
+     [
+      "2024",
+      1
+     ]
+    ]
+   },
+   "question": "Metformina?",
+   "substances": [],
+   "title": "Relatório",
+   "updatedAt": "<ts>",
+   "version": 3
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/reports/{report_id}/search": {
+  "json": {
+   "notes": [],
+   "query": "metformina",
+   "results": [
+    {
+     "authors": "Anika Weber, Hiro Suzuki",
+     "citedBy": 10,
+     "doi": "10.0000/2",
+     "journal": "Example Journal",
+     "keywords": [
+      "metformin",
+      "diabetes",
+      "heart"
+     ],
+     "language": "",
+     "oaUrl": "",
+     "openAccess": false,
+     "pmid": "2",
+     "ref": "2",
+     "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
+     "source": "Europe PMC",
+     "studyTypes": [],
+     "title": "Estudo de contrato 2",
+     "year": 2024
+    },
+    {
+     "authors": "Anika Weber, Hiro Suzuki",
+     "citedBy": 10,
+     "doi": "10.0000/3",
+     "journal": "Example Journal",
+     "keywords": [
+      "metformin",
+      "diabetes",
+      "heart"
+     ],
+     "language": "",
+     "oaUrl": "",
+     "openAccess": false,
+     "pmid": "3",
+     "ref": "3",
+     "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
+     "source": "Europe PMC",
+     "studyTypes": [],
+     "title": "Estudo de contrato 3",
+     "year": 2024
+    }
+   ],
+   "yearFrom": 2025
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "POST /api/search": {
+  "json": {
+   "results": [
+    {
+     "doi": "10.1/x",
+     "journal": "J",
+     "pmid": "1",
+     "reliability": "Alta",
+     "score": 0.95,
+     "source": "MED",
+     "title": "T 1",
+     "url": "https://x/1",
+     "year": "2024"
+    }
+   ]
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "PUT /api/interests": {
+  "json": {
+   "languages": [
+    "pt"
+   ],
+   "terms": [
+    "metformina"
+   ],
+   "topics": [
+    {
+     "area": "medicina",
+     "subtopics": []
+    }
+   ]
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "PUT /api/library/tags": {
+  "json": {
+   "tags": [
+    "diabetes"
+   ]
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "PUT /api/notifications/prefs": {
+  "json": {
+   "channel": "sininho",
+   "kinds": [
+    {
+     "description": "Um artigo da sua biblioteca, de uma lista ou de um relatório passou a constar como retratado na fonte.",
+     "enabled": false,
+     "key": "retratacao",
+     "label": "Artigo retratado",
+     "priority": 2
+    },
+    {
+     "description": "Uma substância confirmada em um relatório mudou na ANVISA, na Conitec ou na Rename.",
+     "enabled": true,
+     "key": "regulatorio",
+     "label": "Mudança regulatória",
+     "priority": 2
+    },
+    {
+     "description": "Entraram artigos novos na lista de origem de um relatório.",
+     "enabled": true,
+     "key": "relatorio-lista",
+     "label": "Novidades dos relatórios",
+     "priority": 1
+    },
+    {
+     "description": "Artigos novos sobre as áreas, os subtemas e as palavras-chave que você acompanha.",
+     "enabled": true,
+     "key": "novo-artigo",
+     "label": "Artigos novos nos interesses",
+     "priority": 1
+    }
+   ]
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "PUT /api/profile": {
+  "json": {
+   "configured": true,
+   "healthPack": true,
+   "profile": "saude"
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "PUT /api/reports/{report_id}": {
+  "json": {
+   "createdAt": "<ts>",
+   "criteria": [
+    {
+     "how": "Consulta a marca de retratação no registro da fonte (Europe PMC ou OpenAlex).",
+     "name": "Integridade (retratação)",
+     "weight": 20
+    },
+    {
+     "how": "Usa o tipo de estudo do registro oficial. Revisão sistemática e meta-análise pontuam mais; ensaio randomizado vem a seguir; estudos observacionais, revisões narrativas e relatos de caso pontuam menos.",
+     "name": "Desenho do estudo",
+     "weight": 25
+    },
+    {
+     "how": "Preprint não passou por revisão por pares; artigo em periódico indexado é considerado revisado.",
+     "name": "Revisão por pares",
+     "weight": 10
+    },
+    {
+     "how": "Procura no resumo o tamanho da amostra (n = ..., N participantes) ou o número de estudos incluídos.",
+     "name": "Tamanho da amostra informado",
+     "weight": 10
+    },
+    {
+     "how": "Procura no resumo uma medida de efeito (HR, OR, RR, diferença de médias) com valor numérico.",
+     "name": "Resultado principal quantificado",
+     "weight": 10
+    },
+    {
+     "how": "Procura no resumo um intervalo de confiança (melhor) ou valor de p (parcial).",
+     "name": "Precisão estatística (IC ou p)",
+     "weight": 10
+    },
+    {
+     "how": "Verifica se o resumo é estruturado e traz a seção de métodos (desenho, participantes, intervenção).",
+     "name": "Método descrito no resumo",
+     "weight": 10
+    },
+    {
+     "how": "Para ensaios clínicos: procura número de registro prévio (ClinicalTrials.gov, ReBEC, ISRCTN e outros) no resumo.",
+     "name": "Registro prévio do ensaio",
+     "weight": 5
+    }
+   ],
+   "id": "<id>",
+   "items": [
+    {
+     "findings": [
+      {
+       "sentence": "Methods: We pooled 14 trials (n=18,450).",
+       "tags": [
+        "tamanho da amostra"
+       ]
+      },
+      {
+       "sentence": "Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02).",
+       "tags": [
+        "medida de efeito",
+        "intervalo de confiança",
+        "valor de p"
+       ]
+      }
+     ],
+     "included": true,
+     "note": "ok",
+     "ref": "1",
+     "reliability": {
+      "band": "Alta",
+      "coverage": 70,
+      "score": 100,
+      "warnings": [
+       "Nota calculada com 70% dos critérios avaliáveis; o restante não pôde ser verificado."
+      ]
+     },
+     "work": {
+      "authors": "Anika Weber, Hiro Suzuki",
+      "citedBy": 10,
+      "doi": "10.0000/1",
+      "journal": "Example Journal",
+      "keywords": [
+       "metformin",
+       "diabetes",
+       "heart"
+      ],
+      "language": "",
+      "oaUrl": "",
+      "openAccess": false,
+      "pmid": "1",
+      "ref": "1",
+      "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
+      "source": "Europe PMC",
+      "studyTypes": [],
+      "title": "Estudo de contrato 1",
+      "year": 2024
+     }
+    }
+   ],
+   "listName": "Minha lista",
+   "method": [
+    "Os estudos foram reunidos manualmente pelo autor na lista de leitura “Minha lista” e congelados neste relatório em <date>. As buscas usadas para encontrá-los não são registradas nesta versão do relatório.",
+    "Fontes dos registros: Europe PMC (1).",
+    "Foram reunidos 1 estudos; 1 foram incluídos e 0 excluídos pelo autor, sem critério automático.",
+    "Para cada estudo incluído, a nota de confiabilidade (0 a 100) soma os critérios abaixo, cada um com seu peso; critérios que não puderam ser verificados no registro ficam fora do cálculo e a cobertura é informada.",
+    "A nota de confiabilidade é calculada por código somente com o título, o resumo e os metadados do registro. Ela indica sinais verificáveis no registro e não substitui a leitura crítica do artigo.",
+    "Os dados estatísticos são frases copiadas do resumo, escolhidas por palavras-chave. A seleção pode omitir frases e foi lido apenas o resumo, não o texto completo.",
+    "Relatório na versão 2, gerado em <date> pelo Biomedical Data Digger. Nenhum texto deste relatório foi gerado por IA."
+   ],
+   "methodNote": "nota",
+   "panorama": {
+    "languages": [
+     [
+      "Idioma não informado",
+      1
+     ]
+    ],
+    "openAccess": 0,
+    "retracted": 0,
+    "sources": [
+     [
+      "Europe PMC",
+      1
+     ]
+    ],
+    "total": 1,
+    "types": [
+     [
+      "Tipo de estudo não informado",
+      1
+     ]
+    ],
+    "withoutAbstract": 0,
+    "years": [
+     [
+      "2024",
+      1
+     ]
+    ]
+   },
+   "question": "Metformina?",
+   "substances": [
+    "metformina"
+   ],
+   "title": "Relatório 2",
+   "updatedAt": "<ts>",
+   "version": 2
+  },
+  "status": 200,
+  "type": "application/json"
+ }
+}
