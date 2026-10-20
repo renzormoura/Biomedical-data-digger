@@ -10,7 +10,7 @@ import re
 import unicodedata
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Union
+from typing import Any, Union
 
 import prompt_builders as pb
 
@@ -174,7 +174,7 @@ class PageSpec:
         ]
 
 
-def _b(label: str, builder: Callable, output_label: str = "", **kwargs) -> AnalysisButton:
+def _b(label: str, builder: Callable[..., list[dict[str, str]]], output_label: str = "", **kwargs: Any) -> AnalysisButton:
     kwargs.setdefault("reasoning_effort", LOW_REASONING.get(builder))
     return AnalysisButton(label, builder, output_label, **kwargs)
 

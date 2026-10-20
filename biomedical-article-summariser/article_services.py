@@ -1,13 +1,16 @@
 """Busca, normalizacao e cache de artigos cientificos."""
 
 import re
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from functools import wraps
+from typing import Any, ParamSpec, TypeVar, cast
 from urllib.parse import parse_qs, urlencode, urlparse
 
 import requests
 from bs4 import BeautifulSoup as bs
+from bs4 import Tag
 from loguru import logger
 
 from security import safe_get
@@ -18,9 +21,13 @@ MIN_ABSTRACT_CHARS = 200
 HTTP_TIMEOUT = 15
 
 
-def catch_request_error(func):
+_P = ParamSpec("_P")
+_R = TypeVar("_R")
+
+
+def catch_request_error(func: Callable[_P, _R]) -> Callable[_P, _R | None]:
     @wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: _P.args, **kwargs: _P.kwargs) -> _R | None:
         try:
             return func(*args, **kwargs)
         except requests.RequestException as error:
@@ -45,12 +52,12 @@ def get_xml_from_url(url: str) -> bs:
     return bs(response.content, "lxml-xml")
 
 
-def fetch_article_abstract(soup: bs) -> Article:
+def fetch_article_abstract(soup: bs | None) -> Article:
     if soup is None:
         return "No XML found", ""
     title_tag = soup.find("article-title")
     title = title_tag.get_text(strip=True) if title_tag else "No Title Found for this article"
-    abstract_tag = soup.find("abstract")
+    abstract_tag = cast(Tag | None, soup.find("abstract"))
     if not abstract_tag:
         return title, ""
     abstract = " ".join(
@@ -88,7 +95,7 @@ def fetch_full_text(soup: bs) -> Article:
             sections.append(f"**{label}:**\n" + " ".join(paragraphs))
     if sections:
         return title, "\n\n".join(sections)
-    abstract_tag = soup.find("abstract")
+    abstract_tag = cast(Tag | None, soup.find("abstract"))
     if abstract_tag:
         return title, " ".join(
             clean_text(paragraph.get_text(strip=True))
@@ -276,10 +283,10 @@ def fetch_by_arxiv(arxiv_id: str) -> Article:
             timeout=10,
         )
         response.raise_for_status()
-        entry = bs(response.content, "lxml-xml").find("entry")
+        entry = cast(Tag | None, bs(response.content, "lxml-xml").find("entry"))
         if not entry:
             return "Artigo nao encontrado no arXiv", ""
-        title_tag, summary_tag = entry.find("title"), entry.find("summary")
+        title_tag, summary_tag = cast(Tag | None, entry.find("title")), cast(Tag | None, entry.find("summary"))
         return (
             clean_text(title_tag.get_text()) if title_tag else "Titulo nao encontrado",
             clean_text(summary_tag.get_text()) if summary_tag else "",
@@ -333,9 +340,9 @@ BROWSER_HEADERS = {
 def _meta_content(soup: bs, *names: str) -> str:
     for name in names:
         for attr in ("name", "property"):
-            tag = soup.find("meta", attrs={attr: name})
-            if tag and tag.get("content", "").strip():
-                return tag["content"].strip()
+            tag = cast(Tag | None, soup.find("meta", attrs={attr: name}))
+            if tag and str(tag.get("content", "")).strip():
+                return str(tag["content"]).strip()
     return ""
 
 
@@ -487,9 +494,10 @@ def _lookup_by_crossref_alternative_id(alternative_id: str) -> tuple[str, str, s
     o DOI real permite encadear Semantic Scholar/OpenAlex, que o tem indexado.
     """
     try:
+        params: dict[str, str | int] = {"filter": f"alternative-id:{alternative_id}", "rows": 1}
         response = requests.get(
             "https://api.crossref.org/works",
-            params={"filter": f"alternative-id:{alternative_id}", "rows": 1},
+            params=params,
             headers={"User-Agent": "BiomedicalDataDigger/1.0"},
             timeout=15,
         )
@@ -675,7 +683,7 @@ def fetch_from_google_scholar(scholar_url: str) -> Article:
 
 def _first_result_link(soup: bs) -> str:
     for anchor in soup.select("h3.gs_rt a[href]"):
-        href = anchor.get("href", "")
+        href = str(anchor.get("href", ""))
         if href.startswith("http"):
             return href
     return ""
@@ -780,9 +788,10 @@ def _bibliographic_relevance_for_item(item: dict) -> tuple[str, float]:
 
 
 def _search_europe_pmc(keyword: str, page_size: int) -> list[dict]:
+    params: dict[str, str | int] = {"query": keyword, "resultType": "core", "format": "json", "pageSize": page_size}
     response = requests.get(
         "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
-        params={"query": keyword, "resultType": "core", "format": "json", "pageSize": page_size},
+        params=params,
         timeout=15,
     )
     response.raise_for_status()
@@ -790,12 +799,13 @@ def _search_europe_pmc(keyword: str, page_size: int) -> list[dict]:
 
 
 def _search_openalex(keyword: str, page_size: int) -> list[dict]:
-    response = requests.get(
-        "https://api.openalex.org/works",
-        params={
+    params: dict[str, str | int] = {
             "search": keyword,
             "per-page": page_size,
-        },
+        }
+    response = requests.get(
+        "https://api.openalex.org/works",
+        params=params,
         headers={"User-Agent": "BiomedicalDataDigger/1.0"},
         timeout=15,
     )
@@ -804,13 +814,14 @@ def _search_openalex(keyword: str, page_size: int) -> list[dict]:
 
 
 def _search_semantic_scholar(keyword: str, page_size: int) -> list[dict]:
-    response = requests.get(
-        "https://api.semanticscholar.org/graph/v1/paper/search",
-        params={
+    params: dict[str, str | int] = {
             "query": keyword,
             "limit": page_size,
             "fields": "title,year,venue,externalIds,citationCount,paperId",
-        },
+        }
+    response = requests.get(
+        "https://api.semanticscholar.org/graph/v1/paper/search",
+        params=params,
         timeout=15,
     )
     response.raise_for_status()
@@ -818,12 +829,13 @@ def _search_semantic_scholar(keyword: str, page_size: int) -> list[dict]:
 
 
 def _search_crossref(keyword: str, page_size: int) -> list[dict]:
-    response = requests.get(
-        "https://api.crossref.org/works",
-        params={
+    params: dict[str, str | int] = {
             "query": keyword,
             "rows": page_size,
-        },
+        }
+    response = requests.get(
+        "https://api.crossref.org/works",
+        params=params,
         headers={"User-Agent": "BiomedicalDataDigger/1.0"},
         timeout=15,
     )
@@ -832,9 +844,10 @@ def _search_crossref(keyword: str, page_size: int) -> list[dict]:
 
 
 def _search_arxiv(keyword: str, page_size: int) -> list[dict]:
+    params: dict[str, str | int] = {"search_query": f'all:"{keyword}"', "max_results": page_size}
     response = requests.get(
         "https://export.arxiv.org/api/query",
-        params={"search_query": f'all:"{keyword}"', "max_results": page_size},
+        params=params,
         timeout=15,
     )
     response.raise_for_status()
@@ -847,7 +860,7 @@ def _year_from_crossref(item: dict) -> str:
     return str(date_parts[0][0]) if date_parts and date_parts[0] else "—"
 
 
-def _normalize_search_result(item: dict, source: str) -> dict:
+def _normalize_search_result(item: Any, source: str) -> dict:
     if source == "MED":
         return {
             "title": item.get("title") or "Título não informado",
@@ -935,8 +948,8 @@ def search_reliable_articles(keyword: str, limit: int = 5, area: str = "Todas") 
         "ARXIV": _search_arxiv,
     }
     fetch_size = min(max(page_size * 2, 10), 25)
-    raw_results = []
-    failures = []
+    raw_results: list[dict] = []
+    failures: list[str] = []
     with ThreadPoolExecutor(max_workers=len(source_searchers)) as executor:
         pending = {
             executor.submit(searcher, keyword.strip(), fetch_size): source

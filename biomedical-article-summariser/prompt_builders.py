@@ -720,7 +720,7 @@ Use exclusivamente estes títulos em negrito e listas:
 Para modalidades de eficácia, segurança ou estatística, não declare que um artigo é superior se os desenhos, populações, métricas ou contextos não forem comparáveis."""
     return [{"role": "system", "content": sys_prompt.strip()}, {"role": "user", "content": user_prompt}]
 
-def build_message_pontos_chave(article_title, abstract_text, sys_prompt=SYS_PROMPT):
+def build_message_pontos_chave(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> list[dict[str, str]]:
     user_prompt = f"""Você é um especialista em síntese científica. Leia o resumo a seguir e extraia até 5 achados importantes, apresentados como frases curtas e diretas.
 
 Título: {article_title}
@@ -732,7 +732,7 @@ Abstract:
 **Restrição absoluta:** Todos os pontos devem ser extraídos exclusivamente do texto fornecido. Nenhuma inferência, complemento ou conhecimento externo."""
     return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
 
-def build_message_conduta_urgencia(article_title, abstract_text, sys_prompt=SYS_PROMPT):
+def build_message_conduta_urgencia(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> list[dict[str, str]]:
     user_prompt = f"""Você é um médico emergencista. Extraia EXCLUSIVAMENTE o protocolo de manejo de urgência/emergência descrito no artigo a seguir.
 
 Título: {article_title}
@@ -752,7 +752,7 @@ Abstract:
 **Restrição absoluta:** Se o artigo não descrever protocolo de urgência explícito, informe: "Este artigo não descreve um protocolo de manejo agudo de urgência." Nunca complete com conhecimento externo."""
     return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
 
-def build_message_populacoes_especiais(article_title, abstract_text, sys_prompt=SYS_PROMPT):
+def build_message_populacoes_especiais(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> list[dict[str, str]]:
     user_prompt = f"""Você é um clínico especializado em populações vulneráveis. Extraia como a intervenção descrita no artigo se modifica para populações especiais.
 
 Título: {article_title}
@@ -770,7 +770,7 @@ Para cada uma: ajuste de dose, contraindicações, monitoramento adicional, prec
 **Restrição absoluta:** Somente informações do artigo. Nenhum ajuste baseado em conhecimento externo."""
     return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
 
-def build_message_lacunas_pesquisa(article_title, abstract_text, sys_prompt=SYS_PROMPT):
+def build_message_lacunas_pesquisa(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> list[dict[str, str]]:
     user_prompt = f"""Você é um pesquisador sênior. Extraia as lacunas de conhecimento e direções futuras mencionadas pelos autores do artigo.
 
 Título: {article_title}
@@ -787,7 +787,7 @@ Abstract:
 **Restrição absoluta:** Somente lacunas e direções explicitamente mencionadas pelos autores. Não inferir lacunas baseadas em conhecimento externo."""
     return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
 
-def build_message_comparacao_literatura(article_title, abstract_text, sys_prompt=SYS_PROMPT):
+def build_message_comparacao_literatura(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> list[dict[str, str]]:
     user_prompt = f"""Você é um revisor científico. Analise como o artigo se posiciona em relação à literatura prévia, conforme descrito pelos autores.
 
 Título: {article_title}
@@ -804,7 +804,7 @@ Abstract:
 **Restrição absoluta:** Somente comparações que os próprios autores fazem. Não adicionar comparações baseadas em conhecimento externo."""
     return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
 
-def build_message_disponibilidade_sus(article_title, abstract_text, sys_prompt=SYS_PROMPT):
+def build_message_disponibilidade_sus(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> list[dict[str, str]]:
     contexto_extra = contexto_brasil.bloco_contexto(f"{article_title} {abstract_text}")
     user_prompt = f"""Você é um médico com experiência no sistema público de saúde brasileiro. Avalie a disponibilidade das intervenções descritas no artigo no contexto do SUS.
 
@@ -828,7 +828,7 @@ Abstract:
 4. **Impacto para o Médico do SUS** — o que pode ou não aplicar com base neste artigo"""
     return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
 
-def build_message_vigilancia_sanitaria(article_title, abstract_text, sys_prompt=SYS_PROMPT):
+def build_message_vigilancia_sanitaria(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> list[dict[str, str]]:
     contexto_extra = contexto_brasil.bloco_contexto(f"{article_title} {abstract_text}")
     user_prompt = f"""Você é um médico com conhecimento em regulação sanitária brasileira. Analise o artigo sob perspectiva regulatória para o contexto brasileiro.
 
@@ -850,7 +850,7 @@ Abstract:
 4. **Riscos Regulatórios** — o que o médico deve considerar legalmente ao aplicar os achados no Brasil"""
     return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
 
-def build_message_resumo_paciente(article_title, abstract_text, sys_prompt=SYS_PROMPT):
+def build_message_resumo_paciente(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> list[dict[str, str]]:
     user_prompt = f"""Explique os achados deste artigo científico para uma pessoa leiga — sem formação técnica na área. Use linguagem simples, acessível e clara, como se estivesse explicando para um familiar ou paciente.
 
 Título: {article_title}
@@ -868,7 +868,7 @@ Estruture a resposta com os tópicos:
 **Restrição absoluta:** Somente informações do artigo."""
     return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
 
-def build_message_resumo_estudante(article_title, abstract_text, sys_prompt=SYS_PROMPT):
+def build_message_resumo_estudante(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> list[dict[str, str]]:
     user_prompt = f"""Você é um professor com experiência em ensino nas áreas da saúde e ciências da vida. Explique este artigo para um estudante de graduação de forma didática e formativa — adaptando a linguagem ao contexto do artigo.
 
 Título: {article_title}
@@ -886,7 +886,7 @@ Estruture a resposta com os tópicos:
 **Restrição absoluta:** Somente informações do resumo. Não defina termos nem explique conceitos usando conhecimento externo; quando a explicação não estiver no resumo, indique "Não explicado no resumo fornecido"."""
     return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
 
-def build_message_questoes_discussao(article_title, abstract_text, sys_prompt=SYS_PROMPT):
+def build_message_questoes_discussao(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> list[dict[str, str]]:
     user_prompt = f"""Você é um professor de análise científica. Elabore exatamente 5 perguntas para debate baseadas neste resumo.
 
 Título: {article_title}
@@ -900,7 +900,7 @@ Cubra: método, resultados, limitações, implicações e direções futuras som
 **Restrição absoluta:** Perguntas baseadas nos achados específicos do artigo."""
     return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
 
-def build_message_confiabilidade(article_title, abstract_text, sys_prompt=SYS_PROMPT):
+def build_message_confiabilidade(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> list[dict[str, str]]:
     user_prompt = f"""Avalie a força das informações metodológicas apresentadas neste resumo, sem expressar opinião clínica e sem extrapolar além do texto.
 
 Título: {article_title}

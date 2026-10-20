@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 
 import uvicorn
+from fastapi import FastAPI
 
 from alerts import AlertService, AlertStore
 from arxiv_catalog import ArxivCatalog
@@ -31,7 +32,7 @@ from web import create_app as create_web_app
 from workflow import AnalysisService, ArticleRepository
 
 
-def load_brazil_bases():  # type: ignore[no-untyped-def]
+def load_brazil_bases() -> tuple[anvisa.Instantaneo, conitec.Instantaneo, rename.Instantaneo] | None:
     """Instantaneos da ANVISA, da Conitec e da Rename; None se algum nao puder ser lido (o vigia regulatorio fica de fora)."""
     try:
         return anvisa.carregar(), conitec.carregar(), rename.carregar()
@@ -39,7 +40,7 @@ def load_brazil_bases():  # type: ignore[no-untyped-def]
         return None
 
 
-def create_app():  # type: ignore[no-untyped-def]
+def create_app() -> FastAPI:
     settings = Settings.from_env()
     repository = ArticleRepository()
     usage_log = UsageLog()

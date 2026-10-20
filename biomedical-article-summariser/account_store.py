@@ -12,6 +12,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from functools import lru_cache
+from typing import Any
 
 from dotenv import load_dotenv
 
@@ -68,7 +69,7 @@ class AccountStore:
         self.uses_postgres = bool(self.database_url)
 
     @contextmanager
-    def _connection(self) -> Iterator[object]:
+    def _connection(self) -> Iterator[Any]:
         if self.uses_postgres:
             try:
                 import psycopg
@@ -78,11 +79,11 @@ class AccountStore:
             database_url = self.database_url
             if database_url.startswith("postgres://"):
                 database_url = "postgresql://" + database_url[len("postgres://"):]
-            connection = psycopg.connect(database_url)
+            pg_connection = psycopg.connect(database_url)
             try:
-                yield connection
+                yield pg_connection
             finally:
-                connection.close()
+                pg_connection.close()
             return
 
         connection = sqlite3.connect(self.sqlite_path, timeout=15)
