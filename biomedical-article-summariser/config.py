@@ -53,6 +53,10 @@ class Settings:
     ncbi_api_key: str = field(default="", repr=False)
     daily_token_budget_guest: int = 60_000
     daily_token_budget_user: int = 200_000
+    require_terms: bool = False  # cadastro exige aceitar Termos e Politica (padrao em producao)
+    legal_controller: str = ""  # quem e o controlador dos dados (nome ou razao social)
+    legal_contact: str = ""  # e-mail do encarregado / para solicitacoes de titulares
+    legal_forum: str = ""  # comarca do foro (opcional)
     app_base_url: str = "http://localhost:7860"  # base dos links enviados por e-mail (nunca vem do cabecalho Host)
 
     @classmethod
@@ -70,8 +74,18 @@ class Settings:
         base_url = os.environ.get("APP_BASE_URL", "").strip().rstrip("/")
         if production and os.environ.get("SMTP_HOST", "").strip() and not base_url.startswith("https://"):
             raise ConfigurationError("APP_BASE_URL (https://...) e obrigatoria em producao quando SMTP_HOST esta definido.")
+        require_terms = os.environ.get("REQUIRE_TERMS", "1" if production else "0").strip().lower() in ("1", "true", "yes", "on")
+        legal_controller = os.environ.get("LEGAL_CONTROLLER", "").strip()
+        legal_contact = os.environ.get("LEGAL_CONTACT", "").strip()
+        if require_terms and production and not (legal_controller and legal_contact):
+            raise ConfigurationError(
+                "Defina LEGAL_CONTROLLER e LEGAL_CONTACT: os Termos de Uso e a Politica de Privacidade "
+                "precisam identificar o controlador dos dados e um contato (ou use REQUIRE_TERMS=0)."
+            )
         return cls(
             production=production,
+            require_terms=require_terms, legal_controller=legal_controller, legal_contact=legal_contact,
+            legal_forum=os.environ.get("LEGAL_FORUM", "").strip(),
             app_base_url=base_url or "http://localhost:7860",
             alerts_cron_token=cron_token,
             session_secret=secret,

@@ -44,6 +44,13 @@ services:
         sync: false
       - key: SMTP_FROM
         sync: false
+      # Identificacao exigida pelos Termos de Uso e pela Politica de Privacidade (o servico nao sobe sem estas duas em producao)
+      - key: LEGAL_CONTROLLER
+        sync: false
+      - key: LEGAL_CONTACT
+        sync: false
+      - key: LEGAL_FORUM
+        sync: false
       # Laboratorio de IA (opcional)
       - key: GROQ_API_KEY
         sync: false

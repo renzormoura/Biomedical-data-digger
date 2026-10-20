@@ -15,7 +15,7 @@
 Variáveis de ambiente: ver [Configuração](configuracao.md). Em `render.yaml`, `SESSION_SECRET` é gerado pelo Render; `DATABASE_URL` vem do banco criado pelo próprio Blueprint; `APP_BASE_URL`, `SMTP_*`, `GROQ_API_KEY`, `ALERTS_CRON_TOKEN` e `ADMIN_TOKEN` são informados no painel (`sync: false`).
 
 ## O Blueprint (`render.yaml`)
-Cria, na mesma região (`virginia`), o **PostgreSQL** (`biomedical-data-digger-db`, plano pago com backup) e o **serviço web** (plano `starter`, sempre ligado), liga `DATABASE_URL` ao banco, gera `SESSION_SECRET`, define o *health check* em `/healthz` e lista as variáveis que você preenche no painel (`APP_BASE_URL`, `SMTP_*`, `GROQ_API_KEY`, `ALERTS_CRON_TOKEN`, `ADMIN_TOKEN`). **Confirme os nomes dos planos no painel do Render antes de aplicar** (eles mudam).
+Cria, na mesma região (`virginia`), o **PostgreSQL** (`biomedical-data-digger-db`, plano pago com backup) e o **serviço web** (plano `starter`, sempre ligado), liga `DATABASE_URL` ao banco, gera `SESSION_SECRET`, define o *health check* em `/healthz` e lista as variáveis que você preenche no painel (`LEGAL_CONTROLLER`, `LEGAL_CONTACT`, `APP_BASE_URL`, `SMTP_*`, `GROQ_API_KEY`, `ALERTS_CRON_TOKEN`, `ADMIN_TOKEN`). **Confirme os nomes dos planos no painel do Render antes de aplicar** (eles mudam).
 
 ### Banco pronto antes do primeiro tráfego
 1. Aplique o Blueprint (*New → Blueprint*) e espere o banco ficar disponível.
@@ -23,12 +23,12 @@ Cria, na mesma região (`virginia`), o **PostgreSQL** (`biomedical-data-digger-d
    ```bash
    DATABASE_URL="postgresql://..." python scripts/verificar_banco.py
    ```
-   Ele conecta, cria as 25 tabelas que faltarem (só `CREATE TABLE IF NOT EXISTS`), confere se todas existem e faz uma escrita e leitura de teste sem deixar rastro. Saída esperada: "Banco pronto."
+   Ele conecta, cria as 26 tabelas que faltarem (só `CREATE TABLE IF NOT EXISTS`), confere se todas existem e faz uma escrita e leitura de teste sem deixar rastro. Saída esperada: "Banco pronto."
 3. O serviço também cria as tabelas na subida e **falha rápido** se o banco estiver fora (melhor do que falhar no primeiro login).
 4. Confirme o **backup automático** do plano contratado e teste uma restauração (ver *Backup e recuperação* abaixo).
 
 ## Primeira implantação
-1. Aplicar o Blueprint (cria banco e serviço) e preencher as variáveis marcadas no painel: `APP_BASE_URL`, `SMTP_*` (e-mail), `GROQ_API_KEY` (se usar o Laboratório) e, para a rotina de avisos, `ALERTS_CRON_TOKEN` (≥24 caracteres).
+1. Aplicar o Blueprint (cria banco e serviço) e preencher as variáveis marcadas no painel: **`LEGAL_CONTROLLER` e `LEGAL_CONTACT` (sem elas o serviço não sobe)**, `APP_BASE_URL`, `SMTP_*` (e-mail), `GROQ_API_KEY` (se usar o Laboratório) e, para a rotina de avisos, `ALERTS_CRON_TOKEN` (≥24 caracteres).
 2. Rodar `scripts/verificar_banco.py` (seção acima).
 3. Se preferir criar tudo à mão: PostgreSQL na mesma região do serviço, URL **interna** em `DATABASE_URL` e os mesmos valores do Blueprint.
 4. Fazer o deploy. Na subida, cada armazém cria as próprias tabelas (`CREATE TABLE IF NOT EXISTS`).

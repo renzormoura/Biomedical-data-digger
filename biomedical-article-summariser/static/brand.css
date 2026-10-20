@@ -733,3 +733,10 @@ input[type="text"], input[type="search"], input[type="email"], input[type="passw
 .mail-state.is-ok { color: var(--ok); border-color: var(--ok); }
 
 .narrow { max-width: 34rem; margin-inline: auto; }
+
+/* textos legais e aceite no cadastro */
+.legal-text h1 { font-size: 1.8rem; margin: 0 0 12px; }
+.legal-text h2 { font-size: 1.1rem; margin: 26px 0 8px; }
+.legal-text p, .legal-text li { line-height: 1.6; }
+.auth-terms { display: flex; gap: 8px; align-items: flex-start; font-size: 0.85rem; }
+.auth-terms input { margin-top: 3px; }

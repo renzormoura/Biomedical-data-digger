@@ -65,9 +65,9 @@ Ver [Segurança](../arquitetura/seguranca.md): senhas com PBKDF2 (600 mil itera�
 4. Registrar causa, correção e aprendizado.
 
 ## Pendências
-1. Política de Privacidade e Termos de Uso redigidos por advogado.
+1. **Revisão por advogado** dos rascunhos já publicados no produto (`legal_texts/termos-de-uso.md` e `politica-de-privacidade.md`, servidos em `#/termos` e `#/privacidade`); definir o controlador e o contato (`LEGAL_CONTROLLER`, `LEGAL_CONTACT`).
 2. Indicação do encarregado (DPO) e canal de contato.
-3. Aviso de privacidade e consentimento visíveis no cadastro.
+3. ~~Aviso de privacidade e consentimento visíveis no cadastro~~ — feito: caixa "Li e aceito" obrigatória, com registro da versão aceita (`terms_acceptance`). Falta decidir como pedir novo aceite quando os textos mudarem.
 4. E-mail transacional: confirmação e recuperação **já implementadas**; falta o provedor contratado (operador de dados, listar na tabela acima), a base legal documentada (execução de contrato) e o consentimento/opt-out antes de qualquer aviso por e-mail.
 5. Registro das operações de tratamento (ROPA) e RIPD se o escopo crescer.
 6. Política de retenção para contas inativas.

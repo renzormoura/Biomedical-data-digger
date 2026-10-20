@@ -34,13 +34,18 @@ API JSON interna do produto, consumida pela própria SPA. Todas as rotas ficam s
 | Método | Rota | Acesso | Corpo / parâmetros | Descrição |
 |---|---|---|---|---|
 | GET | `/api/auth/me` | pública | — | `{user}` da sessão atual (ou nulo) |
-| POST | `/api/auth/register` | pública | `{email, password}` | Cria a conta e inicia a sessão |
+| POST | `/api/auth/register` | pública | `{email, password, acceptTerms}` | Cria a conta e inicia a sessão. Com `REQUIRE_TERMS` ligado (padrão em produção), `acceptTerms: true` é obrigatório e a versão aceita é registrada |
 | POST | `/api/auth/login` | pública | `{email, password}` | Inicia a sessão |
 | POST | `/api/auth/logout` | pública | — | Encerra a sessão |
 | POST | `/api/auth/forgot` | pública | `{email}` | Pede o link de redefinição. A resposta é **sempre a mesma** (a conta exista ou não); 503 se o servidor não tem e-mail configurado |
 | POST | `/api/auth/reset` | pública | `{token, password}` | Troca a senha com o token do link (1 hora, uso único). Senha fraca não gasta o link |
 | POST | `/api/auth/verify` | pública | `{token}` | Confirma o e-mail com o token do link (48 horas, uso único) |
 | POST | `/api/account/resend-verification` | conta | — | Reenvia a confirmação: `{sent: true}`, `{sent: false, reason: "wait"}` (1 por minuto) ou `{alreadyVerified: true}` |
+
+## Textos legais
+| Método | Rota | Acesso | Descrição |
+|---|---|---|---|
+| GET | `/api/legal/{doc}` | pública | `doc` = `termos` ou `privacidade`. Devolve `{title, version, html}` (HTML já escapado, com os dados do controlador preenchidos). Documento desconhecido: 404 |
 
 ## Descoberta e artigo
 | Método | Rota | Acesso | Parâmetros | Descrição |

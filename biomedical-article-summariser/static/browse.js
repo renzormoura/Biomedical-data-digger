@@ -221,12 +221,16 @@
   // com conta, o botao com o nome do usuario abre o Perfil (o "Sair da conta" fica la); sem conta, abre a entrada
   accountButton.addEventListener("click", () => { if (session.user) location.hash = "#/perfil"; else openAuth(); });
 
+  dialog.querySelectorAll("[data-close-auth]").forEach((link) => link.addEventListener("click", () => dialog.close()));
+
   async function authenticate(kind) {
     const email = document.getElementById("auth-email").value.trim();
     const password = document.getElementById("auth-password").value;
     if (!email || !password) { authError.textContent = "Informe e-mail e senha."; authError.hidden = false; return; }
+    const acceptTerms = document.getElementById("auth-terms").checked;
+    if (kind === "register" && !acceptTerms) { authError.textContent = "Para criar a conta, aceite os Termos de Uso e a Política de Privacidade."; authError.hidden = false; return; }
     try {
-      const data = await api(`/api/auth/${kind}`, { method: "POST", body: { email, password } });
+      const data = await api(`/api/auth/${kind}`, { method: "POST", body: kind === "register" ? { email, password, acceptTerms } : { email, password } });
       document.getElementById("auth-password").value = "";
       setUser(data.user);
       dialog.close();
@@ -2115,6 +2119,18 @@
     return token;
   }
 
+  async function renderLegal(doc) {
+    setTitle(doc === "termos" ? "Termos de Uso" : "Política de Privacidade");
+    const body = h("div", { class: "stack" }, loading());
+    mount($app, h("section", { class: "narrow stack legal" }, body));
+    try {
+      const data = await api(`/api/legal/${doc}`);
+      const article = h("article", { class: "legal-text" });
+      article.innerHTML = data.html;  // HTML gerado e escapado pelo servidor (markdown_lite)
+      mount(body, article, h("p", { class: "muted" }, `Versão ${data.version}.`));
+    } catch (error) { mount(body, errorBox(error.message)); }
+  }
+
   function renderResetPassword(params) {
     setTitle("Redefinir senha");
     const token = takeLinkToken(params, "redefinir");
@@ -2164,6 +2180,7 @@
     else if (view === "artigo") renderArticle(params);
     else if (view === "biblioteca") renderLibrary(params);
     else if (view === "feed") renderFeed(params);
+    else if (view === "termos" || view === "privacidade") renderLegal(view);
     else if (view === "redefinir") renderResetPassword(params);
     else if (view === "confirmar") renderConfirmEmail(params);
     else if (view === "interesses") location.replace("#/perfil/interesses");

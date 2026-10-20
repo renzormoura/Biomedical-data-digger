@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 2026-10 — Termos de Uso e Política de Privacidade no produto
+
+### Adicionado
+- **Rascunhos** dos Termos de Uso e da Política de Privacidade (`legal_texts/`), servidos em `#/termos` e `#/privacidade` (rota `GET /api/legal/{doc}`) com links no rodapé e no cadastro. **Precisam de revisão jurídica antes do lançamento.**
+- Caixa "Li e aceito os Termos e a Política" obrigatória ao criar a conta; o servidor exige `acceptTerms` quando `REQUIRE_TERMS` está ligado (padrão em produção) e grava a versão aceita e a data (`terms_acceptance`), incluída na cópia de dados e removida na exclusão.
+- Novas variáveis `LEGAL_CONTROLLER`, `LEGAL_CONTACT`, `LEGAL_FORUM` e `REQUIRE_TERMS`; em produção o serviço **não sobe** sem controlador e contato, para nunca publicar o texto com `[a definir]`.
+
 ## 2026-10 — Recuperação de senha, confirmação de e-mail e banco pronto para o Render
 
 ### Adicionado

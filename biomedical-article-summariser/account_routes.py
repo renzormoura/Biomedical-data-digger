@@ -15,6 +15,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, Field
 
+from account_consent import ConsentStore
 from account_store import AccountStore, AccountStoreError, InvalidCredentialsFormat, validate_credentials
 from account_tokens import AccountTokens
 from alerts import AlertStore
@@ -35,6 +36,11 @@ class DeleteIn(BaseModel):
     password: str = Field(max_length=200)
 
 
+def _terms(consent: ConsentStore | None, user: str) -> dict[str, str] | None:
+    accepted = consent.get(user) if consent is not None else None
+    return {"version": accepted[0], "acceptedAt": accepted[1]} if accepted else None
+
+
 def register_account_routes(
     app: FastAPI,
     *,
@@ -49,6 +55,7 @@ def register_account_routes(
     notifications: NotificationStore | None = None,
     tokens: AccountTokens | None = None,
     mail_enabled: bool = False,
+    consent: ConsentStore | None = None,
 ) -> None:
     def require_user(request: Request) -> str:
         user = current_user(request)
@@ -117,7 +124,8 @@ def register_account_routes(
         profile = profiles.get(user) if profiles else None
         payload: dict[str, Any] = {
             "exportedAt": utcnow_iso(),
-            "account": {"email": user, "createdAt": created, "emailVerified": tokens.is_verified(user) if tokens is not None else None},
+            "account": {"email": user, "createdAt": created, "emailVerified": tokens.is_verified(user) if tokens is not None else None,
+                        "terms": _terms(consent, user)},
             "profile": {"profile": profile.key, "healthPack": profile.health_pack} if profile else None,
             "library": [{**item.work.to_dict(), "tags": list(item.tags), "savedAt": item.saved_at} for item in library.items(user)],
             "lists": [
@@ -173,6 +181,8 @@ def register_account_routes(
             notifications.delete_user_data(user)
         if tokens is not None:
             tokens.delete_user_data(user)
+        if consent is not None:
+            consent.delete_user_data(user)
         try:
             account_store_factory().delete_user(user)
         except AccountStoreError as error:

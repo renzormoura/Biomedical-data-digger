@@ -19,6 +19,7 @@
 
 | `account_tokens` | `token_hash` (PK), `email`, `purpose` (`reset`/`verify`), `expires_at`, `created_at` | Tokens de uso único dos links de e-mail; **só o hash SHA-256** é guardado |
 | `email_verification` | `email` (PK), `verified_at` | E-mail confirmado (por link ou ao redefinir a senha) |
+| `terms_acceptance` | `email` (PK), `version`, `accepted_at` | Versão dos Termos e da Política aceita no cadastro, e quando |
 
 ### Biblioteca (`library_store.py`)
 | Tabela | Colunas | Uso |
@@ -73,7 +74,7 @@ O feed é **global** (não pertence a conta); a personalização é feita na lei
 | Demais dados pessoais | até a pessoa excluí-los ou excluir a conta |
 
 ## Exclusão e exportação
-- `DELETE /api/account` chama `delete_user_data(user)` em cada armazém (biblioteca e listas, relatórios, alertas e interesses, notificações, perfil, tokens e confirmação de e-mail) e depois remove a conta. `retraction_status` e o feed são globais e não têm dados pessoais.
+- `DELETE /api/account` chama `delete_user_data(user)` em cada armazém (biblioteca e listas, relatórios, alertas e interesses, notificações, perfil, tokens, confirmação de e-mail e aceite dos termos) e depois remove a conta. `retraction_status` e o feed são globais e não têm dados pessoais.
 - `GET /api/account/export` reúne tudo o que pertence à conta em um único JSON (sem o hash de senha).
 
 ## Fora do banco

@@ -22,6 +22,7 @@ from fastapi.testclient import TestClient
 import downloads
 import enrichment
 import pages
+from account_consent import ConsentStore
 from account_store import AccountStore
 from account_tokens import AccountTokens
 from alerts import AlertService, AlertStore
@@ -139,8 +140,8 @@ def recorder(tmp_path, monkeypatch):
     database = Database(database_url="", sqlite_path=str(tmp_path / "contract.sqlite3"))
     library, reports, alert_store = LibraryStore(database), ReportStore(database), AlertStore(database)
     profiles, notification_store, feed_store = ProfileStore(database), NotificationStore(database), FeedStore(database)
-    account_tokens = AccountTokens(database)
-    for store in (library, reports, alert_store, profiles, notification_store, feed_store, account_tokens):
+    account_tokens, consent = AccountTokens(database), ConsentStore(database)
+    for store in (library, reports, alert_store, profiles, notification_store, feed_store, account_tokens, consent):
         store.initialize()
     inbox = Inbox()
 
@@ -178,7 +179,7 @@ def recorder(tmp_path, monkeypatch):
             "title": "T 1", "journal": "J", "year": 2024, "pmid": "1", "source": "MED", "url": "https://x/1", "doi": "10.1/x",
             "reliability": "Alta", "reliability_score": 0.95}],
         usage_log=UsageLog(), discovery=discovery, library=library, alerts=alerts, reports=reports, profiles=profiles,
-        notifications=notifications, feed=feed_service, account_tokens=account_tokens, mailer=inbox,
+        notifications=notifications, feed=feed_service, account_tokens=account_tokens, mailer=inbox, consent=consent,
     )
     recorder = Recorder(TestClient(app, base_url="http://testserver"))
     recorder.app = app  # type: ignore[attr-defined]
@@ -194,6 +195,9 @@ def run_scenario(r: Recorder) -> None:  # noqa: C901 - e um roteiro linear de pr
     c("GET", "/healthz")
     # visitante
     c("GET", "/api/auth/me", label="visitante")
+    c("GET", "/api/legal/{doc}", "/api/legal/termos", label="termos")
+    c("GET", "/api/legal/{doc}", "/api/legal/privacidade", label="privacidade")
+    c("GET", "/api/legal/{doc}", "/api/legal/outro", label="desconhecido")
     c("GET", "/api/discover/options")
     c("GET", "/api/discover/search", params={"q": "metformina", "per_page": 5})
     c("GET", "/api/discover/search", label="uma fonte", params={"q": "metformina", "source": "pubmed", "sort": "cited"})
@@ -227,7 +231,7 @@ def run_scenario(r: Recorder) -> None:  # noqa: C901 - e um roteiro linear de pr
     c("GET", "/api/admin/usage", label="sem token")
     c("GET", "/api/admin/usage", label="com token", headers={"Authorization": "Bearer " + "a" * 30})
     # conta
-    c("POST", "/api/auth/register", json={"email": EMAIL, "password": PASSWORD})
+    c("POST", "/api/auth/register", json={"email": EMAIL, "password": PASSWORD, "acceptTerms": True})
     c("POST", "/api/auth/logout")
     c("POST", "/api/auth/login", json={"email": EMAIL, "password": PASSWORD})
     c("GET", "/api/auth/me", label="logado")

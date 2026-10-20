@@ -15,11 +15,13 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from markupsafe import Markup
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 import article_services
+import legal
 import markdown_lite
 import pages
+from account_consent import ConsentStore
 from account_routes import register_account_routes
 from account_store import (
     AccountStore,
@@ -48,6 +50,7 @@ from ratelimit import RateLimitExceeded, SlidingWindowLimiter, client_key
 from reports import ReportStore
 from routes.hardening import install_http_hardening
 from routes.lab import LabContext, register_lab_routes
+from routes.legal import register_legal_routes
 from routes.recovery import RecoveryContext, register_recovery_routes
 from sessions import SessionSigner
 from usage import UsageLog
@@ -60,6 +63,8 @@ SESSION_COOKIE = "bdd_session"
 # Modelos de requisicao (validacao na borda)
 # ---------------------------------------------------------------------------
 class CredentialsIn(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+    accept_terms: bool = Field(False, alias="acceptTerms")
     email: str = Field(max_length=320)
     password: str = Field(max_length=200)
 
@@ -84,6 +89,7 @@ def create_app(
     feed: FeedService | None = None,
     account_tokens: AccountTokens | None = None,
     mailer: Mailer | None = None,
+    consent: ConsentStore | None = None,
 ) -> FastAPI:
     app = FastAPI(title="Biomedical Data Digger", docs_url=None, redoc_url=None, openapi_url=None)
     signer = SessionSigner(settings.session_secret or SessionSigner.generate_secret())
@@ -188,6 +194,8 @@ def create_app(
             },
         )
 
+    register_legal_routes(app, settings)
+
     @app.get("/healthz")
     def healthz() -> dict[str, str]:
         return {"status": "ok"}
@@ -215,12 +223,16 @@ def create_app(
     def register(body: CredentialsIn, request: Request) -> JSONResponse:
         throttle_auth(request)
         email, password = credentials(body)
+        if settings.require_terms and not body.accept_terms:
+            raise DiggerError("Aceite os Termos de Uso e a Política de Privacidade para criar a conta.")
         try:
             created = account_store_factory().create_user(email, password)
         except AccountStoreError as error:
             raise DiggerError(str(error)) from error
         if not created:
             return JSONResponse({"error": "Este e-mail já está cadastrado."}, status_code=409)
+        if consent is not None and body.accept_terms:
+            consent.record(email, legal.VERSION)
         if recovery is not None:
             recovery.send_verification(email)
         response = JSONResponse({"user": email})
@@ -259,7 +271,7 @@ def create_app(
             app, account_store_factory=account_store_factory, current_user=current_user, throttle_auth=throttle_auth, on_deleted=end_account,
             library=library, reports=reports, alerts=alerts.store if alerts is not None else None, profiles=profiles,
             notifications=notifications.store if notifications is not None else None,
-            tokens=account_tokens, mail_enabled=recovery is not None and recovery.enabled,
+            tokens=account_tokens, mail_enabled=recovery is not None and recovery.enabled, consent=consent,
         )
 
     if discovery is not None and library is not None:

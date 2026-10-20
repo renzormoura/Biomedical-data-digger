@@ -11,6 +11,14 @@ Toda a configuração vem de **variáveis de ambiente**, lidas e validadas em um
 | `SESSION_SECRET` | Segredo de assinatura das sessões, **mínimo 32 caracteres**. No Render é gerado automaticamente (`generateValue`). Trocá-lo **encerra todas as sessões** |
 | `DATABASE_URL` | URL do PostgreSQL. Em produção, sem ela o serviço **não inicia** |
 
+### Para os textos legais (obrigatórias em produção)
+| Variável | Descrição |
+|---|---|
+| `LEGAL_CONTROLLER` | Nome ou razão social do controlador dos dados, exibido nos Termos e na Política. Sem ela (e `LEGAL_CONTACT`), o serviço **não sobe** em produção |
+| `LEGAL_CONTACT` | E-mail do encarregado / para solicitações de titulares |
+| `LEGAL_FORUM` | Comarca do foro (opcional) |
+| `REQUIRE_TERMS` | `1` (padrão em produção) exige aceitar os Termos ao criar a conta; `0` desliga (não recomendado em produção) |
+
 ### Para e-mail (confirmação de endereço e recuperação de senha)
 | Variável | Descrição |
 |---|---|

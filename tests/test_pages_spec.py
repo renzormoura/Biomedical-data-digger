@@ -112,6 +112,8 @@ def test_settings_validation(monkeypatch):
 
 def test_production_requires_a_strong_session_secret(monkeypatch):
     monkeypatch.setenv("APP_ENV", "production")
+    monkeypatch.setenv("LEGAL_CONTROLLER", "Empresa Exemplo")
+    monkeypatch.setenv("LEGAL_CONTACT", "privacidade@exemplo.com")
     monkeypatch.delenv("SESSION_SECRET", raising=False)
     with pytest.raises(ValueError, match="SESSION_SECRET"):
         Settings.from_env()

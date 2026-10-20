@@ -24,6 +24,12 @@ Guardadas como **PBKDF2-HMAC-SHA256** com **600.000 iterações** e sal aleatór
 - Consequência conhecida: **trocar a senha não encerra sessões de outros aparelhos** até o cookie expirar.
 - Em produção, `SESSION_SECRET` com ao menos 32 caracteres é obrigatório; sem ele o serviço não sobe.
 
+### Termos de Uso e Política de Privacidade
+- Os dois textos ficam em `legal_texts/*.md`, são servidos por `GET /api/legal/{doc}` e aparecem nas telas `#/termos` e `#/privacidade` (links no rodapé e no cadastro). **São rascunhos: revisão jurídica obrigatória antes do lançamento.**
+- Para criar a conta é preciso marcar "Li e aceito…". O servidor exige `acceptTerms` quando `REQUIRE_TERMS` está ligado (padrão em produção) e grava a **versão aceita e o momento** na tabela `terms_acceptance`, incluída na cópia de dados e removida na exclusão da conta. Contas anteriores a esta função não têm registro de aceite.
+- Em produção o serviço **não sobe** sem `LEGAL_CONTROLLER` (nome ou razão social do controlador) e `LEGAL_CONTACT` (e-mail do encarregado), para nunca publicar o texto com `[a definir]`. `LEGAL_FORUM` é opcional.
+- `legal.VERSION` deve ser alterada sempre que o texto mudar; mudanças relevantes pedem novo aceite (ainda não automatizado).
+
 ### Confirmação de e-mail e recuperação de senha
 - **Confirmação:** ao se cadastrar, a pessoa recebe um link (`#/confirmar?token=…`, válido por 48 horas, uso único). Enquanto não confirma, a conta funciona normalmente; em *Perfil → Conta e dados* aparece "Não confirmado" e o botão **Reenviar** (1 por minuto). A confirmação será exigida para avisos por e-mail.
 - **Recuperação:** em "Esqueci a senha" a pessoa informa o e-mail e recebe um link (`#/redefinir?token=…`, 1 hora, uso único). A tela pede a nova senha duas vezes. Abrir o link e trocar a senha também confirma o e-mail.

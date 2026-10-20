@@ -54,6 +54,8 @@ files = [
     "biomedical-article-summariser/security.py",
     "biomedical-article-summariser/routes",
     "biomedical-article-summariser/mailer.py",
+    "biomedical-article-summariser/legal.py",
+    "biomedical-article-summariser/account_consent.py",
     "biomedical-article-summariser/account_tokens.py",
     "biomedical-article-summariser/timeutil.py",
     "biomedical-article-summariser/biomedical_data_digger.py",

@@ -243,6 +243,7 @@ def test_mailer_from_env(monkeypatch):
 def test_production_with_smtp_requires_an_https_base_url(monkeypatch):
     monkeypatch.setenv("APP_ENV", "production")
     monkeypatch.setenv("SESSION_SECRET", "s" * 40)
+    monkeypatch.setenv("REQUIRE_TERMS", "0")  # este teste e so sobre APP_BASE_URL
     monkeypatch.setenv("SMTP_HOST", "smtp.exemplo.com")
     monkeypatch.delenv("APP_BASE_URL", raising=False)
     with pytest.raises(ConfigurationError, match="APP_BASE_URL"):
