@@ -16,6 +16,14 @@ from loguru import logger
 from security import safe_get
 
 Article = tuple[str, str]
+
+
+class SourcesUnavailableError(RuntimeError):
+    """Nenhuma das fontes de busca respondeu."""
+
+
+class UnrecognizedIdentifierError(ValueError):
+    """O texto informado nao e um ID ou URL de artigo em formato conhecido."""
 # Abaixo disso o "resumo" e apenas navegacao/lixo do cabecalho, nao um abstract.
 MIN_ABSTRACT_CHARS = 200
 HTTP_TIMEOUT = 15
@@ -966,7 +974,7 @@ def search_reliable_articles(keyword: str, limit: int = 5, area: str = "Todas") 
                 failures.append(f"{source}: {error}")
 
     if not raw_results and failures:
-        raise RuntimeError("Nenhuma fonte de artigos respondeu. " + " | ".join(failures))
+        raise SourcesUnavailableError("Nenhuma fonte de artigos respondeu. " + " | ".join(failures))
 
     ranked = []
     for item in _deduplicate_articles(raw_results):
@@ -1012,4 +1020,4 @@ def resolve_article(raw_input: str) -> tuple[str, str, str]:
     if _looks_like_url(value):
         title, abstract = fetch_from_generic_url(_normalize_url(value))
         return title, abstract, "Pagina do artigo"
-    raise ValueError("Nao foi possivel identificar o formato do ID ou URL.")
+    raise UnrecognizedIdentifierError("Nao foi possivel identificar o formato do ID ou URL.")

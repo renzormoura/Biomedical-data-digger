@@ -8,14 +8,12 @@ import os
 import re
 import secrets
 import sqlite3
-from collections.abc import Iterator
-from contextlib import contextmanager
 from datetime import datetime, timezone
 from functools import lru_cache
-from typing import Any
 
 from dotenv import load_dotenv
 
+from db import Database
 from timeutil import utcnow
 
 load_dotenv()
@@ -60,7 +58,9 @@ def validate_credentials(email: str, password: str) -> tuple[str, str]:
 
 
 class AccountStore:
-    def __init__(self) -> None:
+    """Contas de usuario sobre `db.Database` (o mesmo acesso ao banco dos demais armazens)."""
+
+    def __init__(self, database: Database | None = None) -> None:
         self.database_url = os.environ.get("DATABASE_URL", "").strip()
         self.sqlite_path = os.environ.get("DATABASE_PATH", _DEFAULT_SQLITE_PATH)
         self.environment = os.environ.get("APP_ENV", "development").lower()
@@ -68,59 +68,23 @@ class AccountStore:
             raise AccountStoreError(
                 "DATABASE_URL e obrigatoria em producao. Configure um PostgreSQL persistente no Render."
             )
-        self.uses_postgres = bool(self.database_url)
-
-    @contextmanager
-    def _connection(self) -> Iterator[Any]:
-        if self.uses_postgres:
-            try:
-                import psycopg
-            except ImportError as error:
-                raise AccountStoreError("A dependencia psycopg nao esta instalada.") from error
-
-            database_url = self.database_url
-            if database_url.startswith("postgres://"):
-                database_url = "postgresql://" + database_url[len("postgres://"):]
-            pg_connection = psycopg.connect(database_url)
-            try:
-                yield pg_connection
-            finally:
-                pg_connection.close()
-            return
-
-        connection = sqlite3.connect(self.sqlite_path, timeout=15)
-        try:
-            yield connection
-        finally:
-            connection.close()
+        self._db = database or Database(database_url=self.database_url, sqlite_path=self.sqlite_path)
+        self.uses_postgres = self._db.uses_postgres
 
     def initialize(self) -> None:
-        with self._connection() as connection:
-            if self.uses_postgres:
-                with connection.cursor() as cursor:
-                    cursor.execute(
-                        """
-                        CREATE TABLE IF NOT EXISTS users (
-                            email VARCHAR(320) PRIMARY KEY,
-                            password_hash VARCHAR(128) NOT NULL,
-                            password_salt VARCHAR(64) NOT NULL,
-                            created_at TIMESTAMPTZ NOT NULL
-                        )
-                        """
-                    )
-                connection.commit()
-            else:
-                connection.execute(
-                    """
-                    CREATE TABLE IF NOT EXISTS users (
-                        email TEXT PRIMARY KEY,
-                        password_hash TEXT NOT NULL,
-                        password_salt TEXT NOT NULL,
-                        created_at TEXT NOT NULL
-                    )
-                    """
-                )
-                connection.commit()
+        if self.uses_postgres:
+            ddl = (
+                "CREATE TABLE IF NOT EXISTS users ("
+                "email VARCHAR(320) PRIMARY KEY, password_hash VARCHAR(128) NOT NULL, "
+                "password_salt VARCHAR(64) NOT NULL, created_at TIMESTAMPTZ NOT NULL)"
+            )
+        else:
+            ddl = (
+                "CREATE TABLE IF NOT EXISTS users ("
+                "email TEXT PRIMARY KEY, password_hash TEXT NOT NULL, "
+                "password_salt TEXT NOT NULL, created_at TEXT NOT NULL)"
+            )
+        self._db.execute(ddl)
 
     @staticmethod
     def _password_digest(password: str, salt: bytes) -> str:
@@ -136,21 +100,12 @@ class AccountStore:
         salt = secrets.token_bytes(32)
         password_hash = self._password_digest(password, salt)
         created_at = utcnow()
-
+        stored_at: datetime | str = created_at if self.uses_postgres else created_at.isoformat()
         try:
-            with self._connection() as connection:
-                if self.uses_postgres:
-                    with connection.cursor() as cursor:
-                        cursor.execute(
-                            "INSERT INTO users (email, password_hash, password_salt, created_at) VALUES (%s, %s, %s, %s)",
-                            (normalized_email, password_hash, salt.hex(), created_at),
-                        )
-                else:
-                    connection.execute(
-                        "INSERT INTO users (email, password_hash, password_salt, created_at) VALUES (?, ?, ?, ?)",
-                        (normalized_email, password_hash, salt.hex(), created_at.isoformat()),
-                    )
-                connection.commit()
+            self._db.execute(
+                "INSERT INTO users (email, password_hash, password_salt, created_at) VALUES (?, ?, ?, ?)",
+                (normalized_email, password_hash, salt.hex(), stored_at),
+            )
         except Exception as error:
             if self._is_unique_violation(error):
                 return False
@@ -158,51 +113,22 @@ class AccountStore:
         return True
 
     def authenticate(self, email: str, password: str) -> bool:
-        normalized_email = email.strip().lower()
-        with self._connection() as connection:
-            if self.uses_postgres:
-                with connection.cursor() as cursor:
-                    cursor.execute(
-                        "SELECT password_hash, password_salt FROM users WHERE email = %s",
-                        (normalized_email,),
-                    )
-                    row = cursor.fetchone()
-            else:
-                row = connection.execute(
-                    "SELECT password_hash, password_salt FROM users WHERE email = ?",
-                    (normalized_email,),
-                ).fetchone()
-
+        row = self._fetch_one("SELECT password_hash, password_salt FROM users WHERE email = ?", (email.strip().lower(),))
         if not row:
             # Gasta o mesmo custo de PBKDF2 para nao revelar, pelo tempo, se o e-mail existe.
             self._password_digest(password, _DUMMY_SALT)
             return False
         stored_hash, stored_salt = row
-        calculated_hash = self._password_digest(password, bytes.fromhex(stored_salt))
-        return hmac.compare_digest(calculated_hash, stored_hash)
+        calculated_hash = self._password_digest(password, bytes.fromhex(str(stored_salt)))
+        return hmac.compare_digest(calculated_hash, str(stored_hash))
 
     def _fetch_one(self, sql: str, params: tuple[object, ...]) -> tuple[object, ...] | None:
-        with self._connection() as connection:
-            if self.uses_postgres:
-                with connection.cursor() as cursor:
-                    cursor.execute(sql.replace("?", "%s"), params)
-                    row = cursor.fetchone()
-                return tuple(row) if row else None
-            row = connection.execute(sql, params).fetchone()
-            return tuple(row) if row else None
+        rows = self._db.query(sql, params)
+        return tuple(rows[0]) if rows else None
 
     def _write(self, sql: str, params: tuple[object, ...]) -> int:
         """Executa uma escrita e devolve quantas linhas foram afetadas."""
-        with self._connection() as connection:
-            if self.uses_postgres:
-                with connection.cursor() as cursor:
-                    cursor.execute(sql.replace("?", "%s"), params)
-                    count = int(cursor.rowcount)
-                connection.commit()
-                return count
-            count = int(connection.execute(sql, params).rowcount)
-            connection.commit()
-            return count
+        return self._db.execute(sql, params)
 
     def exists(self, email: str) -> bool:
         return self._fetch_one("SELECT 1 FROM users WHERE email = ?", (email.strip().lower(),)) is not None

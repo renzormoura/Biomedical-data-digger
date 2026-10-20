@@ -60,16 +60,8 @@ def _postgres_schema(monkeypatch, request):
     monkeypatch.setattr(db.Database, "__init__", init)
     monkeypatch.setenv("DATABASE_URL", url)
 
-    # varios testes limpam DATABASE_URL para usar SQLite nas contas; aqui a conta tambem vai para o PostgreSQL
     import account_store
 
-    account_init = account_store.AccountStore.__init__
-
-    def account_init_pg(self, *args, **kwargs):
-        account_init(self, *args, **kwargs)
-        self.database_url, self.uses_postgres = url, True
-
-    monkeypatch.setattr(account_store.AccountStore, "__init__", account_init_pg)
     account_store.get_account_store.cache_clear()  # a instancia unica nao pode apontar para o schema de outro teste
     try:
         yield

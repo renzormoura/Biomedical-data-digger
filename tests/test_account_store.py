@@ -36,8 +36,7 @@ def test_unknown_user_does_not_authenticate_and_pays_hash_cost(store, monkeypatc
 def test_passwords_are_salted_and_not_stored_in_clear(store, tmp_path):
     store.create_user("a@example.com", "mesma-senha-123")
     store.create_user("b@example.com", "mesma-senha-123")
-    with store._connection() as connection:
-        rows = connection.execute("SELECT password_hash, password_salt FROM users").fetchall()
+    rows = store._db.query("SELECT password_hash, password_salt FROM users")
     assert rows[0][0] != rows[1][0] and rows[0][1] != rows[1][1]
     assert all("mesma-senha-123" not in cell for row in rows for cell in row)
 
@@ -73,3 +72,12 @@ def test_validate_credentials_rejects_bad_input(email, password):
 
 def test_validate_credentials_normalizes():
     assert validate_credentials("  Ana@Example.COM ", "  senha-forte-1 ") == ("ana@example.com", "senha-forte-1")
+
+
+def test_custom_errors_still_are_the_builtin_types_callers_catch():
+    import article_services
+    import config
+
+    assert issubclass(config.ConfigurationError, ValueError)
+    assert issubclass(article_services.SourcesUnavailableError, RuntimeError)
+    assert issubclass(article_services.UnrecognizedIdentifierError, ValueError)

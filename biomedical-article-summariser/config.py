@@ -6,6 +6,10 @@ import os
 from dataclasses import dataclass, field
 
 
+class ConfigurationError(ValueError):
+    """Variavel de ambiente ausente ou invalida (o servico nao deve subir assim)."""
+
+
 def _int_env(name: str, default: int, minimum: int = 0) -> int:
     raw = os.environ.get(name, "").strip()
     if not raw:
@@ -13,9 +17,9 @@ def _int_env(name: str, default: int, minimum: int = 0) -> int:
     try:
         value = int(raw)
     except ValueError as error:
-        raise ValueError(f"{name} deve ser um inteiro, recebido: {raw!r}") from error
+        raise ConfigurationError(f"{name} deve ser um inteiro, recebido: {raw!r}") from error
     if value < minimum:
-        raise ValueError(f"{name} deve ser >= {minimum}, recebido: {value}")
+        raise ConfigurationError(f"{name} deve ser >= {minimum}, recebido: {value}")
     return value
 
 
@@ -26,9 +30,9 @@ def _float_env(name: str, default: float, minimum: float, maximum: float) -> flo
     try:
         value = float(raw)
     except ValueError as error:
-        raise ValueError(f"{name} deve ser um numero, recebido: {raw!r}") from error
+        raise ConfigurationError(f"{name} deve ser um numero, recebido: {raw!r}") from error
     if not minimum <= value <= maximum:
-        raise ValueError(f"{name} deve estar entre {minimum} e {maximum}, recebido: {value}")
+        raise ConfigurationError(f"{name} deve estar entre {minimum} e {maximum}, recebido: {value}")
     return value
 
 
@@ -55,13 +59,13 @@ class Settings:
         production = os.environ.get("APP_ENV", "development").strip().lower() == "production"
         secret = os.environ.get("SESSION_SECRET", "").strip()
         if production and len(secret) < 32:
-            raise ValueError("SESSION_SECRET (>= 32 caracteres) e obrigatoria em producao.")
+            raise ConfigurationError("SESSION_SECRET (>= 32 caracteres) e obrigatoria em producao.")
         admin_token = os.environ.get("ADMIN_TOKEN", "").strip()
         if admin_token and len(admin_token) < 24:
-            raise ValueError("ADMIN_TOKEN deve ter ao menos 24 caracteres (ou ficar vazio para desativar).")
+            raise ConfigurationError("ADMIN_TOKEN deve ter ao menos 24 caracteres (ou ficar vazio para desativar).")
         cron_token = os.environ.get("ALERTS_CRON_TOKEN", "").strip()
         if cron_token and len(cron_token) < 24:
-            raise ValueError("ALERTS_CRON_TOKEN deve ter ao menos 24 caracteres (ou ficar vazio para desativar).")
+            raise ConfigurationError("ALERTS_CRON_TOKEN deve ter ao menos 24 caracteres (ou ficar vazio para desativar).")
         return cls(
             production=production,
             alerts_cron_token=cron_token,
