@@ -144,7 +144,7 @@ Cada fase vira um commit atômico; nenhuma muda comportamento, API nem banco. Te
 
 1. Tema padrão: seguir o sistema (recomendado) ou escuro sempre?
 2. Fonte: pilha do sistema (sem baixar nada) ou hospedar Inter?
-3. Nome e logotipo: manter "Biomedical Data Digger" com novo monograma, ou aproveitar para renomear?
+3. Nome e logotipo: manter "Lastro" com novo monograma, ou aproveitar para renomear?
 4. Faixa de números: vale aparecer só com dados que podemos garantir (itens acima)?
 5. Começo pela maquete estática (recomendado) ou direto para a fase 1?
 

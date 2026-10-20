@@ -1,6 +1,6 @@
-# Documentação do Biomedical Data Digger
+# Documentação do Lastro
 
-Biomedical Data Digger é uma plataforma web de pesquisa científica: busca em várias fontes abertas, avalia com critérios transparentes a confiabilidade de cada artigo, acompanha novidades por interesse e entrega o resultado em relatórios, listas e referências prontas para gerenciadores bibliográficos.
+Lastro é uma plataforma web de pesquisa científica: busca em várias fontes abertas, avalia com critérios transparentes a confiabilidade de cada artigo, acompanha novidades por interesse e entrega o resultado em relatórios, listas e referências prontas para gerenciadores bibliográficos.
 
 > **Confidencialidade.** O código-fonte é proprietário e privado (ver [Licença e confidencialidade](legal/licenca-e-confidencialidade.md)). Esta é a documentação **interna completa**: parte dela (produto, funcionalidades, guia do usuário) pode ser publicada; outra parte (módulos, segurança, runbook, pendências) deve ficar restrita. O que sai e como sai está em [Publicação da documentação](operacao/publicacao-da-documentacao.md).
 

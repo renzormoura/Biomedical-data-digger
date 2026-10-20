@@ -1,4 +1,4 @@
-# Biomedical Data Digger — aplicação
+# Lastro — aplicação
 
 Código da aplicação web (Python/FastAPI, front-end em JavaScript puro). A documentação completa está em [`../docs/`](../docs/README.md); este arquivo é só um mapa rápido.
 

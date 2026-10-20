@@ -22,7 +22,7 @@ from xmlutil import parse_xml, text_of
 API_URL = "https://export.arxiv.org/api/query"
 HTTP_TIMEOUT = 25
 MIN_INTERVAL = 3.0
-USER_AGENT = "BiomedicalDataDigger/1.0 (navegador de artigos)"
+USER_AGENT = "Lastro/1.0 (navegador de artigos)"
 NS = {
     "a": "http://www.w3.org/2005/Atom",
     "o": "http://a9.com/-/spec/opensearch/1.1/",

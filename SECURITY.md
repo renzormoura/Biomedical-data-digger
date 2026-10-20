@@ -1,7 +1,7 @@
 # Política de segurança
 
 ## Reportar uma vulnerabilidade
-Se você encontrou uma falha de segurança no Biomedical Data Digger, **não abra uma issue pública** nem divulgue detalhes. Envie um relato privado ao responsável pelo projeto (canal de contato de segurança: **[definir e-mail dedicado, por exemplo security@seu-dominio]**) com:
+Se você encontrou uma falha de segurança no Lastro, **não abra uma issue pública** nem divulgue detalhes. Envie um relato privado ao responsável pelo projeto (canal de contato de segurança: **[definir e-mail dedicado, por exemplo security@seu-dominio]**) com:
 
 - descrição do problema e impacto;
 - passos para reproduzir (rota, entrada, ambiente);

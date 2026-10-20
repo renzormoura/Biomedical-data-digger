@@ -13,7 +13,7 @@ from openalex_catalog import split_name
 
 API_URL = "https://doaj.org/api/search/articles/"
 HTTP_TIMEOUT = 20
-USER_AGENT = "BiomedicalDataDigger/1.0 (navegador de artigos)"
+USER_AGENT = "Lastro/1.0 (navegador de artigos)"
 _ES_SPECIAL = set('+-=&|!(){}[]^"~*?:\\/<>')
 MAX_KEYWORDS = 12
 

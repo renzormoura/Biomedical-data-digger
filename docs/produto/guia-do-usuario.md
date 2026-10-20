@@ -1,6 +1,6 @@
 # Guia do usuário
 
-Como usar o Biomedical Data Digger, da primeira busca ao relatório pronto. Não é preciso conta para buscar, ler e navegar pelo feed.
+Como usar o Lastro, da primeira busca ao relatório pronto. Não é preciso conta para buscar, ler e navegar pelo feed.
 
 ## 1. Começar: a página inicial
 Digite um tema, título, DOI ou palavra-chave e escolha a fonte (o padrão é **Todas as fontes**). Os exemplos abaixo do campo levam direto a uma busca. Se você tem conta e escolheu um perfil, aparecem atalhos "Para você".

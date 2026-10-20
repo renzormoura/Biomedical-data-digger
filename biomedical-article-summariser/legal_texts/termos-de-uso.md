@@ -1,6 +1,6 @@
 # Termos de Uso
 
-**Versão {{versao}}.** Estes Termos regem o uso do Biomedical Data Digger ("o Serviço"), oferecido por **{{controlador}}** ("nós"). Ao criar uma conta ou usar o Serviço, você concorda com eles. Se não concordar, não use o Serviço.
+**Versão {{versao}}.** Estes Termos regem o uso do Lastro ("o Serviço"), oferecido por **{{controlador}}** ("nós"). Ao criar uma conta ou usar o Serviço, você concorda com eles. Se não concordar, não use o Serviço.
 
 ## 1. O que é o Serviço
 O Serviço é uma plataforma de pesquisa científica: reúne fontes abertas de artigos numa só busca, mostra uma nota de confiabilidade com critérios abertos, acompanha novidades, e ajuda a organizar listas, relatórios e referências. Há também um Laboratório de IA opcional.

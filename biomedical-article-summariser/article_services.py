@@ -269,7 +269,7 @@ def fetch_by_doi(doi: str) -> Article:
     try:
         response = requests.get(
             f"https://api.crossref.org/works/{doi}", timeout=10,
-            headers={"User-Agent": "BiomedicalDataDigger/1.0"},
+            headers={"User-Agent": "Lastro/1.0"},
         )
         if response.status_code == 200:
             item = response.json().get("message", {})
@@ -307,7 +307,7 @@ def fetch_by_openalex(openalex_id: str) -> Article:
     try:
         response = requests.get(
             f"https://api.openalex.org/works/{openalex_id}", timeout=10,
-            headers={"User-Agent": "BiomedicalDataDigger/1.0"},
+            headers={"User-Agent": "Lastro/1.0"},
         )
         response.raise_for_status()
         data = response.json()
@@ -506,7 +506,7 @@ def _lookup_by_crossref_alternative_id(alternative_id: str) -> tuple[str, str, s
         response = requests.get(
             "https://api.crossref.org/works",
             params=params,
-            headers={"User-Agent": "BiomedicalDataDigger/1.0"},
+            headers={"User-Agent": "Lastro/1.0"},
             timeout=15,
         )
         response.raise_for_status()
@@ -814,7 +814,7 @@ def _search_openalex(keyword: str, page_size: int) -> list[dict]:
     response = requests.get(
         "https://api.openalex.org/works",
         params=params,
-        headers={"User-Agent": "BiomedicalDataDigger/1.0"},
+        headers={"User-Agent": "Lastro/1.0"},
         timeout=15,
     )
     response.raise_for_status()
@@ -844,7 +844,7 @@ def _search_crossref(keyword: str, page_size: int) -> list[dict]:
     response = requests.get(
         "https://api.crossref.org/works",
         params=params,
-        headers={"User-Agent": "BiomedicalDataDigger/1.0"},
+        headers={"User-Agent": "Lastro/1.0"},
         timeout=15,
     )
     response.raise_for_status()

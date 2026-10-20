@@ -1,4 +1,4 @@
-/* Biomedical Data Digger — frontend sem dependências.
+/* Lastro — frontend sem dependências.
    O HTML de resultado vem do servidor já sanitizado (markdown_lite escapa todo texto);
    todo o resto é montado com textContent/DOM, nunca com innerHTML de dados externos. */
 (() => {

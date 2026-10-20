@@ -28,7 +28,7 @@ DICIONARIO_URL = "https://dados.anvisa.gov.br/dados/Documentacao_e_Dicionario_de
 ALLOWED_HOST = "dados.anvisa.gov.br"
 MAX_BYTES = 150_000_000
 HTTP_TIMEOUT = 180
-USER_AGENT = "BiomedicalDataDigger/1.0 (dados abertos)"
+USER_AGENT = "Lastro/1.0 (dados abertos)"
 SNAPSHOT_PATH = Path(__file__).resolve().parent.parent / "dados_brasil" / "anvisa.json"
 REQUIRED = {"NOME_PRODUTO", "CATEGORIA_REGULATORIA", "DATA_VENCIMENTO_REGISTRO", "CLASSE_TERAPEUTICA", "EMPRESA_DETENTORA_REGISTRO",
             "SITUACAO_REGISTRO", "PRINCIPIO_ATIVO", "TIPO_PRODUTO"}

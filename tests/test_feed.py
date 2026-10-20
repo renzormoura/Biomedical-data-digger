@@ -160,7 +160,7 @@ def test_http_fetch_sends_a_polite_conditional_request(monkeypatch):
     monkeypatch.setattr(requests, "get", fake_get)
     result = http_fetch("https://exemplo.com/feed", etag='"old"', last_modified="Fri, 16 Oct 2026 10:00:00 GMT")
     assert result == FetchResult(200, b"<rss/>", '"abc"', "Sat, 17 Oct 2026 10:00:00 GMT")
-    assert "BiomedicalDataDigger" in seen["headers"]["User-Agent"] and seen["headers"]["If-None-Match"] == '"old"'
+    assert "Lastro" in seen["headers"]["User-Agent"] and seen["headers"]["If-None-Match"] == '"old"'
     assert seen["headers"]["If-Modified-Since"] == "Fri, 16 Oct 2026 10:00:00 GMT" and seen["timeout"] == feedmod.HTTP_TIMEOUT
 
 

@@ -44,7 +44,7 @@ PAGE_SIZE = 20
 PER_SOURCE_VIEW = 12  # no maximo isto de cada fonte na tela, para uma fonte que publica muito nao tomar o feed
 MAX_CANDIDATES = 800
 RECENT_TTL = 30.0  # segundos que a lista de candidatos fica em memoria
-USER_AGENT = "BiomedicalDataDigger/1.0 (agregador de manchetes academicas; +https://github.com/renzormoura/Biomedical-data-digger)"
+USER_AGENT = "Lastro/1.0 (agregador de manchetes academicas)"
 FUTURE_TOLERANCE = timedelta(days=2)
 
 _SCHEMA = (

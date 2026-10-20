@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 2026-10 — O produto passa a se chamar Lastro
+
+### Alterado
+- Nome visível ao usuário trocado de "Biomedical Data Digger" para **Lastro**: título das páginas, topo, rodapé, e-mails (confirmação, redefinição e ativação de assinatura), Termos de Uso, Política de Privacidade, relatórios e documentos baixados, janela de perfil e identificação (*User-Agent*) nas consultas a serviços externos. A documentação também usa o novo nome.
+- **Não mudaram** (nomes técnicos internos): nome do repositório, das pastas e dos módulos, o serviço e o endereço no Render (`biomedical-data-digger`), variáveis de ambiente e nomes de arquivos. Podem ser renomeados depois, junto com um domínio próprio.
+
 ## 2026-10 — Montagem 100% gratuita no Render
 
 ### Alterado

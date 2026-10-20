@@ -1,6 +1,6 @@
 # Política de Privacidade
 
-**Versão {{versao}}.** Esta Política explica como o Biomedical Data Digger ("o Serviço") trata dados pessoais, conforme a Lei Geral de Proteção de Dados (LGPD, Lei 13.709/2018). O controlador dos dados é **{{controlador}}**. Contato do encarregado e para solicitações: **{{contato}}**.
+**Versão {{versao}}.** Esta Política explica como o Lastro ("o Serviço") trata dados pessoais, conforme a Lei Geral de Proteção de Dados (LGPD, Lei 13.709/2018). O controlador dos dados é **{{controlador}}**. Contato do encarregado e para solicitações: **{{contato}}**.
 
 ## 1. Em resumo
 - Buscar, ler e navegar pelo feed **não exigem conta**.

@@ -21,7 +21,7 @@ Sem conta, o mesmo botão mostra "Entrar" e abre o diálogo de entrada; quem ace
 O produto é um só, com um núcleo para qualquer área. O perfil só **destaca** ferramentas e **liga ou desliga** o pacote de saúde (ANVISA, Conitec e Rename); nunca bloqueia uma função do núcleo.
 
 - **Perfis:** estudante, pesquisador, profissional de saúde ou farmácia, consultoria ou assessoria, outro uso. Só "profissional de saúde ou farmácia" liga o pacote por padrão; a caixa "Mostrar a situação de medicamentos no Brasil" muda isso à parte.
-- **Primeira entrada:** quem tem conta e ainda não escolheu vê a pergunta "Como você vai usar o Biomedical Data Digger?", com "Agora não" (guardado em `localStorage`).
+- **Primeira entrada:** quem tem conta e ainda não escolheu vê a pergunta "Como você vai usar o Lastro?", com "Agora não" (guardado em `localStorage`).
 - **Sem perfil ou sem conta, o pacote fica visível**, para não esconder o diferencial de quem ainda não disse o que faz.
 
 | | Pacote ligado | Pacote desligado |

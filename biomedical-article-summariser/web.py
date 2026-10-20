@@ -97,7 +97,7 @@ def create_app(
     flags: AccountFlags | None = None,
     admin: AdminService | None = None,
 ) -> FastAPI:
-    app = FastAPI(title="Biomedical Data Digger", docs_url=None, redoc_url=None, openapi_url=None)
+    app = FastAPI(title="Lastro", docs_url=None, redoc_url=None, openapi_url=None)
     signer = SessionSigner(settings.session_secret or SessionSigner.generate_secret())
     auth_limiter = SlidingWindowLimiter(settings.login_attempts_per_minute, window=60.0)
     templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))

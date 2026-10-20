@@ -1,7 +1,7 @@
 # Visão geral do produto
 
 ## O que é
-Biomedical Data Digger é uma plataforma web que ajuda pessoas a **encontrar, entender, acompanhar e entregar** pesquisa científica. Ela reúne fontes abertas numa única busca, mostra com critérios abertos o quanto cada artigo merece confiança, avisa quando sai algo novo sobre os temas de interesse e transforma as leituras em listas, relatórios e referências.
+Lastro é uma plataforma web que ajuda pessoas a **encontrar, entender, acompanhar e entregar** pesquisa científica. Ela reúne fontes abertas numa única busca, mostra com critérios abertos o quanto cada artigo merece confiança, avisa quando sai algo novo sobre os temas de interesse e transforma as leituras em listas, relatórios e referências.
 
 O núcleo serve **qualquer área do conhecimento**. Para quem trabalha com saúde no Brasil, há um **pacote opcional** que cruza os medicamentos citados nos artigos com dados oficiais brasileiros (ANVISA, Conitec e Rename).
 
