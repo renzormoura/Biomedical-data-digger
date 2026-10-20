@@ -6,6 +6,7 @@
 - **Fase 0:** teste de contrato (`tests/test_api_contract.py` + `tests/golden/api_contract.json`) que percorre as 96 chamadas de todas as rotas da API e compara com um retrato salvo; falha se uma rota nova ficar sem cobertura. Para regravar de propósito: `UPDATE_GOLDEN=1 pytest tests/test_api_contract.py`.
 
 ### Alterado
+- **CI:** novo job `postgres` roda a suíte inteira contra PostgreSQL 16 em cada push, para pegar diferenças de SQL entre SQLite e produção.
 - **Fase 3:** `browse_api.py` (734 linhas numa só função) e `web.py` (345) foram divididos no pacote `routes/` (um módulo por domínio, `ApiContext` com as dependências, modelos e montagem de JSON separados, endurecimento HTTP e Laboratório em módulos próprios). O texto das rotas foi movido sem alterar a lógica; o teste de contrato confirma respostas idênticas. Não foram adicionados modelos de resposta Pydantic de propósito: eles poderiam alterar o JSON.
 - **Fase 2:** `timeutil.py` (relógio e formato ISO únicos, no lugar de 8 cópias); `AccountStore` agora usa `db.Database` como os demais armazéns (um só caminho de acesso ao banco); exceções com nome próprio (`ConfigurationError`, `SourcesUnavailableError`, `UnrecognizedIdentifierError`), todas subclasses dos tipos que o código já capturava.
 - **Fase 1:** `account_store`, `article_services`, `pages`, `prompt_builders`, `prompt_specs`, `contexto_brasil` e `biomedical_data_digger` entram na verificação de tipos (mypy: 62 arquivos). Decoradores e funções ganharam anotações; nenhuma lógica mudou.

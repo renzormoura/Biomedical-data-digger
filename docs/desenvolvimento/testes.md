@@ -65,9 +65,9 @@ pytest -m live                           # avaliação com modelo real (precisa 
 | Mudança de segurança | Caso de abuso reproduzido como teste |
 
 ## CI
-`.github/workflows/ci.yml` roda em cada *push* na `main` e em *pull requests*, com Python 3.10 e 3.11: `ruff check`, `mypy`, `pytest --cov` (falha abaixo de 80%), `node --test` e auditoria de dependências (`pip-audit`, não bloqueante).
+`.github/workflows/ci.yml` roda em cada *push* na `main` e em *pull requests*. O job `quality` usa Python 3.10 e 3.11 e o job `postgres` roda a suíte inteira contra PostgreSQL 16 (serviço do próprio CI). O `quality` faz: `ruff check`, `mypy`, `pytest --cov` (falha abaixo de 80%), `node --test` e auditoria de dependências (`pip-audit`, não bloqueante).
 
 ## Lacunas conhecidas
-- O CI ainda não roda a suíte contra PostgreSQL (só localmente, com `TEST_POSTGRES_URL`).
+- Sem teste de carga e sem teste de restauração de backup.
 - Sem teste de carga e sem teste visual automatizado.
 - A fidelidade da IA é medida só manualmente com `evals/`.
