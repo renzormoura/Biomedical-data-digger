@@ -142,7 +142,8 @@ _EMAILS = iter(range(10_000))
 
 def login(client, email=None):
     email = email or f"ana{next(_EMAILS)}@exemplo.com"  # o cadastro de contas e compartilhado entre os testes do processo
-    assert client.post("/api/auth/register", json={"email": email, "password": "senha-de-teste-local-7"}).status_code == 200
+    response = client.post("/api/auth/register", json={"email": email, "password": "senha-de-teste-local-7"})
+    assert response.status_code == 200, response.text
 
 
 def test_brief_returns_the_article_card_with_reliability(client):

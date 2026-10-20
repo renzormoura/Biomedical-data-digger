@@ -12,7 +12,7 @@ Estado do projeto para quem vai continuar. Atualizado em **19/10/2026**. O panor
 | Item | Situação | O que falta |
 |---|---|---|
 | Rotina agendada (alertas, retratações, feed) | Fluxo e rota prontos | Definir `ALERTS_CRON_TOKEN` no Render e os segredos `APP_URL` e `ALERTS_CRON_TOKEN` no GitHub |
-| PostgreSQL | Contas validadas | Validar todas as tabelas novas (biblioteca, relatórios, alertas, notificações, feed, perfil) em banco real |
+| PostgreSQL | Suíte completa passa em PostgreSQL 16 local (`TEST_POSTGRES_URL`, ver [Testes](../desenvolvimento/testes.md)) | Apontar `DATABASE_URL` de produção, conferir backups e restauração |
 | Dados do Brasil | Instantâneos de 17/10/2026 | Revisão por farmacêutico/médico; resolver a licença da Rename |
 | Feed | 51 fontes verificadas em 18/10/2026 | Revisar os termos de cada fonte |
 | Validação com usuários | Roteiro pronto | Executar |

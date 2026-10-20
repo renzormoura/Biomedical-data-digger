@@ -142,6 +142,7 @@ def test_retraction_status_roundtrip_and_chunks(parts):
     assert parts.store.retraction_status(refs)["r449"][0] is True  # passa por varios blocos
 
 
+@pytest.mark.sqlite_only  # "isolado" = outro arquivo SQLite; no PostgreSQL todos os armazens dividem o mesmo schema
 def test_due_users_needs_the_accounts_table_and_orders_oldest_first(parts):
     accounts = AccountStore()
     for email in ("a@x.com", "b@x.com", "c@x.com"):

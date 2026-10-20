@@ -210,7 +210,9 @@ class AccountStore:
         if not row:
             return ""
         value = row[0]
-        return value.isoformat(timespec="seconds") if isinstance(value, datetime) else str(value)[:19]
+        if isinstance(value, datetime):  # PostgreSQL devolve com fuso; normaliza para UTC no mesmo formato do SQLite
+            return (value.astimezone(timezone.utc) if value.tzinfo else value).strftime("%Y-%m-%dT%H:%M:%S")
+        return str(value)[:19]
 
     def change_password(self, email: str, new_password: str) -> bool:
         salt = secrets.token_bytes(32)

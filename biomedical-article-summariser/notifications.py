@@ -206,11 +206,12 @@ class NotificationStore:
             found.update({ref: (bool(retracted), checked) for ref, retracted, checked in rows})
         return found
 
-    def set_retraction(self, ref: str, retracted: bool) -> None:
+    def set_retraction(self, ref: str, retracted: bool, checked_at: datetime | None = None) -> None:
+        """Grava o estado de retratacao; `checked_at` e o relogio do servico (a hora da conferencia), padrao: agora."""
         self._db.execute(
             "INSERT INTO retraction_status (ref, retracted, checked_at) VALUES (?, ?, ?) "
             "ON CONFLICT (ref) DO UPDATE SET retracted = excluded.retracted, checked_at = excluded.checked_at",
-            (ref, 1 if retracted else 0, _iso(_now())),
+            (ref, 1 if retracted else 0, _iso(checked_at or _now())),
         )
 
     # ------------------------------------------------------------------ regulatorio
@@ -340,7 +341,7 @@ class NotificationService:
             except DiggerError:
                 continue
             if work is not None:
-                self._store.set_retraction(ref, work.retracted)
+                self._store.set_retraction(ref, work.retracted, now)
                 checked += 1
         return checked
 
@@ -348,7 +349,7 @@ class NotificationService:
         watched = self._watched(user)
         for ref, (work, _places) in watched.items():
             if work.retracted:  # ja estava marcado quando foi guardado
-                self._store.set_retraction(ref, True)
+                self._store.set_retraction(ref, True, self._clock())
         self.refresh_retractions(set(watched), budget)
         created = 0
         for ref, (retracted, _checked) in self._store.retraction_status(sorted(watched)).items():

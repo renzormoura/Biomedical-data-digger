@@ -6,7 +6,8 @@
 - **Sem migrações versionadas.** Cada armazém cria suas tabelas com `CREATE TABLE IF NOT EXISTS` em `initialize()`, na subida. Alterações precisam ser **aditivas**; mudanças destrutivas exigiriam um mecanismo de migração (pendência).
 - **Chave de dono:** todas as tabelas pessoais usam o **e-mail** (minúsculo) como identificador da conta. Toda consulta filtra pelo dono.
 - Em produção sem `DATABASE_URL` o serviço **não inicia**, para não gravar contas no disco efêmero.
-- Estado: o caminho PostgreSQL das tabelas criadas após a de contas **ainda não foi validado em um banco real** (ver [Roadmap](../roadmap/roadmap.md)).
+- **Validação em PostgreSQL:** em 20/10/2026 a suíte inteira (1.469 testes) passou contra PostgreSQL 16 real, com um schema por teste (ver [Testes](../desenvolvimento/testes.md#rodar-a-suíte-contra-postgresql)). Falta validar no banco **de produção** (Neon/Render) e fazer um teste de carga/restauração.
+- **Diferenças já tratadas:** `users.created_at` é `TIMESTAMPTZ` no PostgreSQL e texto no SQLite; `AccountStore.created_at` normaliza ambos para UTC `AAAA-MM-DDTHH:MM:SS`. Consultas sem `ORDER BY` não têm ordem garantida no PostgreSQL: sempre ordene.
 
 ## Dicionário de tabelas
 

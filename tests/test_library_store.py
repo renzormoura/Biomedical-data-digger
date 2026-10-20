@@ -41,6 +41,7 @@ def test_database_translates_placeholders_for_postgres_only():
     assert Transaction(None, postgres=False)._sql("SELECT ? , ?") == "SELECT ? , ?"
 
 
+@pytest.mark.sqlite_only
 def test_database_picks_backend_from_url_and_normalizes_postgres_scheme():
     assert Database(database_url="", sqlite_path="x.db").uses_postgres is False
     pg = Database(database_url="postgres://u:p@host/db", sqlite_path="x.db")

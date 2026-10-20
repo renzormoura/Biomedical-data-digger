@@ -23,7 +23,7 @@ Itens que **bloqueiam ou condicionam a cobrança**. Ordem sugerida:
 | # | Item | Por quê | Referência |
 |---:|---|---|---|
 | 1 | Tornar o repositório privado e publicar só a documentação aprovada | O código é ativo comercial | [Publicação da documentação](../operacao/publicacao-da-documentacao.md) |
-| 2 | Validar o PostgreSQL (Neon/Render) para **todas** as tabelas | Hoje só SQLite foi exercitado nas tabelas novas | [Modelo de dados](../arquitetura/dados.md) |
+| 2 | Validar o PostgreSQL **de produção** (Neon/Render) e testar backup/restauração | A suíte já passa em PostgreSQL 16 local (20/10/2026); falta o banco real | [Modelo de dados](../arquitetura/dados.md) |
 | 3 | Ativar a rotina agendada (`ALERTS_CRON_TOKEN` no Render e segredos no GitHub) | Sem ela, avisos e feed só atualizam com visitas | [Rotinas agendadas](../operacao/rotinas-agendadas.md) |
 | 4 | Resolver a licença da **Rename** (CC BY-NC-SA 4.0) | Uso não comercial | [Licenças e termos](../legal/licencas-e-termos.md) |
 | 5 | Revisar os termos de cada fonte do feed e de cada API de busca | Uso comercial e agregação | idem |

@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 2026-10 — Suíte validada em PostgreSQL
+
+### Adicionado
+- Os testes podem rodar contra PostgreSQL de verdade (`TEST_POSTGRES_URL`, um schema por teste), definido em `tests/conftest.py`; marcador `sqlite_only` para testes de comportamento exclusivo do SQLite. Resultado em 20/10/2026: 1.469 passaram e 2 foram pulados, em PostgreSQL 16.
+
+### Corrigido
+- `AccountStore.created_at` devolvia a data com fuso (25 caracteres) no PostgreSQL e sem fuso no SQLite; agora é sempre UTC no formato `AAAA-MM-DDTHH:MM:SS` (afetava o "membro desde" do Perfil só em produção).
+- A reconferência semanal de retratações gravava a hora real da máquina em vez da hora do serviço (`set_retraction`); isso fazia um teste falhar quando a data real passava da data fixa dele e podia atrasar reconferências.
+
 ## 2026-10 — Documentação profissional completa
 
 ### Adicionado
