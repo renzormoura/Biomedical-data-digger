@@ -339,6 +339,17 @@ def _mix_sources(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [row for _, row in banded]
 
 
+def item_areas(source: Source, topics: Sequence[str]) -> tuple[str, ...]:
+    """Areas de um item: primeiro as dos temas que ele proprio cita (evidencia do item), depois a area principal da fonte.
+
+    Das areas da fonte, so a primeira vale para todos os itens; as demais so entram quando o titulo ou o trecho citam
+    um tema delas. Fontes gerais (Phys.org, MIT News, Nature...) nao tem area: o item so entra num filtro de area se
+    citar um tema dela. As areas sao calculadas na leitura, entao corrigir a lista de areas de uma fonte vale tambem
+    para os itens ja guardados.
+    """
+    return tuple(dict.fromkeys([*(key.partition("/")[0] for key in topics), *source.areas[:1]]))
+
+
 class FeedService:
     def __init__(self, store: FeedStore, fetcher: Fetcher = http_fetch, clock: Callable[[], datetime] = _now) -> None:
         self._store = store
@@ -354,8 +365,7 @@ class FeedService:
     def classify(self, entry: Entry, source: Source) -> tuple[tuple[str, ...], tuple[str, ...]]:
         """(temas citados no titulo e no trecho, areas do item): as areas juntam as da fonte e as dos temas citados."""
         keys = tuple(interests.topic_keys_in(f"{entry.title}. {entry.snippet}"))
-        areas = tuple(dict.fromkeys([*source.areas, *(key.partition("/")[0] for key in keys)]))
-        return keys, areas
+        return keys, item_areas(source, keys)
 
     def refresh_source(self, source: Source) -> int:
         """Busca uma fonte e guarda os itens recentes; devolve quantos itens ela tem agora. Nunca levanta por falha da fonte."""
@@ -438,7 +448,8 @@ class FeedService:
                 continue
             if language and source.language != language:
                 continue
-            if area and area not in item.areas:
+            areas = item_areas(source, item.topics)
+            if area and area not in areas:
                 continue
             matched: list[str] = []
             if personalized:
@@ -451,7 +462,7 @@ class FeedService:
                 continue
             rows.append({
                 "id": item.id, "kind": "artigo" if is_article else "noticia", "title": item.title, "snippet": item.snippet, "url": item.url,
-                "publishedAt": item.published_at, "dateKnown": item.date_known, "areas": [interests.area_label(a) for a in item.areas], "areaKeys": list(item.areas),
+                "publishedAt": item.published_at, "dateKnown": item.date_known, "areas": [interests.area_label(a) for a in areas], "areaKeys": list(areas),
                 "matched": list(dict.fromkeys(matched)),
                 "source": {"id": source.id, "name": source.name, "tier": source.tier, "tierLabel": TIERS[source.tier][0], "language": source.language, "site": source.site},
             })

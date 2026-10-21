@@ -11,6 +11,7 @@
 - **Revisão dos prompts do Laboratório de IA** (detalhes em [Análises clínicas](../features/analises-clinicas.md)): prompt de sistema sem a sobra que forçava "resumo em bullets" em toda análise, com os marcadores reais, regra de idioma e "omita campos vazios"; auditoria com prompt de sistema próprio e com a resposta auditada tratada como texto não confiável (e sem corte em 12 mil caracteres); personalização restrita a estilo; pedidos que o resumo não sustenta retirados dos prompts de estatística, PICO, aplicabilidade ao Brasil, resumo para leigos, populações especiais e medicamentos; "exatamente N" virou "até N". **Ainda não validado com o modelo real nem por profissional de saúde.**
 
 ### Corrigido
+- **Filtro de área do feed:** "Engenharias", "Medicina" etc. traziam itens de outras áreas, porque fontes gerais (Phys.org, MIT News) contavam todos os itens em todas as suas áreas. Agora o item entra numa área pelo que ele próprio cita, e a fonte só vale pela área principal; a capa do cartão acompanha o filtro.
 - O teste de contrato da API dependia da Europe PMC (citação e extração faziam chamada de rede): falhava de forma intermitente quando a rede estava lenta e o snapshot trazia uma contagem de citações que muda com o tempo. Agora usa respostas fixas e roda sem rede.
 
 ### Adicionado

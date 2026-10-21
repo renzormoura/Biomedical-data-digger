@@ -67,12 +67,12 @@ SOURCES: tuple[Source, ...] = (
     Source("elife", "eLife", "https://elifesciences.org/rss/recent.xml", "https://elifesciences.org/", "en", "revista", ("biologia", "medicina", "psicologia")),
     Source("biorxiv", "bioRxiv (preprints)", "https://connect.biorxiv.org/biorxiv_xml.php?subject=all", "https://www.biorxiv.org/", "en", "preprint", ("biologia",)),
     # ---- engenharia, computacao e exatas
-    Source("mit-news", "MIT News", "https://news.mit.edu/rss/feed", "https://news.mit.edu/", "en", "instituicao", ("engenharia", "computacao", "exatas", "biologia")),
+    Source("mit-news", "MIT News", "https://news.mit.edu/rss/feed", "https://news.mit.edu/", "en", "instituicao", ()),
     Source("ieee-spectrum", "IEEE Spectrum", "https://spectrum.ieee.org/feeds/feed.rss", "https://spectrum.ieee.org/", "en", "revista", ("engenharia", "computacao")),
     Source("techxplore", "Tech Xplore", "https://techxplore.com/rss-feed/", "https://techxplore.com/", "en", "divulgacao", ("engenharia", "computacao")),
     Source("sciencedaily-computacao", "ScienceDaily: Computação e Matemática", "https://www.sciencedaily.com/rss/computers_math.xml", "https://www.sciencedaily.com/news/computers_math/", "en", "divulgacao", ("computacao", "exatas")),
     Source("sciencedaily-materia", "ScienceDaily: Matéria e Energia", "https://www.sciencedaily.com/rss/matter_energy.xml", "https://www.sciencedaily.com/news/matter_energy/", "en", "divulgacao", ("exatas", "engenharia")),
-    Source("phys-org", "Phys.org", "https://phys.org/rss-feed/", "https://phys.org/", "en", "divulgacao", ("exatas", "engenharia")),
+    Source("phys-org", "Phys.org", "https://phys.org/rss-feed/", "https://phys.org/", "en", "divulgacao", ()),
     Source("quanta", "Quanta Magazine", "https://api.quantamagazine.org/feed/", "https://www.quantamagazine.org/", "en", "divulgacao", ("exatas", "computacao")),
     # ---- ambiente e terra
     Source("sciencedaily-ambiente", "ScienceDaily: Meio ambiente", "https://www.sciencedaily.com/rss/earth_climate.xml", "https://www.sciencedaily.com/news/earth_climate/", "en", "divulgacao", ("ambiente", "agrarias")),

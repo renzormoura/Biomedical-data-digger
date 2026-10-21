@@ -2004,10 +2004,7 @@
     },
     {
      "areas": [
-      "Engenharias e tecnologia",
-      "Computação e IA",
-      "Física, química e matemática",
-      "Biologia e biotecnologia"
+      "Qualquer área"
      ],
      "failing": false,
      "id": "mit-news",
@@ -2076,8 +2073,7 @@
     },
     {
      "areas": [
-      "Física, química e matemática",
-      "Engenharias e tecnologia"
+      "Qualquer área"
      ],
      "failing": false,
      "id": "phys-org",

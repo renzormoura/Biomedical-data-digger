@@ -1694,9 +1694,10 @@
   const hueOf = (text) => { let sum = 0; for (const char of String(text)) sum = (sum * 31 + char.codePointAt(0)) % 360; return sum; };
   const initials = (name) => String(name).split(/[\s.\-/]+/).filter(Boolean).slice(0, 2).map((part) => part[0].toUpperCase()).join("");
 
-  function feedCard(item, { featured = false } = {}) {
+  function feedCard(item, { featured = false, filterArea = "" } = {}) {
     const internal = item.internal === true;
-    const area = Lib.feedArea(item.areaKeys);
+    // com um filtro de area ativo, a capa usa a area filtrada (nao a primeira da lista), para o cartao combinar com o filtro
+    const area = Lib.feedArea(filterArea && (item.areaKeys || []).includes(filterArea) ? [filterArea] : item.areaKeys);
     const hours = item.dateKnown ? (Date.now() - new Date(item.publishedAt).getTime()) / 3600000 : Infinity;
     const attrs = internal ? { href: item.url } : { href: item.url, target: "_blank", rel: "noopener noreferrer nofollow" };
     const link = h("a", attrs, item.title);
@@ -1771,7 +1772,7 @@
       hasInterests = data.hasInterests;
       paintControls();
       if (reset) mount(list);
-      list.append(...data.items.map((item, index) => feedCard(item, { featured: reset && index === 0 })));
+      list.append(...data.items.map((item, index) => feedCard(item, { featured: reset && index === 0, filterArea: state.area })));
       if (!list.children.length) {
         if (data.refreshing && retries < FEED_MAX_RETRIES) {
           mount(list, loading("Buscando as primeiras novidades nas fontes (pode levar cerca de um minuto)…"));

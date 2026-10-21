@@ -543,3 +543,28 @@ def test_double_encoded_entities_in_titles_and_snippets_are_decoded():
             b'<link>https://exemplo.com/a</link><description>Texto &amp;#8220;citado&amp;#8221;</description></item></channel></rss>')
     entry = parse_feed(feed)[0]
     assert entry.title == "Amid “twin crisis” & more" and entry.snippet == "Texto “citado”"
+
+
+def test_item_areas_trust_the_items_own_topics_before_the_source():
+    assert feedmod.item_areas(SOURCE_BY_ID["nature"], ()) == ()  # fonte geral e item sem tema: sem area
+    assert feedmod.item_areas(SOURCE_BY_ID["nature"], ("engenharia/robotica",)) == ("engenharia",)
+    assert feedmod.item_areas(SOURCE_BY_ID["techxplore"], ()) == ("engenharia",)  # so a area principal da fonte vale sempre
+    assert feedmod.item_areas(SOURCE_BY_ID["techxplore"], ("computacao",)) == ("computacao", "engenharia")  # tema primeiro
+    assert feedmod.item_areas(SOURCE_BY_ID["fiocruz"], ("medicina", "medicina/pediatria")) == ("medicina",)
+
+
+def test_area_filter_ignores_stale_stored_areas_and_general_sources(store):
+    store.upsert([
+        # guardado antes da correcao: dizia "engenharia", mas a fonte e geral e o texto nao cita tema nenhum
+        make_item("1", NOW - timedelta(hours=1), "phys-org", title="Candida auris e uma ameaca", topics=(), areas=("exatas", "engenharia")),
+        make_item("2", NOW - timedelta(hours=2), "phys-org", title="Novo robo aprende a andar", topics=("engenharia/robotica",), areas=("exatas", "engenharia")),
+        make_item("3", NOW - timedelta(hours=3), "techxplore", title="Bateria de sodio", topics=(), areas=("engenharia", "computacao")),
+        make_item("4", NOW - timedelta(hours=4), "techxplore", title="Chip de IA", topics=("computacao",), areas=("engenharia", "computacao")),
+    ], NOW.isoformat())
+    service = service_with(store, Fetcher())
+    assert [i["id"] for i in service.page(prefs=None, mode="tudo", area="engenharia").items] == ["2", "3", "4"]
+    assert [i["id"] for i in service.page(prefs=None, mode="tudo", area="computacao").items] == ["4"]  # computacao so por evidencia
+    assert [i["id"] for i in service.page(prefs=None, mode="tudo", area="exatas").items] == []
+    todas = service.page(prefs=None, mode="tudo")
+    assert [i["id"] for i in todas.items] == ["1", "2", "3", "4"] and todas.items[0]["areaKeys"] == []  # sem filtro, nada some
+    assert todas.items[3]["areaKeys"] == ["computacao", "engenharia"]
