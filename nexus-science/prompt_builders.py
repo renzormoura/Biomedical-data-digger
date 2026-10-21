@@ -120,7 +120,7 @@ Abstract:
 
 **AVISO DE USO CLÍNICO:** As informações abaixo são extraídas exclusivamente do artigo fornecido. Não substitui bulas, diretrizes institucionais ou julgamento clínico individualizado.
 
-**FORMATO OBRIGATÓRIO:** Use exclusivamente títulos em negrito e listas com marcadores (bullet points). Não use tabelas, colunas ou qualquer formatação tabular. O texto deve ser legível em telas de celular.
+**FORMATO OBRIGATÓRIO:** Títulos em negrito e bullet points, sem tabelas, legível no celular.
 
 **Regra de economia:** inclua só os campos que o resumo informa; omita os demais, sem listar cada campo ausente. Se uma seção inteira não tiver informação, escreva uma única linha "Não descrito no resumo fornecido". Copie doses, unidades, vias, diluições e tempos exatamente como aparecem, sem converter nem calcular (por exemplo, não transforme mg/kg em mg totais).
 
@@ -194,7 +194,7 @@ Título: {article_title}
 Abstract:
 {abstract_text}
 
-**FORMATO OBRIGATÓRIO:** Use exclusivamente títulos em negrito e listas com marcadores (bullet points). Não use tabelas. O texto deve ser legível em telas de celular.
+**FORMATO OBRIGATÓRIO:** Títulos em negrito e bullet points, sem tabelas, legível no celular.
 
 Estruture a análise com os seguintes tópicos:
 
@@ -250,7 +250,7 @@ Título: {article_title}
 Abstract:
 {abstract_text}
 
-**FORMATO OBRIGATÓRIO:** Use exclusivamente títulos em negrito e listas com marcadores (bullet points). Não use tabelas. O texto deve ser legível em telas de celular.
+**FORMATO OBRIGATÓRIO:** Títulos em negrito e bullet points, sem tabelas, legível no celular.
 
 Estruture a resposta com os seguintes tópicos:
 
@@ -301,7 +301,7 @@ Título: {article_title}
 Abstract:
 {abstract_text}
 
-**FORMATO OBRIGATÓRIO:** Use exclusivamente títulos em negrito e listas com marcadores (bullet points). Não use tabelas. O texto deve ser legível em telas de celular.
+**FORMATO OBRIGATÓRIO:** Títulos em negrito e bullet points, sem tabelas, legível no celular.
 
 Estruture a resposta com os seguintes tópicos:
 
@@ -357,7 +357,7 @@ Abstract:
 
 **AVISO:** As informações abaixo são extraídas exclusivamente do artigo fornecido. Não substitui bulas, diretrizes institucionais ou julgamento clínico individualizado.
 
-**FORMATO OBRIGATÓRIO:** Use exclusivamente títulos em negrito e listas com marcadores (bullet points). Não use tabelas. Seja direto e objetivo — este material será consultado em situações de urgência.
+**FORMATO OBRIGATÓRIO:** Títulos em negrito e bullet points, sem tabelas. Seja direto e objetivo: material de consulta em urgência.
 
 Estruture a resposta com os seguintes tópicos:
 
@@ -473,7 +473,7 @@ Abstract:
 - Diferencie dados do artigo, fatos externos e inferências. Toda inferência deve ser explicitamente marcada como **[INFERÊNCIA]** e apoiada pelos dados apresentados.
 - Considere a data da fonte e sinalize quando a informação puder ter mudado. Não transforme a análise em recomendação clínica individual.
 
-**FORMATO OBRIGATÓRIO:** Use exclusivamente títulos em negrito e listas com marcadores (bullet points). Não use tabelas. O texto deve ser legível em telas de celular.
+**FORMATO OBRIGATÓRIO:** Títulos em negrito e bullet points, sem tabelas, legível no celular.
 
 Estruture a análise com os seguintes tópicos:
 
