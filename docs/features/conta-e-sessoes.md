@@ -18,7 +18,7 @@ Permitir que a pessoa use o produto sem conta (buscar, ler, navegar pelo feed) e
 Guardadas como **PBKDF2-HMAC-SHA256** com **600.000 iterações** e sal aleatório de 32 bytes por conta. Nunca se guarda a senha, e o hash nunca sai da API (nem na exportação de dados).
 
 ### Sessão (`sessions.py`)
-- Cookie `bdd_session` com `usuario.expiração.assinatura`. A assinatura é **HMAC-SHA256** com `SESSION_SECRET`; o cookie não carrega dado sensível além do e-mail.
+- Cookie `nexus_session` com `usuario.expiração.assinatura`. A assinatura é **HMAC-SHA256** com `SESSION_SECRET`; o cookie não carrega dado sensível além do e-mail.
 - Duração de **7 dias**. Atributos: `HttpOnly`, `SameSite=Lax`, `Secure` em produção, `Path=/`.
 - O servidor **não guarda estado de sessão**. Para que um cookie de conta excluída pare de valer, ele confere a existência da conta com um **cache curto de 30 s**.
 - Consequência conhecida: **trocar a senha não encerra sessões de outros aparelhos** até o cookie expirar.

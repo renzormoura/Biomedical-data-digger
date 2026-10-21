@@ -11,7 +11,7 @@ import downloads
 import search_overview
 from brasil import conitec, consulta
 from catalog import SearchQuery, Work
-from domain import DiggerError, NotFoundError, SourceUnavailableError
+from domain import NexusError, NotFoundError, SourceUnavailableError
 from exports import EXPORT_FORMATS
 from routes.context import ApiContext
 from routes.payloads import (
@@ -128,7 +128,7 @@ def register_discover_routes(app: FastAPI, ctx: ApiContext) -> None:
     ) -> Response:
         """Referencia de UM artigo para importar no Zotero, Mendeley ou EndNote. Publica: nao exige conta."""
         if format not in EXPORT_FORMATS or format in ("csv", "json", "resumos"):
-            raise DiggerError("Formato de referência inválido.")
+            raise NexusError("Formato de referência inválido.")
         work = discovery.work(ref, client_id=identity(request))
         filename, media_type, build = EXPORT_FORMATS[format]
         return Response(
@@ -219,7 +219,7 @@ def register_discover_routes(app: FastAPI, ctx: ApiContext) -> None:
         client = identity(request)
         valid = downloads.CITATION_FORMATS if kind == "citation" else downloads.KIND_FORMATS.get(kind)
         if valid is None or format not in valid:
-            raise DiggerError("Tipo ou formato de download inválido.")
+            raise NexusError("Tipo ou formato de download inválido.")
         if kind == "citation":
             work = discovery.work(ref, client_id=client)
             ext = EXPORT_FORMATS[format][0].rsplit(".", 1)[-1]

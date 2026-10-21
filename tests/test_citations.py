@@ -5,7 +5,7 @@ import requests
 
 import citations
 from citations import Author, CitationMetadata
-from domain import DiggerError
+from domain import NexusError
 from prompt_builders import SYS_PROMPT  # noqa: F401  (garante import do pacote)
 
 META = CitationMetadata(
@@ -72,7 +72,7 @@ def test_title_html_and_trailing_period_are_cleaned():
 
 
 def test_unknown_style_is_a_domain_error():
-    with pytest.raises(DiggerError):
+    with pytest.raises(NexusError):
         citations.format_citation(META, "Chicago")
 
 
@@ -134,20 +134,20 @@ def test_fetch_by_pmcid_queries_pmcid_field(mock_get):
 @patch("citations.requests.get")
 def test_fetch_not_found_and_network_errors(mock_get):
     mock_get.return_value = _json({"resultList": {"result": []}})
-    with pytest.raises(DiggerError, match="não encontrado"):
+    with pytest.raises(NexusError, match="não encontrado"):
         citations.fetch_citation_metadata("33984217")
     mock_get.side_effect = requests.ConnectionError("down")
-    with pytest.raises(DiggerError, match="metadados"):
+    with pytest.raises(NexusError, match="metadados"):
         citations.fetch_citation_metadata("10.1000/abc")
 
 
 def test_unsupported_input_asks_for_doi_pmid():
-    with pytest.raises(DiggerError, match="DOI, PMID ou PMCID"):
+    with pytest.raises(NexusError, match="DOI, PMID ou PMCID"):
         citations.fetch_citation_metadata("2301.00001")
 
 
 @patch("citations.requests.get")
 def test_record_without_title_is_rejected(mock_get):
     mock_get.return_value = _json({"message": {"title": []}})
-    with pytest.raises(DiggerError, match="não tem título"):
+    with pytest.raises(NexusError, match="não tem título"):
         citations.fetch_citation_metadata("10.1000/abc")

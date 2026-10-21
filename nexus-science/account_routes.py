@@ -21,7 +21,7 @@ from account_store import AccountStore, AccountStoreError, InvalidCredentialsFor
 from account_tokens import AccountTokens
 from alerts import AlertStore
 from billing import BillingStore
-from domain import AuthRequiredError, DiggerError
+from domain import AuthRequiredError, NexusError
 from library_store import LibraryStore
 from notifications import NotificationStore
 from profiles import ProfileStore
@@ -71,7 +71,7 @@ def make_account_purger(
         try:
             account_store_factory().delete_user(user)
         except AccountStoreError as error:
-            raise DiggerError(str(error)) from error
+            raise NexusError(str(error)) from error
 
     return purge
 
@@ -113,9 +113,9 @@ def register_account_routes(
         try:
             ok = account_store_factory().authenticate(user, password.strip())
         except AccountStoreError as error:
-            raise DiggerError(str(error)) from error
+            raise NexusError(str(error)) from error
         if not ok:
-            raise DiggerError("Senha incorreta.")
+            raise NexusError("Senha incorreta.")
 
     @app.get("/api/account")
     def account_summary(request: Request) -> dict[str, Any]:
@@ -123,7 +123,7 @@ def register_account_routes(
         try:
             created = account_store_factory().created_at(user)
         except AccountStoreError as error:
-            raise DiggerError(str(error)) from error
+            raise NexusError(str(error)) from error
         counts = {
             "library": len(library.items(user)), "lists": len(library.lists(user)), "analyses": len(library.analyses(user)),
             "reports": len(reports.summaries(user)) if reports else 0,
@@ -150,13 +150,13 @@ def register_account_routes(
         try:
             _, new_password = validate_credentials(user, body.new)
         except InvalidCredentialsFormat as error:
-            raise DiggerError(str(error)) from error
+            raise NexusError(str(error)) from error
         if new_password == body.current.strip():
-            raise DiggerError("A nova senha precisa ser diferente da atual.")
+            raise NexusError("A nova senha precisa ser diferente da atual.")
         try:
             account_store_factory().change_password(user, new_password)
         except AccountStoreError as error:
-            raise DiggerError(str(error)) from error
+            raise NexusError(str(error)) from error
         return {"ok": True}
 
     @app.get("/api/account/export")
@@ -166,7 +166,7 @@ def register_account_routes(
         try:
             created = account_store_factory().created_at(user)
         except AccountStoreError as error:
-            raise DiggerError(str(error)) from error
+            raise NexusError(str(error)) from error
         profile = profiles.get(user) if profiles else None
         payload: dict[str, Any] = {
             "exportedAt": utcnow_iso(),

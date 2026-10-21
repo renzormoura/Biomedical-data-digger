@@ -27,7 +27,7 @@ from typing import Any
 from brasil import anvisa, conitec, consulta, rename
 from catalog import Work
 from db import Database
-from domain import DiggerError, RateLimitedError
+from domain import NexusError, RateLimitedError
 from library_store import LibraryStore
 from report_brasil import display_name
 from reports import ReportStore
@@ -334,7 +334,7 @@ class NotificationService:
                 work = self._fetch(ref)
             except RateLimitedError:
                 break
-            except DiggerError:
+            except NexusError:
                 continue
             if work is not None:
                 self._store.set_retraction(ref, work.retracted, now)

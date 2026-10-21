@@ -3,7 +3,7 @@ import pytest
 from catalog import CatalogError, SearchQuery, SearchResult, Work
 from citations import Author
 from discovery import DiscoveryService, citation_metadata
-from domain import ArticleNotFoundError, DiggerError, RateLimitedError, SourceUnavailableError
+from domain import ArticleNotFoundError, NexusError, RateLimitedError, SourceUnavailableError
 from ratelimit import SlidingWindowLimiter
 
 ABSTRACT = (
@@ -91,7 +91,7 @@ def test_sources_listing_and_unknown_source():
     assert [s["id"] for s in listing] == ["all", "europepmc", "openalex"]
     assert listing[0]["name"] == "Todas as fontes" and listing[0]["default"] is True and listing[1]["default"] is False
     assert svc.default_source == "europepmc"
-    with pytest.raises(DiggerError, match="desconhecida"):
+    with pytest.raises(NexusError, match="desconhecida"):
         svc.search(SearchQuery(q="x"), source="google")
 
 
@@ -153,7 +153,7 @@ def test_all_catalogs_down_without_fallback_is_source_unavailable():
 
 def test_work_input_is_validated_and_rate_limited():
     svc = service(limit=1)
-    with pytest.raises(DiggerError, match="identificador"):
+    with pytest.raises(NexusError, match="identificador"):
         svc.work("   ")
     svc.work("1", client_id="a")
     svc.work("1", client_id="a")  # cache

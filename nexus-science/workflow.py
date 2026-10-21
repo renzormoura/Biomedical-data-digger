@@ -20,7 +20,7 @@ import article_services
 import citations
 import europepmc
 from cache import SingleFlight, TTLCache
-from domain import Article, ArticleNotFoundError, Completion, DiggerError, RateLimitedError, is_failure_title
+from domain import Article, ArticleNotFoundError, Completion, NexusError, RateLimitedError, is_failure_title
 from europepmc import EuropePmcRecord
 from extraction import has_cues
 from extraction_view import (
@@ -122,17 +122,17 @@ class ArticleRepository:
 
     def get(self, raw: str) -> Article:
         if not raw or not raw.strip():
-            raise DiggerError("Por favor, cole um ID ou URL de artigo antes de gerar a análise.")
+            raise NexusError("Por favor, cole um ID ou URL de artigo antes de gerar a análise.")
         key = canonical_key(raw)
         cached = self._cache.get(key)
         if cached is not None:
             return cached
         try:
             title, abstract, source = self._resolver(raw.strip())
-        except DiggerError:
+        except NexusError:
             raise
         except Exception as error:
-            raise DiggerError(f"Erro ao buscar artigo: {error}") from error
+            raise NexusError(f"Erro ao buscar artigo: {error}") from error
         if not abstract or not abstract.strip():
             raise ArticleNotFoundError(_not_found_message(title))
         cleaned, removed = neutralize(strip_boilerplate(abstract))
@@ -157,7 +157,7 @@ PROVIDER_RATE_LIMIT_MESSAGE = (
 )
 
 
-def _provider_error(prefix: str, error: Exception) -> DiggerError:
+def _provider_error(prefix: str, error: Exception) -> NexusError:
     """Converte falhas do provedor em erro seguro: o texto cru pode trazer IDs internos.
 
     429 vira `RateLimitedError` com mensagem amigavel; erros HTTP exibem so o codigo; os
@@ -168,8 +168,8 @@ def _provider_error(prefix: str, error: Exception) -> DiggerError:
     if status == 429:
         return RateLimitedError(PROVIDER_RATE_LIMIT_MESSAGE)
     if isinstance(status, int):
-        return DiggerError(f"{prefix} (provedor respondeu HTTP {status}). Tente novamente em instantes.")
-    return DiggerError(f"{prefix}: {error}")
+        return NexusError(f"{prefix} (provedor respondeu HTTP {status}). Tente novamente em instantes.")
+    return NexusError(f"{prefix}: {error}")
 
 
 def _not_found_message(title: str) -> str:
@@ -295,7 +295,7 @@ class AnalysisService:
         started = time.monotonic()
         try:
             completion = self._generator.complete(messages, model, options)
-        except DiggerError:
+        except NexusError:
             raise
         except Exception as error:
             raise _provider_error(error_prefix, error) from error
@@ -303,13 +303,13 @@ class AnalysisService:
         if self._quota is not None:
             self._quota.charge(client_id, tokens)
         if not completion.text.strip():
-            raise DiggerError(
+            raise NexusError(
                 "O modelo não devolveu texto"
                 + (" (atingiu o limite de tamanho)" if completion.truncated else "")
                 + ". Tente novamente."
             )
         if self._policy is not None and len(completion.text.strip()) < self._policy.min_answer_chars:
-            raise DiggerError(
+            raise NexusError(
                 "A resposta do modelo veio curta demais para ser uma análise válida e foi descartada. "
                 "Tente novamente."
             )
@@ -375,7 +375,7 @@ class AnalysisService:
         try:
             outcome, leader = self._flight.do(key, compute_and_store)
         except TimeoutError as error:
-            raise DiggerError("Uma análise idêntica está demorando demais. Tente novamente.") from error
+            raise NexusError("Uma análise idêntica está demorando demais. Tente novamente.") from error
         if leader:
             return Reply(outcome.text, tokens=outcome.tokens, quota_remaining=self._remaining(client_id))
         self._record_hit(usage_key, model, client_id)
@@ -450,7 +450,7 @@ class AnalysisService:
     ) -> Reply:
         """Auditoria de uma resposta anterior. Nao usa cache (depende do texto auditado)."""
         if not response_text:
-            raise DiggerError("Gere uma análise antes de executar a auditoria.")
+            raise NexusError("Gere uma análise antes de executar a auditoria.")
         article = self._repository.get(article_id)
         messages = build_message_auditoria_resposta(
             wrap_source("SOURCE_TITLE", article.title),
@@ -478,7 +478,7 @@ class AnalysisService:
         usage_key: str = "compare",
     ) -> Reply:
         if not (article_id_a or "").strip() or not (article_id_b or "").strip():
-            raise DiggerError("Informe os dois IDs ou URLs para comparar os artigos.")
+            raise NexusError("Informe os dois IDs ou URLs para comparar os artigos.")
         key = _digest(
             "compare", canonical_key(article_id_a), canonical_key(article_id_b), analysis_type, model, medical_context,
             self._policy,
@@ -530,9 +530,9 @@ class AnalysisService:
         """Extracao sem IA (zero token): resumo organizado, numeros com a frase de origem e metadados
         (`overview`) ou trechos copiados do abstract sobre um tema (`dose`, `conduta`, ...)."""
         if kind != "overview" and kind not in PASSAGE_KINDS:
-            raise DiggerError("Tipo de extração inválido.")
+            raise NexusError("Tipo de extração inválido.")
         if not (article_id or "").strip():
-            raise DiggerError("Cole um ID ou URL de artigo antes de extrair.")
+            raise NexusError("Cole um ID ou URL de artigo antes de extrair.")
         try:
             self._limiter.check(client_id)
         except RateLimitExceeded as error:
@@ -551,7 +551,7 @@ class AnalysisService:
     def cite(self, article_id: str, style: str, *, client_id: str = "local") -> str:
         """Referencia formatada (ABNT/APA/Vancouver) a partir de registros oficiais, sem LLM."""
         if not (article_id or "").strip():
-            raise DiggerError("Cole um DOI, PMID ou PMCID para gerar a referência.")
+            raise NexusError("Cole um DOI, PMID ou PMCID para gerar a referência.")
         try:
             self._limiter.check(client_id)
         except RateLimitExceeded as error:

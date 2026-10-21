@@ -4,7 +4,7 @@ API JSON interna do produto, consumida pela própria SPA. Todas as rotas ficam s
 
 ## Convenções
 - **Formato:** requisições e respostas em JSON (`application/json`), exceto downloads (arquivos).
-- **Autenticação:** cookie de sessão `bdd_session` (HttpOnly) obtido em `POST /api/auth/login` ou `/register`. Colunas "Acesso": **pública** (sem conta), **conta** (exige sessão; sem ela responde 401), **token** (Bearer).
+- **Autenticação:** cookie de sessão `nexus_session` (HttpOnly) obtido em `POST /api/auth/login` ou `/register`. Colunas "Acesso": **pública** (sem conta), **conta** (exige sessão; sem ela responde 401), **token** (Bearer).
 - **Erros:** `{"error": "mensagem em português"}` com o status adequado.
 
 | Status | Significado |

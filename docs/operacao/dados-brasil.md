@@ -1,6 +1,6 @@
 # Atualização dos dados do Brasil
 
-Os dados de ANVISA, Conitec e Rename ficam em **instantâneos versionados** no repositório (`biomedical-article-summariser/dados_brasil/`). O servidor só lê esses arquivos; nenhuma consulta de usuário acessa os sites oficiais. Por isso a atualização é um **passo manual, com revisão**.
+Os dados de ANVISA, Conitec e Rename ficam em **instantâneos versionados** no repositório (`nexus-science/dados_brasil/`). O servidor só lê esses arquivos; nenhuma consulta de usuário acessa os sites oficiais. Por isso a atualização é um **passo manual, com revisão**.
 
 ## Quando atualizar
 | Base | Arquivo | Aviso de defasagem na interface | Frequência sugerida |

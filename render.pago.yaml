@@ -4,21 +4,21 @@
 # Blueprint, informe o caminho do arquivo `render.pago.yaml`.
 
 databases:
-  - name: biomedical-data-digger-db
-    databaseName: bdd
-    user: bdd
+  - name: nexus-science-db
+    databaseName: nexus
+    user: nexus
     region: virginia
     plan: basic-256mb
 
 services:
   - type: web
-    name: biomedical-data-digger
+    name: nexus-science
     runtime: python
     region: virginia
     plan: starter
-    rootDir: biomedical-article-summariser
+    rootDir: nexus-science
     buildCommand: pip install -r requirements.txt
-    startCommand: python biomedical_data_digger.py
+    startCommand: python nexus_science.py
     healthCheckPath: /healthz
     envVars:
       - key: PYTHON_VERSION
@@ -27,7 +27,7 @@ services:
         value: production
       - key: DATABASE_URL
         fromDatabase:
-          name: biomedical-data-digger-db
+          name: nexus-science-db
           property: connectionString
       - key: SESSION_SECRET
         generateValue: true

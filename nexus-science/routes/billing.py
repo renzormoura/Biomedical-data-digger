@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 
 import plans
 from billing import PENDING, PaymentRequest, Subscription
-from domain import DiggerError, NotFoundError, SourceUnavailableError
+from domain import NexusError, NotFoundError, SourceUnavailableError
 from pix import br_code
 from routes.context import ApiContext
 
@@ -78,9 +78,9 @@ def register_billing_routes(app: FastAPI, ctx: ApiContext) -> None:
             raise SourceUnavailableError("O pagamento por Pix ainda não está disponível. Fale com o suporte.")
         plan = catalog.get(body.plan)
         if plan is None or plan.price_cents <= 0:
-            raise DiggerError("Plano inválido.")
+            raise NexusError("Plano inválido.")
         if body.months not in plans.PERIODS:
-            raise DiggerError("Período inválido.")
+            raise NexusError("Período inválido.")
         return request_payload(billing.create_request(user, plan.key, body.months, plans.amount_cents(plan, body.months)))
 
     @app.delete("/api/billing/requests/{request_id}")

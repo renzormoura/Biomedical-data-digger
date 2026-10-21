@@ -10,7 +10,7 @@
 | Fidelidade com modelo real | `pytest -m live` | `evals/test_fidelity_live.py` | Fora da suíte padrão (chama o Groq) |
 | Verificação visual | Manual (desktop e celular) | — | Sem teste visual automatizado |
 
-Cobertura mínima de **80%** (`fail_under` em `pyproject.toml`); atual ≈96%. O ponto de entrada (`biomedical_data_digger.py`) é excluído da medição.
+Cobertura mínima de **80%** (`fail_under` em `pyproject.toml`); atual ≈96%. O ponto de entrada (`nexus_science.py`) é excluído da medição.
 
 ## Princípios
 - **Nunca usar rede real.** Um *fixture* automático (`conftest.py`) faz todo DNS resolver para um IP público fixo; as fontes são simuladas (`FakeCatalog`, respostas HTTP montadas com `make_response`). Testes **não chamam o Groq**.
@@ -35,10 +35,10 @@ Cobertura mínima de **80%** (`fail_under` em `pyproject.toml`); atual ≈96%. O
 ## Rodar a suíte contra PostgreSQL
 Por padrão os testes usam SQLite. Para validar o SQL em PostgreSQL de verdade (o banco de produção), suba um PostgreSQL descartável e defina `TEST_POSTGRES_URL`:
 ```bash
-docker run -d --name bdd-pg-test -e POSTGRES_PASSWORD=bdd_local_test -e POSTGRES_DB=bdd -p 127.0.0.1:55432:5432 postgres:16-alpine
-export TEST_POSTGRES_URL="postgresql://postgres:bdd_local_test@127.0.0.1:55432/bdd"
+docker run -d --name nexus-pg-test -e POSTGRES_PASSWORD=nexus_local_test -e POSTGRES_DB=nexus -p 127.0.0.1:55432:5432 postgres:16-alpine
+export TEST_POSTGRES_URL="postgresql://postgres:nexus_local_test@127.0.0.1:55432/nexus"
 pytest --no-cov
-docker rm -f bdd-pg-test        # ao terminar
+docker rm -f nexus-pg-test        # ao terminar
 ```
 - Cada teste ganha um **schema próprio** (isolamento total, apagado ao fim); `Database(database_url="")` e `AccountStore` apontam para ele. Está em `tests/conftest.py`.
 - Use **`127.0.0.1`**, não `localhost`: no Windows, `localhost` demora ~10 s por conexão e a suíte fica inviável.

@@ -1,6 +1,6 @@
 import pytest
 
-from domain import Article, ArticleNotFoundError, BackendUnavailableError, Completion, DiggerError
+from domain import Article, ArticleNotFoundError, BackendUnavailableError, Completion, NexusError
 from prompt_builders import build_message_sumario
 from ratelimit import SlidingWindowLimiter
 from workflow import (
@@ -89,12 +89,12 @@ def test_missing_abstract_mentions_paywall():
 
 def test_unexpected_resolver_exception_becomes_domain_error():
     repo = ArticleRepository(CountingResolver(RuntimeError("rede caiu")))
-    with pytest.raises(DiggerError, match="rede caiu"):
+    with pytest.raises(NexusError, match="rede caiu"):
         repo.get("33984217")
 
 
 def test_empty_input_is_rejected():
-    with pytest.raises(DiggerError):
+    with pytest.raises(NexusError):
         ArticleRepository(CountingResolver()).get("   ")
 
 
@@ -159,7 +159,7 @@ def test_rate_limit_is_enforced_per_client():
     # rotulos diferentes = analises diferentes (repeticoes identicas vem do cache e nao contam)
     service.analyze("33984217", "m", build_message_sumario, "S1", client_id="1.1.1.1")
     service.analyze("33984217", "m", build_message_sumario, "S2", client_id="1.1.1.1")
-    with pytest.raises(DiggerError, match="Limite de requisicoes"):
+    with pytest.raises(NexusError, match="Limite de requisicoes"):
         service.analyze("33984217", "m", build_message_sumario, "S3", client_id="1.1.1.1")
     service.analyze("33984217", "m", build_message_sumario, "S3", client_id="2.2.2.2")
 
@@ -170,13 +170,13 @@ def test_llm_failure_is_wrapped():
             raise RuntimeError("503 upstream")
 
     service, *_ = make_service(generator=Boom())
-    with pytest.raises(DiggerError, match="503 upstream"):
+    with pytest.raises(NexusError, match="503 upstream"):
         service.analyze("33984217", "m", build_message_sumario, "S")
 
 
 def test_audit_requires_previous_response():
     service, *_ = make_service()
-    with pytest.raises(DiggerError, match="Gere uma análise"):
+    with pytest.raises(NexusError, match="Gere uma análise"):
         service.audit("33984217", "m", "")
 
 
@@ -188,7 +188,7 @@ def test_audit_runs_with_cached_article():
 
 def test_compare_validates_both_inputs_and_labels_sources_separately():
     service, _, gen = make_service(generator=FakeGenerator("comparação"))
-    with pytest.raises(DiggerError):
+    with pytest.raises(NexusError):
         service.compare("33984217", " ", "Eficácia", "m")
     result = service.compare("33984217", "33984218", "Eficácia", "m", medical_context=True)
     assert "Comparação entre Artigos" in result and CLINICAL_DISCLAIMER in result
@@ -215,8 +215,8 @@ def test_cite_validates_input_and_rate_limits():
     service = AnalysisService(
         ArticleRepository(CountingResolver()), FakeGenerator(), SlidingWindowLimiter(1, 60), citation_fetcher=lambda raw: meta
     )
-    with pytest.raises(DiggerError):
+    with pytest.raises(NexusError):
         service.cite("  ", "APA")
     service.cite("10.1000/abc", "APA", client_id="x")
-    with pytest.raises(DiggerError, match="Limite"):
+    with pytest.raises(NexusError, match="Limite"):
         service.cite("10.1000/abc", "APA", client_id="x")

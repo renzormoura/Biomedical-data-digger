@@ -1,18 +1,18 @@
 # Catálogo de módulos
 
-Código em `biomedical-article-summariser/` (Python, plano). Os módulos não têm estado global além de caches e limitadores em memória, criados em `biomedical_data_digger.py`.
+Código em `nexus-science/` (Python, plano). Os módulos não têm estado global além de caches e limitadores em memória, criados em `nexus_science.py`.
 
 ## Entrada e web
 | Módulo | Responsabilidade |
 |---|---|
-| `biomedical_data_digger.py` | Ponto de entrada: monta as dependências (catálogos, stores, serviços), carrega as bases do Brasil e sobe o `uvicorn` na porta `PORT` (padrão 7860) |
+| `nexus_science.py` | Ponto de entrada: monta as dependências (catálogos, stores, serviços), carrega as bases do Brasil e sobe o `uvicorn` na porta `PORT` (padrão 7860) |
 | `web.py` | Fábrica da aplicação FastAPI: sessão por cookie, identidade, páginas e autenticação; instala o endurecimento HTTP e registra os grupos de rotas |
 | `browse_api.py` | Monta o `ApiContext` e registra os grupos de rotas do navegador de artigos, na ordem de sempre |
 | `routes/` | Rotas por domínio, cada uma com `register_<domínio>_routes(app, ctx)`: `discover` (busca, obra, semelhantes, enriquecimento, downloads, Brasil, panorama), `analyses`, `profile`, `feed`, `reports`, `watch` (interesses, alertas, notificações, rotina agendada), `library` (biblioteca, listas, compartilhamento) `recovery` (recuperação de senha e confirmação de e-mail), `legal` (textos legais), `billing` (planos e Pix do lado da pessoa) e `admin` (painel de administração) e `lab` (Laboratório de IA, consumo). Também `context.py` (dependências), `schemas.py` (modelos de entrada), `payloads.py` (JSON de resposta) e `hardening.py` (cabeçalhos de segurança, checagem de origem e tratamento de erros) |
 | `timeutil.py` | Relógio UTC e formato ISO únicos |
 | `account_routes.py` | Resumo da conta, troca de senha, exportação de dados e exclusão (LGPD) |
 | `config.py` | `Settings` lidas do ambiente, com validação em um só lugar |
-| `domain.py` | Exceções de domínio com mensagem segura (`DiggerError`, `RateLimitedError`, `NotFoundError`…) e tipos que circulam entre camadas |
+| `domain.py` | Exceções de domínio com mensagem segura (`NexusError`, `RateLimitedError`, `NotFoundError`…) e tipos que circulam entre camadas |
 
 ## Descoberta e artigo
 | Módulo | Responsabilidade |

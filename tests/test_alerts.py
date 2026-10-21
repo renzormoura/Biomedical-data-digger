@@ -23,7 +23,7 @@ from catalog import Work
 from config import Settings
 from db import Database
 from discovery import DiscoveryService
-from domain import DiggerError, NotFoundError
+from domain import NexusError, NotFoundError
 from library_store import LibraryStore
 from ratelimit import SlidingWindowLimiter
 from web import create_app
@@ -68,13 +68,13 @@ def test_validar_accepts_valid_choices_and_deduplicates():
     ([], [], [f"termo {i}" for i in range(interests.MAX_TERMS + 1)]),
 ])
 def test_validar_rejects_unknown_or_excess(topics, languages, terms):
-    with pytest.raises(DiggerError):
+    with pytest.raises(NexusError):
         interests.validar(topics, languages, terms)
 
 
 def test_validar_limits_total_topics():
     many = [{"area": "medicina", "subtopics": [s["key"] for s in interests.catalogo()["areas"][0]["subtopics"]]}, {"area": "computacao", "subtopics": ["llm", "aprendizado-maquina", "saude-digital"]}]
-    with pytest.raises(DiggerError, match="no máximo"):
+    with pytest.raises(NexusError, match="no máximo"):
         interests.validar(many, [], [])
 
 
@@ -247,7 +247,7 @@ def test_results_that_do_not_talk_about_the_topic_are_ignored(parts):
 def test_source_failures_do_not_consume_the_interval_and_are_reported(parts):
     store, searcher, clock, service = parts
     choose(store)
-    searcher.error = DiggerError("Fonte fora do ar.")
+    searcher.error = NexusError("Fonte fora do ar.")
     result = service.check(EMAIL)
     assert not result.ran and result.reason == "fontes" and result.notes == ("Fonte fora do ar.",)
     searcher.error = None

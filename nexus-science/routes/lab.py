@@ -18,7 +18,7 @@ import pages
 from config import Settings
 from domain import (
     ArticleNotFoundError,
-    DiggerError,
+    NexusError,
 )
 from presentation import UNVERIFIABLE_FALLBACK, verification_annex_md
 from usage import UsageLog
@@ -157,7 +157,7 @@ def register_lab_routes(app: FastAPI, lab: LabContext) -> None:
     @app.post("/api/compare")
     def compare(body: CompareIn, request: Request) -> dict[str, Any]:
         if body.analysis not in pages.COMPARISON_TYPES:
-            raise DiggerError("Tipo de comparação inválido.")
+            raise NexusError("Tipo de comparação inválido.")
         reply = service.compare(
             body.article_a, body.article_b, body.analysis, validated_model(body.model),
             medical_context=body.clinical, client_id=identity(request),
@@ -195,13 +195,13 @@ def register_lab_routes(app: FastAPI, lab: LabContext) -> None:
     @app.post("/api/search")
     def search(body: SearchIn, request: Request) -> dict[str, Any]:
         if not body.query.strip():
-            raise DiggerError("Informe uma palavra-chave ou tema para buscar artigos relevantes.")
+            raise NexusError("Informe uma palavra-chave ou tema para buscar artigos relevantes.")
         if body.area not in article_services.AREA_KEYWORDS:
-            raise DiggerError("Área de foco inválida.")
+            raise NexusError("Área de foco inválida.")
         try:
             items = search_fn(body.query, limit=body.limit, area=body.area)
         except RuntimeError as error:
-            raise DiggerError(str(error)) from error
+            raise NexusError(str(error)) from error
         if not items:
             raise ArticleNotFoundError(
                 "Nenhum artigo foi encontrado para esta busca com o filtro selecionado. "

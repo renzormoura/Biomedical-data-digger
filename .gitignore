@@ -6,7 +6,7 @@ venv/
 __pycache__/
 *.pyc
 .env
-biomedical-article-summariser/accounts.sqlite3
+nexus-science/accounts.sqlite3
 *.pem
 
 # Ferramentas

@@ -12,7 +12,7 @@ O produto é comercial: o **código-fonte deve ficar privado**, e a **documenta�
 ## Opções para expor só a documentação
 | Opção | Como | Prós | Contras |
 |---|---|---|---|
-| **A. Repositório público só de documentação (recomendada)** | Criar `Biomedical-data-digger-docs`, copiar `docs/` (sem planos internos) e publicar via GitHub Pages | Simples, gratuito, controle total do que sai | Duas cópias a manter (pode ser automatizado) |
+| **A. Repositório público só de documentação (recomendada)** | Criar `nexus-science-docs`, copiar `docs/` (sem planos internos) e publicar via GitHub Pages | Simples, gratuito, controle total do que sai | Duas cópias a manter (pode ser automatizado) |
 | **B. GitHub Pages do repositório privado** | Pages a partir do repositório privado | Uma única fonte | Exige plano pago (GitHub Pro/Team) e o site fica público ou restrito à organização |
 | **C. Site de documentação próprio** | Gerar um site (MkDocs, Docusaurus) a partir de `docs/` e hospedar no domínio do produto | Marca própria, busca, versões | Mais trabalho de manutenção |
 | **D. PDF/portal para clientes** | Exportar para PDF e entregar sob NDA | Controle por cliente | Fica desatualizado |

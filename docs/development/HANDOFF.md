@@ -23,9 +23,9 @@ Estado do projeto para quem vai continuar. Atualizado em **19/10/2026**. O panor
 | Validação com usuários | Roteiro pronto | Executar |
 
 ## Onde está cada coisa
-- Código: `biomedical-article-summariser/` ([catálogo de módulos](../arquitetura/modulos.md)).
+- Código: `nexus-science/` ([catálogo de módulos](../arquitetura/modulos.md)).
 - Testes: `tests/` (`tests/js/` para JavaScript); avaliação com modelo real: `evals/`.
-- Dados do Brasil: `biomedical-article-summariser/dados_brasil/` + `scripts/atualizar_*.py`.
+- Dados do Brasil: `nexus-science/dados_brasil/` + `scripts/atualizar_*.py`.
 - Infra: `render.yaml`, `.github/workflows/ci.yml`, `.github/workflows/alertas.yml`.
 - Documentação: `docs/` ([índice](../README.md)).
 

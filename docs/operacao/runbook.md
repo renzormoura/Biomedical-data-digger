@@ -62,7 +62,7 @@ Um IP/conta passou do limite (ver [Segurança](../arquitetura/seguranca.md#limit
 
 ### Conciliar pagamentos Pix e ativar assinaturas
 1. Entre com a sua conta de administrador (e-mail em `ADMIN_EMAILS`) e abra **Administração → Pagamentos** (ou `#/admin/pagamentos`). Sem conta de administrador, o `ADMIN_TOKEN` funciona na mesma tela.
-2. Em **Pedidos pendentes**, compare cada pedido (e-mail, valor, identificador) com o extrato do banco da chave Pix. O banco costuma mostrar valor, data e nome do pagador; o identificador `BDD…` aparece só em alguns bancos.
+2. Em **Pedidos pendentes**, compare cada pedido (e-mail, valor, identificador) com o extrato do banco da chave Pix. O banco costuma mostrar valor, data e nome do pagador; o identificador `NXS…` aparece só em alguns bancos.
 3. Bateu: **Confirmar pagamento** (a assinatura é ativada ou prorrogada e a pessoa recebe e-mail). Não bateu e faz mais de alguns dias: **Cancelar**.
 4. Pagamento recebido sem pedido: ache a conta em **Administração → Usuários** e use **Dar 30 dias de Pro** (ou peça à pessoa que crie o pedido).
 5. Problemas comuns: valor diferente do pedido (não confirme; combine com a pessoa), pagamento duplicado (confirme um e devolva o outro), "Painel desativado" (falta `ADMIN_TOKEN` no servidor), 401 (token errado).

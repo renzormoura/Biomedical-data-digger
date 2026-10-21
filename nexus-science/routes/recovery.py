@@ -24,7 +24,7 @@ from pydantic import BaseModel, Field
 
 from account_store import AccountStore, AccountStoreError, InvalidCredentialsFormat, validate_credentials
 from account_tokens import RESET, VERIFY, AccountTokens
-from domain import AuthRequiredError, DiggerError, SourceUnavailableError
+from domain import AuthRequiredError, NexusError, SourceUnavailableError
 from mailer import EmailMessage, Mailer, MailError
 
 RESEND_COOLDOWN = timedelta(seconds=60)
@@ -107,7 +107,7 @@ def register_recovery_routes(app: FastAPI, rc: RecoveryContext) -> None:
         try:
             known = bool(email) and rc.account_store_factory().exists(email)
         except AccountStoreError as error:
-            raise DiggerError(str(error)) from error
+            raise NexusError(str(error)) from error
         if known:
             rc.send_reset(email)
         return {"ok": True, "message": GENERIC_FORGOT}
@@ -117,17 +117,17 @@ def register_recovery_routes(app: FastAPI, rc: RecoveryContext) -> None:
         rc.throttle_auth(request)
         email = rc.tokens.peek(body.token, RESET)
         if email is None:
-            raise DiggerError("Este link é inválido ou expirou. Peça um novo link de redefinição.")
+            raise NexusError("Este link é inválido ou expirou. Peça um novo link de redefinição.")
         try:
             _, password = validate_credentials(email, body.password)
         except InvalidCredentialsFormat as error:
-            raise DiggerError(str(error)) from error
+            raise NexusError(str(error)) from error
         try:
             changed = rc.account_store_factory().change_password(email, password)
         except AccountStoreError as error:
-            raise DiggerError(str(error)) from error
+            raise NexusError(str(error)) from error
         if not changed:
-            raise DiggerError("Este link é inválido ou expirou. Peça um novo link de redefinição.")
+            raise NexusError("Este link é inválido ou expirou. Peça um novo link de redefinição.")
         rc.tokens.clear(email, RESET)
         rc.tokens.mark_verified(email)  # quem abriu o link controla a caixa de e-mail
         return {"ok": True}
@@ -137,7 +137,7 @@ def register_recovery_routes(app: FastAPI, rc: RecoveryContext) -> None:
         rc.throttle_auth(request)
         email = rc.tokens.consume(body.token, VERIFY)
         if email is None:
-            raise DiggerError("Este link de confirmação é inválido ou expirou. Peça um novo na sua conta.")
+            raise NexusError("Este link de confirmação é inválido ou expirou. Peça um novo na sua conta.")
         rc.tokens.mark_verified(email)
         return {"verified": True, "email": email}
 
@@ -154,5 +154,5 @@ def register_recovery_routes(app: FastAPI, rc: RecoveryContext) -> None:
         if rc._recently_sent(user, VERIFY):  # noqa: SLF001 - mesma unidade (contexto de recuperacao)
             return {"sent": False, "reason": "wait"}
         if not rc.send_verification(user):
-            raise DiggerError("Não foi possível enviar o e-mail agora. Tente novamente em instantes.")
+            raise NexusError("Não foi possível enviar o e-mail agora. Tente novamente em instantes.")
         return {"sent": True}

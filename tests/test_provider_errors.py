@@ -4,7 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from config import Settings
-from domain import DiggerError, RateLimitedError
+from domain import NexusError, RateLimitedError
 from prompt_builders import build_message_sumario
 from ratelimit import SlidingWindowLimiter
 from test_web import FakeGenerator as WebFakeGenerator
@@ -47,7 +47,7 @@ def test_provider_429_becomes_a_friendly_rate_limit_error_without_internal_ids()
 
 
 def test_other_provider_http_errors_show_only_the_status_code():
-    with pytest.raises(DiggerError) as info:
+    with pytest.raises(NexusError) as info:
         service(failing(ProviderError(503, "upstream said: secret-internal-detail req_abc123"))).analyze(
             "33984217", "m", build_message_sumario, "S"
         )
@@ -56,7 +56,7 @@ def test_other_provider_http_errors_show_only_the_status_code():
 
 
 def test_errors_without_status_keep_the_previous_behavior():
-    with pytest.raises(DiggerError, match="503 upstream"):
+    with pytest.raises(NexusError, match="503 upstream"):
         service(failing(RuntimeError("503 upstream"))).analyze("33984217", "m", build_message_sumario, "S")
 
 

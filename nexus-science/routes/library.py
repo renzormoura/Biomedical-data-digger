@@ -7,7 +7,7 @@ from typing import Annotated, Any
 from fastapi import FastAPI, Query, Request
 from fastapi.responses import Response
 
-from domain import DiggerError, NotFoundError, RateLimitedError
+from domain import NexusError, NotFoundError, RateLimitedError
 from exports import EXPORT_FORMATS
 from ratelimit import RateLimitExceeded
 from routes.context import ApiContext
@@ -71,7 +71,7 @@ def register_library_routes(app: FastAPI, ctx: ApiContext) -> None:
     ) -> Response:
         user = require_user(request)
         if format not in EXPORT_FORMATS:
-            raise DiggerError("Formato de exportação inválido.")
+            raise NexusError("Formato de exportação inválido.")
         if list_id:
             chosen = next((item for item in library.lists(user) if item.id == list_id), None)
             if chosen is None:

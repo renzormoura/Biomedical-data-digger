@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 
 import pages
 from config import Settings
-from domain import BackendUnavailableError, Completion, DiggerError, RateLimitedError
+from domain import BackendUnavailableError, Completion, NexusError, RateLimitedError
 from prompt_builders import build_message_pontos_chave, build_message_sumario
 from quota import QuotaManager
 from ratelimit import SlidingWindowLimiter
@@ -73,7 +73,7 @@ def test_failures_are_not_cached():
             return Completion("ok", 10, 5)
 
     service, gen, _ = make(Flaky())
-    with pytest.raises(DiggerError):
+    with pytest.raises(NexusError):
         run(service)
     assert "ok" in run(service)
     assert len(gen.calls) == 2

@@ -11,7 +11,7 @@ import downloads
 import report_brasil
 from alerts import work_key
 from catalog import SearchQuery
-from domain import DiggerError, NotFoundError
+from domain import NexusError, NotFoundError
 from library_store import ReadingList
 from reports import (
     FINDINGS_PER_STUDY,
@@ -181,7 +181,7 @@ def register_reports_routes(app: FastAPI, ctx: ApiContext) -> None:
             format: Annotated[str, Query(max_length=10)] = "html",  # noqa: A002 - nome do parametro HTTP
         ) -> Response:
             if format not in downloads.TEXT_FORMATS:
-                raise DiggerError("Formato de download inválido.")
+                raise NexusError("Formato de download inválido.")
             report = report_store.get(require_user(request), report_id)
             section = report_brasil.build(report.substances, brasil_bases(request)) if report.substances else None
             content, media = downloads.render(report_blocks(report, brasil=section), format)

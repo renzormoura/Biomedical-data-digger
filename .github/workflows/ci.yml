@@ -23,11 +23,11 @@ jobs:
           cache: pip
           cache-dependency-path: |
             requirements-dev.txt
-            biomedical-article-summariser/requirements.txt
+            nexus-science/requirements.txt
       - name: Install
         run: pip install -r requirements-dev.txt
       - name: Lint (ruff)
-        run: ruff check biomedical-article-summariser tests evals scripts
+        run: ruff check nexus-science tests evals scripts
       - name: Types (mypy)
         run: mypy
       - name: Tests + coverage
@@ -38,7 +38,7 @@ jobs:
       - name: Testes do frontend (node:test)
         run: node --test tests/js/browse-lib.test.js prototype/navegador/tests/lib.test.js
       - name: Dependency audit
-        run: pip install pip-audit && pip-audit -r biomedical-article-summariser/requirements.txt
+        run: pip install pip-audit && pip-audit -r nexus-science/requirements.txt
         continue-on-error: true
 
   postgres:
@@ -49,7 +49,7 @@ jobs:
         image: postgres:16-alpine
         env:
           POSTGRES_PASSWORD: ci_only_password
-          POSTGRES_DB: bdd
+          POSTGRES_DB: nexus
         ports:
           - 5432:5432
         options: >-
@@ -58,7 +58,7 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     env:
-      TEST_POSTGRES_URL: postgresql://postgres:ci_only_password@127.0.0.1:5432/bdd
+      TEST_POSTGRES_URL: postgresql://postgres:ci_only_password@127.0.0.1:5432/nexus
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -67,7 +67,7 @@ jobs:
           cache: pip
           cache-dependency-path: |
             requirements-dev.txt
-            biomedical-article-summariser/requirements.txt
+            nexus-science/requirements.txt
       - name: Install
         run: pip install -r requirements-dev.txt
       - name: Tests em PostgreSQL

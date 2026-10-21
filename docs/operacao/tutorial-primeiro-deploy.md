@@ -23,7 +23,7 @@ python -c "import secrets; print(secrets.token_urlsafe(32))"
 
 ## Parte 1: banco de dados gratuito (Neon)
 1. Crie conta em **neon.tech** (pode entrar com o GitHub).
-2. **Create project**: nome `biomedical-data-digger`, região **AWS US East (N. Virginia)** (a mesma região do serviço no Render, para ficar rápido).
+2. **Create project**: nome `nexus-science`, região **AWS US East (N. Virginia)** (a mesma região do serviço no Render, para ficar rápido).
 3. Na tela do projeto, abra **Connect** (ou *Connection Details*) e copie a **connection string**. Dois cuidados:
    - Use a conexão **direta**, **sem** `-pooler` no endereço (o `pooler` pode atrapalhar o driver).
    - Ela deve terminar com `?sslmode=require`. Algo como `postgresql://usuario:senha@ep-xxxx.us-east-1.aws.neon.tech/neondb?sslmode=require`.

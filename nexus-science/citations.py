@@ -15,7 +15,7 @@ from typing import Any
 import requests
 
 import article_services
-from domain import DiggerError
+from domain import NexusError
 
 HTTP_TIMEOUT = 15
 USER_AGENT = {"User-Agent": "NexusScience/1.0"}
@@ -256,7 +256,7 @@ def format_citation(meta: CitationMetadata, style: str) -> str:
     try:
         return FORMATTERS[style](meta)
     except KeyError as error:
-        raise DiggerError(f"Estilo de citação desconhecido: {style}.") from error
+        raise NexusError(f"Estilo de citação desconhecido: {style}.") from error
 
 
 # ---------------------------------------------------------------------------
@@ -315,7 +315,7 @@ def _get_json(url: str, **kwargs: Any) -> dict[str, Any]:
         response.raise_for_status()
         return response.json()
     except (requests.RequestException, ValueError) as error:
-        raise DiggerError(f"Não foi possível consultar a fonte de metadados: {error}") from error
+        raise NexusError(f"Não foi possível consultar a fonte de metadados: {error}") from error
 
 
 def fetch_citation_metadata(raw: str) -> CitationMetadata:
@@ -332,10 +332,10 @@ def fetch_citation_metadata(raw: str) -> CitationMetadata:
         )
         results = (data.get("resultList") or {}).get("result", [])
         if not results:
-            raise DiggerError("Artigo não encontrado na Europe PMC.")
+            raise NexusError("Artigo não encontrado na Europe PMC.")
         meta = parse_europe_pmc(results[0])
     else:
-        raise DiggerError("Para gerar referências, informe um DOI, PMID ou PMCID.")
+        raise NexusError("Para gerar referências, informe um DOI, PMID ou PMCID.")
     if not meta.title:
-        raise DiggerError("O registro encontrado não tem título; não é possível gerar a referência.")
+        raise NexusError("O registro encontrado não tem título; não é possível gerar a referência.")
     return meta

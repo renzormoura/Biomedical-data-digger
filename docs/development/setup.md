@@ -17,7 +17,7 @@ python -m venv .venv_local
 pip install -r requirements-dev.txt        # inclui as dependências do servidor
 ```
 
-Configuração local (opcional): crie `biomedical-article-summariser/.env`:
+Configuração local (opcional): crie `nexus-science/.env`:
 ```
 DATABASE_PATH=accounts.sqlite3
 GROQ_API_KEY=<sua chave>
@@ -26,8 +26,8 @@ Sem `DATABASE_URL`, o produto usa SQLite local (`accounts.sqlite3`, ignorado pel
 
 ## Executar
 ```bash
-cd biomedical-article-summariser
-python biomedical_data_digger.py
+cd nexus-science
+python nexus_science.py
 ```
 Abra `http://localhost:7860`. **Depois de editar JS ou CSS, reinicie o servidor**: os arquivos estáticos levam um hash de versão calculado na subida.
 
@@ -35,7 +35,7 @@ Para testar o Laboratório de IA sem chave da Groq, instale o [Ollama](https://o
 
 ## Verificações antes de commitar
 ```bash
-ruff check biomedical-article-summariser tests evals scripts
+ruff check nexus-science tests evals scripts
 mypy
 pytest                      # cobertura mínima de 80% no CI
 node --test tests/js/browse-lib.test.js

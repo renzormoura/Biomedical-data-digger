@@ -5,7 +5,7 @@
 
   const Lib = window.BrowseLib;
   const $app = document.getElementById("app");
-  const THEME_KEY = "bdd.theme"; // compartilhado com a página de IA
+  const THEME_KEY = "nexus.theme"; // compartilhado com a página de IA
   const PAGE_SIZE = 10;
   // ------------------------------------------------------------------ DOM
   function h(tag, attrs, ...kids) {
@@ -1341,7 +1341,7 @@
     saude: [["Ver a situação de um medicamento no Brasil (ANVISA, Conitec, Rename)", Lib.buildHash("/busca", { q: "metformina" })], ["Acompanhar especialidades e receber avisos", "#/perfil/interesses"], ["Criar um relatório com a situação regulatória dos medicamentos", "#/biblioteca"]],
     consultoria: [["Criar um relatório de tema com método e histórico", "#/biblioteca"], ["Acompanhar os temas dos seus clientes", "#/perfil/interesses"], ["Exportar as referências para o cliente", "#/biblioteca"]],
   };
-  const PROFILE_SKIP_KEY = () => `bdd.profile.skip:${session.user}`;
+  const PROFILE_SKIP_KEY = () => `nexus.profile.skip:${session.user}`;
   let profileOptionsPromise;
   const loadProfileOptions = () => {
     profileOptionsPromise ||= api("/api/profile/options").catch((error) => { profileOptionsPromise = undefined; throw error; });
@@ -2270,7 +2270,7 @@
 
     // acesso: a propria sessao de administrador; o token (so para emergencia) fica apenas na aba do navegador
     let token = "";
-    try { token = sessionStorage.getItem("bdd-admin") || ""; } catch { /* sem armazenamento */ }
+    try { token = sessionStorage.getItem("nexus-admin") || ""; } catch { /* sem armazenamento */ }
     const call = (path, options = {}) => api(path, { ...options, headers: token ? { Authorization: `Bearer ${token}` } : {} });
     const refresh = () => renderAdmin(active);
     const run = (action, done) => async () => {
@@ -2283,7 +2283,7 @@
       mount(content, h("form", { class: "card stack", onsubmit: (event) => {
         event.preventDefault();
         token = input.value.trim();
-        try { sessionStorage.setItem("bdd-admin", token); } catch { /* ignora */ }
+        try { sessionStorage.setItem("nexus-admin", token); } catch { /* ignora */ }
         refresh();
       } }, h("p", { class: message ? "note" : "muted", role: "alert" }, message || "Entre com uma conta de administrador ou use o token de emergência."),
       h("div", { class: "field" }, h("label", { for: "admin-token" }, "Token de administrador"), input),
@@ -2389,7 +2389,7 @@
     const load = async (promise) => {
       try { await promise; } catch (error) {
         if (error.status === 401 || error.status === 404) {
-          if (token) { token = ""; try { sessionStorage.removeItem("bdd-admin"); } catch { /* ignora */ } }
+          if (token) { token = ""; try { sessionStorage.removeItem("nexus-admin"); } catch { /* ignora */ } }
           askToken(error.status === 404 ? "O painel está desativado neste servidor (defina ADMIN_EMAILS ou ADMIN_TOKEN)." : "Esta conta não é de administrador (ou o token está errado).");
         } else mount(content, errorBox(error.message));
       }

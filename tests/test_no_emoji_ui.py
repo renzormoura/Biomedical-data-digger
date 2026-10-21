@@ -9,7 +9,7 @@ import pytest
 
 import pages
 
-ROOT = Path(__file__).resolve().parent.parent / "biomedical-article-summariser"
+ROOT = Path(__file__).resolve().parent.parent / "nexus-science"
 EMOJI = re.compile("[\U0001F300-\U0001FAFF☀-➿⭐⛔✅]")
 UI_FILES = [
     "static/browse.js", "static/app.js", "templates/browse.html", "templates/ia.html", "templates/_footer.html",

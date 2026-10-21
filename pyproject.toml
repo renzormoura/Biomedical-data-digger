@@ -1,13 +1,13 @@
 [project]
-name = "biomedical-data-digger"
+name = "nexus-science"
 version = "0.3.0"
 description = "Analise de artigos cientificos com LLMs, com verificacao de fidelidade a fonte."
 requires-python = ">=3.10"
-readme = "biomedical-article-summariser/README.md"
+readme = "nexus-science/README.md"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["biomedical-article-summariser", "tests"]
+pythonpath = ["nexus-science", "tests"]
 addopts = "-ra --strict-markers"
 markers = [
     "live: chama servicos externos reais (LLM); desativado por padrao",
@@ -16,8 +16,8 @@ markers = [
 filterwarnings = ["ignore::DeprecationWarning"]
 
 [tool.coverage.run]
-source = ["biomedical-article-summariser"]
-omit = ["*/biomedical_data_digger.py"]
+source = ["nexus-science"]
+omit = ["*/nexus_science.py"]
 
 [tool.coverage.report]
 show_missing = true
@@ -27,7 +27,7 @@ fail_under = 80
 [tool.ruff]
 line-length = 120
 target-version = "py310"
-src = ["biomedical-article-summariser", "tests"]
+src = ["nexus-science", "tests"]
 extend-exclude = ["*.ipynb", ".venv_local", "biomedical-article_summarizer", "tools"]
 
 [tool.ruff.lint]
@@ -49,81 +49,81 @@ ignore = [
 
 [tool.mypy]
 python_version = "3.10"
-mypy_path = "biomedical-article-summariser"
+mypy_path = "nexus-science"
 files = [
-    "biomedical-article-summariser/security.py",
-    "biomedical-article-summariser/routes",
-    "biomedical-article-summariser/mailer.py",
-    "biomedical-article-summariser/pix.py",
-    "biomedical-article-summariser/plans.py",
-    "biomedical-article-summariser/billing.py",
-    "biomedical-article-summariser/account_flags.py",
-    "biomedical-article-summariser/admin_service.py",
-    "biomedical-article-summariser/legal.py",
-    "biomedical-article-summariser/account_consent.py",
-    "biomedical-article-summariser/account_tokens.py",
-    "biomedical-article-summariser/timeutil.py",
-    "biomedical-article-summariser/biomedical_data_digger.py",
-    "biomedical-article-summariser/contexto_brasil.py",
-    "biomedical-article-summariser/prompt_specs.py",
-    "biomedical-article-summariser/prompt_builders.py",
-    "biomedical-article-summariser/pages.py",
-    "biomedical-article-summariser/article_services.py",
-    "biomedical-article-summariser/account_store.py",
-    "biomedical-article-summariser/ratelimit.py",
-    "biomedical-article-summariser/cache.py",
-    "biomedical-article-summariser/domain.py",
-    "biomedical-article-summariser/grounding.py",
-    "biomedical-article-summariser/config.py",
-    "biomedical-article-summariser/llm_service.py",
-    "biomedical-article-summariser/workflow.py",
-    "biomedical-article-summariser/markdown_lite.py",
-    "biomedical-article-summariser/sessions.py",
-    "biomedical-article-summariser/presentation.py",
-    "biomedical-article-summariser/citations.py",
-    "biomedical-article-summariser/web.py",
-    "biomedical-article-summariser/usage.py",
-    "biomedical-article-summariser/quota.py",
-    "biomedical-article-summariser/generation.py",
-    "biomedical-article-summariser/injection.py",
-    "biomedical-article-summariser/extraction.py",
-    "biomedical-article-summariser/extraction_view.py",
-    "biomedical-article-summariser/europepmc.py",
-    "biomedical-article-summariser/catalog.py",
-    "biomedical-article-summariser/europepmc_catalog.py",
-    "biomedical-article-summariser/openalex_catalog.py",
-    "biomedical-article-summariser/discovery.py",
-    "biomedical-article-summariser/browse_api.py",
-    "biomedical-article-summariser/db.py",
-    "biomedical-article-summariser/library_store.py",
-    "biomedical-article-summariser/alerts.py",
-    "biomedical-article-summariser/reports.py",
-    "biomedical-article-summariser/notifications.py",
-    "biomedical-article-summariser/feed.py",
-    "biomedical-article-summariser/feed_sources.py",
-    "biomedical-article-summariser/account_routes.py",
-    "biomedical-article-summariser/search_overview.py",
-    "biomedical-article-summariser/profiles.py",
-    "biomedical-article-summariser/report_brasil.py",
-    "biomedical-article-summariser/interests.py",
-    "biomedical-article-summariser/exports.py",
-    "biomedical-article-summariser/xmlutil.py",
-    "biomedical-article-summariser/brasil/__init__.py",
-    "biomedical-article-summariser/brasil/conitec.py",
-    "biomedical-article-summariser/brasil/nomes.py",
-    "biomedical-article-summariser/brasil/anvisa.py",
-    "biomedical-article-summariser/brasil/rename.py",
-    "biomedical-article-summariser/brasil/rename_build.py",
-    "biomedical-article-summariser/brasil/anvisa_build.py",
-    "biomedical-article-summariser/brasil/consulta.py",
-    "biomedical-article-summariser/brasil/conitec_build.py",
-    "biomedical-article-summariser/downloads.py",
-    "biomedical-article-summariser/arxiv_catalog.py",
-    "biomedical-article-summariser/doaj_catalog.py",
-    "biomedical-article-summariser/openaire_catalog.py",
-    "biomedical-article-summariser/pubmed_catalog.py",
-    "biomedical-article-summariser/enrichment.py",
-    "biomedical-article-summariser/reliability.py",
+    "nexus-science/security.py",
+    "nexus-science/routes",
+    "nexus-science/mailer.py",
+    "nexus-science/pix.py",
+    "nexus-science/plans.py",
+    "nexus-science/billing.py",
+    "nexus-science/account_flags.py",
+    "nexus-science/admin_service.py",
+    "nexus-science/legal.py",
+    "nexus-science/account_consent.py",
+    "nexus-science/account_tokens.py",
+    "nexus-science/timeutil.py",
+    "nexus-science/nexus_science.py",
+    "nexus-science/contexto_brasil.py",
+    "nexus-science/prompt_specs.py",
+    "nexus-science/prompt_builders.py",
+    "nexus-science/pages.py",
+    "nexus-science/article_services.py",
+    "nexus-science/account_store.py",
+    "nexus-science/ratelimit.py",
+    "nexus-science/cache.py",
+    "nexus-science/domain.py",
+    "nexus-science/grounding.py",
+    "nexus-science/config.py",
+    "nexus-science/llm_service.py",
+    "nexus-science/workflow.py",
+    "nexus-science/markdown_lite.py",
+    "nexus-science/sessions.py",
+    "nexus-science/presentation.py",
+    "nexus-science/citations.py",
+    "nexus-science/web.py",
+    "nexus-science/usage.py",
+    "nexus-science/quota.py",
+    "nexus-science/generation.py",
+    "nexus-science/injection.py",
+    "nexus-science/extraction.py",
+    "nexus-science/extraction_view.py",
+    "nexus-science/europepmc.py",
+    "nexus-science/catalog.py",
+    "nexus-science/europepmc_catalog.py",
+    "nexus-science/openalex_catalog.py",
+    "nexus-science/discovery.py",
+    "nexus-science/browse_api.py",
+    "nexus-science/db.py",
+    "nexus-science/library_store.py",
+    "nexus-science/alerts.py",
+    "nexus-science/reports.py",
+    "nexus-science/notifications.py",
+    "nexus-science/feed.py",
+    "nexus-science/feed_sources.py",
+    "nexus-science/account_routes.py",
+    "nexus-science/search_overview.py",
+    "nexus-science/profiles.py",
+    "nexus-science/report_brasil.py",
+    "nexus-science/interests.py",
+    "nexus-science/exports.py",
+    "nexus-science/xmlutil.py",
+    "nexus-science/brasil/__init__.py",
+    "nexus-science/brasil/conitec.py",
+    "nexus-science/brasil/nomes.py",
+    "nexus-science/brasil/anvisa.py",
+    "nexus-science/brasil/rename.py",
+    "nexus-science/brasil/rename_build.py",
+    "nexus-science/brasil/anvisa_build.py",
+    "nexus-science/brasil/consulta.py",
+    "nexus-science/brasil/conitec_build.py",
+    "nexus-science/downloads.py",
+    "nexus-science/arxiv_catalog.py",
+    "nexus-science/doaj_catalog.py",
+    "nexus-science/openaire_catalog.py",
+    "nexus-science/pubmed_catalog.py",
+    "nexus-science/enrichment.py",
+    "nexus-science/reliability.py",
 ]
 follow_imports = "silent"
 strict_optional = true

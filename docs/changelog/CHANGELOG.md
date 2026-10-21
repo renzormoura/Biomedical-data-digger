@@ -4,7 +4,7 @@
 
 ### Alterado
 - Nome visível ao usuário trocado de "Lastro" para **Nexus Science**, nos mesmos lugares da troca anterior (telas, e-mails, textos legais, relatórios, documentos baixados e documentação). A identificação nas consultas a serviços externos passou a ser `NexusScience/1.0`.
-- Mesmos nomes técnicos internos mantidos (repositório, pastas, módulos, serviço no Render e variáveis de ambiente).
+- **Nomes técnicos renomeados:** a pasta da aplicação passou de `biomedical-article-summariser` para `nexus-science`, o ponto de entrada para `nexus_science.py`, o serviço e o banco no Render para `nexus-science` e `nexus-science-db` (nos arquivos `render*.yaml`), a exceção base para `NexusError` e o cookie de sessão para `nexus_session` (quem estava logado entra uma vez de novo; as chaves do navegador do tema e do histórico também recomeçam). O prefixo das referências Pix passou de `BDD` para `NXS`.
 
 ## 2026-10 — Acabamento da interface
 

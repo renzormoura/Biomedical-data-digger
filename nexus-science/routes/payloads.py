@@ -11,7 +11,7 @@ import markdown_lite
 import reliability
 from brasil import anvisa, conitec, consulta, rename
 from catalog import Work
-from domain import DiggerError
+from domain import NexusError
 from enrichment import Enrichment
 from library_store import ReadingList, SavedAnalysis
 from routes.schemas import SNIPPET_CHARS
@@ -29,7 +29,7 @@ def analysis_payload(item: SavedAnalysis, *, full: bool = False) -> dict[str, An
 
 def analysis_file(article_title: str, label: str, markdown: str, fmt: str) -> Response:
     if fmt not in downloads.TEXT_FORMATS:
-        raise DiggerError("Formato de download inválido.")
+        raise NexusError("Formato de download inválido.")
     content, media = downloads.render(downloads.analysis_blocks(article_title, label, markdown), fmt)
     filename = downloads.analysis_filename(article_title, label, downloads.TEXT_FORMATS[fmt][2])
     return Response(content, media_type=media, headers={

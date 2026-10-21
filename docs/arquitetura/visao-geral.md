@@ -21,7 +21,7 @@ flowchart LR
 
 ## Princípios de projeto
 1. **Núcleo sem IA.** Busca, extração, nota, citações, relatórios, alertas e feed são determinísticos e testáveis. O LLM fica atrás de uma interface (`LLMBackend`) e só serve o Laboratório de IA (ADR-001, ADR-005).
-2. **Camadas com dependência para dentro** (ADR-004): `domain`/`catalog` (tipos) ← serviços (`discovery`, `workflow`, `reports`, `alerts`…) ← rotas (`web`, `browse_api`, `account_routes`) ← entrada (`biomedical_data_digger.py`). Os serviços não conhecem FastAPI.
+2. **Camadas com dependência para dentro** (ADR-004): `domain`/`catalog` (tipos) ← serviços (`discovery`, `workflow`, `reports`, `alerts`…) ← rotas (`web`, `browse_api`, `account_routes`) ← entrada (`nexus_science.py`). Os serviços não conhecem FastAPI.
 3. **Falha isolada.** Cada fonte externa falha sozinha (aviso, não erro); a busca só falha se todas falharem; enriquecimento, panorama e semelhantes são "melhor esforço".
 4. **Dados oficiais como instantâneos.** ANVISA, Conitec e Rename são arquivos versionados; nenhuma consulta de usuário depende da disponibilidade desses sites.
 5. **Segurança por padrão** (ADR-005): CSP restritiva, limites de entrada, proteção contra SSRF, defesa contra injeção de prompt, limitadores de taxa e cotas.
@@ -30,7 +30,7 @@ flowchart LR
 ## Componentes
 | Camada | Módulos principais | Responsabilidade |
 |---|---|---|
-| Entrada | `biomedical_data_digger.py` | Monta as dependências e sobe o `uvicorn` |
+| Entrada | `nexus_science.py` | Monta as dependências e sobe o `uvicorn` |
 | Web/API | `web.py`, `browse_api.py`, `account_routes.py` | Rotas, middleware de segurança, sessão, tratamento de erros |
 | Descoberta | `discovery.py`, `*_catalog.py`, `enrichment.py`, `search_overview.py`, `downloads.py`, `citations.py`, `exports.py` | Busca, junção, obra, semelhantes, enriquecimento, documentos |
 | Qualidade | `extraction.py`, `reliability.py` | Trechos do resumo e nota de confiabilidade |

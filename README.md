@@ -25,13 +25,13 @@ Comece pelo [índice da documentação](docs/README.md).
 ```bash
 python -m venv .venv_local && source .venv_local/bin/activate   # Windows: .venv_local\Scripts\Activate.ps1
 pip install -r requirements-dev.txt
-cd biomedical-article-summariser && python biomedical_data_digger.py   # http://localhost:7860
+cd nexus-science && python nexus_science.py   # http://localhost:7860
 ```
 Sem `DATABASE_URL`, usa SQLite local. Variáveis: [Configuração](docs/operacao/configuracao.md).
 
 ## Qualidade
 ```bash
-ruff check biomedical-article-summariser tests evals scripts
+ruff check nexus-science tests evals scripts
 mypy
 pytest                                    # 1.471 testes; cobertura mínima de 80%
 node --test tests/js/browse-lib.test.js
@@ -40,7 +40,7 @@ node --test tests/js/browse-lib.test.js
 ## Estrutura do repositório
 | Caminho | Conteúdo |
 |---|---|
-| `biomedical-article-summariser/` | Aplicação (Python/FastAPI, front-end em `static/` e `templates/`, dados do Brasil em `dados_brasil/`) |
+| `nexus-science/` | Aplicação (Python/FastAPI, front-end em `static/` e `templates/`, dados do Brasil em `dados_brasil/`) |
 | `tests/` | Testes (`pytest` e `node:test`) |
 | `docs/` | Documentação |
 | `scripts/` | Atualização dos dados do Brasil, verificação do feed, medição de tokens |

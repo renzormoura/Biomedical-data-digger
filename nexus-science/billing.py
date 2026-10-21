@@ -16,7 +16,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from db import Database
-from domain import DiggerError, LimitReachedError, NotFoundError
+from domain import LimitReachedError, NexusError, NotFoundError
 from plans import DAYS_PER_MONTH, FREE_KEY
 from timeutil import Clock, iso, utcnow
 
@@ -125,7 +125,7 @@ class BillingStore:
             raise LimitReachedError("Você já tem pedidos de pagamento em aberto. Cancele algum ou aguarde a confirmação.")
         request = PaymentRequest(
             secrets.token_hex(16), email, plan, months, amount_cents,
-            "BDD" + "".join(secrets.choice(REFERENCE_ALPHABET) for _ in range(10)), PENDING,
+            "NXS" + "".join(secrets.choice(REFERENCE_ALPHABET) for _ in range(10)), PENDING,
             self._clock().isoformat(timespec="microseconds"), None, "",  # microssegundos: a ordem dos pedidos nao empata
         )
         self._db.execute(
@@ -195,5 +195,5 @@ class BillingStore:
 
 def require_months(months: int, allowed: tuple[int, ...]) -> int:
     if months not in allowed:
-        raise DiggerError("Período inválido.")
+        raise NexusError("Período inválido.")
     return months

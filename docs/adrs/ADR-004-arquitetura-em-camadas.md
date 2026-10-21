@@ -4,7 +4,7 @@
 
 ## Contexto
 
-O código evoluiu por acréscimo: `biomedical_data_digger.py` misturava layout Gradio, regras de
+O código evoluiu por acréscimo: `nexus_science.py` misturava layout Gradio, regras de
 negócio (cache, resolução, prompts, chamada ao LLM) e estado global. Havia duplicação entre as
 páginas Geral/Medicina (tema, histórico, handlers), três cópias do fluxo "cache ou resolver",
 botões que reutilizavam prompts de outros botões, falhas codificadas como texto no campo
@@ -15,12 +15,12 @@ botões que reutilizavam prompts de outros botões, falhas codificadas como text
 1. **Camadas com dependência unidirecional**
    `ui` → `workflow` → (`domain`, `article_services`, `llm_service`, `cache`, `ratelimit`).
    `workflow.py` não importa Gradio: é testável com dublês injetados (`Resolver`, `TextGenerator`).
-2. **Composição na borda.** Só `biomedical_data_digger.create_app()` instancia dependências
+2. **Composição na borda.** Só `nexus_science.create_app()` instancia dependências
    concretas (repositório, roteador de LLM, limitador). Nada de singletons criados no import.
 3. **Estratégia para LLMs.** `LLMBackend` (Protocol) + `LLMRouter`; adicionar um provedor é
    escrever uma classe, sem tocar nos chamadores.
 4. **Modelo de domínio.** `Article` imutável (abstract obrigatório) e erros tipados cujo
-   `user_message` é seguro para exibição. A UI apenas converte `DiggerError` em `gr.Error`.
+   `user_message` é seguro para exibição. A UI apenas converte `NexusError` em `gr.Error`.
 5. **UI declarativa.** Cada aba é um `PageSpec` (dados); uma única fábrica monta os componentes.
    O smoke test garante que toda a interface constrói, e invariantes impedem builders duplicados
    ou mortos.

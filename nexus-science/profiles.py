@@ -10,7 +10,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from db import Database
-from domain import DiggerError
+from domain import NexusError
 from timeutil import utcnow_iso
 
 # (chave, rotulo, descricao, pacote de saude ligado por padrao)
@@ -29,7 +29,7 @@ _SCHEMA = (
 )
 
 
-class ProfileError(DiggerError):
+class ProfileError(NexusError):
     """Perfil invalido; a mensagem e segura para o usuario."""
 
 

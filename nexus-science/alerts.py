@@ -18,7 +18,7 @@ from datetime import date, datetime, timedelta
 
 from catalog import SearchQuery, Work
 from db import Database
-from domain import DiggerError, NotFoundError
+from domain import NexusError, NotFoundError
 from interests import Preferences, Topic, carregar, mentions
 from timeutil import iso as _iso
 from timeutil import utcnow as _now
@@ -300,7 +300,7 @@ class AlertService:
         def run(item: _Search) -> tuple[_Search, tuple[Work, ...] | None]:
             try:
                 return item, self._search(item.query, user)
-            except DiggerError as error:
+            except NexusError as error:
                 notes.append(error.user_message)
                 return item, None
 

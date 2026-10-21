@@ -10,7 +10,7 @@ from fastapi.testclient import TestClient
 import pages
 import prompt_builders as pb
 from config import Settings
-from domain import Completion, DiggerError
+from domain import Completion, NexusError
 from generation import DEFAULT_MAX_TOKENS, GenerationOptions, GenerationPolicy
 from llm_service import GroqBackend, OllamaBackend
 from prompt_builders import build_message_sumario
@@ -174,7 +174,7 @@ def test_empty_model_output_is_an_error_not_a_blank_result():
             return Completion("   ", 100, 900, truncated=True)
 
     service, _ = make(Empty())
-    with pytest.raises(DiggerError, match="não devolveu texto.*limite de tamanho"):
+    with pytest.raises(NexusError, match="não devolveu texto.*limite de tamanho"):
         service.analyze("33984217", "m", build_message_sumario, "S")
 
 

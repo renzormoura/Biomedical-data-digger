@@ -9,7 +9,7 @@ from fastapi.testclient import TestClient
 
 import pages
 from config import Settings
-from domain import Completion, DiggerError
+from domain import Completion, NexusError
 from llm_service import GroqBackend, LLMRouter, OllamaBackend
 from prompt_builders import build_message_sumario
 from ratelimit import SlidingWindowLimiter
@@ -101,7 +101,7 @@ def test_failed_generation_is_not_recorded():
             raise RuntimeError("503")
 
     service, log = _service_with_log(Boom())
-    with pytest.raises(DiggerError):
+    with pytest.raises(NexusError):
         service.analyze("33984217", "m", build_message_sumario, "S")
     assert log.snapshot()["totals"]["calls"] == 0
 

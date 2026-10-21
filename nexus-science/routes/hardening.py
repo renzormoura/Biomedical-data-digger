@@ -12,8 +12,8 @@ from config import Settings
 from domain import (
     AuthRequiredError,
     BackendUnavailableError,
-    DiggerError,
     LimitReachedError,
+    NexusError,
     NotFoundError,
     RateLimitedError,
     SourceUnavailableError,
@@ -48,8 +48,8 @@ def install_http_hardening(app: FastAPI, settings: Settings) -> None:
             response.headers["Cache-Control"] = "public, max-age=3600"
         return response
 
-    @app.exception_handler(DiggerError)
-    async def digger_error_handler(request: Request, error: DiggerError) -> JSONResponse:
+    @app.exception_handler(NexusError)
+    async def nexus_error_handler(request: Request, error: NexusError) -> JSONResponse:
         status = 400
         if isinstance(error, RateLimitedError):
             status = 429

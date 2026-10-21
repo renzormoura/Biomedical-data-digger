@@ -13,15 +13,15 @@ Código da aplicação web (Python/FastAPI, front-end em JavaScript puro). A doc
 Na raiz do repositório:
 ```bash
 pip install -r requirements-dev.txt
-cd biomedical-article-summariser
-python biomedical_data_digger.py        # http://localhost:7860
+cd nexus-science
+python nexus_science.py        # http://localhost:7860
 ```
 Sem `DATABASE_URL`, usa SQLite local. Variáveis de ambiente: [Configuração](../docs/operacao/configuracao.md). Depois de editar JS/CSS, reinicie o servidor.
 
 ## Onde está cada coisa
 | Pasta/arquivo | Conteúdo |
 |---|---|
-| `biomedical_data_digger.py` | Ponto de entrada (monta as dependências e sobe o servidor) |
+| `nexus_science.py` | Ponto de entrada (monta as dependências e sobe o servidor) |
 | `web.py`, `browse_api.py`, `account_routes.py` | Rotas e middleware |
 | `discovery.py`, `*_catalog.py` | Busca em várias fontes |
 | `reliability.py`, `extraction.py` | Nota de confiabilidade e extração do resumo (sem IA) |
@@ -34,7 +34,7 @@ Catálogo completo: [Módulos](../docs/arquitetura/modulos.md). API: [Referênci
 
 ## Qualidade
 ```bash
-ruff check biomedical-article-summariser tests evals scripts
+ruff check nexus-science tests evals scripts
 mypy
 pytest
 node --test tests/js/browse-lib.test.js

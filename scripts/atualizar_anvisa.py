@@ -1,4 +1,4 @@
-"""Atualiza `biomedical-article-summariser/dados_brasil/anvisa.json` a partir dos dados abertos da ANVISA.
+"""Atualiza `nexus-science/dados_brasil/anvisa.json` a partir dos dados abertos da ANVISA.
 
 Uso (na raiz do repositorio):  python scripts/atualizar_anvisa.py
 
@@ -10,7 +10,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "biomedical-article-summariser"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "nexus-science"))
 
 from brasil import anvisa_build  # noqa: E402
 

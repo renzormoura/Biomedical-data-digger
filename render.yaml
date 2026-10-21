@@ -8,13 +8,13 @@
 
 services:
   - type: web
-    name: biomedical-data-digger
+    name: nexus-science
     runtime: python
     region: virginia
     plan: free
-    rootDir: biomedical-article-summariser
+    rootDir: nexus-science
     buildCommand: pip install -r requirements.txt
-    startCommand: python biomedical_data_digger.py
+    startCommand: python nexus_science.py
     healthCheckPath: /healthz
     envVars:
       - key: PYTHON_VERSION

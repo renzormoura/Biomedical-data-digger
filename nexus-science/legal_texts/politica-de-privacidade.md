@@ -42,7 +42,7 @@ Senhas guardadas com algoritmo próprio para senhas (PBKDF2, com sal); sessão p
 O Serviço não é direcionado a menores de 18 anos. Se soubermos que uma conta pertence a menor sem a autorização legal necessária, poderemos encerrá-la.
 
 ## 8. Cookies
-Usamos **apenas** um cookie essencial de sessão (`bdd_session`). Não usamos cookies de publicidade nem de análise.
+Usamos **apenas** um cookie essencial de sessão (`nexus_session`). Não usamos cookies de publicidade nem de análise.
 
 ## 9. Mudanças
 Podemos atualizar esta Política. Mudanças relevantes serão avisadas e a versão vigente fica sempre nesta página, com a data da versão.

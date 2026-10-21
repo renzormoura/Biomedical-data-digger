@@ -17,7 +17,7 @@ from pydantic import BaseModel, Field
 
 import plans
 from billing import CONFIRMED, PENDING
-from domain import DiggerError, NotFoundError, RateLimitedError
+from domain import NexusError, NotFoundError, RateLimitedError
 from mailer import EmailMessage, MailError
 from ratelimit import RateLimitExceeded
 from routes.context import ApiContext
@@ -89,7 +89,7 @@ def register_admin_routes(app: FastAPI, ctx: ApiContext) -> None:
 
     def protect_admins(email: str, actor: str) -> None:
         if email in settings.admin_emails or email == actor:
-            raise DiggerError("Administradores não podem ser suspensos nem excluídos por aqui.")
+            raise NexusError("Administradores não podem ser suspensos nem excluídos por aqui.")
 
     def audit(actor: str, action: str, email: str = "") -> None:
         logger.info("admin_action actor={} action={} target={}", actor, action, email or "-")
@@ -140,7 +140,7 @@ def register_admin_routes(app: FastAPI, ctx: ApiContext) -> None:
         address = target(email)
         protect_admins(address, actor)
         if ctx.flags is None:
-            raise DiggerError("Suspensão indisponível.")
+            raise NexusError("Suspensão indisponível.")
         ctx.flags.suspend(address, body.reason)
         ctx.session_changed(address, False)
         audit(actor, "suspend", address)
@@ -151,7 +151,7 @@ def register_admin_routes(app: FastAPI, ctx: ApiContext) -> None:
         actor = require_admin(request)
         address = target(email)
         if ctx.flags is None:
-            raise DiggerError("Suspensão indisponível.")
+            raise NexusError("Suspensão indisponível.")
         changed = ctx.flags.unsuspend(address)
         ctx.session_changed(address, True)
         audit(actor, "unsuspend", address)
@@ -167,7 +167,7 @@ def register_admin_routes(app: FastAPI, ctx: ApiContext) -> None:
         if not sent and ctx.mailer is not None:
             return {"sent": False}  # ja ha um link recente (1 por minuto)
         if ctx.mailer is None:
-            raise DiggerError("O envio de e-mails não está configurado neste servidor.")
+            raise NexusError("O envio de e-mails não está configurado neste servidor.")
         return {"sent": True}
 
     @app.post("/api/admin/users/{email}/verify")
@@ -185,7 +185,7 @@ def register_admin_routes(app: FastAPI, ctx: ApiContext) -> None:
         address = target(email)
         protect_admins(address, actor)
         if body.confirm.strip().lower() != address:
-            raise DiggerError("Digite o e-mail da conta para confirmar a exclusão.")
+            raise NexusError("Digite o e-mail da conta para confirmar a exclusão.")
         ctx.purge_account(address)
         ctx.session_changed(address, False)
         audit(actor, "delete_account", address)
@@ -228,7 +228,7 @@ def register_admin_routes(app: FastAPI, ctx: ApiContext) -> None:
     def admin_grant(body: GrantIn, request: Request) -> dict[str, Any]:
         actor = require_admin(request)
         if body.plan not in catalog or body.plan == plans.FREE_KEY:
-            raise DiggerError("Plano inválido.")
+            raise NexusError("Plano inválido.")
         address = target(body.email)
         subscription = billing.grant(address, body.plan, body.days)
         audit(actor, f"grant_{body.plan}_{body.days}d", address)

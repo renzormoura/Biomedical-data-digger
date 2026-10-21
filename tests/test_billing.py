@@ -49,9 +49,9 @@ def test_crc16_matches_the_ccitt_false_reference_vector():
 
 
 def test_br_code_has_the_expected_fields_and_a_valid_checksum():
-    code = br_code("chave@exemplo.com", "Maria da Silva Ltda", "São Paulo", 2900, "BDDABC123")
+    code = br_code("chave@exemplo.com", "Maria da Silva Ltda", "São Paulo", 2900, "NXSABC123")
     assert code.startswith("000201010211") and "br.gov.bcb.pix" in code and "chave@exemplo.com" in code
-    assert "540529.00" in code and "5802BR" in code and "BDDABC123" in code
+    assert "540529.00" in code and "5802BR" in code and "NXSABC123" in code
     assert "5919Maria da Silva Ltda" in code  # nome sem acento, com o tamanho do campo
     assert code[-8:-4] == "6304" and code[-4:] == crc16(code[:-4])  # o CRC cobre tudo ate "6304"
 
@@ -78,7 +78,7 @@ def store(tmp_path):
 
 def test_requests_are_reused_limited_and_cancellable(store):
     first = store.create_request(EMAIL, "pro", 1, 2900)
-    assert first.status == PENDING and first.reference.startswith("BDD") and len(first.reference) == 13
+    assert first.status == PENDING and first.reference.startswith("NXS") and len(first.reference) == 13
     assert store.create_request(EMAIL, "pro", 1, 2900).id == first.id  # o mesmo pedido nao se repete
     store.create_request(EMAIL, "pro", 3, 8700)
     store.create_request(EMAIL, "pro", 12, 34800)

@@ -20,7 +20,7 @@ import downloads
 import reliability
 from cache import TTLCache
 from catalog import Catalog, CatalogError, SearchQuery, SearchResult, Work
-from domain import ArticleNotFoundError, DiggerError, RateLimitedError, SourceUnavailableError
+from domain import ArticleNotFoundError, NexusError, RateLimitedError, SourceUnavailableError
 from enrichment import Enricher, Enrichment
 from extraction import AbstractSection, Finding, extract_findings, split_sections
 from ratelimit import RateLimitExceeded, SlidingWindowLimiter
@@ -175,7 +175,7 @@ class DiscoveryService:
     def _catalog(self, source: str | None) -> Catalog:
         catalog = self._catalogs.get(source or self._default)
         if catalog is None:
-            raise DiggerError("Fonte de busca desconhecida.")
+            raise NexusError("Fonte de busca desconhecida.")
         return catalog
 
     def _check(self, client_id: str) -> None:
@@ -238,7 +238,7 @@ class DiscoveryService:
         def run(item: tuple[Catalog, SearchQuery]) -> SearchResult | None:
             try:
                 return self._search_one(item[0], item[1])
-            except DiggerError as error:
+            except NexusError as error:
                 logger.debug("Fonte {} falhou na busca combinada: {}", item[0].id, error)
                 return None
 
@@ -306,7 +306,7 @@ class DiscoveryService:
     def work(self, ref: str, *, source: str | None = None, client_id: str = "local") -> Work:
         ref = (ref or "").strip()[:300]
         if not ref:
-            raise DiggerError("Informe o identificador do artigo.")
+            raise NexusError("Informe o identificador do artigo.")
         cached = [self._works.get(f"{c.id}:{ref}") for c in self._catalogs.values()]
         found = next((w for w in cached if w is not None), None)
         if found is not None:
@@ -408,7 +408,7 @@ class DiscoveryService:
                 SearchQuery(q=" ".join(terms), sort="relevance", per_page=SIMILAR_LIMIT + 4),
                 source=self._source_of(work), client_id=client_id,
             )
-        except DiggerError:
+        except NexusError:
             return ()
         own = {work.ref, work.pmid, work.doi, work.pmcid} - {""}
         own_title = _NON_WORD.sub("", work.title.lower())

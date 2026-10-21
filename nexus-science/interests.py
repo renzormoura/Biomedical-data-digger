@@ -12,7 +12,7 @@ import unicodedata
 from dataclasses import dataclass, field
 from functools import lru_cache
 
-from domain import DiggerError
+from domain import NexusError
 
 MAX_TOPICS = 15  # areas sem subtema + subtemas escolhidos
 MAX_LANGUAGES = 4
@@ -152,7 +152,7 @@ class Topic:
         return (self.query_pt if language == "pt" else self.query_en).split("|")[0].strip()
 
 
-class InterestsError(DiggerError):
+class InterestsError(NexusError):
     """Preferencias invalidas; a mensagem e segura para o usuario."""
 
 

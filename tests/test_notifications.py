@@ -16,7 +16,7 @@ from citations import Author
 from config import Settings
 from db import Database
 from discovery import DiscoveryService
-from domain import DiggerError, RateLimitedError
+from domain import NexusError, RateLimitedError
 from library_store import LibraryStore
 from notifications import (
     KINDS,
@@ -76,7 +76,7 @@ def parts(tmp_path, monkeypatch, bases):
     def fetch(ref):
         calls.append(ref)
         if ref == "falha":
-            raise DiggerError("fonte fora do ar")
+            raise NexusError("fonte fora do ar")
         if ref == "limite":
             raise RateLimitedError("muitas consultas")
         return remote.get(ref)

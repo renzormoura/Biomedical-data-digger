@@ -4,8 +4,8 @@
 (() => {
   "use strict";
 
-  const HISTORY_KEY = "bdd.history";
-  const THEME_KEY = "bdd.theme";
+  const HISTORY_KEY = "nexus.history";
+  const THEME_KEY = "nexus.theme";
   const HISTORY_LIMIT = 10;
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];

@@ -18,7 +18,7 @@ import statistics
 import sys
 import time
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "biomedical-article-summariser"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "nexus-science"))
 
 import prompt_builders as pb  # noqa: E402
 from generation import GenerationOptions  # noqa: E402

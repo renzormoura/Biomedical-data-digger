@@ -16,7 +16,7 @@ Para quem vai alterar o código. Ambiente e comandos: [Preparar o ambiente](../d
 - **ruff** com as regras `E, F, W, I, B, UP, SIM, C4, RET, PIE, S` (config em `pyproject.toml`); **mypy** com a lista explícita de arquivos em `[tool.mypy] files`: **ao criar um módulo novo, inclua-o ali**.
 - Comentários e docstrings em português, curtos; explique o **porquê**, não o óbvio. Nomes de domínio em português quando já são assim no módulo (ex.: `situacao`, `candidato`).
 - Sem emojis na interface (testado).
-- Tratamento de erros: use as exceções de `domain.py` (`DiggerError` e derivadas) com **mensagem segura para o usuário**; exceções inesperadas viram "Erro interno" e vão para o log.
+- Tratamento de erros: use as exceções de `domain.py` (`NexusError` e derivadas) com **mensagem segura para o usuário**; exceções inesperadas viram "Erro interno" e vão para o log.
 - Tempo e aleatoriedade injetáveis (`clock`, `TTLCache`) para testar sem `sleep` longo.
 
 ## Como fazer mudanças comuns
@@ -24,7 +24,7 @@ Para quem vai alterar o código. Ambiente e comandos: [Preparar o ambiente](../d
 ### Adicionar uma fonte de busca
 1. Criar `xxx_catalog.py` com uma classe que implemente `Catalog` (`id`, `name`, `study_types()`, `search(query)`, `get(ref)`; defina `combined = True` para a fonte entrar em "Todas as fontes") e converta tudo para `Work`.
 2. Tratar erros de rede como `CatalogError` (o serviço os converte em aviso).
-3. Registrar em `create_app()` (`biomedical_data_digger.py`).
+3. Registrar em `create_app()` (`nexus_science.py`).
 4. Testes com respostas simuladas (sem rede), seguindo `tests/test_more_sources.py`.
 5. Atualizar [Busca](../features/busca-artigos.md), [Integrações](../arquitetura/integracoes-externas.md) e [Licenças](../legal/licencas-e-termos.md).
 

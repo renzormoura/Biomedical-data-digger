@@ -1,4 +1,4 @@
-"""Atualiza `biomedical-article-summariser/dados_brasil/rename.json` a partir do PDF oficial da Rename.
+"""Atualiza `nexus-science/dados_brasil/rename.json` a partir do PDF oficial da Rename.
 
 Uso (na raiz do repositorio):  python scripts/atualizar_rename.py   (requer `pip install pypdf`)
 
@@ -10,7 +10,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "biomedical-article-summariser"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "nexus-science"))
 
 from brasil import rename_build  # noqa: E402
 

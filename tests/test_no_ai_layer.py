@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 import pages
 import prompt_builders as pb
 from config import Settings
-from domain import BackendUnavailableError, DiggerError, RateLimitedError
+from domain import BackendUnavailableError, NexusError, RateLimitedError
 from europepmc import EuropePmcRecord
 from extraction import CUE_KINDS
 from ratelimit import SlidingWindowLimiter
@@ -98,9 +98,9 @@ def test_clinical_extraction_appends_disclaimer_and_security_warnings():
 
 def test_extract_validates_input_and_applies_the_rate_limit():
     service, _, _ = make(limit=2)
-    with pytest.raises(DiggerError, match="inválido"):
+    with pytest.raises(NexusError, match="inválido"):
         service.extract("33984217", "inexistente")
-    with pytest.raises(DiggerError, match="Cole um ID"):
+    with pytest.raises(NexusError, match="Cole um ID"):
         service.extract("   ")
     service.extract("33984217", client_id="a")
     service.extract("33984217", client_id="a")

@@ -22,7 +22,7 @@ Busca, feed, nota de confiabilidade e Panorama não têm limite em nenhum plano.
 Ao atingir um limite, a API responde 409 com a mensagem "O plano Gratuito permite até N artigos… Veja os planos". Salvar de novo um artigo já salvo não ocupa outro lugar. **Assinatura vencida não apaga nada:** a conta volta ao gratuito e os limites passam a valer só para novas gravações.
 
 ## Como funciona
-1. **Pedido** (`POST /api/billing/requests`): cria `payment_requests` com plano, meses, valor (`preço × meses`, sem desconto por enquanto) e um **identificador** `BDD` + 10 caracteres. Pedidos idênticos pendentes são reaproveitados; no máximo 3 pendentes por conta.
+1. **Pedido** (`POST /api/billing/requests`): cria `payment_requests` com plano, meses, valor (`preço × meses`, sem desconto por enquanto) e um **identificador** `NXS` + 10 caracteres. Pedidos idênticos pendentes são reaproveitados; no máximo 3 pendentes por conta.
 2. **Pix "copia e cola"** (`pix.py`): gera o BR Code estático do Banco Central com chave, nome, cidade, **valor** e o identificador (CRC16-CCITT). Qualquer app de banco paga. É um QR estático: o banco pode ou não mostrar o identificador no extrato.
 3. **Conciliação (administrador):** em `#/admin`, com o `ADMIN_TOKEN`, a lista de pedidos pendentes mostra e-mail, plano, valor e identificador. O administrador confere o extrato bancário (valor, data, nome do pagador, identificador quando houver) e clica **Confirmar pagamento**. Isso é sempre um ato humano: nada confirma sozinho.
 4. **Ativação:** a confirmação marca o pedido como pago e cria ou **prorroga** a assinatura (30 dias por mês pago, somados ao vencimento atual se o plano for o mesmo), e envia o e-mail de ativação.

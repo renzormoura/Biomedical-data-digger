@@ -40,7 +40,7 @@ from cache import TTLCache
 from config import Settings
 from discovery import DiscoveryService
 from domain import (
-    DiggerError,
+    NexusError,
     RateLimitedError,
 )
 from feed import FeedService
@@ -60,7 +60,7 @@ from usage import UsageLog
 from workflow import AnalysisService, ArticleRepository
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-SESSION_COOKIE = "bdd_session"
+SESSION_COOKIE = "nexus_session"
 
 # ---------------------------------------------------------------------------
 # Modelos de requisicao (validacao na borda)
@@ -164,7 +164,7 @@ def create_app(
 
     def validated_model(model: str) -> str:
         if model not in pages.MODEL_CHOICES:
-            raise DiggerError("Modelo de linguagem inválido.")
+            raise NexusError("Modelo de linguagem inválido.")
         return model
 
     # -- paginas ---------------------------------------------------------------
@@ -223,18 +223,18 @@ def create_app(
         try:
             return validate_credentials(body.email, body.password)
         except InvalidCredentialsFormat as error:
-            raise DiggerError(str(error)) from error
+            raise NexusError(str(error)) from error
 
     @app.post("/api/auth/register")
     def register(body: CredentialsIn, request: Request) -> JSONResponse:
         throttle_auth(request)
         email, password = credentials(body)
         if settings.require_terms and not body.accept_terms:
-            raise DiggerError("Aceite os Termos de Uso e a Política de Privacidade para criar a conta.")
+            raise NexusError("Aceite os Termos de Uso e a Política de Privacidade para criar a conta.")
         try:
             created = account_store_factory().create_user(email, password)
         except AccountStoreError as error:
-            raise DiggerError(str(error)) from error
+            raise NexusError(str(error)) from error
         if not created:
             return JSONResponse({"error": "Este e-mail já está cadastrado."}, status_code=409)
         if consent is not None and body.accept_terms:
@@ -254,7 +254,7 @@ def create_app(
         except InvalidCredentialsFormat:
             ok = False
         except AccountStoreError as error:
-            raise DiggerError(str(error)) from error
+            raise NexusError(str(error)) from error
         if not ok:
             return JSONResponse({"error": "E-mail ou senha inválidos."}, status_code=401)
         if flags is not None and flags.is_suspended(email):

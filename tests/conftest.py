@@ -5,7 +5,7 @@ import sys
 
 import pytest
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "biomedical-article-summariser"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "nexus-science"))
 
 
 @pytest.fixture(autouse=True)
@@ -34,7 +34,7 @@ def _postgres_schema(monkeypatch, request):
 
     Cada teste ganha um schema proprio (isolamento total) e todo `Database(database_url="")` -- que nos testes
     significa "o banco local" -- passa a apontar para ele. Sem a variavel, nada muda e os testes usam SQLite.
-    Uso:  TEST_POSTGRES_URL=postgresql://usuario:senha@localhost:55432/bdd pytest
+    Uso:  TEST_POSTGRES_URL=postgresql://usuario:senha@localhost:55432/nexus pytest
     """
     base = os.environ.get("TEST_POSTGRES_URL", "").strip()
     if not base:

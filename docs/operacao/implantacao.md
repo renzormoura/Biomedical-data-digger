@@ -5,9 +5,9 @@
 |---|---|
 | Hospedagem | **Render** (serviço web Python) |
 | Definição | `render.yaml` na raiz (infraestrutura como código) |
-| Diretório raiz do serviço | `biomedical-article-summariser` |
+| Diretório raiz do serviço | `nexus-science` |
 | Build | `pip install -r requirements.txt` |
-| Início | `python biomedical_data_digger.py` (uvicorn em `0.0.0.0:$PORT`) |
+| Início | `python nexus_science.py` (uvicorn em `0.0.0.0:$PORT`) |
 | Python | 3.11.9 (`PYTHON_VERSION`; sem isso o Render usa uma versão nova e o build falha) |
 | Banco | PostgreSQL gerenciado do Render, definido no mesmo `render.yaml` (`DATABASE_URL` vem do banco por `fromDatabase`) |
 | Plano | O Blueprint usa plano pago (web `starter` sempre ligado e banco com backup). No plano gratuito o serviço **hiberna após ~15 minutos sem acesso** e o disco é efêmero: não use com usuários reais |
@@ -21,7 +21,7 @@ Variáveis de ambiente: ver [Configuração](configuracao.md). Em `render.yaml`,
 A descrição abaixo é do desenho **pago**; no gratuito, troque "banco do Render" por "banco do Neon".
 
 ## O Blueprint pago (`render.pago.yaml`)
-Cria, na mesma região (`virginia`), o **PostgreSQL** (`biomedical-data-digger-db`, plano pago com backup) e o **serviço web** (plano `starter`, sempre ligado), liga `DATABASE_URL` ao banco, gera `SESSION_SECRET`, define o *health check* em `/healthz` e lista as variáveis que você preenche no painel (`ADMIN_EMAILS`, `LEGAL_CONTROLLER`, `LEGAL_CONTACT`, `PIX_KEY`, `PIX_NAME`, `APP_BASE_URL`, `SMTP_*`, `GROQ_API_KEY`, `ALERTS_CRON_TOKEN`, `ADMIN_TOKEN`). **Confirme os nomes dos planos no painel do Render antes de aplicar** (eles mudam).
+Cria, na mesma região (`virginia`), o **PostgreSQL** (`nexus-science-db`, plano pago com backup) e o **serviço web** (plano `starter`, sempre ligado), liga `DATABASE_URL` ao banco, gera `SESSION_SECRET`, define o *health check* em `/healthz` e lista as variáveis que você preenche no painel (`ADMIN_EMAILS`, `LEGAL_CONTROLLER`, `LEGAL_CONTACT`, `PIX_KEY`, `PIX_NAME`, `APP_BASE_URL`, `SMTP_*`, `GROQ_API_KEY`, `ALERTS_CRON_TOKEN`, `ADMIN_TOKEN`). **Confirme os nomes dos planos no painel do Render antes de aplicar** (eles mudam).
 
 ### Banco pronto antes do primeiro tráfego
 1. Aplique o Blueprint (*New → Blueprint*) e espere o banco ficar disponível.

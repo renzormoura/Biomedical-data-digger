@@ -52,7 +52,7 @@ class Completion:
         return (self.prompt_tokens or 0) + (self.completion_tokens or 0)
 
 
-class DiggerError(Exception):
+class NexusError(Exception):
     """Erro esperado com mensagem segura para exibir ao usuario."""
 
     def __init__(self, user_message: str) -> None:
@@ -60,27 +60,27 @@ class DiggerError(Exception):
         self.user_message = user_message
 
 
-class RateLimitedError(DiggerError):
+class RateLimitedError(NexusError):
     """O cliente excedeu o limite de uso (HTTP 429)."""
 
 
-class SourceUnavailableError(DiggerError):
+class SourceUnavailableError(NexusError):
     """Uma fonte de artigos (Europe PMC, OpenAlex...) esta indisponivel (HTTP 503)."""
 
 
-class BackendUnavailableError(DiggerError):
+class BackendUnavailableError(NexusError):
     """Nenhum backend de LLM apto a atender o modelo pedido."""
 
 
-class AuthRequiredError(DiggerError):
+class AuthRequiredError(NexusError):
     """E preciso entrar na conta para esta acao (HTTP 401)."""
 
 
-class NotFoundError(DiggerError):
+class NotFoundError(NexusError):
     """O recurso pedido nao existe (HTTP 404)."""
 
 
-class LimitReachedError(DiggerError):
+class LimitReachedError(NexusError):
     """Um limite de uso (itens, listas...) foi atingido (HTTP 409)."""
 
 

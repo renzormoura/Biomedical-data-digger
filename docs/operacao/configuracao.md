@@ -1,6 +1,6 @@
 # Configuração
 
-Toda a configuração vem de **variáveis de ambiente**, lidas e validadas em um só lugar (`config.py`). Valores inválidos impedem a subida com mensagem clara (por exemplo, "RATE_LIMIT_PER_MINUTE deve ser um inteiro"). Em desenvolvimento, as variáveis podem ficar em `biomedical-article-summariser/.env` (ignorado pelo Git).
+Toda a configuração vem de **variáveis de ambiente**, lidas e validadas em um só lugar (`config.py`). Valores inválidos impedem a subida com mensagem clara (por exemplo, "RATE_LIMIT_PER_MINUTE deve ser um inteiro"). Em desenvolvimento, as variáveis podem ficar em `nexus-science/.env` (ignorado pelo Git).
 
 ## Variáveis
 

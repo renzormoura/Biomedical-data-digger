@@ -2,7 +2,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const Lib = require("../../biomedical-article-summariser/static/browse-lib.js");
+const Lib = require("../../nexus-science/static/browse-lib.js");
 
 test("parseRoute reconhece as telas e ignora o desconhecido", () => {
   assert.deepEqual(Lib.parseRoute("#/busca?q=sepsis").view, "busca");

@@ -3,7 +3,7 @@
 (function () {
   const root = document.documentElement;
   try {
-    const saved = localStorage.getItem("bdd.theme");
+    const saved = localStorage.getItem("nexus.theme");
     if (saved === "light" || saved === "dark") root.setAttribute("data-theme", saved);
   } catch (error) { /* armazenamento indisponível: segue o sistema */ }
   const button = document.getElementById("theme-toggle");
@@ -12,7 +12,7 @@
     const current = root.getAttribute("data-theme") || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
     const next = current === "dark" ? "light" : "dark";
     root.setAttribute("data-theme", next);
-    try { localStorage.setItem("bdd.theme", next); } catch (error) { /* ignora */ }
+    try { localStorage.setItem("nexus.theme", next); } catch (error) { /* ignora */ }
   });
 
   // Seletor de formato de citação (maquete)
