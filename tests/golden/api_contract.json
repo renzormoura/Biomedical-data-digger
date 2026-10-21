@@ -280,6 +280,7 @@
   "json": {
    "byPlan": {
     "gratuito": 0,
+    "max": 0,
     "pro": 1
    },
    "expiringSoon": 0,
@@ -601,6 +602,18 @@
      "name": "Pro",
      "price": "R$ 29,00",
      "priceCents": 2900
+    },
+    {
+     "description": "Para quem pesquisa o tempo todo: limites bem maiores de biblioteca, listas e relatórios.",
+     "key": "max",
+     "limits": {
+      "library": 2000,
+      "lists": 200,
+      "reports": 100
+     },
+     "name": "Max",
+     "price": "R$ 49,90",
+     "priceCents": 4990
     }
    ]
   },

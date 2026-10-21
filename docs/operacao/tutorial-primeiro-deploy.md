@@ -51,7 +51,7 @@ No serviço web: **Environment**. Preencha estas:
 | `APP_BASE_URL` | `https://` + o endereço do serviço (aparece no topo da página do serviço, algo como `https://biomedical-data-digger.onrender.com`), sem barra no fim | **Sim**, se usar e-mail |
 | `ADMIN_EMAILS` | O e-mail da sua conta de administrador | Recomendada |
 | `ADMIN_TOKEN`, `ALERTS_CRON_TOKEN` | Os dois segredos gerados | Recomendadas |
-| `PIX_KEY`, `PIX_NAME`, `PRO_PRICE_CENTS` | Chave Pix, nome do recebedor (até 25 caracteres, sem acento) e preço em centavos (`2900` = R$ 29,00) | Para cobrar |
+| `PIX_KEY`, `PIX_NAME`, `PRO_PRICE_CENTS`, `MAX_PRICE_CENTS` | Chave Pix, nome do recebedor (até 25 caracteres, sem acento) e preços em centavos (`2900` = R$ 29,00; `4990` = R$ 49,90) | Para cobrar |
 | `BILLING_ENFORCED` | Deixe `0` | Não |
 | `GROQ_API_KEY` | Chave da Groq (tem plano gratuito), se quiser o Laboratório de IA | Não |
 
@@ -88,7 +88,7 @@ Sem o monitor, tudo funciona, só que a primeira visita depois de um tempo parad
 3. Em **Actions → Alertas agendados → Run workflow**, rode uma vez para conferir. Depois roda sozinho a cada 6 horas (poucas execuções por mês, dentro do limite gratuito do GitHub).
 
 ## Parte 8: receber por Pix
-1. Confira `PIX_KEY`, `PIX_NAME` e `PRO_PRICE_CENTS`.
+1. Confira `PIX_KEY`, `PIX_NAME` e `PRO_PRICE_CENTS` e `MAX_PRICE_CENTS`.
 2. Em **Planos**, crie um pedido de teste e veja o código "copia e cola" (abra no app do banco sem pagar, só para conferir).
 3. Em **Administração → Pagamentos**, o pedido aparece pendente. Quando um pagamento de verdade cair, confira o extrato e clique **Confirmar pagamento**.
 4. Só mude `BILLING_ENFORCED` para `1` quando quiser que os limites do plano gratuito valham.

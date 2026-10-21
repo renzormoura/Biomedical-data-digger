@@ -48,13 +48,16 @@ class AdminService:
     def overview(self) -> dict[str, Any]:
         now = self._clock()
         total = self._count("SELECT COUNT(*) FROM users")
-        paying = self._count("SELECT COUNT(*) FROM subscriptions WHERE expires_at > ?", (now.isoformat(timespec="seconds"),))
+        active = self._db.query("SELECT plan, COUNT(*) FROM subscriptions WHERE expires_at > ? GROUP BY plan", (now.isoformat(timespec="seconds"),))
+        by_plan = dict.fromkeys(plans.PAID_KEYS, 0)
+        by_plan.update({str(plan): int(count) for plan, count in active})
+        paying = sum(by_plan.values())
         month_ago = now - timedelta(days=30)
         return {
             "users": total,
             "verified": self._count("SELECT COUNT(*) FROM email_verification"),
             "suspended": self._count("SELECT COUNT(*) FROM suspended_accounts"),
-            "byPlan": {plans.FREE_KEY: total - paying, plans.PRO_KEY: paying},
+            "byPlan": {plans.FREE_KEY: total - paying, **by_plan},
             "newLast7Days": self._count("SELECT COUNT(*) FROM users WHERE created_at >= ?", ((now - timedelta(days=7)).isoformat(),)),
             "pendingPayments": len(self._billing.pending()),
             "revenueLast30DaysCents": self._billing.revenue_cents(month_ago),

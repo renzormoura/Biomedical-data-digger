@@ -24,6 +24,7 @@ Toda a configuração vem de **variáveis de ambiente**, lidas e validadas em um
 | `PIX_NAME` | Nome do recebedor mostrado no Pix (ASCII, até 25 caracteres) |
 | `PIX_CITY` | Cidade do recebedor (padrão `BRASIL`, até 15 caracteres) |
 | `PRO_PRICE_CENTS` | Preço do Pro por mês em centavos (padrão 2900, **provisório**) |
+| `MAX_PRICE_CENTS` | Preço do Max por mês em centavos (padrão 4990, **provisório**) |
 
 O painel de administração e a conciliação usam `ADMIN_TOKEN` (já listado abaixo).
 

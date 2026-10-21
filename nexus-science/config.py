@@ -59,6 +59,7 @@ class Settings:
     pix_name: str = ""  # nome do recebedor no Pix (ate 25 caracteres)
     pix_city: str = "BRASIL"
     pro_price_cents: int = 2900  # preco do plano Pro por mes, em centavos (valor provisorio: defina o preco real)
+    max_price_cents: int = 4990  # preco do plano Max por mes, em centavos (valor provisorio)
     require_terms: bool = False  # cadastro exige aceitar Termos e Politica (padrao em producao)
     legal_controller: str = ""  # quem e o controlador dos dados (nome ou razao social)
     legal_contact: str = ""  # e-mail do encarregado / para solicitacoes de titulares
@@ -97,6 +98,7 @@ class Settings:
             production=production,
             admin_emails=admin_emails, billing_enforced=billing_enforced, pix_key=pix_key, pix_name=pix_name,
             pix_city=os.environ.get("PIX_CITY", "").strip() or "BRASIL", pro_price_cents=_int_env("PRO_PRICE_CENTS", 2900, minimum=1),
+            max_price_cents=_int_env("MAX_PRICE_CENTS", 4990, minimum=1),
             require_terms=require_terms, legal_controller=legal_controller, legal_contact=legal_contact,
             legal_forum=os.environ.get("LEGAL_FORUM", "").strip(),
             app_base_url=base_url or "http://localhost:7860",

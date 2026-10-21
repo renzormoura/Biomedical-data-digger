@@ -775,19 +775,20 @@
     ["3", "Entregue", "Listas, relatório com método e citações prontas para o seu gerenciador."],
   ];
   const planCards = (data) => h("div", { class: "gplan-grid" }, data.plans.map((plan) => {
-    const featured = plan.priceCents > 0;
+    const featured = plan.key === "pro";
+    const paid = plan.priceCents > 0;
     return h("article", { class: `gplan-card${featured ? " is-featured" : ""}` },
-      featured ? h("span", { class: "gplan-flag" }, "Mais completo") : null,
+      featured ? h("span", { class: "gplan-flag" }, "Mais escolhido") : null,
       h("h3", {}, plan.name),
       h("p", { class: "gplan-price" }, plan.priceCents ? h("strong", {}, plan.price) : h("strong", {}, "Grátis"), plan.priceCents ? h("span", { class: "muted" }, " por mês") : null),
       h("p", { class: "muted" }, plan.description),
       h("ul", { class: "checklist" },
-        h("li", {}, icon("check"), h("span", {}, `${plan.limits.library} artigos na biblioteca`)),
+        h("li", {}, icon("check"), h("span", {}, `${plan.limits.library.toLocaleString("pt-BR")} artigos na biblioteca`)),
         h("li", {}, icon("check"), h("span", {}, `${plan.limits.lists} listas de leitura`)),
         h("li", {}, icon("check"), h("span", {}, `${plan.limits.reports} ${plan.limits.reports === 1 ? "relatório" : "relatórios"} de tema`))),
       h("button", { type: "button", class: `btn ${featured ? "btn-primary" : "btn-secondary"}`,
-        onclick: () => openAuth(featured ? "Crie sua conta para assinar o plano Pro." : "Crie sua conta grátis para salvar artigos e acompanhar interesses.") },
-      featured ? "Começar e assinar" : "Criar conta grátis"));
+        onclick: () => openAuth(paid ? `Crie sua conta para assinar o plano ${plan.name}.` : "Crie sua conta grátis para salvar artigos e acompanhar interesses.") },
+      paid ? "Começar e assinar" : "Criar conta grátis"));
   }));
 
   function renderGuestHome() {
@@ -799,7 +800,7 @@
       mount(plansBox,
         h("p", { class: "eyebrow" }, "Planos"),
         h("h2", { id: "planos" }, "Comece grátis. Cresça quando precisar."),
-        h("p", { class: "lead" }, "Buscar, ler e navegar pelo feed é livre, sem conta. A conta grátis já guarda seus artigos; o Pro amplia os limites para quem pesquisa todo dia."),
+        h("p", { class: "lead" }, "Buscar, ler e navegar pelo feed é livre, sem conta. A conta grátis já guarda seus artigos; os planos pagos ampliam os limites para quem pesquisa todo dia."),
         planCards(data));
     }).catch(() => { /* sem planos publicados, a secao simplesmente nao aparece */ });
 
@@ -2406,7 +2407,7 @@
           h("p", { class: "plan-price" }, plan.priceCents ? h("strong", {}, `R$ ${(total / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`) : h("strong", {}, "Grátis"),
             plan.priceCents ? h("span", { class: "muted" }, ` por ${months} ${months === 1 ? "mês" : "meses"}`) : null),
           h("ul", { class: "checklist" },
-            h("li", {}, icon("check"), h("span", {}, `${plan.limits.library} artigos na biblioteca`)),
+            h("li", {}, icon("check"), h("span", {}, `${plan.limits.library.toLocaleString("pt-BR")} artigos na biblioteca`)),
             h("li", {}, icon("check"), h("span", {}, `${plan.limits.lists} listas de leitura`)),
             h("li", {}, icon("check"), h("span", {}, plan.limits.reports ? `${plan.limits.reports} ${plan.limits.reports === 1 ? "relatório" : "relatórios"} de tema` : "Sem relatórios de tema"))),
           current ? h("p", { class: "note" }, mine.active && plan.priceCents ? `Plano atual, até ${fmtDay(mine.expiresAt)}.` : "Plano atual.")
@@ -2451,7 +2452,7 @@
   /** Aba de Administração: visão geral, usuários (com plano e ações), pagamentos e sistema. Só aparece para administradores. */
   const ADMIN_TABS = [["", "Visão geral"], ["usuarios", "Usuários"], ["pagamentos", "Pagamentos"], ["sistema", "Sistema"]];
   const brl = (cents) => `R$ ${(cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
-  const PLAN_NAMES = { gratuito: "Gratuito", pro: "Pro" };
+  const PLAN_NAMES = { gratuito: "Gratuito", pro: "Pro", max: "Max" };
 
   function renderAdmin(tab = "") {
     setTitle("Administração");
@@ -2502,7 +2503,7 @@
       const search = h("input", { type: "search", value: query, placeholder: "Buscar por e-mail", "aria-label": "Buscar por e-mail", maxlength: "100" });
       const rows = data.users.map((user) => h("tr", { class: user.suspended ? "is-suspended" : "" },
         h("td", {}, h("button", { type: "button", class: "link-button", onclick: () => openUser(user.email) }, user.email)),
-        h("td", {}, h("span", { class: `plan-badge${user.plan === "pro" ? " is-pro" : ""}` }, PLAN_NAMES[user.plan] || user.plan), user.expiresAt ? h("small", { class: "muted" }, ` até ${fmtDay(user.expiresAt)}`) : null),
+        h("td", {}, h("span", { class: `plan-badge${user.plan !== "gratuito" ? " is-pro" : ""}` }, PLAN_NAMES[user.plan] || user.plan), user.expiresAt ? h("small", { class: "muted" }, ` até ${fmtDay(user.expiresAt)}`) : null),
         h("td", {}, user.verified ? "Sim" : "Não"),
         h("td", {}, `${user.usage.library} / ${user.usage.lists} / ${user.usage.reports}`),
         h("td", {}, fmtDay(user.createdAt)),
@@ -2522,7 +2523,10 @@
           info.suspension ? h("p", { class: "note" }, `Conta suspensa desde ${fmtDay(info.suspension.since)}${info.suspension.reason ? `: ${info.suspension.reason}` : ""}.`) : null,
           h("h3", {}, "Plano"),
           h("div", { class: "row" },
-            [30, 90, 365].map((days) => h("button", { type: "button", class: "btn btn-secondary btn-sm", onclick: run(() => post("/api/admin/billing/grant", { email: info.email, plan: "pro", days }), `Pro por ${days} dias concedido.`) }, `Dar ${days} dias de Pro`)),
+            (() => {
+              const pick = h("select", { "aria-label": "Plano a conceder" }, [["pro", "Pro"], ["max", "Max"]].map(([value, label]) => h("option", { value }, label)));
+              return [pick, [30, 90, 365].map((days) => h("button", { type: "button", class: "btn btn-secondary btn-sm", onclick: run(() => post("/api/admin/billing/grant", { email: info.email, plan: pick.value, days }), `${PLAN_NAMES[pick.value]} por ${days} dias concedido.`) }, `Dar ${days} dias`))];
+            })(),
             h("button", { type: "button", class: "btn btn-ghost btn-sm", onclick: run(() => post("/api/admin/billing/revoke", { email: info.email }), "Assinatura removida.") }, "Remover assinatura")),
           h("h3", {}, "Conta"),
           h("div", { class: "row" },

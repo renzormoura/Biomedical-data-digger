@@ -120,7 +120,7 @@ def test_overview_counts_people_plans_payments_and_revenue(env):
     env.flags.suspend(BIA, "teste")
     overview = boss.get("/api/admin/overview").json()
     assert overview["users"] == 3 and overview["verified"] == 1 and overview["suspended"] == 1
-    assert overview["byPlan"] == {"gratuito": 2, "pro": 1} and overview["pendingPayments"] == 1
+    assert overview["byPlan"] == {"gratuito": 2, "pro": 1, "max": 0} and overview["pendingPayments"] == 1
     assert overview["revenueTotalCents"] == 8700 and overview["revenueLast30DaysCents"] == 8700 and overview["newLast7Days"] == 3
 
 

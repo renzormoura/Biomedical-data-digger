@@ -12,6 +12,8 @@ from config import Settings
 
 FREE_KEY = "gratuito"
 PRO_KEY = "pro"
+MAX_KEY = "max"
+PAID_KEYS = (PRO_KEY, MAX_KEY)
 PERIODS = (1, 3, 12)  # meses que a pessoa pode pagar de uma vez
 DAYS_PER_MONTH = 30
 
@@ -31,9 +33,16 @@ FREE = Plan(FREE_KEY, "Gratuito", "Para conhecer: busca, feed e nota de confiabi
 PRO = Plan(PRO_KEY, "Pro", "Biblioteca, listas e relatórios completos, avisos e exportações.", library=500, lists=50, reports=30, price_cents=2900)
 
 
+MAX = Plan(MAX_KEY, "Max", "Para quem pesquisa o tempo todo: limites bem maiores de biblioteca, listas e relatórios.", library=2000, lists=200, reports=100, price_cents=4990)
+
+
 def catalog(settings: Settings) -> dict[str, Plan]:
-    """Os planos com o preco da configuracao (`PRO_PRICE_CENTS`)."""
-    return {FREE_KEY: FREE, PRO_KEY: replace(PRO, price_cents=settings.pro_price_cents)}
+    """Os planos, do mais simples ao mais completo, com os precos da configuracao (`PRO_PRICE_CENTS`, `MAX_PRICE_CENTS`)."""
+    return {
+        FREE_KEY: FREE,
+        PRO_KEY: replace(PRO, price_cents=settings.pro_price_cents),
+        MAX_KEY: replace(MAX, price_cents=settings.max_price_cents),
+    }
 
 
 def money(cents: int) -> str:

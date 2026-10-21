@@ -66,6 +66,8 @@ services:
         sync: false
       - key: PRO_PRICE_CENTS
         value: "2900"
+      - key: MAX_PRICE_CENTS
+        value: "4990"
       # Laboratorio de IA (opcional)
       - key: GROQ_API_KEY
         sync: false

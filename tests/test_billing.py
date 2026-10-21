@@ -250,5 +250,28 @@ def test_production_with_billing_requires_the_pix_data(monkeypatch):
     monkeypatch.setenv("PIX_KEY", "chave@exemplo.com")
     monkeypatch.setenv("PIX_NAME", "Empresa Exemplo")
     monkeypatch.setenv("PRO_PRICE_CENTS", "3990")
+    monkeypatch.setenv("MAX_PRICE_CENTS", "5990")
     settings = Settings.from_env()
-    assert settings.billing_enforced and settings.pro_price_cents == 3990 and settings.pix_city == "BRASIL"
+    assert settings.billing_enforced and settings.pro_price_cents == 3990 and settings.max_price_cents == 5990 and settings.pix_city == "BRASIL"
+
+
+def test_max_plan_is_listed_after_pro_with_its_own_price_and_limits(env):
+    body = env.build().get("/api/billing/plans").json()
+    assert [p["key"] for p in body["plans"]] == ["gratuito", "pro", "max"]
+    top = body["plans"][2]
+    assert top["priceCents"] == 4990 and top["price"] == "R$ 49,90" and top["limits"] == {"library": 2000, "lists": 200, "reports": 100}
+    assert next(p for p in env.build(max_price_cents=5990).get("/api/billing/plans").json()["plans"] if p["key"] == "max")["price"] == "R$ 59,90"
+
+
+def test_max_subscription_charges_its_price_grants_its_limits_and_shows_in_the_overview(env):
+    client = env.build(billing_enforced=True)
+    made = client.post("/api/billing/requests", json={"plan": "max", "months": 3}).json()
+    assert made["plan"] == "max" and made["amountCents"] == 4990 * 3
+    client.post(f"/api/admin/billing/requests/{made['id']}/confirm", headers=ADMIN, json={})
+    me = client.get("/api/billing/me").json()
+    assert me["plan"] == "max" and me["planName"] == "Max" and me["limits"]["library"] == 2000
+    overview = client.get("/api/admin/overview", headers=ADMIN).json()
+    assert overview["byPlan"]["max"] == 1 and overview["byPlan"]["pro"] == 0
+    granted = client.post("/api/admin/billing/grant", headers=ADMIN, json={"email": EMAIL, "plan": "max", "days": 5}).json()
+    assert granted["plan"] == "max"
+    assert client.post("/api/admin/billing/grant", headers=ADMIN, json={"email": EMAIL, "plan": "inexistente", "days": 5}).status_code == 400

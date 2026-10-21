@@ -9,6 +9,7 @@
 
 ### Alterado
 - `scripts/verificar_banco.py` passa a conferir 30 tabelas.
+- **Terceiro plano, o Max** (R$ 49,90 por mês, provisório; 2.000 artigos, 200 listas e 100 relatórios). Preço em `MAX_PRICE_CENTS`. A visão geral do painel de administração conta os planos pagos um a um e a concessão manual ganhou a escolha do plano. Quem troca de plano começa o novo prazo na data da confirmação (não há desconto proporcional do plano anterior).
 
 ## 2026-10 — O produto passa a se chamar Nexus Science
 

@@ -9,7 +9,7 @@ Ordem das seções:
 3. **Funcionalidades** (seis cartões) e **confiança e método**, com o exemplo de nota de 0 a 100 (dados fictícios).
 4. **Como funciona:** buscar, avaliar e entregar.
 5. **Para quem é:** estudantes, pesquisadores e profissionais de saúde.
-6. **Planos:** Gratuito × Pro, lidos de `GET /api/billing/plans` (preço e limites reais). Os botões abrem a janela de criar conta. Se a rota falhar, a seção não aparece.
+6. **Planos:** Gratuito, Pro ("Mais escolhido") e Max, lidos de `GET /api/billing/plans` (preço e limites reais). Os botões abrem a janela de criar conta. Se a rota falhar, a seção não aparece.
 7. **Chamada final:** "Criar conta grátis", sem cartão.
 
 ## Quem tem conta: painel de trabalho

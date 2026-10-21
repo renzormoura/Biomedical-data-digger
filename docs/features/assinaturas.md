@@ -14,6 +14,7 @@ Cobrar pelo produto na fase inicial **sem depender de provedor de pagamento**: a
 |---|---:|---:|---:|---|
 | Gratuito | 50 | 3 | 1 | R$ 0 |
 | Pro | 500 | 50 | 30 | `PRO_PRICE_CENTS` por mês (padrão **provisório** de R$ 29,00; defina o preço real) |
+| Max | 2.000 | 200 | 100 | `MAX_PRICE_CENTS` por mês (padrão **provisório** de R$ 49,90; os limites também são provisórios) |
 
 Busca, feed, nota de confiabilidade e Panorama não têm limite em nenhum plano. Os valores de limite estão em `plans.py`.
 
@@ -36,7 +37,7 @@ Na aba **Administração** (`#/admin`), visível para contas em `ADMIN_EMAILS`; 
 Tabelas `subscriptions` (conta, plano, validade) e `payment_requests` (pedidos, com valor, identificador, status e data). **Pedidos confirmados são registro de pagamento (obrigação fiscal) e permanecem mesmo se a conta for excluída**; a assinatura e os pedidos não confirmados são apagados. Ver [Modelo de dados](../arquitetura/dados.md).
 
 ## Configuração
-`BILLING_ENFORCED`, `PIX_KEY`, `PIX_NAME`, `PIX_CITY`, `PRO_PRICE_CENTS` e `ADMIN_TOKEN` (ver [Configuração](../operacao/configuracao.md)). Em produção, `BILLING_ENFORCED=1` exige `PIX_KEY` e `PIX_NAME`.
+`BILLING_ENFORCED`, `PIX_KEY`, `PIX_NAME`, `PIX_CITY`, `PRO_PRICE_CENTS`, `MAX_PRICE_CENTS` e `ADMIN_TOKEN` (ver [Configuração](../operacao/configuracao.md)). Em produção, `BILLING_ENFORCED=1` exige `PIX_KEY` e `PIX_NAME`.
 
 ## Limites e próximos passos
 - **Conciliação manual:** não escala além de poucas dezenas de pagamentos por semana. O próximo passo natural é um provedor com Pix dinâmico (QR por cobrança) e *webhook* de confirmação (por exemplo Asaas, Pagar.me ou Mercado Pago): `pix.py` e a confirmação manual são substituídos, o resto (planos, assinatura, limites, painel) continua.
