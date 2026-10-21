@@ -112,3 +112,34 @@ test("feedArea escolhe a primeira area conhecida do item e cai em geral", () => 
   assert.equal(Lib.feedArea(undefined), "geral");
   assert.equal(Lib.FEED_AREAS.length, 14);
 });
+
+test("journeyProgress vira 0..1 conforme a seção alta passa pela tela", () => {
+  // seção de 2680px numa tela de 812px: só rola 1868px com o palco fixo
+  assert.equal(Lib.journeyProgress(100, 2680, 812), 0);      // ainda nao chegou
+  assert.equal(Lib.journeyProgress(0, 2680, 812), 0);
+  assert.equal(Lib.journeyProgress(-934, 2680, 812), 0.5);
+  assert.equal(Lib.journeyProgress(-1868, 2680, 812), 1);
+  assert.equal(Lib.journeyProgress(-5000, 2680, 812), 1);    // ja passou
+  assert.equal(Lib.journeyProgress(-10, 500, 812), 0);       // seção menor que a tela: sem divisão por zero
+});
+
+test("journeyScene troca a cena em 34% e 67%", () => {
+  assert.deepEqual([0, 0.33, 0.34, 0.5, 0.66, 0.67, 1].map(Lib.journeyScene), [1, 1, 2, 2, 2, 3, 3]);
+});
+
+test("countAt começa em zero, termina no valor e nunca passa dele", () => {
+  assert.equal(Lib.countAt(51, 0), 0);
+  assert.equal(Lib.countAt(51, 1), 51);
+  assert.equal(Lib.countAt(51, 2), 51);
+  assert.equal(Lib.countAt(51, -1), 0);
+  assert.ok(Lib.countAt(100, 0.5) > 50);  // saída suave: passa da metade antes da metade do tempo
+  const seq = [0, 0.2, 0.4, 0.6, 0.8, 1].map((k) => Lib.countAt(214, k));
+  assert.deepEqual([...seq].sort((a, b) => a - b), seq);
+});
+
+test("stepsSummary conta os passos feitos e aponta o próximo", () => {
+  const steps = [{ done: true, label: "A", href: "#a" }, { done: false, label: "B", href: "#b" }, { done: false, label: "C", href: "#c" }];
+  assert.deepEqual(Lib.stepsSummary(steps), { done: 1, total: 3, percent: 33, next: steps[1] });
+  assert.equal(Lib.stepsSummary(steps.map((s) => ({ ...s, done: true }))).next, null);
+  assert.deepEqual(Lib.stepsSummary([]), { done: 0, total: 0, percent: 0, next: null });
+});

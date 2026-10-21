@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 2026-10 — Início animado: jornada para o convidado e painel em blocos
+
+### Alterado
+- **Início do convidado:** virou a "jornada": uma seção em que a rolagem conta o produto num cartão fixo (busca, nota de confiabilidade, relatório), com título animado, números que contam, planos e chamada final. Substitui os blocos de funcionalidades, confiança e "como funciona".
+- **Início de quem tem conta:** painel em blocos, com números que contam, anel de primeiros passos, sino animado, leque da biblioteca, consulta rápida "Consta no SUS?", atalhos e brilho que segue o cursor. No celular, 2 colunas.
+- Todas as animações respeitam "reduzir movimento" e usam só CSS e `style.setProperty` (a política de segurança continua sem estilo em linha).
+
 ## 2026-10 — Duas páginas iniciais e nome da conta
 
 ### Adicionado

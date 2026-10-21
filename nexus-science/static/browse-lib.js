@@ -118,6 +118,30 @@
     return out;
   }
 
+  /** Progresso (0 a 1) da rolagem dentro de uma seção alta com palco fixo: `top` é o topo da seção na tela. */
+  function journeyProgress(top, sectionHeight, viewportHeight) {
+    const total = sectionHeight - viewportHeight;
+    if (!(total > 0)) return 0;
+    return Math.max(0, Math.min(1, -top / total));
+  }
+
+  /** Cena (1, 2 ou 3) que cada faixa do progresso mostra na "jornada" da página inicial. */
+  function journeyScene(progress) {
+    return progress < 0.34 ? 1 : progress < 0.67 ? 2 : 3;
+  }
+
+  /** Valor do contador no instante `k` (0 a 1) da animação, com saída suave. */
+  function countAt(end, k) {
+    const x = Math.max(0, Math.min(1, k));
+    return Math.round(end * (1 - Math.pow(1 - x, 3)));
+  }
+
+  /** Primeiros passos concluídos, em ordem, e quantos faltam: [{done, label, href}] -> {done, total, next}. */
+  function stepsSummary(steps) {
+    const done = steps.filter((step) => step.done).length;
+    return { done, total: steps.length, percent: steps.length ? Math.round((done / steps.length) * 100) : 0, next: steps.find((step) => !step.done) || null };
+  }
+
   /** Caminho da IA com o artigo preenchido: /ia?artigo=REF#geral */
   function aiLabHref(ref, tab = "geral") {
     return `/ia?${new URLSearchParams({ artigo: ref }).toString()}#${tab}`;
@@ -125,6 +149,6 @@
 
   return {
     SEARCH_DEFAULTS, FEED_AREAS, feedArea, parseRoute, buildHash, searchStateFromParams, paramsFromSearchState, apiParamsFromSearchState,
-    safeHttpUrl, formatCount, debounce, pageWindow, aiLabHref,
+    safeHttpUrl, formatCount, debounce, pageWindow, aiLabHref, journeyProgress, journeyScene, countAt, stepsSummary,
   };
 });

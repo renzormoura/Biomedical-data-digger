@@ -2,25 +2,31 @@
 
 O início muda conforme a pessoa: **convidado** vê a vitrine do produto, **quem tem conta** vê o painel de trabalho. A escolha é feita no navegador (`renderHome` em `static/browse.js`), pela sessão: `data-user` e `data-name` no botão da conta, entregues na primeira pintura.
 
-## Convidado: apresentar o produto e levar aos planos
-Ordem das seções:
-1. **Topo:** frase de valor, busca (campo, seletor de fonte) e exemplos de temas. A busca sem conta continua livre.
-2. **Números:** quantas fontes de busca, quantas fontes do feed e os 8 critérios de confiabilidade.
-3. **Funcionalidades** (seis cartões) e **confiança e método**, com o exemplo de nota de 0 a 100 (dados fictícios).
-4. **Como funciona:** buscar, avaliar e entregar.
-5. **Para quem é:** estudantes, pesquisadores e profissionais de saúde.
-6. **Planos:** Gratuito, Pro ("Mais escolhido") e Max, lidos de `GET /api/billing/plans` (preço e limites reais). Os botões abrem a janela de criar conta. Se a rota falhar, a seção não aparece.
-7. **Chamada final:** "Criar conta grátis", sem cartão.
+## Convidado: a jornada (a rolagem conta o produto)
+A vitrine é uma página que se conta rolando:
+1. **Topo:** "Da pergunta ao relatório.", com o título entrando linha a linha, a busca de verdade (campo e seletor de fonte), exemplos de temas e o convite "Role para ver como funciona".
+2. **Jornada:** uma seção alta (≈330% da tela) com um **palco fixo**. À esquerda, três passos (buscar, avaliar, entregar), de que só o atual fica aceso; à direita, um cartão que se transforma em três cenas: a **busca** (cinco fontes que surgem e três resultados com nota), a **nota** (anel que se preenche e critérios que aparecem um a um) e o **relatório** (linhas que se escrevem e os botões de exportação). Uma barra lateral mostra o progresso. Os dados do cartão são **fictícios**, como o exemplo de nota que já existia.
+3. **Números** que contam de zero quando entram na tela (fontes de busca, fontes do feed, critérios), **para quem é**, **planos** (Gratuito, Pro e Max, lidos de `GET /api/billing/plans`) e a chamada final "Criar conta grátis".
 
-## Quem tem conta: painel de trabalho
-- **"Bem-vindo, Nome"** (primeiro nome) e a data de hoje; sem nome cadastrado, "Bem-vindo de volta". Logo abaixo, a busca.
-- **Números da conta:** artigos salvos, listas e relatórios, cada um levando à tela correspondente. Com cobrança ativa (`BILLING_ENFORCED=1`), mostra "x de limite" e uma barra de uso, mais o cartão do plano; sem cobrança ativa os limites e o plano não aparecem, porque todas as contas têm limites do Pro.
-- **Primeiros passos:** interesses, perfil de uso, primeiro artigo salvo, primeira lista e primeiro relatório. A lista some quando os cinco estão feitos.
-- **Avisos** (até 4 do sininho) e **Últimos salvos** (4 da biblioteca), cada um com orientação quando está vazio.
-- **Novidades para você:** até 6 cartões do feed dos interesses; se não houver, as novidades gerais.
-- **Atalhos:** os do perfil de uso escolhido, ou os padrões, e o Laboratório de IA.
+No celular, só o passo atual aparece acima do cartão, a seção fica um pouco mais curta e o cartão esconde o item que não cabe; nada rola para o lado.
+
+## Quem tem conta: painel em blocos
+- **"Bem-vindo, Nome"** e a data de hoje; sem nome cadastrado, "Bem-vindo de volta". Logo abaixo, a busca.
+- **Blocos** (grade de 4 colunas no computador, 2 no celular), cada um entrando com atraso e com um brilho que segue o cursor:
+  - **Artigos salvos, listas e relatórios:** números que contam de zero. Com cobrança ativa (`BILLING_ENFORCED=1`), mostram "de limite" e uma barra de uso; sem cobrança, só o número.
+  - **Primeiros passos:** anel de progresso (interesses, perfil de uso, primeiro artigo, primeira lista, primeiro relatório) e o próximo passo; quando os cinco acabam, o bloco vira "Tudo pronto" com um convite ao Laboratório de IA.
+  - **Avisos** (até 3 do sininho; o sino balança e ganha um selo quando há não lidos) e **Últimos salvos** (3 da biblioteca, com um leque de cartões que abre ao passar o mouse).
+  - **Consta no SUS?** consulta rápida de medicamento, cirurgia, exame ou técnica (ver [Disponibilidade no SUS](disponibilidade-sus.md)).
+  - **Atalhos:** os do perfil de uso escolhido, o Laboratório de IA e, com cobrança ativa, o plano atual.
+- **Novidades para você:** até 6 cartões do feed dos interesses (ou as gerais), abaixo dos blocos.
 
 Os dados vêm em paralelo (`/api/account`, `/api/billing/me`, `/api/alerts`, `/api/library`, `/api/feed`); cada bloco aparece quando o seu chega e uma falha de um deles não derruba os outros.
+
+## Animações e acessibilidade
+- Tudo é feito com classes de CSS e propriedades definidas por script (`style.setProperty`), sem estilo nem script em linha, por causa da política de segurança do site. Sem bibliotecas.
+- Com **"reduzir movimento"** ligado no aparelho, as animações somem: os blocos aparecem de uma vez, os números não contam e o título não anima.
+- O cartão da jornada é decorativo (`aria-hidden`); o texto dos três passos é real e fica acessível.
+- A lógica que dá para testar sem navegador está em `browse-lib.js` (`journeyProgress`, `journeyScene`, `countAt`, `stepsSummary`) e em `tests/js/browse-lib.test.js`.
 
 ## Nome da conta
 - **Cadastro:** a janela de criar conta pede "Como podemos te chamar?". O campo aparece no primeiro clique em "Criar conta" e o segundo envia. O nome é obrigatório na interface, mas **opcional na API** (`name` em `POST /api/auth/register`), então clientes antigos continuam funcionando.

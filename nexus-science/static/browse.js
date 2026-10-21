@@ -602,19 +602,6 @@
 
   // ------------------------------------------------------------------ Início
   const TOPICS = ["diabetes tipo 2", "inteligência artificial na educação", "mudanças climáticas", "energia solar", "saúde mental"];
-  const FEATURES = [
-    ["search", "Busque em todas as fontes", "Europe PMC, PubMed, arXiv e outras, numa busca só, sem artigos repetidos.", "#/busca"],
-    ["check", "Veja o quanto confiar", "Nota de 0 a 100 com critérios abertos: você vê o que contou e o que faltou.", "#/busca"],
-    ["feed", "Acompanhe sua área", "Novidades de revistas, instituições e preprints de 14 áreas, filtradas pelos seus interesses.", "#/feed"],
-    ["bell", "Receba avisos", "Artigo novo, artigo retratado e mudança regulatória chegam ao sininho.", "#/perfil/interesses"],
-    ["bookmark", "Organize em listas", "Salve artigos, monte listas de leitura e compartilhe por link.", "#/biblioteca"],
-    ["download", "Entregue com método", "Relatório de tema em Word, citações ABNT e APA, e exportação para Zotero.", "#/biblioteca"],
-  ];
-  const TRUST = [
-    ["Sem IA primeiro.", "Trechos copiados do resumo; nada gerado nem interpretado."],
-    ["Dado ausente não pune.", "O que a fonte não informa sai do cálculo."],
-    ["Limites declarados.", "A nota não substitui a leitura crítica."],
-  ];
   const SAMPLE_CRITERIA = [
     ["met", "Integridade (retratação)", "20/20"], ["met", "Desenho do estudo", "22,5/25"], ["met", "Revisão por pares", "10/10"],
     ["unmet", "Tamanho da amostra informado", "0/10"], ["partial", "Resultado principal quantificado", "5/10"],
@@ -634,30 +621,70 @@
       location.hash = Lib.buildHash("/busca", { q, fonte });
     };
     loadOptions().then((options) => {
-      sourceCount.textContent = String(options.sources.filter((src) => src.id !== "all").length);
+      sourceCount.dataset.target = sourceCount.textContent = String(options.sources.filter((src) => src.id !== "all").length);
       if (options.sources.length < 2) return;
       sourceSelect = h("select", { id: "home-source", "aria-label": "Fonte" },
         options.sources.map((src) => h("option", { value: src.default ? "" : src.id }, src.name)));
       sourceSelect.value = "";
       mount(sourceBox, sourceSelect);
     }).catch(() => { /* a busca funciona sem o seletor */ });
-    api("/api/feed/sources").then((data) => { feedCount.textContent = String(data.sources.length); }).catch(() => { feedCount.textContent = ""; });
+    api("/api/feed/sources").then((data) => { feedCount.dataset.target = feedCount.textContent = String(data.sources.length); }).catch(() => { feedCount.textContent = ""; });
     const form = h("form", { class: "home-search", role: "search", onsubmit: (e) => { e.preventDefault(); go(input.value.trim()); } },
       input, sourceBox,
       h("button", { type: "submit", class: "btn btn-primary" }, icon("search"), "Buscar"));
     return { form, sourceCount, feedCount };
   }
 
+  // ---- aparicao ao rolar e contadores (com movimento reduzido, tudo aparece de uma vez)
+  const reducedMotion = () => Boolean(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  let revealIo = null;
+  /** Faz o elemento entrar subindo quando aparece na tela (a CSS esconde `.rv` ate la). */
+  function reveal(el, delay = 0) {
+    el.classList.add("rv");
+    if (delay) el.style.setProperty("--d", `${delay}s`);
+    if (reducedMotion() || !("IntersectionObserver" in window)) { el.classList.add("in"); return el; }
+    if (!revealIo) {
+      revealIo = new IntersectionObserver((entries) => entries.forEach((entry) => {
+        if (entry.isIntersecting) { entry.target.classList.add("in"); revealIo.unobserve(entry.target); }
+      }), { threshold: 0.12 });
+    }
+    revealIo.observe(el);
+    return el;
+  }
+  function resetReveal() { if (revealIo) { revealIo.disconnect(); revealIo = null; } }
+  /** Chama `fn` uma vez, quando o elemento aparece na tela. */
+  function whenVisible(el, fn) {
+    if (reducedMotion() || !("IntersectionObserver" in window)) { fn(); return; }
+    const io = new IntersectionObserver(([entry]) => { if (entry.isIntersecting) { io.disconnect(); fn(); } }, { threshold: 0.4 });
+    io.observe(el);
+  }
+  /** Anima o numero de 0 ate `end` (sem animacao se a pessoa pediu movimento reduzido). */
+  function countTo(el, end, ms = 1200) {
+    if (reducedMotion() || !(end > 0)) { el.textContent = String(end); return; }
+    const t0 = performance.now();
+    const tick = (now) => {
+      const k = Math.min(1, (now - t0) / ms);
+      el.textContent = String(Lib.countAt(end, k));
+      if (k < 1 && el.isConnected) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+  /** Numera os filhos com `--i`, que a CSS usa para escalonar as animacoes. */
+  function indexed(nodes) { nodes.forEach((node, i) => node.style.setProperty("--i", String(i))); return nodes; }
+
   // O inicio muda conforme a pessoa: convidado ve a vitrine do produto; quem tem conta ve o painel de trabalho.
   function renderHome() {
+    resetReveal();
     if (session.user) renderDashboard(); else renderGuestHome();
   }
 
+  // ------------------------------------------------------------------ Inicio de quem tem conta: painel em blocos ("bento")
   const DASH_DEFAULT_SHORTCUTS = [["Buscar artigos", "#/busca"], ["Minha biblioteca", "#/biblioteca"], ["Relatórios", "#/relatorio"], ["Feed de novidades", "#/feed"]];
 
-  function dashSection(title, action, body) {
-    return h("section", { class: "dash-section card" },
-      h("div", { class: "dash-head" }, h("h2", {}, title), action || null), body);
+  /** Um bloco do painel; o brilho que segue o cursor e posto pelo ouvinte do painel inteiro. */
+  function bentoTile(cls, ...kids) { return h("article", { class: `bento-tile ${cls}` }, kids); }
+  function bentoHead(ic, title, link) {
+    return h("div", { class: "bento-head" }, h("span", { class: "bento-ic", "aria-hidden": "true" }, icon(ic)), h("h2", {}, title), link || null);
   }
 
   async function renderDashboard() {
@@ -665,12 +692,35 @@
     const { form } = homeSearch();
     const first = session.name.split(" ")[0];
     const today = new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" });
-    const tiles = h("div", { class: "dash-tiles", "aria-label": "Sua conta em números" }, skeleton("row", 1, "Carregando sua conta…"));
+    const numTile = (href, label) => h("a", { class: "bento-tile b-num", href }, h("strong", { class: "b-n" }, "0"), h("span", { class: "b-l" }, label));
+    const savedTile = numTile("#/biblioteca", "artigos salvos");
+    const listsTile = numTile("#/biblioteca", "listas");
+    const reportsTile = numTile("#/relatorio", "relatórios");
+    const stepsTile = bentoTile("b-steps", skeleton("row", 1, "Carregando seus passos…"));
     const alertsBox = h("div", {}, skeleton("row", 2, "Carregando avisos…"));
+    const alertsTile = bentoTile("b-alerts", bentoHead("bell", "Avisos", h("a", { class: "dash-link", href: "#/perfil/notificacoes" }, "Notificações")), alertsBox);
     const recentBox = h("div", {}, skeleton("row", 2, "Carregando seus artigos…"));
-    const feedBox = h("section", { class: "dash-feed", hidden: "" });
-    const stepsBox = h("div", { hidden: "" });
+    const recentTile = bentoTile("b-recent", bentoHead("bookmark", "Últimos salvos", h("a", { class: "dash-link", href: "#/biblioteca" }, "Biblioteca")), recentBox,
+      h("div", { class: "b-fan", "aria-hidden": "true" }, h("i"), h("i"), h("i")));
+    const susResult = h("div", { class: "stack" });
+    const susNote = h("div", {});
+    const susTile = bentoTile("b-sus", bentoHead("check", "Consta no SUS?"),
+      h("p", { class: "muted b-sub" }, "Medicamento, cirurgia, exame ou técnica: confira nas bases oficiais."), susSearch(susResult, susNote, { compact: true }), susResult, susNote);
     const shortcuts = PROFILE_SHORTCUTS[session.profile] || DASH_DEFAULT_SHORTCUTS;
+    const linksNav = h("nav", { class: "b-chips", "aria-label": "Atalhos" },
+      shortcuts.map(([label, href]) => h("a", { class: "b-chip", href }, label)), h("a", { class: "b-chip", href: "/ia" }, "Laboratório de IA"));
+    const linksTile = bentoTile("b-links", bentoHead("arrow", "Atalhos"), linksNav);
+    const feedBox = h("section", { class: "dash-feed", hidden: "" });
+    const tiles = [savedTile, listsTile, reportsTile, stepsTile, alertsTile, recentTile, susTile, linksTile];
+    tiles.forEach((tile, i) => reveal(tile, i * 0.06));
+    const bento = h("section", { class: "bento", "aria-label": "Seu painel" }, tiles);
+    bento.addEventListener("pointermove", (event) => {  // brilho que segue o cursor, no bloco sob o mouse
+      const tile = event.target.closest && event.target.closest(".bento-tile");
+      if (!tile) return;
+      const box = tile.getBoundingClientRect();
+      tile.style.setProperty("--mx", `${event.clientX - box.left}px`);
+      tile.style.setProperty("--my", `${event.clientY - box.top}px`);
+    });
 
     mount($app,
       h("section", { class: "home-hero dash-hero" },
@@ -678,15 +728,7 @@
         h("h1", { class: "display" }, first ? `Bem-vindo, ${first}` : "Bem-vindo de volta"),
         h("p", { class: "lead" }, "O que vamos pesquisar hoje?"),
         form),
-      tiles,
-      stepsBox,
-      h("div", { class: "dash-grid" },
-        dashSection("Avisos", h("a", { class: "dash-link", href: "#/perfil/notificacoes" }, "Notificações"), alertsBox),
-        dashSection("Últimos salvos", h("a", { class: "dash-link", href: "#/biblioteca" }, "Biblioteca"), recentBox)),
-      feedBox,
-      h("nav", { class: "dash-shortcuts", "aria-label": "Atalhos" },
-        shortcuts.map(([label, href]) => h("a", { class: "btn btn-secondary", href }, label)),
-        h("a", { class: "btn btn-ghost", href: "/ia" }, "Laboratório de IA")));
+      bento, feedBox);
 
     const [accountRes, billingRes, alertsRes, libraryRes] = await Promise.allSettled([
       api("/api/account"), api("/api/billing/me"), api("/api/alerts"), api("/api/library")]);
@@ -694,46 +736,42 @@
     const account = accountRes.status === "fulfilled" ? accountRes.value : null;
     const billing = billingRes.status === "fulfilled" ? billingRes.value : null;
 
-    // -- numeros e plano
-    const tile = (href, label, value, limit) => {
-      const meter = limit && billing && billing.enforced ? h("div", { class: "meter", role: "img", "aria-label": `${value} de ${limit}` }, (() => {
-        const bar = h("i", {}); bar.style.width = `${Math.min(100, Math.round((value / limit) * 100))}%`; return bar;
-      })()) : null;
-      return h("a", { class: "dash-tile", href }, h("strong", {}, String(value)), h("span", {}, limit && billing && billing.enforced ? `${label} · de ${limit}` : label), meter);
-    };
+    // -- numeros (com barra de uso quando a cobranca esta ativa)
     if (account) {
       const limits = billing ? billing.limits : {};
-      mount(tiles,
-        tile("#/biblioteca", "artigos salvos", account.counts.library, limits.library),
-        tile("#/biblioteca", "listas", account.counts.lists, limits.lists),
-        tile("#/relatorio", "relatórios", account.counts.reports, limits.reports),
-        billing && billing.enforced ? h("a", { class: "dash-tile dash-plan", href: "#/planos" }, h("strong", {}, billing.planName), h("span", {}, billing.active ? "seu plano" : "Ver planos e limites")) : null);
-    } else { tiles.remove(); }
+      [[savedTile, account.counts.library, limits.library], [listsTile, account.counts.lists, limits.lists], [reportsTile, account.counts.reports, limits.reports]].forEach(([tile, value, limit]) => {
+        countTo(tile.querySelector(".b-n"), value);
+        if (limit && billing && billing.enforced) {
+          const bar = h("i", {});
+          bar.style.setProperty("--w", `${Math.min(100, Math.round((value / limit) * 100))}%`);
+          tile.querySelector(".b-l").textContent += ` · de ${limit}`;
+          tile.append(h("div", { class: "meter b-meter", role: "img", "aria-label": `${value} de ${limit}` }, bar));
+        }
+      });
+      if (billing && billing.enforced) linksNav.prepend(h("a", { class: "b-chip is-plan", href: "#/planos" }, billing.active ? `Plano ${billing.planName}` : "Ver planos"));
+    } else { [savedTile, listsTile, reportsTile].forEach((tile) => tile.remove()); }
 
-    // -- primeiros passos (some quando tudo foi feito)
+    // -- primeiros passos: anel de progresso; quando acabam, o bloco vira um convite ao Laboratorio
     if (account) {
-      const interestsDone = account.interests.topics + account.interests.terms > 0;
-      const steps = [
-        [interestsDone, "Escolha seus interesses", "#/perfil/interesses"],
-        [Boolean(account.profile && account.profile.configured), "Diga o que você faz", "#/perfil/uso"],
-        [account.counts.library > 0, "Salve seu primeiro artigo", "#/busca"],
-        [account.counts.lists > 0, "Crie uma lista de leitura", "#/biblioteca"],
-        [account.counts.reports > 0, "Gere um relatório", "#/relatorio"],
-      ];
-      const done = steps.filter(([ok]) => ok).length;
-      if (done < steps.length) {
-        const bar = h("i", {}); bar.style.width = `${Math.round((done / steps.length) * 100)}%`;
-        stepsBox.hidden = false;
-        mount(stepsBox, h("section", { class: "dash-steps card" },
-          h("div", { class: "dash-head" }, h("h2", {}, "Primeiros passos"), h("span", { class: "muted" }, `${done} de ${steps.length}`)),
-          h("div", { class: "meter", role: "img", "aria-label": `${done} de ${steps.length} passos feitos` }, bar),
-          h("ul", { class: "checklist dash-checklist" }, steps.map(([ok, label, href]) => h("li", { class: ok ? "is-done" : "" },
-            icon(ok ? "check" : "plus"), ok ? h("span", {}, label) : h("a", { href }, label))))));
-      }
-    }
+      const summary = Lib.stepsSummary([
+        { done: account.interests.topics + account.interests.terms > 0, label: "Escolha seus interesses", href: "#/perfil/interesses" },
+        { done: Boolean(account.profile && account.profile.configured), label: "Diga o que você faz", href: "#/perfil/uso" },
+        { done: account.counts.library > 0, label: "Salve seu primeiro artigo", href: "#/busca" },
+        { done: account.counts.lists > 0, label: "Crie uma lista de leitura", href: "#/biblioteca" },
+        { done: account.counts.reports > 0, label: "Gere um relatório", href: "#/relatorio" },
+      ]);
+      const ring = h("div", { class: "b-ring", role: "img", "aria-label": `${summary.done} de ${summary.total} passos feitos` }, h("b", {}, `${summary.done}/${summary.total}`));
+      mount(stepsTile, h("h2", { class: "b-steps-title" }, summary.next ? "Primeiros passos" : "Tudo pronto"), ring,
+        summary.next ? h("a", { class: "b-next", href: summary.next.href }, summary.next.label, icon("arrow"))
+          : h("a", { class: "b-next", href: "/ia" }, "Experimente o Laboratório de IA", icon("arrow")));
+      requestAnimationFrame(() => requestAnimationFrame(() => ring.style.setProperty("--p", String(summary.percent))));
+    } else { stepsTile.remove(); }
 
-    // -- avisos
-    const alertItems = alertsRes.status === "fulfilled" ? (alertsRes.value.alerts || []).slice(0, 4) : [];
+    // -- avisos: sino que balanca quando ha novidade
+    const alertData = alertsRes.status === "fulfilled" ? alertsRes.value : { alerts: [], unread: 0 };
+    const alertItems = (alertData.alerts || []).slice(0, 3);
+    if (alertData.unread) alertsTile.classList.add("has-unread");
+    alertsTile.querySelector(".bento-ic").dataset.count = alertData.unread ? String(Math.min(alertData.unread, 9)) : "";
     mount(alertsBox, alertItems.length
       ? h("ul", { class: "plain-list dash-list" }, alertItems.map((item) => h("li", { class: item.read ? "" : "is-unread" },
         h("a", { href: item.href, onclick: () => { if (!item.read) api("/api/alerts/read", { method: "POST", body: { id: item.id } }).catch(() => {}); } }, item.title),
@@ -743,7 +781,7 @@
 
     // -- ultimos salvos
     const saved = libraryRes.status === "fulfilled"
-      ? [...libraryRes.value.items].sort((a, b) => String(b.savedAt).localeCompare(String(a.savedAt))).slice(0, 4) : [];
+      ? [...libraryRes.value.items].sort((a, b) => String(b.savedAt).localeCompare(String(a.savedAt))).slice(0, 3) : [];
     mount(recentBox, saved.length
       ? h("ul", { class: "plain-list dash-list" }, saved.map((work) => h("li", {},
         h("a", { href: articleHref(work) }, work.title), h("small", { class: "muted" }, metaLine(work)))))
@@ -760,24 +798,78 @@
       mount(feedBox,
         h("div", { class: "dash-head" }, h("h2", {}, personal ? "Novidades para você" : "Novidades da ciência"), h("a", { class: "dash-link", href: "#/feed" }, "Ver o feed")),
         h("div", { class: "feed-list" }, data.items.slice(0, 6).map((item) => feedCard(item))));
+      reveal(feedBox);
     } catch { /* o resto do painel segue funcionando sem o feed */ }
   }
 
-
+  // ------------------------------------------------------------------ Inicio do convidado: a jornada, contada rolando a pagina
   const AUDIENCES = [
     ["Estudantes", "TCC, dissertação e tese", "Ache referências confiáveis, salve em listas e gere as citações em ABNT ou APA."],
     ["Pesquisadores", "Revisões e acompanhamento da área", "Veja a nota de cada artigo, acompanhe novidades e entregue relatórios com o método declarado."],
     ["Profissionais de saúde", "Decisão com evidência", "Cruze medicamentos com ANVISA, Conitec e Rename e receba aviso quando um estudo for retratado."],
   ];
-  const STEPS = [
-    ["1", "Busque", "Uma pesquisa em várias fontes abertas, sem artigos repetidos."],
-    ["2", "Avalie", "Nota de 0 a 100 com os critérios à vista, para decidir o que ler."],
-    ["3", "Entregue", "Listas, relatório com método e citações prontas para o seu gerenciador."],
+  const JOURNEY = [
+    ["01 / BUSCAR", "Uma pergunta, cinco fontes.", "PubMed, Europe PMC, arXiv, OpenAlex e DOAJ respondem juntos, sem artigos repetidos."],
+    ["02 / AVALIAR", "Uma nota que mostra o cálculo.", "Oito critérios abertos, de 0 a 100. Você vê o que contou e o que faltou."],
+    ["03 / ENTREGAR", "Relatório com método.", "Listas, relatório com o método declarado e citações para Word e Zotero."],
   ];
-  const planCards = (data) => h("div", { class: "gplan-grid" }, data.plans.map((plan) => {
+  const JOURNEY_SOURCES = ["PubMed", "Europe PMC", "arXiv", "OpenAlex", "DOAJ"];
+  const JOURNEY_RESULTS = [
+    ["Metformin and outcomes in older adults", "Revisão sistemática · 2025", 78],
+    ["Coorte multicêntrica de pacientes com DM2", "Coorte · 2024", 71],
+    ["Efeitos adversos gastrointestinais", "Ensaio clínico · 2023", 64],
+  ];
+  const JOURNEY_EXPORTS = ["Baixar Word", "Exportar para Zotero", "Citação ABNT"];
+
+  /** O cartao fixo da jornada: tres cenas (busca, nota, relatorio) com dados ficticios, como o exemplo de nota que ja existia. */
+  function journeyCard() {
+    const scene1 = h("div", { class: "jr-scene s1" },
+      h("div", { class: "jr-query" }, "metformina em idosos"),
+      h("div", { class: "jr-sources" }, indexed(JOURNEY_SOURCES.map((name) => h("span", {}, name)))),
+      h("div", { class: "jr-results" }, indexed(JOURNEY_RESULTS.map(([title, meta, score]) =>
+        h("div", {}, h("span", {}, title, h("small", {}, meta)), h("b", {}, String(score)))))));
+    const ring = h("div", { class: "jr-ring" }, h("div", {}, h("b", {}, "78"), h("small", {}, "de 100")));
+    const scene2 = h("div", { class: "jr-scene s2" }, ring,
+      h("div", {}, h("strong", {}, "Metformin and outcomes in older adults"), h("div", { class: "muted jr-note" }, "Confiabilidade alta · dados fictícios")),
+      h("ul", { class: "jr-crit" }, indexed(SAMPLE_CRITERIA.slice(0, 5).map(([status, name, pts]) =>
+        h("li", { class: `st-${status}` }, icon(STATUS_ICONS[status]), h("span", {}, name), h("b", {}, pts))))));
+    const lines = [92, 78, 86, 54, 70].map((width) => { const line = h("i", {}); line.style.setProperty("--w", `${width}%`); return line; });
+    const scene3 = h("div", { class: "jr-scene s3" },
+      h("div", { class: "jr-doc" }, h("h4", {}, "Relatório · Metformina em idosos"), h("span", { class: "jr-method" }, "Método: 5 fontes · 12 estudos incluídos"), indexed(lines)),
+      h("div", { class: "jr-exports" }, indexed(JOURNEY_EXPORTS.map((name) => h("span", {}, name)))));
+    return { card: h("div", { class: "jr-card", "aria-hidden": "true" }, h("div", { class: "jr-bar" }, h("i"), h("i"), h("i")), scene1, scene2, scene3), ring };
+  }
+
+  /** Secao alta com palco fixo: a rolagem vira progresso, e o progresso troca a cena, o texto e a barra lateral. */
+  function journeySection() {
+    const { card, ring } = journeyCard();
+    const items = JOURNEY.map(([n, title, text], i) => h("li", { class: i === 0 ? "on" : "" }, h("span", { class: "jr-n" }, n), h("h2", {}, title), h("p", {}, text)));
+    const stage = h("div", { class: "jr-stage" }, h("div", { class: "jr-rail", "aria-hidden": "true" }, h("i")), h("div", { class: "jr-copy" }, h("ol", {}, items)), card);
+    stage.dataset.s = "1";
+    const section = h("section", { class: "journey", id: "jornada", "aria-label": "Como funciona, passo a passo" }, stage);
+    let scene = 0;
+    const update = () => {
+      if (!section.isConnected) { removeEventListener("scroll", onScroll); removeEventListener("resize", onScroll); return; }  // saiu da pagina inicial
+      const progress = Lib.journeyProgress(section.getBoundingClientRect().top, section.offsetHeight, innerHeight);
+      stage.style.setProperty("--prog", progress.toFixed(3));
+      const next = Lib.journeyScene(progress);
+      if (next === scene) return;
+      scene = next;
+      stage.dataset.s = String(next);
+      items.forEach((li, i) => li.classList.toggle("on", i + 1 === next));
+      ring.classList.toggle("on", next === 2);
+    };
+    const onScroll = update;  // leve (uma leitura de posicao e troca de classes), entao roda direto no evento
+    addEventListener("scroll", onScroll, { passive: true });
+    addEventListener("resize", onScroll);
+    setTimeout(update, 0);  // depois de montada
+    return section;
+  }
+
+  const planCards = (data) => h("div", { class: "gplan-grid" }, data.plans.map((plan, i) => {
     const featured = plan.key === "pro";
     const paid = plan.priceCents > 0;
-    return h("article", { class: `gplan-card${featured ? " is-featured" : ""}` },
+    return reveal(h("article", { class: `gplan-card${featured ? " is-featured" : ""}` },
       featured ? h("span", { class: "gplan-flag" }, "Mais escolhido") : null,
       h("h3", {}, plan.name),
       h("p", { class: "gplan-price" }, plan.priceCents ? h("strong", {}, plan.price) : h("strong", {}, "Grátis"), plan.priceCents ? h("span", { class: "muted" }, " por mês") : null),
@@ -788,7 +880,7 @@
         h("li", {}, icon("check"), h("span", {}, `${plan.limits.reports} ${plan.limits.reports === 1 ? "relatório" : "relatórios"} de tema`))),
       h("button", { type: "button", class: `btn ${featured ? "btn-primary" : "btn-secondary"}`,
         onclick: () => openAuth(paid ? `Crie sua conta para assinar o plano ${plan.name}.` : "Crie sua conta grátis para salvar artigos e acompanhar interesses.") },
-      paid ? "Começar e assinar" : "Criar conta grátis"));
+      paid ? "Começar e assinar" : "Criar conta grátis")), i * 0.1);
   }));
 
   function renderGuestHome() {
@@ -802,62 +894,45 @@
         h("h2", { id: "planos" }, "Comece grátis. Cresça quando precisar."),
         h("p", { class: "lead" }, "Buscar, ler e navegar pelo feed é livre, sem conta. A conta grátis já guarda seus artigos; os planos pagos ampliam os limites para quem pesquisa todo dia."),
         planCards(data));
+      reveal(plansBox);
     }).catch(() => { /* sem planos publicados, a secao simplesmente nao aparece */ });
 
+    const line = (kids, i) => { const inner = h("span", {}, kids); inner.style.setProperty("--i", String(i)); return h("span", { class: "jr-line" }, inner); };
+    const eight = h("strong", { "data-target": "8" }, "0");
     const stat = (value, label) => h("div", { class: "stat" }, value, h("span", {}, label));
+    const stats = h("section", { class: "stats stats-3", "aria-label": "O produto em números" },
+      stat(sourceCount, "fontes de busca em uma só"), stat(feedCount, "fontes de novidades no feed"), stat(eight, "critérios abertos de confiabilidade"));
+    whenVisible(stats, () => [sourceCount, feedCount, eight].forEach((el) => countTo(el, Number(el.dataset.target || el.textContent) || 0)));
+
     mount($app,
-      h("section", { class: "home-hero" },
+      h("section", { class: "home-hero jr-hero" },
+        h("div", { class: "jr-orb a", "aria-hidden": "true" }), h("div", { class: "jr-orb b", "aria-hidden": "true" }),
         h("p", { class: "eyebrow" }, "Plataforma de pesquisa científica"),
-        h("h1", { class: "display" }, "Encontre, entenda e organize a pesquisa."),
+        h("h1", { class: "display jr-title" }, line("Da pergunta", 0), line(["ao ", h("span", { class: "jr-accent" }, "relatório.")], 1)),
         h("p", { class: "lead" }, "Busque em várias fontes, veja com critérios abertos o quanto cada artigo merece confiança e transforme suas leituras em um relatório com método."),
         form,
-        h("p", { class: "examples" }, "Exemplos: ", TOPICS.map((t) => h("a", { href: Lib.buildHash("/busca", { q: t }) }, t)))),
+        h("p", { class: "examples" }, "Exemplos: ", TOPICS.map((t) => h("a", { href: Lib.buildHash("/busca", { q: t }) }, t))),
+        h("a", { class: "jr-scroll", href: "#/", onclick: (event) => { event.preventDefault(); document.getElementById("jornada").scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth" }); } },
+          h("i", { "aria-hidden": "true" }), "Role para ver como funciona")),
 
-      profileShortcuts(),
+      journeySection(),
 
-      h("section", { class: "stats stats-3", "aria-label": "O produto em números" },
-        stat(sourceCount, "fontes de busca em uma só"),
-        stat(feedCount, "fontes de novidades no feed"),
-        stat(h("strong", {}, "8"), "critérios abertos de confiabilidade")),
-
-      h("section", { class: "home-section", "aria-labelledby": "recursos" },
-        h("h2", { id: "recursos" }, "Tudo para ler, acompanhar e entregar."),
-        h("div", { class: "feature-grid" }, FEATURES.map(([ic, title, text, href]) => h("a", { class: "feature", href },
-          h("span", { class: "feature-icon", "aria-hidden": "true" }, icon(ic)),
-          h("h3", {}, title), h("p", { class: "muted" }, text))))),
-
-      h("section", { class: "home-section split", "aria-labelledby": "confianca" },
-        h("div", {},
-          h("p", { class: "eyebrow" }, "Confiança e método"),
-          h("h2", { id: "confianca" }, "Uma nota que mostra o próprio cálculo."),
-          h("ul", { class: "checklist" }, TRUST.map(([title, text]) => h("li", {}, icon("check"), h("span", {}, h("b", {}, `${title} `), text))))),
-        h("div", { class: "panel", role: "img", "aria-label": "Exemplo de nota de confiabilidade 78 de 100, com dados fictícios" },
-          h("div", { class: "panel-head" }, h("h3", {}, "Exemplo de nota"), h("span", { class: "muted" }, "dados fictícios")),
-          h("div", { class: "panel-body" },
-            h("div", { class: "score" }, h("strong", {}, "78"), h("span", {}, "/100"), h("span", { class: "band" }, "Alta")),
-            h("div", { class: "meter" }, h("i", { class: "w78" })),
-            h("ul", { class: "criteria-mini" }, SAMPLE_CRITERIA.map(([status, name, pts]) => h("li", {},
-              h("span", { class: `st-${status}` }, icon(STATUS_ICONS[status])), h("span", {}, name), h("span", { class: "pts" }, pts))))))),
-
-      h("section", { class: "home-section", "aria-labelledby": "como" },
-        h("p", { class: "eyebrow" }, "Como funciona"),
-        h("h2", { id: "como" }, "Da pergunta ao relatório em três passos."),
-        h("ol", { class: "steps-3" }, STEPS.map(([n, title, text]) => h("li", {}, h("span", { class: "step-n", "aria-hidden": "true" }, n), h("h3", {}, title), h("p", { class: "muted" }, text))))),
+      reveal(stats),
 
       h("section", { class: "home-section", "aria-labelledby": "publico" },
-        h("p", { class: "eyebrow" }, "Para quem é"),
-        h("h2", { id: "publico" }, "Feito para quem precisa de fonte confiável."),
-        h("div", { class: "feature-grid" }, AUDIENCES.map(([who, what, text]) => h("div", { class: "feature" },
-          h("h3", {}, who), h("p", { class: "audience-what" }, what), h("p", { class: "muted" }, text))))),
+        reveal(h("p", { class: "eyebrow" }, "Para quem é")),
+        reveal(h("h2", { id: "publico" }, "Feito para quem precisa de fonte confiável."), 0.05),
+        h("div", { class: "feature-grid" }, AUDIENCES.map(([who, what, text], i) => reveal(h("div", { class: "feature" },
+          h("h3", {}, who), h("p", { class: "audience-what" }, what), h("p", { class: "muted" }, text)), 0.1 + i * 0.1)))),
 
       plansBox,
 
-      h("section", { class: "cta" },
+      reveal(h("section", { class: "cta" },
         h("div", {}, h("h2", {}, "Crie sua conta grátis."),
           h("p", { class: "muted" }, "Sem cartão. Salve artigos, acompanhe seus interesses e gere relatórios com método. Buscar e ler continua livre.")),
         h("div", { class: "row" },
           h("button", { type: "button", class: "btn btn-primary", onclick: () => openAuth("Crie uma conta para salvar artigos, acompanhar interesses e montar listas.") }, "Criar conta grátis"),
-          h("a", { class: "btn btn-outline", href: "/ia" }, "Conhecer o Laboratório de IA"))));
+          h("a", { class: "btn btn-outline", href: "/ia" }, "Conhecer o Laboratório de IA")))));
   }
 
 
@@ -893,7 +968,7 @@
         `, competência ${String(sigtapMeta.competencia).replace(/^(\d{4})(\d{2})$/, "$2/$1")}).`)];
   }
   /** Campo de consulta manual: qualquer medicamento, cirurgia, exame, tecnica ou produto, em portugues. */
-  function susSearch(resultBox, footerBox) {
+  function susSearch(resultBox, footerBox, { compact = false } = {}) {
     const input = h("input", { type: "text", placeholder: "Ex.: colecistectomia, transplante de rim, metformina", maxlength: "100", "aria-label": "Buscar no SUS" });
     const run = async () => {
       const term = input.value.trim();
@@ -902,7 +977,7 @@
       const found = await guarded(() => api(`/api/brasil/sus?q=${encodeURIComponent(term)}`));
       if (!found) { mount(resultBox); return; }
       mount(resultBox, found.items.map(susItem));
-      mount(footerBox, susFooter(found));
+      mount(footerBox, compact ? h("p", { class: "note" }, found.notice) : susFooter(found));
     };
     input.addEventListener("keydown", (event) => { if (event.key === "Enter") { event.preventDefault(); run(); } });
     return h("div", { class: "new-list" }, input, h("button", { type: "button", class: "btn btn-sm btn-secondary", onclick: run }, "Buscar"));
