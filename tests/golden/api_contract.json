@@ -721,6 +721,109 @@
   "status": 200,
   "type": "application/json"
  },
+ "GET /api/brasil/sus": {
+  "json": {
+   "consulta": "colecistectomia",
+   "items": [
+    {
+     "details": [
+      "5 procedimento(s) com esse nome na Tabela SIGTAP (Procedimentos cirúrgicos)."
+     ],
+     "kind": "procedimento",
+     "label": "Consta no SUS",
+     "method": "manual",
+     "name": "Colecistectomia",
+     "procedures": [
+      {
+       "code": "0407030026",
+       "complexity": "média complexidade",
+       "group": "Procedimentos cirúrgicos",
+       "name": "COLECISTECTOMIA",
+       "subgroup": "Cirurgia do aparelho digestivo, orgãos anexos e parede abdominal"
+      },
+      {
+       "code": "0416040233",
+       "complexity": "alta complexidade",
+       "group": "Procedimentos cirúrgicos",
+       "name": "COLECISTECTOMIA EM ONCOLOGIA",
+       "subgroup": "Cirurgia em oncologia"
+      },
+      {
+       "code": "0407030034",
+       "complexity": "média complexidade",
+       "group": "Procedimentos cirúrgicos",
+       "name": "COLECISTECTOMIA VIDEOLAPAROSCÓPICA",
+       "subgroup": "Cirurgia do aparelho digestivo, orgãos anexos e parede abdominal"
+      },
+      {
+       "code": "0407030069",
+       "complexity": "média complexidade",
+       "group": "Procedimentos cirúrgicos",
+       "name": "COLEDOCOTOMIA COM OU SEM COLECISTECTOMIA",
+       "subgroup": "Cirurgia do aparelho digestivo, orgãos anexos e parede abdominal"
+      },
+      {
+       "code": "0416040020",
+       "complexity": "alta complexidade",
+       "group": "Procedimentos cirúrgicos",
+       "name": "COLEDOCOSTOMIA COM OU SEM COLECISTECTOMIA EM ONCOLOGIA",
+       "subgroup": "Cirurgia em oncologia"
+      }
+     ],
+     "source": "",
+     "sources": [
+      "SIGTAP"
+     ],
+     "tone": "ok",
+     "totalProcedures": 5,
+     "verdict": "disponivel"
+    }
+   ],
+   "meta": {
+    "anvisa": {
+     "arquivoModificado": "<date>",
+     "arquivoUrl": "https://dados.anvisa.gov.br/dados/DADOS_ABERTOS_MEDICAMENTOS.csv",
+     "defasado": false,
+     "dias": "<dias>",
+     "dicionarioUrl": "https://dados.anvisa.gov.br/dados/Documentacao_e_Dicionario_de_Dados_Registros_Validos_Medicamento_V1.pdf",
+     "extraidoEm": "<date>",
+     "fonte": "ANVISA, dados abertos de medicamentos registrados (DATAVISA)",
+     "substancias": 3857
+    },
+    "conitec": {
+     "arquivoUrl": "https://www.gov.br/conitec/pt-br/midias/dados-em-excel/recomendacoesdaconitec_20260615.xlsx/@@download/file",
+     "defasado": false,
+     "dias": "<dias>",
+     "extraidoEm": "<date>",
+     "fonte": "CONITEC, recomendacoes sobre tecnologias avaliadas (planilha oficial)",
+     "medicamentos": 782,
+     "paginaUrl": "https://www.gov.br/conitec/pt-br/assuntos/avaliacao-de-tecnologias-em-saude/recomendacoes-da-conitec"
+    },
+    "rename": {
+     "arquivoUrl": "https://bvsms.saude.gov.br/bvs/publicacoes/relacao_nacional_medicamentos_2024_2ed.pdf",
+     "defasado": false,
+     "dias": "<dias>",
+     "extraidoEm": "<date>",
+     "fonte": "RENAME 2024 (2ª edição, 2025)",
+     "licenca": "CC BY-NC-SA 4.0 (uso não comercial, com atribuição e mesma licença)",
+     "substancias": 514
+    },
+    "sigtap": {
+     "arquivoUrl": "ftp://ftp2.datasus.gov.br/pub/sistemas/tup/downloads/TabelaUnificada_202605_v2605210940.zip",
+     "competencia": "202605",
+     "defasado": false,
+     "dias": "<dias>",
+     "extraidoEm": "<date>",
+     "fonte": "DATASUS, Tabela de Procedimentos, Medicamentos, Orteses, Proteses e Materiais Especiais do SUS (SIGTAP)",
+     "paginaUrl": "http://sigtap.datasus.gov.br/tabela-unificada/app/download.jsp",
+     "procedimentos": 4984
+    }
+   },
+   "notice": "Constar em uma lista oficial não garante que a unidade de saúde da pessoa tenha o item: a oferta depende do município, do serviço habilitado e do estoque. Dados de instantâneo, ainda sem revisão de especialista."
+  },
+  "status": 200,
+  "type": "application/json"
+ },
  "GET /api/discover/brasil": {
   "json": {
    "candidatos": [
@@ -1301,6 +1404,74 @@
      "year": 2024
     }
    ]
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "GET /api/discover/sus": {
+  "json": {
+   "items": [
+    {
+     "details": [
+      "Consta na Rename 2024 (medicamentos essenciais), componente básico.",
+      "1144 registro(s) ativo(s) na ANVISA: o produto pode ser vendido no país, o que não significa oferta pelo SUS."
+     ],
+     "kind": "medicamento",
+     "label": "Consta no SUS",
+     "method": "cognato",
+     "name": "Metformina",
+     "procedures": [],
+     "source": "metformin",
+     "sources": [
+      "Rename",
+      "ANVISA"
+     ],
+     "tone": "ok",
+     "totalProcedures": 0,
+     "verdict": "disponivel"
+    }
+   ],
+   "meta": {
+    "anvisa": {
+     "arquivoModificado": "<date>",
+     "arquivoUrl": "https://dados.anvisa.gov.br/dados/DADOS_ABERTOS_MEDICAMENTOS.csv",
+     "defasado": false,
+     "dias": "<dias>",
+     "dicionarioUrl": "https://dados.anvisa.gov.br/dados/Documentacao_e_Dicionario_de_Dados_Registros_Validos_Medicamento_V1.pdf",
+     "extraidoEm": "<date>",
+     "fonte": "ANVISA, dados abertos de medicamentos registrados (DATAVISA)",
+     "substancias": 3857
+    },
+    "conitec": {
+     "arquivoUrl": "https://www.gov.br/conitec/pt-br/midias/dados-em-excel/recomendacoesdaconitec_20260615.xlsx/@@download/file",
+     "defasado": false,
+     "dias": "<dias>",
+     "extraidoEm": "<date>",
+     "fonte": "CONITEC, recomendacoes sobre tecnologias avaliadas (planilha oficial)",
+     "medicamentos": 782,
+     "paginaUrl": "https://www.gov.br/conitec/pt-br/assuntos/avaliacao-de-tecnologias-em-saude/recomendacoes-da-conitec"
+    },
+    "rename": {
+     "arquivoUrl": "https://bvsms.saude.gov.br/bvs/publicacoes/relacao_nacional_medicamentos_2024_2ed.pdf",
+     "defasado": false,
+     "dias": "<dias>",
+     "extraidoEm": "<date>",
+     "fonte": "RENAME 2024 (2ª edição, 2025)",
+     "licenca": "CC BY-NC-SA 4.0 (uso não comercial, com atribuição e mesma licença)",
+     "substancias": 514
+    },
+    "sigtap": {
+     "arquivoUrl": "ftp://ftp2.datasus.gov.br/pub/sistemas/tup/downloads/TabelaUnificada_202605_v2605210940.zip",
+     "competencia": "202605",
+     "defasado": false,
+     "dias": "<dias>",
+     "extraidoEm": "<date>",
+     "fonte": "DATASUS, Tabela de Procedimentos, Medicamentos, Orteses, Proteses e Materiais Especiais do SUS (SIGTAP)",
+     "paginaUrl": "http://sigtap.datasus.gov.br/tabela-unificada/app/download.jsp",
+     "procedimentos": 4984
+    }
+   },
+   "notice": "Constar em uma lista oficial não garante que a unidade de saúde da pessoa tenha o item: a oferta depende do município, do serviço habilitado e do estoque. Dados de instantâneo, ainda sem revisão de especialista."
   },
   "status": 200,
   "type": "application/json"

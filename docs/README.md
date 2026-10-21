@@ -31,6 +31,7 @@ Cada documento explica o objetivo, o que a pessoa vê, como funciona por dentro,
 - [Biblioteca, etiquetas e listas de leitura](features/biblioteca-e-listas.md)
 - [Interesses, alertas e notificações (o sininho)](features/notificacoes.md)
 - [Página inicial (convidado e conta) e nome da conta](features/pagina-inicial.md)
+- [Disponibilidade no SUS (medicamentos, cirurgias e técnicas)](features/disponibilidade-sus.md)
 - [Feed de novidades acadêmicas](features/feed.md)
 - [Relatório de tema](features/relatorio-de-tema.md)
 - [Citações e exportação](features/citacoes-exportacao.md)

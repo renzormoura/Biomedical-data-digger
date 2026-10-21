@@ -55,7 +55,9 @@ Código em `nexus-science/` (Python, plano). Os módulos não têm estado global
 ## Brasil
 | Módulo | Responsabilidade |
 |---|---|
-| `brasil/anvisa.py`, `conitec.py`, `rename.py` | Consulta aos instantâneos (sem rede) |
+| `brasil/anvisa.py`, `conitec.py`, `rename.py`, `sigtap.py` | Consulta aos instantâneos (sem rede) |
+| `brasil/disponibilidade.py` | Veredito "consta no SUS?" por item, juntando as quatro bases |
+| `brasil/sigtap_build.py` | Monta o instantâneo da Tabela SIGTAP a partir do arquivo do DATASUS |
 | `brasil/nomes.py` | Normalização e ligação inglês ↔ português |
 | `brasil/consulta.py` | Consulta unificada por substância |
 | `brasil/*_build.py` | Montagem dos instantâneos a partir das fontes oficiais (usados pelos scripts de atualização) |
@@ -98,7 +100,7 @@ Código em `nexus-science/` (Python, plano). Os módulos não têm estado global
 | Pasta | Conteúdo |
 |---|---|
 | `tests/` | 1.471 testes (pytest) e testes de JS (`tests/js`, `node:test`) |
-| `scripts/` | `atualizar_anvisa.py`, `atualizar_conitec.py`, `atualizar_rename.py`, `verificar_feeds.py`, `measure_tokens.py` |
+| `scripts/` | `atualizar_anvisa.py`, `atualizar_conitec.py`, `atualizar_rename.py`, `atualizar_sigtap.py`, `verificar_feeds.py`, `measure_tokens.py` |
 | `evals/` | Avaliação de fidelidade com o modelo real (fora da suíte padrão) |
 | `prototype/` | Protótipos de interface do navegador e do redesenho |
 | `.github/workflows/` | `ci.yml` (qualidade) e `alertas.yml` (rotina agendada) |

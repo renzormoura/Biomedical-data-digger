@@ -860,6 +860,54 @@
           h("a", { class: "btn btn-outline", href: "/ia" }, "Conhecer o Laboratório de IA"))));
   }
 
+
+  // ------------------------------------------------------------------ Disponibilidade no SUS
+  const SUS_KINDS = { medicamento: "Medicamento", procedimento: "Procedimento, técnica ou produto" };
+  /** Um item do veredito: o que as bases oficiais dizem (consta, incorporado, nao encontrado...), com a fonte de cada afirmacao. */
+  function susItem(item) {
+    return h("article", { class: `sus-item tone-${item.tone}` },
+      h("div", { class: "sus-head" },
+        h("h4", {}, item.name),
+        h("span", { class: `sus-verdict tone-${item.tone}` }, item.label)),
+      h("p", { class: "muted sus-kind" }, SUS_KINDS[item.kind] || item.kind,
+        item.source ? ` · no texto: ${item.source} (${METHODS[item.method] || item.method})` : null),
+      h("ul", { class: "plain-list sus-details" }, item.details.map((text) => h("li", {}, text))),
+      item.procedures.length
+        ? h("details", { class: "more-records" }, h("summary", {}, item.totalProcedures > item.procedures.length
+          ? `Ver procedimentos (${item.procedures.length} de ${item.totalProcedures})` : `Ver procedimentos (${item.totalProcedures})`),
+        h("ul", { class: "plain-list sus-procs" }, item.procedures.map((p) => h("li", {},
+          h("code", {}, p.code), " ", p.name.charAt(0) + p.name.slice(1).toLowerCase(),
+          h("small", { class: "muted" }, [p.group, p.complexity].filter(Boolean).join(" · "))))))
+        : null,
+      item.sources.length ? h("p", { class: "note" }, `Fontes: ${item.sources.join(", ")}.`) : null);
+  }
+  function susFooter(data) {
+    const sigtapMeta = data.meta.sigtap;
+    const stale = ["anvisa", "conitec", "rename", "sigtap"].filter((key) => data.meta[key] && data.meta[key].defasado);
+    const link = Lib.safeHttpUrl(sigtapMeta.paginaUrl);
+    return [
+      stale.length ? h("p", { class: "note" }, `Atenção: dados possivelmente desatualizados (${stale.join(", ")}).`) : null,
+      h("p", { class: "note" }, data.notice),
+      h("p", { class: "note" }, "Bases: Rename 2024, Conitec, ANVISA e a Tabela de Procedimentos do SUS (",
+        link ? h("a", { href: link, target: "_blank", rel: "noopener noreferrer" }, "SIGTAP/DATASUS") : "SIGTAP/DATASUS",
+        `, competência ${String(sigtapMeta.competencia).replace(/^(\d{4})(\d{2})$/, "$2/$1")}).`)];
+  }
+  /** Campo de consulta manual: qualquer medicamento, cirurgia, exame, tecnica ou produto, em portugues. */
+  function susSearch(resultBox, footerBox) {
+    const input = h("input", { type: "text", placeholder: "Ex.: colecistectomia, transplante de rim, metformina", maxlength: "100", "aria-label": "Buscar no SUS" });
+    const run = async () => {
+      const term = input.value.trim();
+      if (term.length < 3) { input.focus(); return; }
+      mount(resultBox, loading("Consultando as bases…"));
+      const found = await guarded(() => api(`/api/brasil/sus?q=${encodeURIComponent(term)}`));
+      if (!found) { mount(resultBox); return; }
+      mount(resultBox, found.items.map(susItem));
+      mount(footerBox, susFooter(found));
+    };
+    input.addEventListener("keydown", (event) => { if (event.key === "Enter") { event.preventDefault(); run(); } });
+    return h("div", { class: "new-list" }, input, h("button", { type: "button", class: "btn btn-sm btn-secondary", onclick: run }, "Buscar"));
+  }
+
   // ------------------------------------------------------------------ Busca
   // do mais forte ao mais fraco: uma escala de um tom so (laranja ate cinza) em vez de varias cores
   const DESIGN_TONES = { sistematica: "t1", ensaio: "t2", observacional: "t3", revisao: "t4", opiniao: "t5", preprint: "t6", desconhecido: "t7" };
@@ -1272,6 +1320,23 @@
           ". Constar na Rename indica medicamento essencial; registro ativo na ANVISA permite comercializar; decisão da Conitec trata da incorporação ao SUS. Nenhum dos três indica disponibilidade na sua unidade de saúde: consulte a Secretaria de Saúde."));
     }
 
+    // disponibilidade no SUS: o que o artigo estuda (medicamentos, cirurgias, tecnicas) existe no SUS? Bases oficiais locais, sem IA
+    const susBox = h("div", { class: "stack" }, loading("Consultando as bases do SUS…"));
+    async function renderSus() {
+      let data;
+      try { data = await api(`/api/discover/sus?ref=${encodeURIComponent(work.ref)}`); } catch {
+        mount(susBox, h("p", { class: "muted" }, "As bases do SUS não estão disponíveis agora."));
+        return;
+      }
+      const manualResult = h("div", { class: "stack" });
+      const manualFooter = h("div", { class: "stack" });
+      mount(susBox,
+        data.items.length
+          ? [h("p", { class: "hint" }, "O que o artigo parece estudar e se consta no SUS. A ligação de nomes é automática: confirme."), data.items.map(susItem)]
+          : h("p", { class: "muted" }, "Não identificamos, no resumo, medicamentos, cirurgias ou técnicas nas bases do SUS. Busque pelo nome em português:"),
+        susSearch(manualResult, manualFooter), manualResult, manualFooter, susFooter(data));
+    }
+
     // artigos semelhantes: carregam depois da pagina e ficam no fim dela
     const similarBox = h("div", { class: "similar-grid" }, loading("Procurando artigos semelhantes…"));
     const similarNote = h("p", { class: "hint" });
@@ -1345,6 +1410,7 @@
               work.keywords.length ? h("div", { class: "kw" }, work.keywords.map((k) => h("a", { href: Lib.buildHash("/busca", { q: k }) }, k))) : null),
             h("section", { class: "card stack" }, h("h3", {}, "Registro e dados"), openData),
             showHealth() ? h("section", { class: "card stack" }, h("h3", {}, "Situação no Brasil"), brasilBox) : null,
+            showHealth() ? h("section", { class: "card stack" }, h("h3", {}, "Disponibilidade no SUS"), susBox) : null,
             h("section", { class: "card stack" }, h("h3", {}, "Análises do Laboratório"), analysesBox),
             h("section", { class: "card stack" }, h("h3", {}, "Organizar"), organize),
           )),
@@ -1352,7 +1418,7 @@
     renderOrganize();
     renderAnalyses();
     renderOpenData();
-    if (showHealth()) renderBrasil();
+    if (showHealth()) { renderBrasil(); renderSus(); }
     renderSimilar();
   }
 

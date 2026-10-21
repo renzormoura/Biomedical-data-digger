@@ -26,6 +26,9 @@ Cada resposta traz a fonte, a data do arquivo e a data da extração. Se a base 
 - A decisão da Conitec trata da incorporação ao SUS.
 - Os dados ainda **não foram revisados** por farmacêutico ou médico (pendência registrada no [Roadmap](../roadmap/roadmap.md)).
 
+## Disponibilidade no SUS
+O bloco **Disponibilidade no SUS** (página do artigo e botão "Disponib. SUS" do Laboratório) cruza estas três bases com a **Tabela SIGTAP** do DATASUS para dizer, por item, se medicamentos, cirurgias, exames e técnicas constam no SUS. Ver [Disponibilidade no SUS](disponibilidade-sus.md).
+
 ## Como funciona
 1. **Instantâneos versionados.** Os dados ficam em arquivos JSON no repositório (`dados_brasil/`), gerados por scripts (`scripts/atualizar_anvisa.py`, `atualizar_conitec.py`, `atualizar_rename.py`; ver [Atualização dos dados do Brasil](../operacao/dados-brasil.md)). Nenhuma consulta de usuário faz requisição à ANVISA, Conitec ou Rename.
 2. **Ligação inglês ↔ português** (`brasil/nomes.py`). Os artigos citam *metformin*, as bases dizem *metformina*. A ligação usa, nesta ordem: (a) tabela curada de sinônimos (`aliases_en_pt.json`) e (b) cognatos por regras de sufixo e grafia (ine/ina, ide/ida, ate/ato, ph/f, y/i…). Toda ligação é só *possível*: a pessoa confirma. A correspondência por distância de edição foi **removida** de propósito, porque ligava "valganciclovir" a "valaciclovir" (medicamentos diferentes): o produto prefere perder cobertura a errar a substância.

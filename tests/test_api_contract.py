@@ -222,6 +222,8 @@ def run_scenario(r: Recorder) -> None:  # noqa: C901 - e um roteiro linear de pr
     c("GET", "/api/discover/brasil", params={"ref": "1"})
     c("GET", "/api/brasil/conitec", params={"q": "metformina"})
     c("GET", "/api/brasil/medicamento", params={"q": "metformina"})
+    c("GET", "/api/brasil/sus", params={"q": "colecistectomia"})
+    c("GET", "/api/discover/sus", params={"ref": "1"})
     c("GET", "/api/profile/options")
     c("GET", "/api/interests/options")
     c("GET", "/api/feed", params={"mode": "tudo"})

@@ -227,6 +227,17 @@ def selecionar_contexto(texto: str) -> list[ItemContexto]:
     return found
 
 
+def bloco_disponibilidade(texto: str) -> str:
+    """O que as bases oficiais (Rename, Conitec, ANVISA e SIGTAP) dizem sobre as intervencoes do texto; vazio se nada ou sem as bases."""
+    from brasil import anvisa, conitec, disponibilidade, rename, sigtap  # noqa: PLC0415 - so o prompt de SUS precisa das bases
+
+    try:
+        itens = disponibilidade.avaliar_texto(texto, anvisa.carregar(), conitec.carregar(), rename.carregar(), sigtap.carregar())
+    except (OSError, ValueError, KeyError):
+        return ""
+    return disponibilidade.como_contexto(itens)
+
+
 def bloco_contexto(texto: str) -> str:
     """Gera o bloco de contexto pronto para o prompt (vazio se nada relevante)."""
     itens = selecionar_contexto(texto)

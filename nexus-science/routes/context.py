@@ -12,7 +12,7 @@ from account_flags import AccountFlags
 from admin_service import AdminService
 from alerts import AlertService
 from billing import BillingStore
-from brasil import anvisa, conitec, rename
+from brasil import anvisa, conitec, rename, sigtap
 from config import Settings
 from discovery import DiscoveryService
 from domain import AuthRequiredError, LimitReachedError, RateLimitedError, SourceUnavailableError
@@ -23,9 +23,10 @@ from notifications import NotificationService
 from profiles import ProfileStore
 from ratelimit import RateLimitExceeded, SlidingWindowLimiter
 from reports import ReportStore
-from routes.payloads import anvisa_meta, conitec_meta, rename_meta
+from routes.payloads import anvisa_meta, conitec_meta, rename_meta, sigtap_meta
 
 Bases = tuple[anvisa.Instantaneo, conitec.Instantaneo, rename.Instantaneo]
+SusBases = tuple[anvisa.Instantaneo, conitec.Instantaneo, rename.Instantaneo, sigtap.Instantaneo]
 
 
 @dataclass
@@ -68,6 +69,18 @@ class ApiContext:
             return anvisa.carregar(), conitec.carregar(), rename.carregar()
         except (OSError, ValueError, KeyError) as error:
             raise SourceUnavailableError("Os dados oficiais do Brasil não estão disponíveis agora.") from error
+
+    def sus_bases(self, request: Request) -> SusBases:
+        """As bases do pacote Brasil mais a Tabela SIGTAP (disponibilidade no SUS)."""
+        anvisa_data, conitec_data, rename_data = self.brasil_bases(request)
+        try:
+            return anvisa_data, conitec_data, rename_data, sigtap.carregar()
+        except (OSError, ValueError, KeyError) as error:
+            raise SourceUnavailableError("A Tabela SIGTAP não está disponível agora.") from error
+
+    @staticmethod
+    def sus_meta(bases: SusBases) -> dict[str, object]:
+        return {"anvisa": anvisa_meta(bases[0]), "conitec": conitec_meta(bases[1]), "rename": rename_meta(bases[2]), "sigtap": sigtap_meta(bases[3])}
 
     def brasil_meta(self, bases: Bases) -> dict[str, object]:
         return {"anvisa": anvisa_meta(bases[0]), "conitec": conitec_meta(bases[1]), "rename": rename_meta(bases[2])}

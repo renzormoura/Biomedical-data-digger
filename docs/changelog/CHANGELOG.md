@@ -7,6 +7,10 @@
 - **Início de quem tem conta** como painel de trabalho: "Bem-vindo, Nome", números da conta (com barra de uso quando a cobrança está ativa), primeiros passos, avisos, últimos salvos, novidades dos interesses e atalhos.
 - **Nome da conta**, pedido no cadastro e editável em Perfil → Conta e dados. Nova tabela `user_names`; `name` nas respostas de `/api/auth/me`, login, cadastro e `/api/account`; nova rota `PUT /api/account/name`. Opcional na API.
 
+### Adicionado
+- **Disponibilidade no SUS:** o que um artigo estuda (medicamentos, cirurgias, exames, técnicas) existe no SUS? Veredito por item com a fonte, a partir da Rename, da Conitec, da ANVISA e da **Tabela SIGTAP** do DATASUS (≈ 5.000 procedimentos, competência 2026-05), por consulta em código. Novo cartão na página do artigo, com busca manual, e rotas `GET /api/brasil/sus` e `GET /api/discover/sus`. Script `scripts/atualizar_sigtap.py`.
+- O botão **Disponib. SUS** do Laboratório de IA passou a receber o resultado das bases no prompt (marcado como [BASES OFICIAIS]); o que não está nelas é tratado como não verificado, nunca como "não está no SUS".
+
 ### Alterado
 - `scripts/verificar_banco.py` passa a conferir 30 tabelas.
 - **Terceiro plano, o Max** (R$ 49,90 por mês, provisório; 2.000 artigos, 200 listas e 100 relatórios). Preço em `MAX_PRICE_CENTS`. A visão geral do painel de administração conta os planos pagos um a um e a concessão manual ganhou a escolha do plano. Quem troca de plano começa o novo prazo na data da confirmação (não há desconto proporcional do plano anterior).

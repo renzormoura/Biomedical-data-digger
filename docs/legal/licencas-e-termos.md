@@ -30,6 +30,7 @@
 |---|---|---|
 | ANVISA (dados abertos de medicamentos) | Dados abertos governamentais | Citar a fonte e a data |
 | Conitec (recomendações) | Dado público governamental | Citar a fonte e a data |
+| SIGTAP (Tabela de Procedimentos do SUS, DATASUS) | Dado público governamental | Citar a fonte e a competência. **Confirmar os termos de uso do DATASUS antes do lançamento comercial** |
 | **Rename 2024** | **CC BY-NC-SA 4.0** (uso **não comercial**, atribuição e compartilhamento pela mesma licença) | **Bloqueio para uso comercial.** Opções: obter autorização/consulta formal ao Ministério da Saúde; usar apenas fatos não protegidos (a lista de nomes e componentes); retirar a Rename do produto pago |
 
 ## Feed (51 fontes)

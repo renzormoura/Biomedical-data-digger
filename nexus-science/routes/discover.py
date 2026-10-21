@@ -9,7 +9,7 @@ from fastapi.responses import Response
 
 import downloads
 import search_overview
-from brasil import conitec, consulta
+from brasil import conitec, consulta, disponibilidade
 from catalog import SearchQuery, Work
 from domain import NexusError, NotFoundError, SourceUnavailableError
 from exports import EXPORT_FORMATS
@@ -17,6 +17,7 @@ from routes.context import ApiContext
 from routes.payloads import (
     conitec_meta,
     conitec_registro,
+    disponibilidade_item,
     enrichment_payload,
     reliability_payload,
     situacao_payload,
@@ -170,6 +171,21 @@ def register_discover_routes(app: FastAPI, ctx: ApiContext) -> None:
         work = discovery.work(ref, client_id=identity(request))
         found = consulta.situacoes_do_texto(f"{work.title}. {work.abstract}", bases[0], bases[1], bases[2])
         return {"candidatos": [situacao_payload(item) for item in found], "meta": brasil_meta(bases)}
+
+    @app.get("/api/brasil/sus")
+    def brasil_sus(request: Request, q: Annotated[str, Query(min_length=3, max_length=100)]) -> dict[str, Any]:
+        """Disponibilidade no SUS de um medicamento, cirurgia, exame, tecnica ou produto (nome em portugues). Sem IA e sem rede."""
+        bases = ctx.sus_bases(request)
+        return {"consulta": q, "items": [disponibilidade_item(i) for i in disponibilidade.avaliar_termo(q, *bases)],
+                "notice": disponibilidade.AVISO, "meta": ctx.sus_meta(bases)}
+
+    @app.get("/api/discover/sus")
+    def sus_artigo(request: Request, ref: Annotated[str, Query(min_length=1, max_length=MAX_REF)]) -> dict[str, Any]:
+        """O que o artigo parece estudar (medicamentos, cirurgias, tecnicas) e se consta no SUS; cada item a confirmar."""
+        bases = ctx.sus_bases(request)
+        work = discovery.work(ref, client_id=identity(request))
+        found = disponibilidade.avaliar_texto(f"{work.title}. {work.abstract}", *bases)
+        return {"items": [disponibilidade_item(i) for i in found], "notice": disponibilidade.AVISO, "meta": ctx.sus_meta(bases)}
 
     @app.get("/api/discover/similar")
     def similar_route(

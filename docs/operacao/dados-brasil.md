@@ -8,7 +8,9 @@ Os dados de ANVISA, Conitec e Rename ficam em **instantâneos versionados** no r
 | ANVISA (medicamentos registrados) | `anvisa.json` | 60 dias | Mensal |
 | Conitec (recomendações) | `conitec.json` | 60 dias | Mensal (a planilha muda de nome a cada versão) |
 | Rename | `rename.json` | 400 dias | A cada nova edição da Rename (revista a cada 1 a 2 anos) |
+| SIGTAP (tabela de procedimentos do SUS) | `sigtap.json` | 120 dias | Mensal (o DATASUS publica uma competência por mês) |
 | Sinônimos inglês ↔ português | `aliases_en_pt.json` | — | Conforme a revisão de especialista e as falhas observadas |
+| Sinônimos de procedimentos | `aliases_procedimentos.json` | — | Ao incluir um termo, conferir que a busca dele acha algo na SIGTAP (o teste faz isso) |
 
 Quando um instantâneo passa do prazo, a interface mostra um aviso de que os dados podem estar desatualizados.
 
@@ -19,6 +21,7 @@ Quando um instantâneo passa do prazo, a interface mostra um aviso de que os dad
    python scripts/atualizar_anvisa.py
    python scripts/atualizar_conitec.py
    python scripts/atualizar_rename.py
+   python scripts/atualizar_sigtap.py
    ```
    Cada script baixa a fonte oficial, monta o instantâneo e imprime um resumo (arquivo de origem, datas e contagens).
 3. **Revisar o diff** do JSON (`git diff --stat` e amostras): contagens coerentes com a edição anterior, sem queda abrupta, nomes sem lixo de extração. O instantâneo é a única fonte do servidor.
@@ -31,6 +34,7 @@ Quando um instantâneo passa do prazo, a interface mostra um aviso de que os dad
 |---|---|---|
 | ANVISA | CSV de dados abertos `dados.anvisa.gov.br/dados/DADOS_ABERTOS_MEDICAMENTOS.csv` (≈46 MB) | Reduz de uma linha por registro para uma por **substância** (sem sal e forma farmacêutica): registros ativos e inativos, categorias, classes terapêuticas, empresas e validade mais distante |
 | Conitec | Planilha Excel de recomendações no portal da Conitec | O script descobre o link atual na página oficial, lê o XLSX só com a biblioteca padrão e mantém **somente medicamentos**; o nome do arquivo contém a data |
+| SIGTAP | ZIP mensal da Tabela Unificada, por FTP (`ftp2.datasus.gov.br`), descoberto na página do DATASUS | Arquivos de largura fixa em latin-1, lidos pelo layout de cada pacote; guarda procedimento, grupo, subgrupo e complexidade (≈ 5.000 itens) |
 | Rename | PDF oficial da Rename 2024 (2ª edição, 2025) | Extração por script (`pypdf`); itens, apresentações, componente e substâncias; **licença CC BY-NC-SA 4.0** |
 
 Os metadados de cada instantâneo (`meta`) registram fonte, URL, data do arquivo, data da extração e contagens; a interface os mostra junto com os resultados.

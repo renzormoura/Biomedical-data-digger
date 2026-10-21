@@ -63,6 +63,8 @@ API JSON interna do produto, consumida pela própria SPA. Todas as rotas ficam s
 | GET | `/api/discover/brasil` | pública | `ref` | Substâncias que o resumo parece citar + situação (ANVISA/Conitec/Rename) |
 | GET | `/api/brasil/conitec` | pública | `q` (3–80) | Decisões da Conitec |
 | GET | `/api/brasil/medicamento` | pública | `q` (3–80) | Registro ANVISA + Conitec + Rename |
+| GET | `/api/brasil/sus` | pública | `q` (3–100) | Disponibilidade no SUS de medicamento, cirurgia, exame, técnica ou produto (Rename, Conitec, ANVISA e SIGTAP) |
+| GET | `/api/discover/sus` | pública | `ref` | O que o artigo parece estudar e se consta no SUS (cada item a confirmar) |
 
 ## Biblioteca, listas e análises salvas (exigem conta)
 | Método | Rota | Corpo / parâmetros | Descrição |

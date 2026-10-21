@@ -805,7 +805,9 @@ Abstract:
     return [{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}]
 
 def build_message_disponibilidade_sus(article_title: str, abstract_text: str, sys_prompt: str = SYS_PROMPT) -> list[dict[str, str]]:
-    contexto_extra = contexto_brasil.bloco_contexto(f"{article_title} {abstract_text}")
+    texto = f"{article_title} {abstract_text}"
+    blocos = (contexto_brasil.bloco_disponibilidade(texto), contexto_brasil.bloco_contexto(texto))
+    contexto_extra = "\n\n".join(bloco for bloco in blocos if bloco)
     user_prompt = f"""Você é um médico com experiência no sistema público de saúde brasileiro. Avalie a disponibilidade das intervenções descritas no artigo no contexto do SUS.
 
 Título: {article_title}
@@ -815,9 +817,11 @@ Abstract:
 {contexto_extra}
 
 **REGRA DE CONFIABILIDADE (obrigatória):**
-- A seção "Disponibilidade no SUS" só pode afirmar algo se (a) o resumo informar expressamente o uso no SUS/Brasil, ou (b) o CONTEXTO CURADO acima trouxer a informação com fonte indicada. Qualquer outro caso deve dizer: "Não verificável com as fontes acessíveis".
+- A seção "Disponibilidade no SUS" só pode afirmar algo se (a) o resumo informar expressamente o uso no SUS/Brasil, (b) o CONTEXTO CURADO acima trouxer a informação com fonte indicada, ou (c) o bloco DISPONIBILIDADE NO SUS (bases oficiais: Rename, Conitec, ANVISA e Tabela SIGTAP) trouxer o item; nesse caso, repita o veredito do bloco sem acrescentar nada. Qualquer outro caso deve dizer: "Não verificável com as fontes acessíveis".
 - Nunca use memória externa nem suposição para afirmar disponibilidade, cobertura, financiamento, preço ou inclusão em protocolo.
-- Separe sempre: **[DO RESUMO]**, **[CONTEXTO CURADO]** (com a fonte citada) ou **[NÃO VERIFICADO]**.
+- Separe sempre: **[DO RESUMO]**, **[BASES OFICIAIS]** (para o bloco de disponibilidade, citando a base), **[CONTEXTO CURADO]** (com a fonte citada) ou **[NÃO VERIFICADO]**.
+- Uma intervenção do artigo que não esteja no bloco de bases oficiais é **[NÃO VERIFICADO]**: não diga que "não está no SUS", diga que não foi encontrada nas bases consultadas.
+- Constar nas bases não garante que a unidade de saúde ofereça o item; diga isso uma vez, no fim da seção.
 - Se o bloco de contexto curado estiver vazio para este tema, responda "Não verificável com as fontes acessíveis" em vez de inferir.
 
 **FORMATO OBRIGATÓRIO:** Bullet points. Use somente o resumo fornecido e o contexto curado; para dados ausentes, indique "Não descrito no resumo fornecido".

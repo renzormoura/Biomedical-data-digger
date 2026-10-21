@@ -9,7 +9,7 @@ from fastapi.responses import Response
 import downloads
 import markdown_lite
 import reliability
-from brasil import anvisa, conitec, consulta, rename
+from brasil import anvisa, conitec, consulta, disponibilidade, rename, sigtap
 from catalog import Work
 from domain import NexusError
 from enrichment import Enrichment
@@ -70,6 +70,25 @@ def rename_meta(snapshot: rename.Instantaneo) -> dict[str, Any]:
     return {
         "fonte": meta.get("fonte"), "arquivoUrl": meta.get("url"), "licenca": meta.get("licenca"), "extraidoEm": meta.get("extraido_em"),
         "substancias": meta.get("substancias"), "dias": days, "defasado": days is None or days > rename.STALE_AFTER_DAYS,
+    }
+
+
+def sigtap_meta(snapshot: sigtap.Instantaneo) -> dict[str, Any]:
+    days = sigtap.dias_desde_extracao(snapshot)
+    meta = snapshot.meta
+    return {
+        "fonte": meta.get("fonte"), "paginaUrl": meta.get("pagina_url"), "arquivoUrl": meta.get("arquivo_url"), "competencia": meta.get("competencia"),
+        "extraidoEm": meta.get("extraido_em"), "procedimentos": meta.get("procedimentos"), "dias": days,
+        "defasado": days is None or days > sigtap.STALE_AFTER_DAYS,
+    }
+
+
+def disponibilidade_item(item: disponibilidade.Item) -> dict[str, Any]:
+    label, tone = disponibilidade.VEREDITOS[item.veredito]
+    return {
+        "kind": item.tipo, "name": item.nome, "verdict": item.veredito, "label": label, "tone": tone, "source": item.origem, "method": item.metodo,
+        "details": list(item.detalhes), "sources": list(item.fontes), "totalProcedures": item.total_procedimentos,
+        "procedures": [{"code": p.codigo, "name": p.nome, "complexity": p.complexidade_texto, "group": p.grupo, "subgroup": p.subgrupo} for p in item.procedimentos],
     }
 
 
