@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cinco propostas de repaginada — Nexus Science</title>
+<link rel="stylesheet" href="base.css">
+<style>
+header.top { padding: 70px 0 30px; }
+h1 { font-size: clamp(2rem, 5vw, 3.6rem); letter-spacing: -0.04em; line-height: 1.04; max-width: 20ch; }
+.lead { color: var(--muted); max-width: 62ch; margin-top: 14px; }
+.grid { display: grid; gap: 22px; padding: 20px 0 60px; }
+.card { display: grid; grid-template-columns: 420px 1fr; gap: 30px; padding: 22px; border: 1px solid var(--border); border-radius: 22px; background: var(--surface); transition: border-color .3s, transform .3s; }
+.card:hover { border-color: var(--accent); transform: translateY(-3px); }
+.shot { position: relative; height: 270px; border-radius: 14px; overflow: hidden; border: 1px solid var(--border); background: var(--bg); }
+.shot iframe { width: 1280px; height: 770px; border: 0; transform: scale(.328); transform-origin: 0 0; pointer-events: none; }
+.shot a { position: absolute; inset: 0; }
+.n { font-family: var(--mono); color: var(--accent-text); font-size: .85rem; }
+.card h2 { font-size: 1.8rem; letter-spacing: -0.03em; margin: 4px 0 8px; }
+.card p { color: var(--muted); }
+dl { display: grid; grid-template-columns: 110px 1fr; gap: 6px 14px; margin: 14px 0 18px; font-size: .9rem; } dt { color: var(--accent-text); font-weight: 600; } dd { color: var(--muted); }
+.cmp { padding: 10px 0 80px; } table { width: 100%; border-collapse: collapse; font-size: .9rem; } th, td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--border); vertical-align: top; } th { color: var(--muted); font-weight: 500; font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; }
+.pick { margin: 10px 0 80px; padding: 26px; border: 1px solid var(--accent); border-radius: 18px; background: var(--accent-soft); }
+@media (max-width: 900px) { .card { grid-template-columns: 1fr; } .shot { height: 220px; } .shot iframe { transform: scale(.26); } table { display: block; overflow-x: auto; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top" style="display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap">
+  <div><a class="logo" href="#"><i></i>Nexus Science</a><h1 style="margin-top:26px">Cinco propostas para a repaginada.</h1>
+  <p class="lead">Mesmas cores do produto (preto e laranja, com tema claro), animações diferentes e uma ideia central em cada uma. Abra cada proposta, role, passe o mouse, alterne o tema no botão ◐ e depois me diga qual direção seguir, ou quais partes misturar.</p></div>
+  <button class="toggle" aria-label="Alternar tema">◐</button>
+</header>
+
+<section class="grid">
+  <article class="card"><div class="shot"><iframe src="01-rede.html" title="Prévia da proposta 1" loading="lazy" tabindex="-1"></iframe><a href="01-rede.html" aria-label="Abrir proposta 1"></a></div>
+    <div><span class="n">PROPOSTA 1</span><h2>Rede</h2><p>O nome vira imagem: uma rede viva de nós liga as fontes ao artigo e reage ao cursor.</p>
+    <dl><dt>Surpresa</dt><dd>Rede em canvas que se organiza em volta das 5 fontes e liga ao mouse; busca com borda que gira; nota que se preenche ao rolar.</dd><dt>Clima</dt><dd>Tecnológico, "inteligência conectada".</dd><dt>Custo</dt><dd>Médio. Canvas leve; precisa pausar fora da tela e respeitar movimento reduzido (já previsto).</dd></dl>
+    <a class="btn primary" href="01-rede.html">Abrir proposta 1</a></div></article>
+
+  <article class="card"><div class="shot"><iframe src="02-jornada.html" title="Prévia da proposta 2" loading="lazy" tabindex="-1"></iframe><a href="02-jornada.html" aria-label="Abrir proposta 2"></a></div>
+    <div><span class="n">PROPOSTA 2</span><h2>Jornada</h2><p>Contar o produto rolando a página: um cartão fixo vira busca, nota e relatório.</p>
+    <dl><dt>Surpresa</dt><dd>Cena que se transforma conforme a rolagem; texto à esquerda acende passo a passo; barra de progresso.</dd><dt>Clima</dt><dd>Narrativo, explica o produto sem texto longo.</dd><dt>Custo</dt><dd>Médio. A parte mais simples de levar para a página inicial real.</dd></dl>
+    <a class="btn primary" href="02-jornada.html">Abrir proposta 2</a></div></article>
+
+  <article class="card"><div class="shot"><iframe src="03-console.html" title="Prévia da proposta 3" loading="lazy" tabindex="-1"></iframe><a href="03-console.html" aria-label="Abrir proposta 3"></a></div>
+    <div><span class="n">PROPOSTA 3</span><h2>Console</h2><p>Pesquisa na velocidade do teclado: terminal que se digita sozinho e paleta de comandos de verdade (Ctrl/Cmd+K).</p>
+    <dl><dt>Surpresa</dt><dd>Demonstração que busca, salva e gera relatório sozinha; paleta de comandos que funciona; faixa de novidades.</dd><dt>Clima</dt><dd>Para quem pesquisa e programa; "ferramenta de profissional".</dd><dt>Custo</dt><dd>Baixo a médio. A paleta de comandos seria útil no produto inteiro, não só na vitrine.</dd></dl>
+    <a class="btn primary" href="03-console.html">Abrir proposta 3</a></div></article>
+
+  <article class="card"><div class="shot"><iframe src="04-bento.html" title="Prévia da proposta 4" loading="lazy" tabindex="-1"></iframe><a href="04-bento.html" aria-label="Abrir proposta 4"></a></div>
+    <div><span class="n">PROPOSTA 4</span><h2>Bento vivo</h2><p>O produto inteiro numa grade de blocos, cada um com uma miniatura animada e brilho que segue o cursor.</p>
+    <dl><dt>Surpresa</dt><dd>Oito blocos vivos: busca em órbita, nota, feed rolando, sino que balança, biblioteca que abre em leque, relatório se escrevendo, "consta no SUS?".</dd><dt>Clima</dt><dd>Moderno, mostra tudo de uma vez.</dd><dt>Custo</dt><dd>Baixo. Só CSS e um pouco de JS; funciona bem também no painel de quem tem conta.</dd></dl>
+    <a class="btn primary" href="04-bento.html">Abrir proposta 4</a></div></article>
+
+  <article class="card"><div class="shot"><iframe src="05-editorial.html" title="Prévia da proposta 5" loading="lazy" tabindex="-1"></iframe><a href="05-editorial.html" aria-label="Abrir proposta 5"></a></div>
+    <div><span class="n">PROPOSTA 5</span><h2>Editorial</h2><p>Tipografia gigante e cinética, como revista: o texto é a imagem e o cursor é a luz.</p>
+    <dl><dt>Surpresa</dt><dd>Títulos que sobem em máscara, faixas de fontes que aceleram com a rolagem, cursor próprio, cartões de área, botão magnético.</dd><dt>Clima</dt><dd>Ousado, de marca; o mais diferente do que existe hoje.</dd><dt>Custo</dt><dd>Médio a alto. Cursor próprio e tipografia enorme pedem cuidado com acessibilidade e celular.</dd></dl>
+    <a class="btn primary" href="05-editorial.html">Abrir proposta 5</a></div></article>
+</section>
+
+<section class="cmp"><h2 style="font-size:1.6rem;letter-spacing:-0.03em;margin-bottom:16px">Lado a lado</h2>
+<table><thead><tr><th>Proposta</th><th>Ideia central</th><th>Anima com</th><th>Vende planos?</th><th>Aproveita no app logado?</th></tr></thead><tbody>
+<tr><td>1 · Rede</td><td>O nome "Nexus" como imagem</td><td>Canvas + cursor</td><td>Bom: planos no fim, depois da prova</td><td>Pouco (é vitrine)</td></tr>
+<tr><td>2 · Jornada</td><td>Contar o uso, passo a passo</td><td>Rolagem</td><td>Muito bom: mostra valor antes de pedir cadastro</td><td>Pouco</td></tr>
+<tr><td>3 · Console</td><td>Velocidade e atalhos</td><td>Digitação + paleta</td><td>Médio: público mais técnico</td><td>Muito: paleta Ctrl+K vale no produto todo</td></tr>
+<tr><td>4 · Bento vivo</td><td>Tudo à vista, cada bloco vivo</td><td>Micro-animações</td><td>Bom</td><td>Muito: o painel de quem tem conta pode virar um bento</td></tr>
+<tr><td>5 · Editorial</td><td>Marca ousada, tipografia</td><td>Texto + cursor</td><td>Médio: prioriza impacto</td><td>Pouco</td></tr></tbody></table></section>
+
+<section class="pick"><strong>Minha leitura (para vocês avaliarem):</strong> para <em>atrair clientes aos planos</em>, a <strong>Jornada (2)</strong> explica melhor o valor; para <em>surpreender</em>, a <strong>Rede (1)</strong> e o <strong>Editorial (5)</strong> são as mais marcantes; para <em>o dia a dia de quem já tem conta</em>, o <strong>Bento (4)</strong> e a <strong>paleta de comandos do Console (3)</strong> são os que mais se aproveitam. Uma combinação possível: <strong>Jornada ou Rede na vitrine do convidado + Bento no painel + paleta Ctrl+K em todo o produto</strong>.</section>
+</div>
+<script src="base.js"></script>
+</body>
+</html>

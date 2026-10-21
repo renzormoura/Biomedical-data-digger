@@ -1,0 +1,50 @@
+/* Base comum das 5 propostas: so os tokens de cor/tipografia do produto (preto e laranja) e utilitarios.
+   Cada proposta traz o proprio layout e as proprias animacoes. Sem recursos externos. */
+:root {
+  --bg: #0a0a0b; --surface: #111113; --surface-2: #18181b; --border: #26262b; --line-strong: #6a6a72;
+  --text: #ededee; --muted: #9b9ba3; --accent: #ff6a00; --accent-hover: #ff8533; --accent-text: #ff8533;
+  --accent-soft: rgba(255, 106, 0, 0.1); --on-accent: #0a0a0b; --ok: #4ade80;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  --bg: #ffffff; --surface: #fafaf9; --surface-2: #f3f3f1; --border: #e4e4e0; --line-strong: #85858b;
+  --text: #0f0f10; --muted: #5a5a62; --accent: #ea580c; --accent-hover: #c2410c; --accent-text: #c2410c;
+  --accent-soft: rgba(234, 88, 12, 0.08); --on-accent: #ffffff; --ok: #15803d;
+  color-scheme: light;
+}
+* { box-sizing: border-box; margin: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); line-height: 1.6; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; cursor: pointer; }
+img, svg, canvas { display: block; max-width: 100%; }
+.wrap { width: min(1160px, 100% - 32px); margin-inline: auto; }
+.muted { color: var(--muted); }
+.accent { color: var(--accent-text); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 20px; border-radius: 8px; border: 1px solid var(--border); background: transparent; font-weight: 600; transition: transform .2s, background .2s, border-color .2s, box-shadow .2s; }
+.btn:hover { border-color: var(--accent); transform: translateY(-1px); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.primary:hover { background: var(--accent-hover); box-shadow: 0 8px 30px -8px var(--accent); }
+.logo { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -0.01em; }
+.logo i { width: 26px; height: 26px; border-radius: 7px; background: var(--accent); display: grid; place-items: center; }
+.logo i::after { content: ""; width: 10px; height: 10px; border: 2.4px solid var(--on-accent); border-radius: 50%; box-shadow: 5px 5px 0 -1.5px var(--on-accent); transform: translate(-2px, -2px); }
+.topbar { position: fixed; inset: 0 0 auto 0; z-index: 20; backdrop-filter: blur(14px); background: color-mix(in srgb, var(--bg) 70%, transparent); border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent); }
+.topbar .wrap { display: flex; align-items: center; justify-content: space-between; height: 62px; gap: 16px; }
+.topbar nav { display: flex; gap: 22px; color: var(--muted); font-size: .92rem; }
+.topbar nav a:hover { color: var(--text); }
+.toggle { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--border); background: transparent; display: grid; place-items: center; }
+.toggle:hover { border-color: var(--accent); }
+.back { position: fixed; left: 14px; bottom: 14px; z-index: 30; font-size: .78rem; padding: 7px 12px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); color: var(--muted); }
+.back:hover { color: var(--text); border-color: var(--accent); }
+.ring { --v: 78; width: 112px; height: 112px; border-radius: 50%; display: grid; place-items: center; position: relative;
+  background: conic-gradient(var(--accent) calc(var(--p, 0) * 3.6deg), var(--border) 0); transition: --p 1.2s; }
+.ring::before { content: ""; position: absolute; inset: 9px; border-radius: 50%; background: var(--surface); }
+.ring b { position: relative; font-size: 2rem; letter-spacing: -0.03em; }
+.ring small { position: relative; display: block; text-align: center; color: var(--muted); font-size: .7rem; margin-top: -6px; }
+@property --p { syntax: "<number>"; inherits: false; initial-value: 0; }
+@media (max-width: 760px) { .topbar nav { display: none; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+}

@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proposta 4 · Bento vivo — Nexus Science</title>
+<link rel="stylesheet" href="base.css">
+<style>
+/* Proposta 4 — BENTO VIVO: o produto inteiro numa grade de blocos, cada um com uma miniatura que se mexe e um brilho que segue o cursor. */
+.hero { padding: 120px 0 40px; display: grid; grid-template-columns: 1.1fr .9fr; gap: 40px; align-items: end; }
+h1 { font-size: clamp(2.4rem, 5.6vw, 4.6rem); line-height: 1; letter-spacing: -0.045em; }
+h1 .g { background: linear-gradient(100deg, var(--accent), #ffc08f, var(--accent)); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: sheen 6s linear infinite; }
+@keyframes sheen { to { background-position: -200% 0; } }
+.hero p { color: var(--muted); font-size: 1.1rem; max-width: 46ch; }
+.search { display: flex; gap: 8px; padding: 7px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); transition: border-color .25s, box-shadow .25s; margin-top: 18px; }
+.search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+.search input { flex: 1; min-width: 0; background: transparent; border: 0; outline: 0; color: var(--text); font: inherit; padding: 8px 10px; }
+.bento { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 236px; gap: 14px; padding-bottom: 80px; }
+.tile { position: relative; border: 1px solid var(--border); border-radius: 22px; background: var(--surface); padding: 22px; overflow: hidden; isolation: isolate; transition: border-color .3s, transform .3s; }
+.tile::before { content: ""; position: absolute; inset: 0; z-index: -1; opacity: 0; transition: opacity .3s; background: radial-gradient(360px circle at var(--mx, 50%) var(--my, 50%), var(--accent-soft), transparent 60%); }
+.tile:hover { border-color: color-mix(in srgb, var(--accent) 60%, var(--border)); transform: translateY(-3px); } .tile:hover::before { opacity: 1; }
+.tile h3 { font-size: 1.05rem; letter-spacing: -0.01em; } .tile .sm { color: var(--muted); font-size: .86rem; margin-top: 2px; }
+.t-busca { grid-column: span 2; grid-row: span 2; } .t-feed { grid-row: span 2; } .t-lib, .t-sus { grid-column: span 2; }
+/* busca */
+.orbit { position: absolute; left: 50%; top: 56%; width: 300px; height: 300px; margin: -150px 0 0 -150px; }
+.orbit .core { position: absolute; inset: 104px; border-radius: 50%; background: var(--accent); display: grid; place-items: center; color: var(--on-accent); font-weight: 800; box-shadow: 0 0 60px -6px var(--accent); animation: beat 2.4s ease-in-out infinite; font-size: .95rem; text-align: center; line-height: 1.1; }
+@keyframes beat { 50% { transform: scale(1.08); } }
+.orbit .ring-o { position: absolute; inset: 0; border: 1px dashed var(--line-strong); border-radius: 50%; animation: turn 26s linear infinite; }
+.orbit .chips span { position: absolute; left: 50%; top: 50%; padding: 4px 11px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--accent); font-size: .74rem; white-space: nowrap; transform: translate(-50%, -50%) rotate(var(--r)) translateY(-150px) rotate(calc(var(--r) * -1)); animation: glow 3s ease-in-out infinite; animation-delay: calc(var(--i) * .6s); }
+@keyframes glow { 50% { box-shadow: 0 0 22px -2px var(--accent); background: var(--accent-soft); } } @keyframes turn { to { transform: rotate(360deg); } }
+.orbit .ring-o::after { content: ""; position: absolute; left: 50%; top: -4px; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 14px var(--accent); }
+.t-busca .num { position: absolute; right: 22px; bottom: 18px; font-family: var(--mono); font-size: .85rem; color: var(--muted); } .t-busca .num b { color: var(--accent-text); font-size: 1.6rem; display: block; text-align: right; }
+/* nota */
+.t-nota { display: grid; place-items: center; text-align: center; } .t-nota .ring { width: 92px; height: 92px; margin: 0 auto 8px; } .t-nota .ring b { font-size: 1.7rem; }
+/* feed */
+.t-feed .roll { position: absolute; inset: 70px 14px 14px; overflow: hidden; mask-image: linear-gradient(transparent, #000 12%, #000 88%, transparent); }
+.roll > div { display: grid; gap: 10px; animation: roll 22s linear infinite; } .roll:hover > div { animation-play-state: paused; } @keyframes roll { to { transform: translateY(-50%); } }
+.news { padding: 11px 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); font-size: .82rem; line-height: 1.35; } .news i { display: inline-block; font-style: normal; font-size: .68rem; padding: 1px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-text); margin-bottom: 5px; }
+/* avisos */
+.bell { position: absolute; right: 24px; top: 22px; width: 38px; height: 38px; color: var(--accent-text); animation: ring-b 4.5s infinite; transform-origin: 50% 10%; } .bell b { position: absolute; right: -4px; top: -4px; min-width: 17px; height: 17px; border-radius: 9px; background: var(--accent); color: var(--on-accent); font-size: .68rem; display: grid; place-items: center; animation: pop 4.5s infinite; }
+@keyframes ring-b { 0%, 60%, 100% { transform: rotate(0); } 64% { transform: rotate(16deg); } 68% { transform: rotate(-14deg); } 72% { transform: rotate(10deg); } 76% { transform: rotate(-6deg); } 80% { transform: rotate(0); } } @keyframes pop { 0%, 58% { transform: scale(0); } 64% { transform: scale(1.3); } 70%, 100% { transform: scale(1); } }
+.alerts { margin-top: 16px; display: grid; gap: 7px; font-size: .8rem; } .alerts div { padding: 8px 11px; border-radius: 10px; background: var(--surface-2); border-left: 3px solid var(--accent); animation: slide 4.5s infinite; animation-delay: calc(var(--i) * .25s); } @keyframes slide { 0%, 50% { opacity: .35; transform: translateX(-8px); } 66%, 100% { opacity: 1; transform: none; } }
+/* biblioteca */
+.fan { position: absolute; right: 30px; bottom: 26px; width: 150px; height: 120px; } .fan i { position: absolute; inset: 0; border-radius: 12px; border: 1px solid var(--border); background: var(--surface-2); transform-origin: 10% 100%; transition: transform .5s cubic-bezier(.2,.8,.2,1); }
+.fan i:nth-child(1) { transform: rotate(-4deg); } .fan i:nth-child(2) { transform: rotate(0); } .fan i:nth-child(3) { background: linear-gradient(135deg, var(--accent-soft), var(--surface-2)); border-color: var(--accent); }
+.t-lib:hover .fan i:nth-child(1) { transform: rotate(-24deg) translateX(-14px); } .t-lib:hover .fan i:nth-child(2) { transform: rotate(-11deg); } .t-lib:hover .fan i:nth-child(3) { transform: rotate(3deg) translateY(-6px); }
+.fan i::after { content: ""; position: absolute; left: 14px; right: 14px; top: 18px; height: 6px; border-radius: 3px; background: var(--border); box-shadow: 0 14px 0 var(--border), 0 28px 0 var(--border); }
+.tags { display: flex; gap: 6px; margin-top: 14px; flex-wrap: wrap; } .tags span { font-size: .74rem; padding: 3px 10px; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); }
+/* relatorio */
+.doc { margin-top: 14px; display: grid; gap: 9px; } .doc i { display: block; height: 8px; border-radius: 4px; background: var(--border); width: 0; animation: wr 6s infinite; animation-delay: calc(var(--i) * .5s); } .doc i:nth-child(odd) { background: color-mix(in srgb, var(--accent) 50%, var(--border)); }
+@keyframes wr { 0% { width: 0; } 25%, 85% { width: var(--w); } 100% { width: 0; } }
+/* sus */
+.sus { margin-top: 14px; display: grid; gap: 8px; font-size: .84rem; } .sus div { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 11px; background: var(--surface-2); } .sus b { margin-left: auto; font-size: .72rem; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--accent); color: var(--accent-text); } .sus .no b { border-color: var(--line-strong); color: var(--muted); }
+.sus div { animation: flip 8s infinite; animation-delay: calc(var(--i) * .6s); } @keyframes flip { 0%, 6% { transform: translateY(8px); opacity: 0; } 12%, 90% { transform: none; opacity: 1; } 100% { opacity: 0; } }
+/* numeros */
+.t-num { display: flex; flex-direction: column; justify-content: center; gap: 4px; } .t-num b { font-size: 2.7rem; letter-spacing: -0.05em; color: var(--accent-text); line-height: 1; } .t-num span { color: var(--muted); font-size: .82rem; }
+.plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; padding-bottom: 80px; } .plan { padding: 26px; border: 1px solid var(--border); border-radius: 22px; background: var(--surface); position: relative; isolation: isolate; overflow: hidden; } .plan.hot { border-color: var(--accent); } .plan .p { font-size: 2rem; font-weight: 800; letter-spacing: -0.04em; margin: 8px 0; } .plan ul { list-style: none; padding: 0; color: var(--muted); font-size: .9rem; display: grid; gap: 6px; margin: 12px 0 18px; } .plan li::before { content: "✓ "; color: var(--accent-text); }
+.sh { font-size: clamp(1.7rem, 3.6vw, 2.6rem); letter-spacing: -0.035em; margin-bottom: 22px; }
+@media (max-width: 920px) { .hero { grid-template-columns: 1fr; } .bento { grid-template-columns: 1fr 1fr; } .t-busca { grid-column: span 2; } .plans { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .bento { grid-template-columns: 1fr; grid-auto-rows: auto; } .tile { min-height: 210px; } .t-busca, .t-lib, .t-sus { grid-column: auto; } .t-busca { min-height: 400px; } .t-feed { min-height: 360px; } .orbit { transform: scale(.82); } }
+</style>
+</head>
+<body>
+<header class="topbar"><div class="wrap">
+  <a class="logo" href="#"><i></i>Nexus Science</a>
+  <nav><a href="#modulos">Módulos</a><a href="#planos">Planos</a></nav>
+  <div style="display:flex;gap:10px;align-items:center"><button class="toggle" aria-label="Alternar tema">◐</button><a class="btn primary" href="#">Criar conta grátis</a></div>
+</div></header>
+
+<main class="wrap">
+<section class="hero">
+  <div><h1>Pesquise com <span class="g">método.</span><br>Entregue com <span class="g">confiança.</span></h1></div>
+  <div><p>Busca em várias fontes, nota de confiabilidade com critérios abertos, feed, avisos e relatórios. Tudo num lugar só.</p>
+    <form class="search" onsubmit="return false"><input placeholder="Tema, título, DOI ou palavra-chave" aria-label="Buscar"><button class="btn primary">Buscar</button></form></div>
+</section>
+
+<section id="modulos" class="bento">
+  <article class="tile t-busca rv"><h3>Busca em várias fontes</h3><p class="sm">Uma pergunta, tudo reunido, sem repetidos.</p>
+    <div class="orbit"><div class="ring-o"></div><div class="chips"><span style="--r:0deg;--i:0">PubMed</span><span style="--r:72deg;--i:1">Europe PMC</span><span style="--r:144deg;--i:2">arXiv</span><span style="--r:216deg;--i:3">OpenAlex</span><span style="--r:288deg;--i:4">DOAJ</span></div><div class="core">uma<br>busca</div></div>
+    <div class="num"><b data-count="214">0</b>resultados em 0,9 s</div></article>
+  <article class="tile t-nota rv" style="--d:.06s"><div><div class="ring" id="ring"><div style="text-align:center"><b>78</b><small>de 100</small></div></div><h3>Nota que mostra o cálculo</h3><p class="sm">8 critérios abertos</p></div></article>
+  <article class="tile t-feed rv" style="--d:.12s"><h3>Feed por área</h3><p class="sm">51 fontes, 14 áreas.</p>
+    <div class="roll"><div id="news"></div></div></article>
+  <article class="tile t-alert rv" style="--d:.18s"><h3>Avisos</h3><p class="sm">Artigo novo, retratação, regulação.</p>
+    <svg class="bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.6 2H4.4zM10 20a2 2 0 0 0 4 0"/></svg><b style="display:none"></b>
+    <div class="alerts"><div style="--i:0">Artigo retratado na sua biblioteca</div><div style="--i:1">3 estudos novos em Diabetes</div></div></article>
+  <article class="tile t-lib rv" style="--d:.06s"><h3>Biblioteca e listas</h3><p class="sm">Salve, organize e compartilhe por link.</p><div class="tags"><span>TCC</span><span>Revisão</span><span>Aula 12</span></div><div class="fan"><i></i><i></i><i></i></div></article>
+  <article class="tile t-rel rv" style="--d:.12s"><h3>Relatório com método</h3><p class="sm">Word, ABNT, Zotero.</p><div class="doc"><i style="--i:0;--w:90%"></i><i style="--i:1;--w:72%"></i><i style="--i:2;--w:84%"></i><i style="--i:3;--w:48%"></i><i style="--i:4;--w:66%"></i></div></article>
+  <article class="tile t-sus rv" style="--d:.18s"><h3>Consta no SUS?</h3><p class="sm">Medicamentos, cirurgias e técnicas, nas bases oficiais.</p>
+    <div class="sus"><div style="--i:0">Metformina <b>Rename · componente básico</b></div><div style="--i:1">Colecistectomia <b>SIGTAP · 5 procedimentos</b></div><div class="no" style="--i:2">Terapia experimental X <b>Não encontrado</b></div></div></article>
+  <article class="tile t-num rv" style="--d:.24s"><b data-count="51">0</b><span>fontes de novidades no feed</span></article>
+</section>
+
+<h2 class="sh rv" id="planos">Comece grátis. Cresça quando precisar.</h2>
+<section class="plans">
+  <article class="plan tile rv"><h3>Gratuito</h3><div class="p">Grátis</div><ul><li>50 artigos na biblioteca</li><li>3 listas</li><li>1 relatório</li></ul><a class="btn" href="#">Criar conta grátis</a></article>
+  <article class="plan tile hot rv" style="--d:.08s"><h3>Pro</h3><div class="p">R$ 29,00 <span class="muted" style="font-size:.85rem;font-weight:500">/mês</span></div><ul><li>500 artigos</li><li>50 listas</li><li>30 relatórios</li></ul><a class="btn primary" href="#">Começar e assinar</a></article>
+  <article class="plan tile rv" style="--d:.16s"><h3>Max</h3><div class="p">R$ 49,90 <span class="muted" style="font-size:.85rem;font-weight:500">/mês</span></div><ul><li>2.000 artigos</li><li>200 listas</li><li>100 relatórios</li></ul><a class="btn" href="#">Começar e assinar</a></article>
+</section>
+</main>
+<a class="back" href="index.html">← todas as propostas</a>
+<script src="base.js"></script>
+<script>
+/* Brilho que segue o cursor, em cada bloco */
+document.querySelectorAll(".tile").forEach((t) => t.addEventListener("pointermove", (e) => { const r = t.getBoundingClientRect(); t.style.setProperty("--mx", e.clientX - r.left + "px"); t.style.setProperty("--my", e.clientY - r.top + "px"); }));
+const feed = [["medicina", "Corticoide inalatório reduz crises em crianças"], ["engenharia", "Chips inspirados no cérebro gastam menos energia"], ["ambiente", "Satélites mapeiam o carbono em florestas tropicais"], ["computação", "IA prevê falhas em redes elétricas"], ["biologia", "Nova técnica edita genes com menos erros"], ["sociais", "Transporte gratuito muda o uso da cidade"]];
+document.getElementById("news").innerHTML = [...feed, ...feed].map(([a, t]) => `<div class="news"><i>${a}</i><br>${t}</div>`).join("");
+NX.onView("[data-count]", (el) => NX.counter(el), .5);
+NX.onView(".t-nota", () => document.getElementById("ring").style.setProperty("--p", 78), .5);
+</script>
+</body>
+</html>

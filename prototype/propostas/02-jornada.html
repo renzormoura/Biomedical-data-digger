@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proposta 2 · Jornada — Nexus Science</title>
+<link rel="stylesheet" href="base.css">
+<style>
+/* Proposta 2 — JORNADA: contar o produto rolando a pagina. Um cartao fixo se transforma em busca, nota e relatorio. */
+.hero { min-height: 92svh; display: grid; align-content: center; padding: 120px 0 60px; position: relative; overflow: hidden; }
+.orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: .22; background: var(--accent); pointer-events: none; animation: drift 14s ease-in-out infinite alternate; }
+.orb.a { width: 480px; height: 480px; right: -120px; top: -80px; } .orb.b { width: 360px; height: 360px; left: -120px; bottom: -120px; animation-delay: -6s; opacity: .14; }
+@keyframes drift { to { transform: translate(-60px, 50px) scale(1.15); } }
+.eyebrow { font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+h1 { font-size: clamp(2.6rem, 8vw, 6.4rem); line-height: .98; letter-spacing: -0.05em; margin: 18px 0 22px; max-width: 12ch; }
+h1 .l { display: block; overflow: hidden; } h1 .l span { display: inline-block; animation: up 1s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i) * .14s + .1s); }
+@keyframes up { from { transform: translateY(105%); } }
+h1 .o { color: var(--accent-text); }
+.lead { max-width: 52ch; color: var(--muted); font-size: 1.15rem; }
+.scroll { margin-top: 44px; display: inline-flex; align-items: center; gap: 12px; color: var(--muted); font-size: .85rem; }
+.scroll i { width: 22px; height: 36px; border: 1.5px solid var(--line-strong); border-radius: 12px; position: relative; }
+.scroll i::after { content: ""; position: absolute; left: 50%; top: 7px; width: 3px; height: 8px; margin-left: -1.5px; border-radius: 2px; background: var(--accent); animation: wheel 1.6s infinite; }
+@keyframes wheel { 60% { transform: translateY(12px); opacity: 0; } 100% { opacity: 0; } }
+
+.journey { height: 330vh; position: relative; }
+.stage { position: sticky; top: 0; height: 100svh; display: grid; grid-template-columns: 1fr 1.05fr; gap: 56px; align-items: center; width: min(1160px, 100% - 32px); margin-inline: auto; padding-top: 62px; }
+.rail { position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 46vh; background: var(--border); border-radius: 3px; }
+.rail i { position: absolute; left: 0; top: 0; width: 100%; height: calc(var(--prog, 0) * 100%); background: var(--accent); border-radius: 3px; box-shadow: 0 0 14px var(--accent); }
+.copy { padding-left: 30px; position: relative; }
+.copy ol { list-style: none; padding: 0; display: grid; gap: 30px; }
+.copy li { opacity: .28; transition: opacity .5s, transform .5s; transform: translateX(-6px); }
+.copy li.on { opacity: 1; transform: none; }
+.copy .n { font-family: var(--mono); color: var(--accent-text); font-size: .85rem; }
+.copy h2 { font-size: clamp(1.8rem, 4vw, 3rem); letter-spacing: -0.035em; line-height: 1.05; margin: 6px 0 8px; }
+.copy p { color: var(--muted); max-width: 40ch; }
+.card { position: relative; height: min(520px, 68vh); border: 1px solid var(--border); border-radius: 22px; background: var(--surface); overflow: hidden; box-shadow: 0 50px 120px -60px var(--accent); }
+.card .bar { display: flex; gap: 7px; padding: 14px 18px; border-bottom: 1px solid var(--border); } .card .bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--border); }
+.scene { position: absolute; inset: 47px 0 0 0; padding: 22px; opacity: 0; transform: translateY(24px) scale(.98); transition: opacity .55s, transform .55s; pointer-events: none; }
+.stage[data-s="1"] .s1, .stage[data-s="2"] .s2, .stage[data-s="3"] .s3 { opacity: 1; transform: none; }
+.q { display: flex; gap: 10px; align-items: center; padding: 12px 14px; border: 1px solid var(--accent); border-radius: 12px; background: var(--bg); font-family: var(--mono); font-size: .92rem; }
+.q::after { content: ""; width: 8px; height: 18px; background: var(--accent); animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.src { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0; }
+.src span { padding: 4px 11px; border: 1px solid var(--border); border-radius: 999px; font-size: .78rem; color: var(--muted); opacity: 0; transform: scale(.6); }
+.stage[data-s="1"] .src span { animation: pop .5s cubic-bezier(.3,1.6,.5,1) forwards; animation-delay: calc(var(--i) * .1s + .2s); }
+@keyframes pop { to { opacity: 1; transform: none; border-color: var(--accent); color: var(--text); } }
+.res { display: grid; gap: 10px; }
+.res div { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); opacity: 0; transform: translateX(40px); }
+.stage[data-s="1"] .res div { animation: slide .6s cubic-bezier(.2,.8,.2,1) forwards; animation-delay: calc(var(--i) * .13s + .5s); }
+@keyframes slide { to { opacity: 1; transform: none; } }
+.res b { margin-left: auto; font-family: var(--mono); color: var(--accent-text); } .res small { color: var(--muted); display: block; }
+.s2 { display: grid; grid-template-columns: auto 1fr; gap: 24px; align-content: start; align-items: center; }
+.crit { grid-column: 1 / -1; list-style: none; padding: 0; display: grid; gap: 10px; font-size: .92rem; }
+.crit li { display: flex; gap: 10px; align-items: center; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--border); opacity: 0; transform: translateX(-16px); }
+.stage[data-s="2"] .crit li { animation: slide .5s forwards; animation-delay: calc(var(--i) * .17s + .5s); }
+.crit li::before { content: "✓"; color: var(--ok); } .crit li.no::before { content: "–"; color: var(--muted); } .crit b { margin-left: auto; font-family: var(--mono); font-weight: 500; color: var(--muted); }
+.doc { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: grid; gap: 10px; }
+.doc h4 { font-size: 1.05rem; } .doc .ln { height: 9px; border-radius: 5px; background: var(--border); width: 0; }
+.stage[data-s="3"] .doc .ln { animation: write 1s cubic-bezier(.3,.7,.2,1) forwards; animation-delay: calc(var(--i) * .18s + .3s); }
+@keyframes write { to { width: var(--w); } }
+.doc .cite { font-family: var(--mono); font-size: .78rem; color: var(--accent-text); }
+.exp { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.exp span { padding: 8px 14px; border: 1px solid var(--accent); border-radius: 9px; font-size: .85rem; opacity: 0; transform: translateY(10px); }
+.stage[data-s="3"] .exp span { animation: slide .5s forwards; animation-delay: calc(var(--i) * .15s + 1.4s); }
+.facts { display: grid; grid-template-columns: repeat(3, 1fr); border-block: 1px solid var(--border); }
+.facts div { padding: 54px 24px; border-right: 1px solid var(--border); } .facts div:last-child { border: 0; }
+.facts b { display: block; font-size: clamp(2.6rem, 6vw, 4.6rem); letter-spacing: -0.05em; line-height: 1; color: var(--accent-text); }
+.cta { text-align: center; padding: 130px 0 150px; }
+.cta h2 { font-size: clamp(2rem, 5vw, 3.8rem); letter-spacing: -0.04em; margin-bottom: 26px; }
+@media (max-width: 860px) { .stage { grid-template-columns: 1fr; gap: 20px; align-content: center; } .rail { display: none; } .copy { padding-left: 0; } .copy ol { gap: 0; } .copy li { display: none; } .copy li.on { display: block; } .card { height: 56vh; } .facts { grid-template-columns: 1fr; } .facts div { border-right: 0; border-bottom: 1px solid var(--border); } }
+</style>
+</head>
+<body>
+<header class="topbar"><div class="wrap">
+  <a class="logo" href="#"><i></i>Nexus Science</a>
+  <nav><a href="#jornada">A jornada</a><a href="#numeros">Números</a></nav>
+  <div style="display:flex;gap:10px;align-items:center"><button class="toggle" aria-label="Alternar tema">◐</button><a class="btn primary" href="#">Criar conta grátis</a></div>
+</div></header>
+
+<main>
+<section class="hero"><div class="orb a"></div><div class="orb b"></div>
+  <div class="wrap" style="position:relative">
+    <span class="eyebrow">Plataforma de pesquisa científica</span>
+    <h1><span class="l"><span style="--i:0">Da pergunta</span></span><span class="l"><span style="--i:1">ao <span class="o">relatório.</span></span></span></h1>
+    <p class="lead">Busque em várias fontes, veja com critérios abertos o quanto cada artigo merece confiança e entregue com método. Role e acompanhe uma pesquisa de verdade.</p>
+    <a class="scroll" href="#jornada"><i></i>Role para ver como funciona</a>
+  </div>
+</section>
+
+<section id="jornada" class="journey" style="--prog:0">
+  <div class="stage" data-s="1">
+    <div class="rail"><i></i></div>
+    <div class="copy"><ol>
+      <li class="on" data-i="1"><span class="n">01 / BUSCAR</span><h2>Uma pergunta, cinco fontes.</h2><p>PubMed, Europe PMC, arXiv, OpenAlex e DOAJ respondem juntos, sem artigos repetidos.</p></li>
+      <li data-i="2"><span class="n">02 / AVALIAR</span><h2>Uma nota que mostra o cálculo.</h2><p>Oito critérios abertos, de 0 a 100. Você vê o que contou e o que faltou.</p></li>
+      <li data-i="3"><span class="n">03 / ENTREGAR</span><h2>Relatório com método.</h2><p>Listas, relatório com o método declarado e citações para Word e Zotero.</p></li>
+    </ol></div>
+    <div class="card" aria-hidden="true">
+      <div class="bar"><i></i><i></i><i></i></div>
+      <div class="scene s1"><div class="q">metformina em idosos</div>
+        <div class="src"><span style="--i:0">PubMed</span><span style="--i:1">Europe PMC</span><span style="--i:2">arXiv</span><span style="--i:3">OpenAlex</span><span style="--i:4">DOAJ</span></div>
+        <div class="res"><div style="--i:0"><span>Metformin and outcomes in older adults<small>Revisão sistemática · 2025</small></span><b>78</b></div><div style="--i:1"><span>Coorte multicêntrica de pacientes com DM2<small>Coorte · 2024</small></span><b>71</b></div><div style="--i:2"><span>Efeitos adversos gastrointestinais<small>Ensaio clínico · 2023</small></span><b>64</b></div></div></div>
+      <div class="scene s2"><div class="ring" id="ring"><div style="text-align:center"><b>78</b><small>de 100</small></div></div>
+        <div><strong>Metformin and outcomes in older adults</strong><div class="muted" style="font-size:.85rem">Confiabilidade alta · dados fictícios</div></div>
+        <ul class="crit"><li style="--i:0">Desenho do estudo <b>+20</b></li><li style="--i:1">Tamanho da amostra <b>+14</b></li><li style="--i:2">Intervalo de confiança <b>+12</b></li><li style="--i:3">Registro do protocolo <b>+10</b></li><li class="no" style="--i:4">Dados disponíveis <b>0</b></li></ul></div>
+      <div class="scene s3"><div class="doc"><h4>Relatório · Metformina em idosos</h4><span class="cite">Método: 5 fontes · 12 estudos incluídos · 2025</span>
+        <div class="ln" style="--i:0;--w:92%"></div><div class="ln" style="--i:1;--w:78%"></div><div class="ln" style="--i:2;--w:86%"></div><div class="ln" style="--i:3;--w:54%"></div><div class="ln" style="--i:4;--w:70%"></div></div>
+        <div class="exp"><span style="--i:0">Baixar Word</span><span style="--i:1">Exportar para Zotero</span><span style="--i:2">Citação ABNT</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="numeros"><div class="facts wrap" style="padding:0">
+  <div class="rv"><b data-count="5">0</b><span class="muted">fontes de busca em uma só</span></div>
+  <div class="rv" style="--d:.1s"><b data-count="51">0</b><span class="muted">fontes de novidades no feed</span></div>
+  <div class="rv" style="--d:.2s"><b data-count="8">0</b><span class="muted">critérios abertos de confiabilidade</span></div>
+</div></section>
+
+<section class="cta"><div class="wrap"><h2 class="rv">Comece sem conta.<br><span class="accent">Salve quando quiser.</span></h2><a class="btn primary rv" style="--d:.15s" href="#">Criar conta grátis</a></div></section>
+</main>
+<a class="back" href="index.html">← todas as propostas</a>
+<script src="base.js"></script>
+<script>
+/* A rolagem dentro de #jornada vira progresso (0..1): troca a cena do cartao, o item do texto e a barra lateral. */
+const J = document.getElementById("jornada"), stage = J.querySelector(".stage"), items = [...J.querySelectorAll(".copy li")], ring = document.getElementById("ring");
+let scene = 0;
+function update() {
+  const r = J.getBoundingClientRect(), total = J.offsetHeight - innerHeight, p = Math.max(0, Math.min(1, -r.top / total));
+  J.style.setProperty("--prog", p.toFixed(3));
+  const s = p < .34 ? 1 : p < .67 ? 2 : 3;
+  if (s !== scene) { scene = s; stage.dataset.s = s; items.forEach((li) => li.classList.toggle("on", Number(li.dataset.i) === s)); ring.style.setProperty("--p", s === 2 ? 78 : 0); }
+}
+addEventListener("scroll", update, { passive: true }); addEventListener("resize", update); update();
+NX.onView(".facts [data-count]", (el) => NX.counter(el), .6);
+</script>
+</body>
+</html>

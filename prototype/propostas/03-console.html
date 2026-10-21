@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proposta 3 · Console — Nexus Science</title>
+<link rel="stylesheet" href="base.css">
+<style>
+/* Proposta 3 — CONSOLE: pesquisa na velocidade do teclado. Terminal que se digita sozinho e paleta de comandos (Ctrl/Cmd+K) de verdade. */
+body { font-feature-settings: "ss01"; }
+.hero { padding: 130px 0 70px; text-align: center; position: relative; overflow: hidden; }
+.hero::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 56px 56px; mask-image: radial-gradient(60% 60% at 50% 30%, #000, transparent 75%); opacity: .45; }
+.hero .wrap { position: relative; }
+.kbd { font-family: var(--mono); font-size: .78rem; padding: 2px 7px; border: 1px solid var(--line-strong); border-bottom-width: 2px; border-radius: 6px; color: var(--muted); background: var(--surface); }
+h1 { font-size: clamp(2.4rem, 6.4vw, 5rem); letter-spacing: -0.045em; line-height: 1.02; margin: 20px auto 16px; max-width: 15ch; }
+h1 .c { color: var(--accent-text); } h1 .c::after { content: "▍"; animation: blink 1s steps(1) infinite; margin-left: 2px; }
+@keyframes blink { 50% { opacity: 0; } }
+.lead { max-width: 56ch; margin: 0 auto 26px; color: var(--muted); font-size: 1.1rem; }
+.hint { display: inline-flex; gap: 8px; align-items: center; color: var(--muted); font-size: .88rem; }
+.term { margin: 44px auto 0; max-width: 860px; text-align: left; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); box-shadow: 0 60px 120px -70px var(--accent); overflow: hidden; }
+.term .bar { display: flex; align-items: center; gap: 7px; padding: 13px 16px; border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: .78rem; color: var(--muted); }
+.term .bar i { width: 11px; height: 11px; border-radius: 50%; background: var(--border); } .term .bar i:first-child { background: var(--accent); }
+.term pre { font-family: var(--mono); font-size: .9rem; line-height: 1.75; padding: 20px 22px; min-height: 340px; white-space: pre-wrap; margin: 0; }
+.p { color: var(--accent-text); } .dim { color: var(--muted); } .ok { color: var(--ok); }
+.sc { display: inline-block; min-width: 2.2ch; text-align: center; padding: 0 6px; border-radius: 5px; font-weight: 700; color: var(--on-accent); background: var(--accent); }
+.sc.m { background: color-mix(in srgb, var(--accent) 55%, var(--surface-2)); } .sc.l { background: var(--line-strong); }
+.bar-p { display: inline-block; width: 22ch; height: .8em; border: 1px solid var(--line-strong); border-radius: 3px; vertical-align: middle; overflow: hidden; } .bar-p i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .12s linear; }
+.cur::after { content: "▍"; color: var(--accent); animation: blink 1s steps(1) infinite; }
+section { padding: 100px 0; }
+h2 { font-size: clamp(1.8rem, 4vw, 2.8rem); letter-spacing: -0.035em; line-height: 1.08; }
+.keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 40px; }
+.key { padding: 22px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); transition: transform .25s, border-color .25s, background .25s; }
+.key:hover, .key.hit { transform: translateY(-5px); border-color: var(--accent); background: var(--accent-soft); }
+.key .kbd { font-size: 1rem; padding: 4px 10px; display: inline-block; margin-bottom: 14px; } .key h3 { font-size: 1.05rem; margin-bottom: 4px; } .key p { color: var(--muted); font-size: .9rem; }
+.ticker { overflow: hidden; border-block: 1px solid var(--border); background: var(--surface); padding: 16px 0; mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+.ticker div { display: flex; gap: 46px; width: max-content; animation: tick 46s linear infinite; font-family: var(--mono); font-size: .86rem; color: var(--muted); }
+.ticker:hover div { animation-play-state: paused; } .ticker b { color: var(--accent-text); font-weight: 500; }
+@keyframes tick { to { transform: translateX(-50%); } }
+.man { display: grid; grid-template-columns: 180px 1fr; gap: 6px 30px; margin-top: 36px; font-family: var(--mono); font-size: .92rem; }
+.man dt { color: var(--accent-text); } .man dd { color: var(--muted); padding-bottom: 14px; border-bottom: 1px dashed var(--border); margin-bottom: 8px; }
+.tbl { width: 100%; border-collapse: collapse; margin-top: 34px; font-size: .95rem; } .tbl th, .tbl td { text-align: left; padding: 16px 14px; border-bottom: 1px solid var(--border); } .tbl th { color: var(--muted); font-weight: 500; font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; }
+.tbl tr:hover td { background: var(--accent-soft); } .tbl .hot td:first-child { color: var(--accent-text); font-weight: 700; }
+.cta { text-align: center; padding: 120px 0 150px; }
+.copy { display: inline-flex; align-items: center; gap: 14px; margin-top: 26px; padding: 14px 20px; border: 1px solid var(--accent); border-radius: 12px; background: var(--surface); font-family: var(--mono); }
+.copy:hover { box-shadow: 0 10px 40px -12px var(--accent); }
+/* paleta de comandos */
+.pal { position: fixed; inset: 0; z-index: 60; display: none; place-items: start center; padding-top: 14vh; background: color-mix(in srgb, var(--bg) 62%, transparent); backdrop-filter: blur(6px); }
+.pal.open { display: grid; animation: fade .18s; } @keyframes fade { from { opacity: 0; } }
+.pal .box { width: min(620px, calc(100% - 28px)); background: var(--surface); border: 1px solid var(--line-strong); border-radius: 16px; box-shadow: 0 40px 120px -20px #000; overflow: hidden; animation: drop .25s cubic-bezier(.2,.8,.2,1); } @keyframes drop { from { transform: translateY(-14px) scale(.98); opacity: 0; } }
+.pal input { width: 100%; background: transparent; border: 0; border-bottom: 1px solid var(--border); outline: 0; color: var(--text); font: inherit; font-size: 1.05rem; padding: 18px 20px; }
+.pal ul { list-style: none; padding: 8px; margin: 0; max-height: 340px; overflow: auto; }
+.pal li { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 10px; cursor: pointer; } .pal li .kbd { margin-left: auto; }
+.pal li.sel { background: var(--accent-soft); outline: 1px solid var(--accent); }
+.pal footer { display: flex; gap: 16px; padding: 10px 16px; border-top: 1px solid var(--border); font-size: .76rem; color: var(--muted); }
+.toast { position: fixed; right: 18px; bottom: 18px; z-index: 70; padding: 12px 18px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--accent); transform: translateY(80px); opacity: 0; transition: .35s; } .toast.on { transform: none; opacity: 1; }
+@media (max-width: 860px) { .keys { grid-template-columns: 1fr 1fr; } .man { grid-template-columns: 1fr; } .term pre { font-size: .78rem; } }
+@media (max-width: 560px) { .tbl th, .tbl td { padding: 12px 6px; font-size: .78rem; } .tbl th:nth-child(n+2):nth-child(-n+4), .tbl td:nth-child(n+2):nth-child(-n+4) { display: none; } .keys { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header class="topbar"><div class="wrap">
+  <a class="logo" href="#"><i></i>Nexus Science</a>
+  <nav><a href="#atalhos">Atalhos</a><a href="#recursos">Recursos</a><a href="#planos">Planos</a></nav>
+  <div style="display:flex;gap:10px;align-items:center"><button class="btn" id="openPal" style="padding:7px 12px;font-size:.85rem">Comandos <span class="kbd">Ctrl K</span></button><button class="toggle" aria-label="Alternar tema">◐</button></div>
+</div></header>
+
+<main>
+<section class="hero"><div class="wrap">
+  <span class="hint">Aperte <span class="kbd">Ctrl</span> <span class="kbd">K</span> e experimente</span>
+  <h1>Pesquisa na velocidade do <span class="c">teclado</span></h1>
+  <p class="lead">Busque em várias fontes, veja a nota de confiabilidade e gere o relatório sem tirar a mão do teclado. Ou use o mouse, como preferir.</p>
+  <a class="btn primary" href="#">Criar conta grátis</a>
+  <div class="term" aria-label="Demonstração animada"><div class="bar"><i></i><i></i><i></i><span style="margin-left:8px">nexus — sessão de pesquisa</span></div><pre id="out"></pre></div>
+</div></section>
+
+<div class="ticker" aria-label="Novidades do feed"><div id="tick"></div></div>
+
+<section id="atalhos"><div class="wrap">
+  <h2 class="rv">Tudo a uma tecla de distância.</h2>
+  <div class="keys">
+    <article class="key rv" data-k="/"><span class="kbd">/</span><h3>Buscar</h3><p>Foca a busca de qualquer tela.</p></article>
+    <article class="key rv" style="--d:.07s" data-k="f"><span class="kbd">g f</span><h3>Feed</h3><p>Novidades dos seus interesses.</p></article>
+    <article class="key rv" style="--d:.14s" data-k="b"><span class="kbd">g b</span><h3>Biblioteca</h3><p>Seus artigos e listas.</p></article>
+    <article class="key rv" style="--d:.21s" data-k="r"><span class="kbd">g r</span><h3>Relatório</h3><p>Do tema ao documento com método.</p></article>
+  </div>
+</div></section>
+
+<section id="recursos" style="background:var(--surface)"><div class="wrap">
+  <h2 class="rv">O manual cabe numa tela.</h2>
+  <dl class="man">
+    <dt class="rv">buscar</dt><dd class="rv">PubMed, Europe PMC, arXiv, OpenAlex e DOAJ numa pesquisa só, sem repetidos.</dd>
+    <dt class="rv">nota</dt><dd class="rv">0 a 100 com 8 critérios abertos: o cálculo aparece, nada de caixa-preta.</dd>
+    <dt class="rv">feed</dt><dd class="rv">51 fontes de notícias e preprints em 14 áreas, filtradas pelo que você acompanha.</dd>
+    <dt class="rv">avisos</dt><dd class="rv">Artigo novo, retratação e mudança regulatória chegam ao sininho.</dd>
+    <dt class="rv">relatório</dt><dd class="rv">Tema, método declarado, estudos incluídos e citações ABNT/APA/Zotero.</dd>
+    <dt class="rv">sus</dt><dd class="rv">Medicamentos, cirurgias e técnicas: consta no SUS? Rename, Conitec, ANVISA e SIGTAP.</dd>
+  </dl>
+</div></section>
+
+<section id="planos"><div class="wrap">
+  <h2 class="rv">Planos, em tabela.</h2>
+  <table class="tbl rv"><thead><tr><th>Plano</th><th>Biblioteca</th><th>Listas</th><th>Relatórios</th><th>Preço</th></tr></thead><tbody>
+    <tr><td>Gratuito</td><td>50</td><td>3</td><td>1</td><td>Grátis</td></tr>
+    <tr class="hot"><td>Pro</td><td>500</td><td>50</td><td>30</td><td>R$ 29,00/mês</td></tr>
+    <tr><td>Max</td><td>2.000</td><td>200</td><td>100</td><td>R$ 49,90/mês</td></tr></tbody></table>
+</div></section>
+
+<section class="cta"><div class="wrap"><h2 class="rv">Pronto para o primeiro comando?</h2>
+  <button class="copy rv" id="copy" style="--d:.1s"><span class="p">$</span> nexus iniciar --gratis <span class="kbd">copiar</span></button></div></section>
+</main>
+
+<div class="pal" id="pal" role="dialog" aria-label="Paleta de comandos"><div class="box"><input id="pi" placeholder="Digite um comando ou busque…" autocomplete="off"><ul id="pl"></ul><footer><span>↑↓ navegar</span><span>↵ executar</span><span>esc fechar</span></footer></div></div>
+<div class="toast" id="toast"></div>
+<a class="back" href="index.html">← todas as propostas</a>
+<script src="base.js"></script>
+<script>
+/* Terminal: digita um comando, "transmite" a saida, e repete o ciclo. */
+const out = document.getElementById("out"), sleep = (ms) => new Promise((r) => setTimeout(r, NX.reduced ? 0 : ms));
+const add = (html) => { out.insertAdjacentHTML("beforeend", html); };
+async function type(text, ms = 38) { add('<span class="p">$ </span><span class="cur"></span>'); const cur = out.querySelector(".cur:last-of-type") || out.lastElementChild; for (const ch of text) { cur.insertAdjacentText("beforebegin", ch); await sleep(ms); } cur.remove(); add("\n"); }
+async function progress(label, ms) { add(`<span class="dim">${label} </span><span class="bar-p"><i></i></span><span class="dim"> </span>\n`); const bars = out.querySelectorAll(".bar-p i"), bar = bars[bars.length - 1]; for (let i = 1; i <= 20; i++) { bar.style.width = i * 5 + "%"; await sleep(ms / 20); } }
+async function cycle() {
+  for (;;) {
+    out.textContent = "";
+    await type('nexus buscar "metformina em idosos"'); await progress("consultando 5 fontes", 900);
+    add('\n<span class="ok">✓</span> 214 resultados · 31 repetidos removidos\n\n'); await sleep(300);
+    add(' <span class="sc">78</span>  Metformin and outcomes in older adults <span class="dim">· Revisão sistemática</span>\n'); await sleep(350);
+    add(' <span class="sc m">71</span>  Coorte multicêntrica de pacientes com DM2 <span class="dim">· Coorte</span>\n'); await sleep(350);
+    add(' <span class="sc l">64</span>  Efeitos adversos gastrointestinais <span class="dim">· Ensaio clínico</span>\n\n'); await sleep(900);
+    await type("nexus salvar 1 --lista TCC"); add('<span class="ok">✓</span> salvo na lista <span class="p">TCC</span> (1 de 50 no plano Gratuito)\n\n'); await sleep(900);
+    await type("nexus relatorio --lista TCC"); await progress("gerando com método declarado", 1300);
+    add('\n<span class="ok">✓</span> relatorio-tcc.docx · 12 estudos · ABNT\n'); await sleep(3600);
+  }
+}
+cycle();
+/* Feed em faixa */
+const news = [["medicina", "Corticoide inalatório reduz crises em crianças"], ["engenharia", "Chips inspirados no cérebro gastam menos energia"], ["ambiente", "Satélites mapeiam o carbono em florestas tropicais"], ["computacao", "Modelo de IA prevê falhas em redes elétricas"], ["biologia", "Nova técnica edita genes com menos erros"], ["sociais", "Estudo mede o efeito do transporte gratuito"], ["farmacia", "Novo antibiótico age contra bactérias resistentes"]];
+document.getElementById("tick").innerHTML = [...news, ...news].map(([a, t]) => `<span><b>${a}</b> ${t}</span>`).join("");
+/* Paleta de comandos */
+const cmds = [["Buscar artigos", "/"], ["Abrir o feed", "g f"], ["Abrir a biblioteca", "g b"], ["Criar relatório de tema", "g r"], ["Consultar o SUS (medicamento, cirurgia, técnica)", "g s"], ["Ver planos", "g p"], ["Alternar tema claro/escuro", "t"]];
+const pal = document.getElementById("pal"), pi = document.getElementById("pi"), pl = document.getElementById("pl"), toast = document.getElementById("toast"); let sel = 0, view = cmds;
+const draw = () => { pl.innerHTML = view.map(([n, k], i) => `<li class="${i === sel ? "sel" : ""}" data-i="${i}">${n}<span class="kbd">${k}</span></li>`).join("") || '<li class="muted">Nada encontrado</li>'; };
+const say = (t) => { toast.textContent = t; toast.classList.add("on"); clearTimeout(say.t); say.t = setTimeout(() => toast.classList.remove("on"), 2200); };
+const run = (i) => { const c = view[i]; if (!c) return; closePal(); if (c[1] === "t") document.querySelector(".toggle").click(); else say("→ " + c[0] + " (demonstração)"); };
+const openPal = () => { pal.classList.add("open"); pi.value = ""; view = cmds; sel = 0; draw(); setTimeout(() => pi.focus(), 30); }, closePal = () => pal.classList.remove("open");
+document.getElementById("openPal").onclick = openPal; pal.addEventListener("click", (e) => { if (e.target === pal) closePal(); });
+pl.addEventListener("click", (e) => { const li = e.target.closest("li[data-i]"); if (li) run(Number(li.dataset.i)); });
+pi.addEventListener("input", () => { const q = pi.value.toLowerCase(); view = cmds.filter(([n]) => n.toLowerCase().includes(q)); sel = 0; draw(); });
+addEventListener("keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); pal.classList.contains("open") ? closePal() : openPal(); return; }
+  if (pal.classList.contains("open")) { if (e.key === "Escape") closePal(); else if (e.key === "ArrowDown") { e.preventDefault(); sel = Math.min(view.length - 1, sel + 1); draw(); } else if (e.key === "ArrowUp") { e.preventDefault(); sel = Math.max(0, sel - 1); draw(); } else if (e.key === "Enter") run(sel); return; }
+  const k = [...document.querySelectorAll(".key")].find((el) => el.dataset.k === e.key); if (k && document.activeElement.tagName !== "INPUT") { k.classList.add("hit"); setTimeout(() => k.classList.remove("hit"), 700); say("Atalho " + k.querySelector("h3").textContent); }
+});
+document.getElementById("copy").onclick = () => { try { navigator.clipboard.writeText("nexus iniciar --gratis"); } catch { /* sem permissao */ } say("Comando copiado (é só uma demonstração)"); };
+</script>
+</body>
+</html>

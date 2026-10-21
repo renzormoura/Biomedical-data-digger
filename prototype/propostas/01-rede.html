@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proposta 1 · Rede — Nexus Science</title>
+<link rel="stylesheet" href="base.css">
+<style>
+/* Proposta 1 — REDE: o nome vira imagem. Uma rede viva de nos liga as fontes ao artigo, e reage ao cursor. */
+.hero { position: relative; min-height: 100svh; display: grid; place-items: center; text-align: center; overflow: hidden; padding: 110px 0 70px; }
+#net { position: absolute; inset: 0; width: 100%; height: 100%; }
+.hero::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(60% 55% at 50% 48%, color-mix(in srgb, var(--bg) 88%, transparent) 30%, transparent 75%); }
+.hero .in { position: relative; z-index: 2; }
+.chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border: 1px solid var(--border); border-radius: 999px; font-size: .8rem; color: var(--muted); background: color-mix(in srgb, var(--surface) 80%, transparent); }
+.chip i { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 0 var(--accent); animation: ping 2s infinite; }
+@keyframes ping { 70% { box-shadow: 0 0 0 9px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+h1 { font-size: clamp(2.5rem, 7vw, 5.4rem); line-height: 1.02; letter-spacing: -0.045em; margin: 22px auto 18px; max-width: 14ch; }
+h1 .w { display: inline-block; overflow: hidden; vertical-align: top; }
+h1 .w span { display: inline-block; transform: translateY(110%); animation: rise .9s cubic-bezier(.2,.8,.2,1) forwards; animation-delay: calc(var(--i) * .09s + .2s); }
+h1 em { font-style: normal; background: linear-gradient(100deg, var(--accent), #ffb27a 60%, var(--accent)); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: rise .9s cubic-bezier(.2,.8,.2,1) forwards, sheen 5s linear infinite; }
+@keyframes rise { to { transform: none; } }
+@keyframes sheen { to { background-position: -200% 0; } }
+.lead { max-width: 56ch; margin: 0 auto 30px; color: var(--muted); font-size: 1.12rem; }
+.search { position: relative; max-width: 640px; margin: 0 auto; border-radius: 14px; padding: 2px; background: conic-gradient(from var(--a, 0deg), var(--accent), transparent 30%, transparent 70%, var(--accent)); animation: spin 6s linear infinite; }
+@property --a { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@keyframes spin { to { --a: 360deg; } }
+.search form { display: flex; gap: 8px; background: var(--surface); border-radius: 12px; padding: 8px; }
+.search input { flex: 1; min-width: 0; background: transparent; border: 0; outline: 0; color: var(--text); font: inherit; padding: 10px 12px; }
+.tags { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 18px; font-size: .84rem; color: var(--muted); }
+.tags a { border-bottom: 1px dashed var(--line-strong); }
+.tags a:hover { color: var(--accent-text); border-color: var(--accent); }
+section { padding: 110px 0; }
+h2 { font-size: clamp(1.9rem, 4.4vw, 3.2rem); letter-spacing: -0.035em; line-height: 1.08; max-width: 18ch; }
+.sub { color: var(--muted); max-width: 54ch; margin-top: 14px; }
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 48px; }
+.step { position: relative; padding: 28px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); overflow: hidden; transition: transform .35s, border-color .35s; }
+.step:hover { transform: translateY(-6px); border-color: var(--accent); }
+.step::before { content: attr(data-n); position: absolute; right: 18px; top: 6px; font-size: 5.5rem; font-weight: 800; color: var(--accent-soft); letter-spacing: -0.06em; }
+.step h3 { font-size: 1.3rem; margin-bottom: 8px; position: relative; }
+.step p { color: var(--muted); position: relative; }
+.node-demo { margin-top: 20px; height: 70px; position: relative; }
+.node-demo i { position: absolute; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); animation: float 4s ease-in-out infinite; animation-delay: var(--d); left: var(--x); top: var(--y); }
+.node-demo svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.node-demo line { stroke: var(--accent); stroke-opacity: .45; stroke-dasharray: 3 4; animation: dash 1.4s linear infinite; }
+@keyframes dash { to { stroke-dashoffset: -14; } }
+@keyframes float { 50% { transform: translateY(-9px); } }
+.proof { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+.panel { border: 1px solid var(--border); border-radius: 18px; background: var(--surface); padding: 28px; }
+.panel .top { display: flex; gap: 24px; align-items: center; }
+.crit { list-style: none; padding: 0; margin-top: 22px; display: grid; gap: 10px; font-size: .92rem; }
+.crit li { display: flex; align-items: center; gap: 10px; opacity: 0; transform: translateX(-12px); transition: .5s; transition-delay: calc(var(--i) * .18s + .3s); }
+.panel.go .crit li { opacity: 1; transform: none; }
+.crit b { margin-left: auto; font-family: var(--mono); color: var(--muted); font-weight: 500; }
+.crit .ok::before { content: "✓"; color: var(--ok); } .crit .no::before { content: "–"; color: var(--muted); }
+.plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 44px; }
+.plan { padding: 28px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); transition: transform .3s, border-color .3s; transform-style: preserve-3d; }
+.plan.hot { border-color: var(--accent); box-shadow: 0 30px 80px -40px var(--accent); }
+.plan h3 { font-size: 1.1rem; } .plan .p { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.04em; margin: 10px 0 4px; }
+.plan ul { list-style: none; padding: 0; margin: 14px 0 20px; display: grid; gap: 8px; color: var(--muted); font-size: .92rem; }
+.plan li::before { content: "✓ "; color: var(--accent-text); }
+.cta { text-align: center; padding: 120px 0 140px; }
+.cta h2 { margin-inline: auto; }
+@media (max-width: 860px) { .steps, .plans, .proof { grid-template-columns: 1fr; } section { padding: 76px 0; } }
+</style>
+</head>
+<body>
+<header class="topbar"><div class="wrap">
+  <a class="logo" href="#"><i></i>Nexus Science</a>
+  <nav><a href="#fontes">Como funciona</a><a href="#nota">Confiabilidade</a><a href="#planos">Planos</a></nav>
+  <div style="display:flex;gap:10px;align-items:center"><button class="toggle" aria-label="Alternar tema">◐</button><a class="btn primary" href="#planos">Criar conta grátis</a></div>
+</div></header>
+
+<main>
+<section class="hero" style="padding-top:110px">
+  <canvas id="net" aria-hidden="true"></canvas>
+  <div class="in wrap">
+    <span class="chip"><i></i>Plataforma de pesquisa científica</span>
+    <h1><span class="w"><span style="--i:0">Encontre,</span></span> <span class="w"><span style="--i:1">entenda</span></span> <span class="w"><span style="--i:2">e</span></span> <span class="w"><em style="--i:3;animation-delay:.65s,0s">organize</em></span> <span class="w"><span style="--i:4">a</span></span> <span class="w"><span style="--i:5">pesquisa.</span></span></h1>
+    <p class="lead">Uma busca em várias fontes abertas, uma nota de confiabilidade que mostra o próprio cálculo e relatórios com método. Tudo ligado, do artigo ao relatório.</p>
+    <div class="search"><form onsubmit="return pulse(event)">
+      <input placeholder="Tema, título, DOI ou palavra-chave" aria-label="Buscar artigos">
+      <button class="btn primary" type="submit">Buscar</button>
+    </form></div>
+    <p class="tags">Experimente: <a href="#">diabetes tipo 2</a> <a href="#">energia solar</a> <a href="#">saúde mental</a></p>
+  </div>
+</section>
+
+<section id="fontes"><div class="wrap">
+  <h2 class="rv">Uma pesquisa. <span class="accent">Tudo conectado.</span></h2>
+  <p class="sub rv" style="--d:.1s">Os nós da rede são o que o Nexus faz por você: reunir, avaliar e entregar.</p>
+  <div class="steps">
+    <article class="step rv" data-n="1"><h3>Reúne</h3><p>PubMed, Europe PMC, arXiv, OpenAlex e DOAJ numa busca só, sem artigos repetidos.</p>
+      <div class="node-demo"><svg><line x1="12%" y1="30" x2="50%" y2="38"/><line x1="50%" y1="38" x2="88%" y2="22"/><line x1="50%" y1="38" x2="70%" y2="62"/></svg><i style="--x:10%;--y:24px;--d:0s"></i><i style="--x:48%;--y:32px;--d:.6s"></i><i style="--x:86%;--y:16px;--d:1.2s"></i><i style="--x:68%;--y:56px;--d:1.8s"></i></div></article>
+    <article class="step rv" data-n="2" style="--d:.12s"><h3>Avalia</h3><p>Nota de 0 a 100 com 8 critérios abertos: você vê o que contou e o que faltou.</p>
+      <div class="node-demo"><svg><line x1="10%" y1="35" x2="35%" y2="35"/><line x1="35%" y1="35" x2="62%" y2="35"/><line x1="62%" y1="35" x2="90%" y2="35"/></svg><i style="--x:8%;--y:29px;--d:.2s"></i><i style="--x:33%;--y:29px;--d:.8s"></i><i style="--x:60%;--y:29px;--d:1.4s"></i><i style="--x:88%;--y:29px;--d:2s"></i></div></article>
+    <article class="step rv" data-n="3" style="--d:.24s"><h3>Entrega</h3><p>Listas, relatório com método declarado e citações prontas para Zotero e Word.</p>
+      <div class="node-demo"><svg><line x1="50%" y1="12" x2="20%" y2="58"/><line x1="50%" y1="12" x2="50%" y2="58"/><line x1="50%" y1="12" x2="80%" y2="58"/></svg><i style="--x:48%;--y:6px;--d:0s"></i><i style="--x:18%;--y:52px;--d:.7s"></i><i style="--x:48%;--y:52px;--d:1.3s"></i><i style="--x:78%;--y:52px;--d:1.9s"></i></div></article>
+  </div>
+</div></section>
+
+<section id="nota" style="background:var(--surface)"><div class="wrap proof">
+  <div><h2 class="rv">Uma nota que <span class="accent">mostra o cálculo.</span></h2><p class="sub rv" style="--d:.1s">Sem caixa-preta: cada ponto vem de um critério que você pode conferir no resumo do próprio artigo.</p></div>
+  <div class="panel rv" id="panel" style="--d:.15s">
+    <div class="top"><div class="ring" id="ring" style="--p:0"><div style="text-align:center"><b data-count="78">0</b><small>de 100</small></div></div>
+      <div><strong>Estudo de exemplo</strong><div class="muted" style="font-size:.85rem">Confiabilidade alta · dados fictícios</div></div></div>
+    <ul class="crit">
+      <li class="ok" style="--i:0">Desenho do estudo <b>+20</b></li><li class="ok" style="--i:1">Tamanho da amostra <b>+14</b></li>
+      <li class="ok" style="--i:2">Intervalo de confiança <b>+12</b></li><li class="ok" style="--i:3">Registro do protocolo <b>+10</b></li>
+      <li class="ok" style="--i:4">Acesso aberto <b>+8</b></li><li class="no" style="--i:5">Dados disponíveis <b>0</b></li>
+    </ul>
+  </div>
+</div></section>
+
+<section id="planos"><div class="wrap">
+  <h2 class="rv">Comece grátis. <span class="accent">Cresça quando precisar.</span></h2>
+  <div class="plans">
+    <article class="plan rv"><h3>Gratuito</h3><div class="p">Grátis</div><span class="muted">Para conhecer</span><ul><li>50 artigos na biblioteca</li><li>3 listas de leitura</li><li>1 relatório de tema</li></ul><a class="btn" href="#">Criar conta grátis</a></article>
+    <article class="plan hot rv" style="--d:.1s"><h3>Pro</h3><div class="p">R$ 29,00<span class="muted" style="font-size:.9rem;font-weight:500"> /mês</span></div><span class="muted">Para quem pesquisa com frequência</span><ul><li>500 artigos na biblioteca</li><li>50 listas de leitura</li><li>30 relatórios de tema</li></ul><a class="btn primary" href="#">Começar e assinar</a></article>
+    <article class="plan rv" style="--d:.2s"><h3>Max</h3><div class="p">R$ 49,90<span class="muted" style="font-size:.9rem;font-weight:500"> /mês</span></div><span class="muted">Limites bem maiores</span><ul><li>2.000 artigos na biblioteca</li><li>200 listas de leitura</li><li>100 relatórios de tema</li></ul><a class="btn" href="#">Começar e assinar</a></article>
+  </div>
+</div></section>
+
+<section class="cta"><div class="wrap"><h2 class="rv">Ligue os pontos da <span class="accent">sua pesquisa.</span></h2><p class="sub rv" style="margin:14px auto 28px;--d:.1s">Sem cartão. Buscar e ler continua livre.</p><a class="btn primary rv" style="--d:.2s" href="#">Criar conta grátis</a></div></section>
+</main>
+<a class="back" href="index.html">← todas as propostas</a>
+<script src="base.js"></script>
+<script>
+/* Rede de nos: fontes (rotuladas) convergem para o centro, os demais derivam e se ligam; o cursor atrai e liga. */
+const cv = document.getElementById("net"), cx = cv.getContext("2d");
+const HUBS = ["PubMed", "Europe PMC", "arXiv", "OpenAlex", "DOAJ"];
+let W = 0, H = 0, dpr = 1, nodes = [], hubs = [], mouse = { x: -999, y: -999 }, t0 = performance.now(), color = "#ff6a00", fg = "#ededee", run = true;
+function theme() { const s = getComputedStyle(document.documentElement); color = s.getPropertyValue("--accent").trim(); fg = s.getPropertyValue("--text").trim(); }
+function size() {
+  dpr = Math.min(devicePixelRatio || 1, 2); W = cv.clientWidth; H = cv.clientHeight; cv.width = W * dpr; cv.height = H * dpr; cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const n = Math.round(Math.min(90, (W * H) / 15000)); nodes = Array.from({ length: n }, () => ({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - .5) * .35, vy: (Math.random() - .5) * .35, r: 1.4 + Math.random() * 1.8 }));
+  hubs = HUBS.map((name, i) => { const a = (i / HUBS.length) * Math.PI * 2 - Math.PI / 2, R = Math.min(W, H) * (W < 700 ? .36 : .4); return { name, a, R, x: Math.random() * W, y: Math.random() * H }; });
+}
+function frame(now) {
+  if (!run) return; const k = Math.min(1, (now - t0) / 2600), e = 1 - Math.pow(1 - k, 3), wob = now / 4000;
+  cx.clearRect(0, 0, W, H);
+  hubs.forEach((h, i) => { const tx = W / 2 + Math.cos(h.a + wob * .25) * h.R * 1.25, ty = H / 2 + Math.sin(h.a + wob * .25) * h.R * .78; h.x += (tx - h.x) * (.02 + .05 * e); h.y += (ty - h.y) * (.02 + .05 * e); });
+  nodes.forEach((p) => { p.x += p.vx; p.y += p.vy; if (p.x < 0 || p.x > W) p.vx *= -1; if (p.y < 0 || p.y > H) p.vy *= -1;
+    const dx = mouse.x - p.x, dy = mouse.y - p.y, d = Math.hypot(dx, dy); if (d < 150) { p.x += dx * .012; p.y += dy * .012; } });
+  const pts = [...nodes, ...hubs.map((h) => ({ x: h.x, y: h.y }))];
+  cx.lineWidth = 1;
+  for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) { const d = Math.hypot(pts[i].x - pts[j].x, pts[i].y - pts[j].y); if (d < 130) { cx.strokeStyle = color; cx.globalAlpha = (1 - d / 130) * .45; cx.beginPath(); cx.moveTo(pts[i].x, pts[i].y); cx.lineTo(pts[j].x, pts[j].y); cx.stroke(); } }
+  pts.forEach((p) => { const d = Math.hypot(mouse.x - p.x, mouse.y - p.y); if (d < 170) { cx.strokeStyle = color; cx.globalAlpha = (1 - d / 170) * .8; cx.beginPath(); cx.moveTo(p.x, p.y); cx.lineTo(mouse.x, mouse.y); cx.stroke(); } });
+  cx.fillStyle = color; nodes.forEach((p) => { cx.globalAlpha = .8; cx.beginPath(); cx.arc(p.x, p.y, p.r, 0, 6.283); cx.fill(); });
+  hubs.forEach((h) => { cx.globalAlpha = 1; cx.fillStyle = color; cx.beginPath(); cx.arc(h.x, h.y, 5.5, 0, 6.283); cx.fill(); cx.globalAlpha = .25; cx.beginPath(); cx.arc(h.x, h.y, 5.5 + 7 * Math.abs(Math.sin(now / 900 + h.a)), 0, 6.283); cx.fill();
+    cx.globalAlpha = .95; cx.fillStyle = fg; cx.font = "600 12px system-ui, sans-serif"; cx.textAlign = "center"; cx.fillText(h.name, h.x, h.y - 16); });
+  cx.globalAlpha = 1; requestAnimationFrame(frame);
+}
+function pulse(ev) { ev.preventDefault(); nodes.forEach((p) => { p.vx += (Math.random() - .5) * 3; p.vy += (Math.random() - .5) * 3; }); setTimeout(() => nodes.forEach((p) => { p.vx *= .15; p.vy *= .15; }), 600); return false; }
+addEventListener("resize", size); document.addEventListener("nx-theme", theme);
+cv.parentElement.addEventListener("pointermove", (e) => { const r = cv.getBoundingClientRect(); mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top; });
+cv.parentElement.addEventListener("pointerleave", () => { mouse.x = mouse.y = -999; });
+new IntersectionObserver(([e]) => { const was = run; run = e.isIntersecting; if (run && !was) requestAnimationFrame(frame); }).observe(cv);
+theme(); size(); if (NX.reduced) { t0 -= 5000; frame(performance.now()); run = false; } else requestAnimationFrame(frame);
+NX.onView("#panel", (el) => { el.classList.add("go"); const ring = document.getElementById("ring"); ring.style.setProperty("--p", 78); NX.counter(el.querySelector("[data-count]"), 1200); }, .4);
+</script>
+</body>
+</html>
