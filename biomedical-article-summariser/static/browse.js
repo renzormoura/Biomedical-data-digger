@@ -29,6 +29,19 @@
       .map((k) => (k.nodeType ? k : document.createTextNode(String(k)))));
   }
   const loading = (text = "Carregando…") => h("div", { class: "loading" }, h("div", { class: "spinner", "aria-hidden": "true" }), h("span", {}, text));
+  // Esqueleto: blocos cinza pulsando no formato do que vai chegar (evita o "pulo" de layout e parece mais rapido que um spinner).
+  const skeleton = (kind, count = 4, label = "Carregando…") => h("div", { class: `skeleton skeleton-${kind}`, role: "status", "aria-label": label },
+    Array.from({ length: count }, () => kind === "card"
+      ? h("div", { class: "sk-card", "aria-hidden": "true" }, h("div", { class: "sk-block sk-cover" }), h("div", { class: "sk-body" },
+        h("div", { class: "sk-block sk-line sk-short" }), h("div", { class: "sk-block sk-line" }), h("div", { class: "sk-block sk-line" }), h("div", { class: "sk-block sk-line sk-mid" })))
+      : h("div", { class: "sk-row", "aria-hidden": "true" },
+        h("div", { class: "sk-block sk-line sk-title" }), h("div", { class: "sk-block sk-line sk-short" }), h("div", { class: "sk-block sk-line" }), h("div", { class: "sk-block sk-line sk-mid" }))));
+  // Tela vazia: desenho de linha, titulo, explicacao e botoes (a ideia e dizer o que fazer, nao so "nada aqui").
+  const emptyState = (art, title, text, ...actions) => h("div", { class: "empty card empty-state" },
+    h("div", { class: "empty-art", "aria-hidden": "true" }, icon(`art-${art}`)),
+    h("h2", { class: "empty-title" }, title),
+    text ? h("p", { class: "muted" }, text) : null,
+    actions.flat().filter(Boolean).length ? h("div", { class: "row empty-actions" }, actions) : null);
   const errorBox = (message) => h("div", { class: "error-box", role: "alert" }, h("strong", {}, "Não foi possível concluir. "), message);
   const SVG_NS = "http://www.w3.org/2000/svg";
   function icon(name, filled = false) {
@@ -483,7 +496,10 @@
     const refresh = () => {
       button.setAttribute("aria-pressed", String(Boolean(work.saved)));
       button.replaceChildren(icon("bookmark", work.saved), work.saved ? "Salvo" : "Salvar", icon("chevron"));
+      if (work.saved && popNext) button.firstChild.classList.add("pop");
+      popNext = false;
     };
+    let popNext = false;
     const closePicker = () => { picker.hidden = true; picker.replaceChildren(); button.setAttribute("aria-expanded", "false"); };
 
     async function renderMenu() {
@@ -543,6 +559,7 @@
         if (work.saved) await api(`/api/library?ref=${encodeURIComponent(work.ref)}`, { method: "DELETE" });
         else await api("/api/library", { method: "POST", body: { ref: work.ref } });
         work.saved = !work.saved;
+        popNext = work.saved;
         toast(work.saved ? "Salvo na biblioteca" : "Removido da biblioteca");
         return true;
       });
@@ -756,7 +773,7 @@
       if (controller) controller.abort();
       controller = new AbortController();
       mount(panoramaBox);
-      mount(results, loading("Buscando…"));
+      mount(results, skeleton("row", 5, "Buscando…"));
       try {
         const data = await api(`/api/discover/search?${Lib.apiParamsFromSearchState(st, PAGE_SIZE)}`, { signal: controller.signal });
         mount(results,
@@ -773,7 +790,7 @@
               badges(work),
               work.snippet ? h("p", { class: "snippet" }, highlighted(work.snippet, st.q)) : null,
               h("div", { class: "row" }, saveButton(work), h("a", { class: "btn btn-sm btn-ghost", href: articleHref(work) }, "Abrir")))))
-            : h("div", { class: "empty card" }, h("p", {}, "Nenhum artigo encontrado."), h("p", { class: "muted" }, "Tente menos termos ou limpe os filtros.")),
+            : emptyState("search", "Nenhum artigo encontrado", "Tente menos termos, outro idioma ou limpe os filtros."),
           data.pages > 1 ? h("nav", { class: "pager", "aria-label": "Páginas" },
             h("button", { type: "button", class: "btn btn-secondary btn-sm", disabled: data.page <= 1, onclick: () => goPage(data.page - 1) }, "Anterior"),
             Lib.pageWindow(data.page, data.pages).map((p) => (p === "…" ? h("span", { class: "muted" }, "…")
@@ -1162,12 +1179,11 @@
   async function renderLibrary(params) {
     setTitle("Biblioteca");
     if (!session.user) {
-      mount($app, h("h1", {}, "Biblioteca"), h("div", { class: "empty card" },
-        h("p", {}, "Entre na sua conta para ver seus artigos salvos e suas listas de leitura."),
+      mount($app, h("h1", {}, "Biblioteca"), emptyState("lock", "Sua biblioteca espera por você", "Entre na sua conta para ver seus artigos salvos e suas listas de leitura.",
         h("button", { type: "button", class: "btn btn-primary", onclick: () => openAuth("Entre para acessar sua biblioteca.") }, "Entrar")));
       return;
     }
-    mount($app, h("h1", {}, "Biblioteca"), loading());
+    mount($app, h("h1", {}, "Biblioteca"), skeleton("row", 4, "Carregando a biblioteca…"));
     const data = await guarded(() => api("/api/library"));
     if (!data) { mount($app, h("h1", {}, "Biblioteca"), errorBox("Não foi possível carregar sua biblioteca.")); return; }
     const saved = await guarded(() => api("/api/analyses"));
@@ -1191,7 +1207,7 @@
           allTags.map((t) => h("a", { class: `chip${t === activeTag ? " active" : ""}`, href: Lib.buildHash("/biblioteca", { tag: t }) }, t))) : h("span", {}),
         exportMenu()) : null,
       !data.items.length
-        ? h("div", { class: "empty card" }, h("p", {}, "Sua biblioteca está vazia."), h("a", { class: "btn btn-primary", href: "#/busca" }, "Buscar artigos"))
+        ? emptyState("library", "Sua biblioteca está vazia", "Salve artigos com o botão “Salvar” e eles ficam aqui, organizados em listas.", h("a", { class: "btn btn-primary", href: "#/busca" }, "Buscar artigos"))
         : h("div", { class: "table-wrap" }, h("table", { class: "library-table" },
           h("thead", {}, h("tr", {},
             h("th", { scope: "col" }, "Artigo"), h("th", { scope: "col", class: "col-year" }, "Ano"),
@@ -1499,7 +1515,7 @@
           [["", "Qualquer idioma"], ["pt", "Português"], ["en", "Inglês"]].map(([value, label]) => h("option", { value, selected: value === state.lang ? "" : null }, label)))));
 
     async function load(reset) {
-      if (reset) { page = 1; mount(list, loading("Carregando as novidades…")); mount(more); }
+      if (reset) { page = 1; mount(list, skeleton("card", 6, "Carregando as novidades…")); mount(more); }
       const query = new URLSearchParams({ mode: state.mode, kind: state.kind, page: String(page) });
       if (state.area) query.set("area", state.area);
       if (state.lang) query.set("lang", state.lang);
@@ -1516,12 +1532,10 @@
           setTimeout(() => { if (location.hash.startsWith("#/feed")) load(true); }, FEED_REFRESH_MS);
           return;
         }
-        mount(list, h("div", { class: "empty card" },
-          h("p", {}, data.personalized ? "Nenhuma novidade sobre os seus interesses por enquanto." : "Nenhuma novidade com esses filtros."),
-          h("div", { class: "row" },
-            data.personalized ? h("button", { type: "button", class: "btn btn-secondary", onclick: () => go({ modo: "tudo" }) }, "Ver tudo") : null,
-            session.user && !data.hasInterests ? h("a", { class: "btn btn-primary", href: "#/perfil/interesses" }, "Escolher interesses") : null,
-            !session.user ? h("button", { type: "button", class: "btn btn-primary", onclick: () => openAuth("Entre para ver o feed dos seus interesses.") }, "Entrar") : null)));
+        mount(list, emptyState("feed", data.personalized ? "Nada novo nos seus interesses" : "Nenhuma novidade com esses filtros", data.personalized ? "Quando as fontes publicarem algo sobre o que você acompanha, aparece aqui." : "Tente outra área ou idioma.",
+          data.personalized ? h("button", { type: "button", class: "btn btn-secondary", onclick: () => go({ modo: "tudo" }) }, "Ver tudo") : null,
+          session.user && !data.hasInterests ? h("a", { class: "btn btn-primary", href: "#/perfil/interesses" }, "Escolher interesses") : null,
+          !session.user ? h("button", { type: "button", class: "btn btn-primary", onclick: () => openAuth("Entre para ver o feed dos seus interesses.") }, "Entrar") : null));
       }
       const next = () => { if (loadingMore) return; loadingMore = true; page += 1; load(false).finally(() => { loadingMore = false; if (document.documentElement.scrollHeight < window.innerHeight * 2) autoMore(); }); };
       mount(more, data.hasMore ? h("button", { type: "button", class: "btn btn-secondary", onclick: next }, "Carregar mais") : null);
@@ -1705,8 +1719,7 @@
     const active = PROFILE_SECTIONS.some(([key]) => key === section) ? section : "";
     setTitle(active ? `Perfil: ${PROFILE_SECTIONS.find(([key]) => key === active)[1]}` : "Perfil");
     if (!session.user) {
-      mount($app, h("h1", {}, "Perfil"), h("div", { class: "empty card" },
-        h("p", {}, "Entre na sua conta para ver o seu perfil, escolher interesses e gerenciar os seus dados."),
+      mount($app, h("h1", {}, "Perfil"), emptyState("lock", "Entre para ver seu perfil", "Aqui você escolhe interesses, gerencia seus dados e acompanha seu plano.",
         h("button", { type: "button", class: "btn btn-primary", onclick: () => openAuth("Entre para acessar o seu perfil.") }, "Entrar")));
       return;
     }
@@ -1933,8 +1946,7 @@
   async function renderReport(reportId) {
     setTitle("Relatório");
     if (!session.user) {
-      mount($app, h("h1", {}, "Relatório"), h("div", { class: "empty card" },
-        h("p", {}, "Entre na sua conta para ver seus relatórios."),
+      mount($app, h("h1", {}, "Relatório"), emptyState("lock", "Entre para ver seus relatórios", "Relatórios nascem das suas listas e ficam guardados na sua conta.",
         h("button", { type: "button", class: "btn btn-primary", onclick: () => openAuth("Entre para acessar seus relatórios.") }, "Entrar")));
       return;
     }
@@ -2057,8 +2069,7 @@
   // ------------------------------------------------------------------ interesses
   async function renderInterests(target = $app) {
     if (!session.user) {
-      mount(target, h("h2", {}, "Interesses e alertas"), h("div", { class: "empty card" },
-        h("p", {}, "Entre na sua conta para escolher o que acompanhar e receber avisos de artigos novos."),
+      mount(target, h("h2", {}, "Interesses e alertas"), emptyState("bell", "Acompanhe o que importa", "Entre na sua conta para escolher o que acompanhar e receber avisos de artigos novos.",
         h("button", { type: "button", class: "btn btn-primary", onclick: () => openAuth("Entre para escolher seus interesses.") }, "Entrar")));
       return;
     }

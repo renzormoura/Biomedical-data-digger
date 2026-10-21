@@ -805,3 +805,34 @@ input[type="text"], input[type="search"], input[type="email"], input[type="passw
 
 /* sem ancora de rolagem: com ela o navegador "segue" o rodape enquanto o feed cresce e a rolagem infinita carregava tudo de uma vez */
 html { overflow-anchor: none; }
+
+/* ---- Acabamento: esqueletos, telas vazias e animacao de salvar ---- */
+.skeleton { display: grid; gap: 16px; }
+.skeleton-card { grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); }
+.skeleton-row { gap: 0; }
+.sk-block { background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 50%, var(--surface-2) 75%); background-size: 200% 100%; animation: sk-shimmer 1.4s ease-in-out infinite; border-radius: var(--radius-sm); }
+.sk-card { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
+.sk-cover { height: 96px; border-radius: 0; }
+.sk-body, .sk-row { display: grid; gap: 10px; }
+.sk-body { padding: 14px; }
+.sk-row { padding: 22px 0; border-bottom: 1px solid var(--border); }
+.sk-line { height: 12px; }
+.sk-title { height: 18px; width: 70%; }
+.sk-short { width: 35%; }
+.sk-mid { width: 60%; }
+@keyframes sk-shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+.empty-state { display: grid; justify-items: center; gap: 10px; text-align: center; padding: 40px 20px; }
+.empty-art { width: 84px; height: 84px; display: grid; place-items: center; border-radius: 50%; background: var(--surface-2); color: var(--accent-text); animation: empty-float 4s ease-in-out infinite; }
+.empty-art .icon { width: 52px; height: 52px; stroke-width: 1.6; }
+.empty-title { font-size: 1.15rem; font-weight: 600; margin: 4px 0 0; }
+.empty-state p { max-width: 46ch; margin: 0; }
+.empty-actions { justify-content: center; margin-top: 6px; }
+@keyframes empty-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+.save-button .icon.pop { animation: save-pop 0.45s cubic-bezier(.3, 1.6, .5, 1); color: var(--accent-text); }
+@keyframes save-pop { 0% { transform: scale(1); } 40% { transform: scale(1.5) rotate(-8deg); } 100% { transform: scale(1); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .sk-block, .empty-art, .save-button .icon.pop { animation: none; }
+}

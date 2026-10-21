@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 2026-10 — Acabamento da interface
+
+### Alterado
+- **Esqueletos de carregamento** (blocos pulsando no formato do conteúdo) na busca, no feed e na biblioteca, no lugar do círculo girando.
+- **Telas vazias com ilustração** e orientação do que fazer (busca sem resultado, biblioteca vazia, feed sem novidades e telas que pedem login).
+- **Animação ao salvar** um artigo (o marcador "pula"). Todas as animações respeitam a preferência de movimento reduzido do sistema.
+
 ## 2026-10 — Feed mais vivo
 
 ### Alterado
