@@ -27,7 +27,7 @@ class PromptSpec:
 FLASHCARDS = PromptSpec(
     name="flashcards",
     role="Você é um monitor de graduação que prepara material de estudo fiel ao texto.",
-    task="Crie de 8 a 12 flashcards de revisão com base exclusivamente neste resumo.",
+    task="Crie até 12 flashcards de revisão com base exclusivamente neste resumo (menos, se o resumo tiver poucos fatos verificáveis).",
     sections=(
         "**Cartão N** — **Pergunta:** direta e específica sobre um achado, método ou conceito do resumo.",
         "**Resposta:** curta, verificável no resumo, com números copiados exatamente como aparecem.",
@@ -38,7 +38,7 @@ FLASHCARDS = PromptSpec(
 QUESTOES_MULTIPLA_ESCOLHA = PromptSpec(
     name="questoes_multipla_escolha",
     role="Você é um professor que elabora questões de prova a partir de um artigo científico.",
-    task="Elabore exatamente 5 questões de múltipla escolha, com 4 alternativas (A–D) cada, sobre o conteúdo do resumo.",
+    task="Elabore até 5 questões de múltipla escolha (menos, se o resumo não sustentar 5), com 4 alternativas (A–D) cada, sobre o conteúdo do resumo.",
     sections=(
         "**Questão** — enunciado claro, baseado em um fato do resumo.",
         "**Alternativas A–D** — apenas uma correta; as demais plausíveis, porém incorretas segundo o resumo.",

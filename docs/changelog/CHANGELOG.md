@@ -7,6 +7,12 @@
 - **Início de quem tem conta** como painel de trabalho: "Bem-vindo, Nome", números da conta (com barra de uso quando a cobrança está ativa), primeiros passos, avisos, últimos salvos, novidades dos interesses e atalhos.
 - **Nome da conta**, pedido no cadastro e editável em Perfil → Conta e dados. Nova tabela `user_names`; `name` nas respostas de `/api/auth/me`, login, cadastro e `/api/account`; nova rota `PUT /api/account/name`. Opcional na API.
 
+### Alterado
+- **Revisão dos prompts do Laboratório de IA** (detalhes em [Análises clínicas](../features/analises-clinicas.md)): prompt de sistema sem a sobra que forçava "resumo em bullets" em toda análise, com os marcadores reais, regra de idioma e "omita campos vazios"; auditoria com prompt de sistema próprio e com a resposta auditada tratada como texto não confiável (e sem corte em 12 mil caracteres); personalização restrita a estilo; pedidos que o resumo não sustenta retirados dos prompts de estatística, PICO, aplicabilidade ao Brasil, resumo para leigos, populações especiais e medicamentos; "exatamente N" virou "até N". **Ainda não validado com o modelo real nem por profissional de saúde.**
+
+### Corrigido
+- O teste de contrato da API dependia da Europe PMC (citação e extração faziam chamada de rede): falhava de forma intermitente quando a rede estava lenta e o snapshot trazia uma contagem de citações que muda com o tempo. Agora usa respostas fixas e roda sem rede.
+
 ### Adicionado
 - **Disponibilidade no SUS:** o que um artigo estuda (medicamentos, cirurgias, exames, técnicas) existe no SUS? Veredito por item com a fonte, a partir da Rename, da Conitec, da ANVISA e da **Tabela SIGTAP** do DATASUS (≈ 5.000 procedimentos, competência 2026-05), por consulta em código. Novo cartão na página do artigo, com busca manual, e rotas `GET /api/brasil/sus` e `GET /api/discover/sus`. Script `scripts/atualizar_sigtap.py`.
 - O botão **Disponib. SUS** do Laboratório de IA passou a receber o resultado das bases no prompt (marcado como [BASES OFICIAIS]); o que não está nelas é tratado como não verificado, nunca como "não está no SUS".

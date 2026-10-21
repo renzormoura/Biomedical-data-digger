@@ -42,7 +42,17 @@ Cada área é uma especificação declarativa (`pages.py`: botões, rótulos, p�
 ## Limites e cuidados
 - Modelos de linguagem podem errar; a verificação de números reduz um tipo de erro, não todos. O produto recomenda leitura crítica do artigo antes de qualquer decisão.
 - A injeção de prompt é tratada por heurística; a avaliação com o modelo real mostrou que só o prompt falha em ≈20% das tentativas, por isso a defesa em código. Não cobre todo ataque (ver [Segurança](../arquitetura/seguranca.md)).
-- Prompts de áreas clínicas foram usados em contexto de pronto-socorro: **não alterar sem validação clínica**.
+- Prompts de áreas clínicas foram usados em contexto de pronto-socorro: **não alterar sem validação clínica**. A revisão de 2026-10 (abaixo) só **restringiu** o que o modelo pode afirmar, mas ainda **não foi validada com o modelo real nem por profissional de saúde**: rode `RUN_LIVE_EVALS=1 GROQ_API_KEY=... pytest evals -m live` antes de colocar em produção.
+
+## Princípios dos prompts (revisão de 2026-10)
+- **Um prompt de sistema só diz o que vale para todas as análises:** marcadores do texto não confiável (`<<<SOURCE_TITLE_START>>>` etc., o mesmo formato de `wrap_source`), idioma (português, salvo outro escolhido na personalização), restrição à fonte, frase única para dado ausente, números copiados sem cálculo, segurança e formato-padrão. Foi removida a sobra do exercício original que obrigava "resumo em bullets + parágrafo" em **todas** as análises, inclusive na crítica metodológica e no glossário.
+- **Ausência de dado:** a frase é sempre "Não descrito no resumo fornecido", e o modelo é instruído a **omitir campos vazios** em vez de repeti-la dezenas de vezes (economia de saída). Variantes como "Não descrito no artigo" foram eliminadas dos prompts escritos à mão; "Não avaliável pelo resumo fornecido" e "Não explicado no resumo fornecido" continuam, por terem sentido próprio.
+- **Personalização só muda estilo:** público, tom, detalhe e foco nunca autorizam acrescentar fatos, definições ou números. A opção "English" prevalece sobre o idioma padrão, o que antes entrava em conflito com o prompt de sistema.
+- **Auditoria com prompt próprio** (`AUDIT_SYS_PROMPT`: revisor de fatos, não extrator), e a **resposta auditada passou a ser tratada como texto não confiável** (`<<<RESPONSE_UNDER_AUDIT_START>>>`), pois pode ter nascido de um resumo malicioso. O limite do trecho auditado subiu de 12.000 para 30.000 caracteres (igual ao da rota), porque antes uma análise longa era cortada em silêncio. Número só é "suportado" se coincidir exatamente.
+- **Pedidos que o resumo não sustenta foram retirados:** estatística (risco de erro tipo II, interpretação própria, "decisão clínica"), PICO ("pacientes que você atende"; nível de evidência só se informado), aplicabilidade ao Brasil (grau de confiança recomendado; comparações com a população brasileira só com fonte), resumo para leigos ("por que isso importa para mim"; sem conselhos de saúde), populações especiais (omite as não mencionadas) e medicamentos (copiar doses sem converter).
+- **Contagens exatas viraram tetos:** "exatamente 5 perguntas/questões" e "8 a 12 flashcards" agora são "até N", para o modelo não inventar conteúdo quando o resumo é curto.
+- **Disponibilidade no SUS** recebe o veredito das bases oficiais como contexto (ver [Disponibilidade no SUS](disponibilidade-sus.md)).
+- Testes: `tests/test_prompt_quality.py` (offline) trava essas regras; `evals/test_fidelity_live.py` ganhou o caso de injeção na resposta auditada.
 - Cota e limitadores são por processo: com mais de uma instância, cada uma conta separado.
 
 ## API

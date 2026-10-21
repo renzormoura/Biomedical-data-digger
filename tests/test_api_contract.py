@@ -29,9 +29,11 @@ from account_tokens import AccountTokens
 from admin_service import AdminService
 from alerts import AlertService, AlertStore
 from billing import BillingStore
+from citations import Author, CitationMetadata
 from config import Settings
 from db import Database
 from discovery import DiscoveryService
+from europepmc import EuropePmcRecord
 from feed import FeedItem, FeedService, FeedStore, SourceState
 from feed_sources import SOURCES
 from library_store import LibraryStore
@@ -80,6 +82,21 @@ def normalize(value: Any, key: str = "") -> Any:
     if key == "dias" and isinstance(value, int):  # idade do instantaneo: muda a cada dia
         return "<dias>"
     return value
+
+
+def fake_citation(article_id: str) -> CitationMetadata:
+    return CitationMetadata(
+        title="Factores clínicos y demográficos asociados con la mortalidad por dengue en Colombia: estudio de casos y controles",
+        authors=(Author("Pimentel", "J."), Author("Moreno", "A."), Author("Gómez", "L."), Author("Rojas", "M.")), journal="Salud publica de Mexico", year="2020", volume="63",
+        issue="1, ene-feb", pages="42-50", doi="10.21149/11193",
+    )
+
+
+def fake_record(article_id: str) -> EuropePmcRecord:
+    return EuropePmcRecord(
+        mesh_terms=("Humans", "Dengue", "Case-Control Studies", "Demography", "Colombia"), open_access=False, cited_by=2,
+        journal="Salud publica de Mexico", year="2020", language="spa",
+    )
 
 
 ABSTRACT = (
@@ -180,7 +197,8 @@ def recorder(tmp_path, monkeypatch):
         feed_store.set_state(SourceState(source.id, now, now, "", 0))
 
     repository = ArticleRepository(lambda raw: ("Metformina e desfechos", ABSTRACT, "Fonte"))
-    service = AnalysisService(repository, FakeGenerator(), SlidingWindowLimiter(1000, 60))
+    # sem rede: o contrato nao pode depender da Europe PMC (lenta, instavel e com contagem de citacoes que muda com o tempo)
+    service = AnalysisService(repository, FakeGenerator(), SlidingWindowLimiter(1000, 60), citation_fetcher=fake_citation, metadata_fetcher=fake_record)
     settings = Settings(session_secret="k" * 40, login_attempts_per_minute=1000, alerts_cron_token="t" * 30, admin_token="a" * 30,
                         pix_key="chave@exemplo.com", pix_name="Empresa Exemplo", pix_city="SAO PAULO")
     app = create_app(

@@ -22,10 +22,10 @@ from domain import (
 )
 from presentation import UNVERIFIABLE_FALLBACK, verification_annex_md
 from usage import UsageLog
-from workflow import AnalysisService, ArticleRepository, Filters, Reply
+from workflow import MAX_AUDITED_CHARS, AnalysisService, ArticleRepository, Filters, Reply
 
 MAX_ARTICLE_ID = 2000
-MAX_PREVIOUS_RESPONSE = 30_000
+MAX_PREVIOUS_RESPONSE = MAX_AUDITED_CHARS  # o que o cliente envia para auditar nao pode passar do que o servidor audita
 
 
 class FiltersIn(BaseModel):

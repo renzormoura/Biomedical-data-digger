@@ -45,6 +45,7 @@ Message = dict[str, str]
 BuildFn = Callable[..., list[Message]]
 
 MAX_SOURCE_CHARS = 12_000
+MAX_AUDITED_CHARS = 30_000  # a analise auditada e bem maior que um resumo; cortar em 12 mil deixaria a auditoria pela metade
 
 CLINICAL_DISCLAIMER = (
     "\n\n---\n> **Apoio à leitura, não à decisão.** Conteúdo gerado por IA a partir apenas do "
@@ -102,9 +103,9 @@ def strip_boilerplate(abstract: str) -> str:
     return text
 
 
-def wrap_source(tag: str, text: str) -> str:
+def wrap_source(tag: str, text: str, limit: int = MAX_SOURCE_CHARS) -> str:
     """Delimita texto nao confiavel; remove marcadores que permitiriam escapar do bloco."""
-    cleaned = re.sub(r"<{3,}|>{3,}", " ", text)[:MAX_SOURCE_CHARS]
+    cleaned = re.sub(r"<{3,}|>{3,}", " ", text)[:limit]
     return f"<<<{tag}_START>>>\n{cleaned}\n<<<{tag}_END>>>"
 
 
@@ -455,7 +456,7 @@ class AnalysisService:
         messages = build_message_auditoria_resposta(
             wrap_source("SOURCE_TITLE", article.title),
             wrap_source("SOURCE_ABSTRACT", article.abstract),
-            response_text,
+            wrap_source("RESPONSE_UNDER_AUDIT", response_text, MAX_AUDITED_CHARS),
         )
         completion, tokens = self._run(
             messages, model, client_id, "Erro ao auditar a resposta", usage_key, self._options()
