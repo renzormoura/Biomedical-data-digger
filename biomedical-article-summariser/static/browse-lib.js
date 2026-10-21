@@ -24,6 +24,14 @@
     return { view, rest: view ? parts.slice(1) : [], params };
   }
 
+  const FEED_AREAS = ["medicina", "farmacia", "enfermagem", "odontologia", "nutricao", "biologia", "psicologia", "computacao", "engenharia",
+    "exatas", "ambiente", "agrarias", "sociais", "educacao"];
+
+  /** Área que dá cor e ícone ao cartão do feed: a primeira área conhecida do item; sem nenhuma, "geral". */
+  function feedArea(keys) {
+    return (Array.isArray(keys) ? keys : []).find((key) => FEED_AREAS.includes(key)) || "geral";
+  }
+
   function buildHash(path, params = {}) {
     const query = new URLSearchParams(
       Object.entries(params).filter(([, v]) => v !== "" && v !== null && v !== undefined && v !== false),
@@ -116,7 +124,7 @@
   }
 
   return {
-    SEARCH_DEFAULTS, parseRoute, buildHash, searchStateFromParams, paramsFromSearchState, apiParamsFromSearchState,
+    SEARCH_DEFAULTS, FEED_AREAS, feedArea, parseRoute, buildHash, searchStateFromParams, paramsFromSearchState, apiParamsFromSearchState,
     safeHttpUrl, formatCount, debounce, pageWindow, aiLabHref,
   };
 });

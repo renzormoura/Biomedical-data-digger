@@ -104,3 +104,11 @@ test("aiLabHref codifica a referência (DOI com barras e símbolos)", () => {
   assert.equal(Lib.aiLabHref("10.1038/s41586-021-03819-2", "medicina"), "/ia?artigo=10.1038%2Fs41586-021-03819-2#medicina");
   assert.ok(!Lib.aiLabHref("x&y=<z>").includes("<"));
 });
+
+test("feedArea escolhe a primeira area conhecida do item e cai em geral", () => {
+  assert.equal(Lib.feedArea(["medicina", "biologia"]), "medicina");
+  assert.equal(Lib.feedArea(["inexistente", "ambiente"]), "ambiente");
+  assert.equal(Lib.feedArea([]), "geral");
+  assert.equal(Lib.feedArea(undefined), "geral");
+  assert.equal(Lib.FEED_AREAS.length, 14);
+});

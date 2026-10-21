@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 2026-10 — Feed mais vivo
+
+### Alterado
+- **Visual do feed:** capas coloridas por área do conhecimento com ícone (geradas no produto, sem imagens de terceiros), primeiro item em destaque, grade, selo "Novo", avatar da fonte e filtro de área em pílulas coloridas.
+- **Rolagem infinita** (o botão "Carregar mais" continua), com a âncora de rolagem do navegador desligada para não carregar tudo de uma vez.
+- **Variedade:** a lista mistura as fontes (2 mais novas de cada, depois as 2 seguintes) em vez de deixar uma fonte ocupar a primeira tela.
+- A API do feed passou a devolver `areaKeys` em cada item.
+
+### Corrigido
+- Títulos e trechos de feeds que codificam as entidades duas vezes (por exemplo `&#x201C;`) apareciam com o código na tela.
+
 ## 2026-10 — O produto passa a se chamar Lastro
 
 ### Alterado

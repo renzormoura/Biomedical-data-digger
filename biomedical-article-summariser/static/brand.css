@@ -764,3 +764,44 @@ input[type="text"], input[type="search"], input[type="email"], input[type="passw
 .plan-badge { display: inline-block; padding: 1px 9px; border-radius: 999px; border: 1px solid var(--border); font-size: 0.74rem; color: var(--muted); margin-left: 6px; }
 .plan-badge.is-pro { color: var(--accent-text); border-color: var(--accent); }
 .admin-table .plan-badge { margin-left: 0; }
+
+/* feed visual: capas coloridas por area (sem imagens de terceiros), grade, destaque e filtro em pilulas */
+.feed-list { grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; }
+.feed-card { padding: 0; overflow: hidden; gap: 0; transition: transform .15s, border-color .15s; }
+.feed-card:hover { transform: translateY(-2px); border-color: var(--hue-border, var(--accent)); }
+.feed-card.is-featured { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(180px, 38%) 1fr; }
+.feed-card.is-featured h3 { font-size: 1.35rem; }
+.feed-card.is-featured .feed-snippet { -webkit-line-clamp: 5; }
+.feed-cover { position: relative; display: flex; align-items: flex-end; justify-content: space-between; min-height: 96px; padding: 10px 12px; overflow: hidden;
+  color: #fff; text-decoration: none; background: linear-gradient(135deg, hsl(var(--hue) 62% var(--cover-a)), hsl(calc(var(--hue) + 38) 66% var(--cover-b))); }
+.feed-card.is-featured .feed-cover { min-height: 100%; }
+.feed-cover::after { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 85% 15%, rgba(255, 255, 255, 0.22), transparent 55%); pointer-events: none; }
+.feed-cover-icon { position: absolute; right: -14px; top: 50%; width: 120px; height: 120px; margin-top: -60px; opacity: 0.22; stroke-width: 1.2; color: #fff; }
+.feed-card.is-featured .feed-cover-icon { width: 190px; height: 190px; margin-top: -95px; }
+.feed-cover .feed-tier { position: relative; z-index: 1; color: #fff; border-color: rgba(255, 255, 255, 0.7); background: rgba(0, 0, 0, 0.28); }
+.feed-new { position: absolute; top: 10px; left: 12px; z-index: 1; padding: 2px 9px; border-radius: 999px; background: #fff; color: #111; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; }
+.feed-body { display: grid; gap: 8px; padding: 14px 16px 16px; align-content: start; }
+.feed-avatar { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; font-size: 0.62rem; font-weight: 800; color: #fff; background: hsl(var(--hue) 55% 38%); }
+.feed-meta { align-items: center; }
+.area-pills { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
+.area-pill { flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--text); font: inherit; font-size: 0.84rem; cursor: pointer; white-space: nowrap; }
+.area-pill .icon { width: 15px; height: 15px; color: hsl(var(--hue, 24) 70% var(--pill-ink)); }
+.area-pill:hover { border-color: hsl(var(--hue, 24) 60% 50%); }
+.area-pill[aria-pressed="true"] { background: linear-gradient(135deg, hsl(var(--hue, 24) 62% var(--cover-a)), hsl(calc(var(--hue, 24) + 38) 66% var(--cover-b))); border-color: transparent; color: #fff; font-weight: 600; }
+.area-pill[aria-pressed="true"] .icon { color: #fff; }
+.area-medicina { --hue: 352; } .area-farmacia { --hue: 200; } .area-enfermagem { --hue: 326; } .area-odontologia { --hue: 184; }
+.area-nutricao { --hue: 98; } .area-biologia { --hue: 142; } .area-psicologia { --hue: 268; } .area-computacao { --hue: 216; }
+.area-engenharia { --hue: 28; } .area-exatas { --hue: 244; } .area-ambiente { --hue: 162; } .area-agrarias { --hue: 76; }
+.area-sociais { --hue: 44; } .area-educacao { --hue: 292; } .area-geral { --hue: 24; }
+:root { --cover-a: 30%; --cover-b: 20%; --pill-ink: 62%; }
+:root[data-theme="light"] { --cover-a: 42%; --cover-b: 34%; --pill-ink: 38%; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) { --cover-a: 42%; --cover-b: 34%; --pill-ink: 38%; } }
+@media (max-width: 760px) {
+  .feed-list { grid-template-columns: 1fr; }
+  .feed-card.is-featured { grid-template-columns: 1fr; }
+  .feed-card.is-featured .feed-cover { min-height: 120px; }
+}
+@media (prefers-reduced-motion: reduce) { .feed-card { transition: none; } .feed-card:hover { transform: none; } }
+
+/* sem ancora de rolagem: com ela o navegador "segue" o rodape enquanto o feed cresce e a rolagem infinita carregava tudo de uma vez */
+html { overflow-anchor: none; }

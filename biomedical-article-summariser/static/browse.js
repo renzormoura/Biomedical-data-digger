@@ -1428,21 +1428,33 @@
     return fmtDate(item.publishedAt.slice(0, 10));
   }
 
-  function feedCard(item) {
+  const hueOf = (text) => { let sum = 0; for (const char of String(text)) sum = (sum * 31 + char.codePointAt(0)) % 360; return sum; };
+  const initials = (name) => String(name).split(/[\s.\-/]+/).filter(Boolean).slice(0, 2).map((part) => part[0].toUpperCase()).join("");
+
+  function feedCard(item, { featured = false } = {}) {
     const internal = item.internal === true;
-    const link = h("a", internal
-      ? { href: item.url }
-      : { href: item.url, target: "_blank", rel: "noopener noreferrer nofollow" }, item.title, internal ? null : icon("external"));
-    return h("article", { class: "feed-card" },
-      h("div", { class: "feed-meta" },
+    const area = Lib.feedArea(item.areaKeys);
+    const hours = item.dateKnown ? (Date.now() - new Date(item.publishedAt).getTime()) / 3600000 : Infinity;
+    const attrs = internal ? { href: item.url } : { href: item.url, target: "_blank", rel: "noopener noreferrer nofollow" };
+    const link = h("a", attrs, item.title);
+    const coverIcon = icon(`area-${area}`);
+    coverIcon.classList.add("feed-cover-icon");
+    const avatar = h("span", { class: "feed-avatar", "aria-hidden": "true" }, initials(item.source.name));
+    avatar.style.setProperty("--hue", String(hueOf(item.source.id || item.source.name)));
+    return h("article", { class: `feed-card area-${area}${featured ? " is-featured" : ""}` },
+      h("a", { class: "feed-cover", ...attrs, tabindex: "-1", "aria-hidden": "true" },
+        coverIcon,
         h("span", { class: `feed-tier tier-${item.source.tier}` }, item.source.tierLabel),
-        h("span", { class: "feed-source" }, item.source.name),
-        h("span", { class: "muted" }, ` · ${feedWhen(item)}`, item.source.language && !["pt", "un"].includes(item.source.language) ? ` · ${item.source.language.toUpperCase()}` : "")),
-      h("h3", {}, link),
-      item.snippet ? h("p", { class: "feed-snippet" }, item.snippet) : null,
-      item.matched.length ? h("div", { class: "chips" }, item.matched.map((m) => h("span", { class: "chip" }, m))) : null,
-      internal ? h("a", { class: "feed-open", href: item.url }, "Ver o artigo e a nota de confiabilidade")
-        : h("a", { class: "feed-open", href: item.url, target: "_blank", rel: "noopener noreferrer nofollow" }, `Ler em ${item.source.name}`, icon("external")));
+        hours < 6 ? h("span", { class: "feed-new" }, "Novo") : null),
+      h("div", { class: "feed-body" },
+        h("div", { class: "feed-meta" }, avatar,
+          h("span", { class: "feed-source" }, item.source.name),
+          h("span", { class: "muted" }, ` · ${feedWhen(item)}`, item.source.language && !["pt", "un"].includes(item.source.language) ? ` · ${item.source.language.toUpperCase()}` : "")),
+        h("h3", {}, link, internal ? null : icon("external")),
+        item.snippet ? h("p", { class: "feed-snippet" }, item.snippet) : null,
+        item.matched.length ? h("div", { class: "chips" }, item.matched.map((m) => h("span", { class: "chip" }, m))) : null,
+        internal ? h("a", { class: "feed-open", href: item.url }, "Ver o artigo e a nota de confiabilidade")
+          : h("a", { class: "feed-open", ...attrs }, `Ler em ${item.source.name}`, icon("external"))));
   }
 
   async function renderFeed(params) {
@@ -1453,7 +1465,7 @@
     };
     const go = (changes) => { location.hash = Lib.buildHash("/feed", { modo: state.mode === "tudo" ? "tudo" : "", tipo: state.kind === "todos" ? "" : state.kind, area: state.area, lang: state.lang, ...changes }); };
     const list = h("div", { class: "feed-list", "aria-live": "polite" });
-    const more = h("div", { class: "row" });
+    const more = h("div", { class: "row feed-more" });
     const status = h("p", { class: "note" });
     const controls = h("div", { class: "feed-controls card" });
     mount($app, h("h1", {}, "Feed"),
@@ -1464,15 +1476,25 @@
     let page = 1;
     let retries = 0;
     let hasInterests = false;
+    let loadingMore = false;
+    let loadNext = null;
+    // rolar perto do fim carrega a próxima página sozinho (o botão "Carregar mais" continua como alternativa)
+    const autoMore = () => {
+      if (!more.isConnected || !location.hash.startsWith("#/feed")) { window.removeEventListener("scroll", autoMore); return; }  // outra tela ou outra versão do feed
+      if (loadNext && !loadingMore && more.getBoundingClientRect().top < window.innerHeight + 600) loadNext();
+    };
+    window.addEventListener("scroll", autoMore, { passive: true });
     const chip = (label, active, onclick) => h("button", { type: "button", class: "pick", "aria-pressed": String(active), onclick }, label);
     const paintControls = () => mount(controls,
       hasInterests ? h("div", { class: "pick-row", role: "group", "aria-label": "Mostrar" },
         chip("Para você", state.mode === "voce", () => go({ modo: "" })), chip("Tudo", state.mode === "tudo", () => go({ modo: "tudo" }))) : null,
       h("div", { class: "pick-row", role: "group", "aria-label": "Tipo" },
         [["todos", "Tudo"], ["artigos", "Artigos"], ["noticias", "Notícias"]].map(([key, label]) => chip(label, state.kind === key, () => go({ tipo: key === "todos" ? "" : key })))),
+      h("div", { class: "area-pills", role: "group", "aria-label": "Área do conhecimento" },
+        h("button", { type: "button", class: "area-pill", "aria-pressed": String(!state.area), onclick: () => go({ area: "" }) }, "Todas as áreas"),
+        areas.map((a) => h("button", { type: "button", class: `area-pill area-${Lib.feedArea([a.key])}`, "aria-pressed": String(a.key === state.area), onclick: () => go({ area: a.key }) },
+          icon(`area-${Lib.feedArea([a.key])}`), a.label))),
       h("div", { class: "row" },
-        h("select", { "aria-label": "Área do conhecimento", onchange: (event) => go({ area: event.target.value }) },
-          h("option", { value: "" }, "Todas as áreas"), areas.map((a) => h("option", { value: a.key, selected: a.key === state.area ? "" : null }, a.label))),
         h("select", { "aria-label": "Idioma", onchange: (event) => go({ lang: event.target.value }) },
           [["", "Qualquer idioma"], ["pt", "Português"], ["en", "Inglês"]].map(([value, label]) => h("option", { value, selected: value === state.lang ? "" : null }, label)))));
 
@@ -1486,7 +1508,7 @@
       hasInterests = data.hasInterests;
       paintControls();
       if (reset) mount(list);
-      list.append(...data.items.map(feedCard));
+      list.append(...data.items.map((item, index) => feedCard(item, { featured: reset && index === 0 })));
       if (!list.children.length) {
         if (data.refreshing && retries < FEED_MAX_RETRIES) {
           mount(list, loading("Buscando as primeiras novidades nas fontes (pode levar cerca de um minuto)…"));
@@ -1501,7 +1523,9 @@
             session.user && !data.hasInterests ? h("a", { class: "btn btn-primary", href: "#/perfil/interesses" }, "Escolher interesses") : null,
             !session.user ? h("button", { type: "button", class: "btn btn-primary", onclick: () => openAuth("Entre para ver o feed dos seus interesses.") }, "Entrar") : null)));
       }
-      mount(more, data.hasMore ? h("button", { type: "button", class: "btn btn-secondary", onclick: () => { page += 1; load(false); } }, "Carregar mais") : null);
+      const next = () => { if (loadingMore) return; loadingMore = true; page += 1; load(false).finally(() => { loadingMore = false; if (document.documentElement.scrollHeight < window.innerHeight * 2) autoMore(); }); };
+      mount(more, data.hasMore ? h("button", { type: "button", class: "btn btn-secondary", onclick: next }, "Carregar mais") : null);
+      loadNext = data.hasMore ? next : null;
       status.textContent = data.updatedAt ? `Fontes atualizadas pela última vez em ${fmtDate(data.updatedAt.slice(0, 10))}.` : "";
       if (!session.user) status.append(" Entre na sua conta para ver só o que combina com os seus interesses.");
     }
@@ -2437,6 +2461,8 @@
     else renderHome();
     if (view !== "busca") window.scrollTo(0, 0);
   }
+  // as telas carregam por partes; com a restauração automática o navegador "persegue" a rolagem antiga enquanto o conteúdo cresce (e a rolagem infinita carregava tudo)
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
   window.addEventListener("hashchange", () => { render(); $app.focus({ preventScroll: true }); });
   render();
   askProfile();

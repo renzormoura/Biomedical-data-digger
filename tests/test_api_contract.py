@@ -77,6 +77,8 @@ def normalize(value: Any, key: str = "") -> Any:
         return masked.get(key) or _norm_text(value)
     if key == "since" and isinstance(value, int):  # epoch de inicio do registro de uso
         return "<epoch>"
+    if key == "dias" and isinstance(value, int):  # idade do instantaneo: muda a cada dia
+        return "<dias>"
     return value
 
 

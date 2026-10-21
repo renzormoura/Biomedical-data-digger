@@ -525,3 +525,21 @@ def test_one_source_cannot_flood_the_feed(store):
     store.upsert(items, NOW.isoformat())
     page = service_with(store, Fetcher()).page(prefs=None, mode="tudo")
     assert page.total == feedmod.PER_SOURCE_VIEW + 1 and any(i["source"]["id"] == "opas" for i in page.items)
+
+
+def test_mix_sources_takes_the_newest_of_each_source_before_the_next_round():
+    def row(source, minute):
+        return {"source": {"id": source}, "publishedAt": f"2026-10-20T10:{minute:02d}:00+00:00", "id": f"{source}{minute}"}
+
+    flood = [row("a", m) for m in (59, 58, 57, 56, 55)]  # uma fonte que publicou tudo de uma vez
+    others = [row("b", 30), row("c", 20)]
+    ordered = sorted(flood + others, key=lambda r: r["publishedAt"], reverse=True)
+    mixed = feedmod._mix_sources(ordered)
+    assert [r["id"] for r in mixed] == ["a59", "a58", "b30", "c20", "a57", "a56", "a55"]  # 2 por fonte e rodada; data mantida dentro dela
+
+
+def test_double_encoded_entities_in_titles_and_snippets_are_decoded():
+    feed = (b'<?xml version="1.0"?><rss version="2.0"><channel><item><title>Amid &amp;#x201C;twin crisis&amp;#x201D; &amp; more</title>'
+            b'<link>https://exemplo.com/a</link><description>Texto &amp;#8220;citado&amp;#8221;</description></item></channel></rss>')
+    entry = parse_feed(feed)[0]
+    assert entry.title == "Amid “twin crisis” & more" and entry.snippet == "Texto “citado”"

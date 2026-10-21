@@ -13,6 +13,17 @@ O feed é leitura (a pessoa vem ver). O sininho é aviso (o produto procura a pe
 - **Fontes e critérios:** painel no fim da página com as 51 fontes, o tipo de cada uma, idioma, áreas e se falharam na última busca.
 - Em celular, a barra inferior é: Início, **Feed**, Busca, Biblioteca, Laboratório.
 
+## Visual do feed
+- **Sem imagens de terceiros, de propósito.** Cada cartão tem uma **capa gerada no próprio produto**: gradiente na cor da **área do conhecimento** do item (14 cores, uma por área) com o **ícone da área** em marca-d'água, o tipo da fonte na capa e um selo **"Novo"** para itens de menos de 6 horas. Não puxamos fotos das fontes: isso exigiria carregar imagens de outros sites (a CSP e a Política de Privacidade dizem que o navegador não carrega nada de terceiros) e a licença das imagens varia de fonte para fonte.
+- **Grade e destaque:** o primeiro item aparece em destaque, em largura total, e os demais em grade (4 colunas no desktop largo, 1 no celular). Cada fonte tem um avatar com as iniciais, em cor própria.
+- **Filtro de área em pílulas:** uma faixa rolável com todas as áreas, cada uma com cor e ícone, no lugar da lista suspensa.
+- **Rolagem infinita:** ao chegar perto do fim, a próxima página carrega sozinha (o botão "Carregar mais" continua como alternativa). A rolagem automática do navegador (âncora de rolagem e restauração) foi desligada porque fazia o feed carregar tudo de uma vez.
+- **Mistura de fontes:** a lista traz primeiro as **2 mais novas de cada fonte**, depois as 2 seguintes, e assim por diante (sempre por data dentro de cada rodada). Assim uma fonte que publica tudo de uma vez, ou sem data no feed, não ocupa a primeira tela inteira.
+- Títulos e trechos com entidades codificadas duas vezes (`&#8220;`) passam a ser decodificados.
+
+### Fotos de verdade: o que seria preciso
+Para ter a foto de cada notícia, o caminho seguro é um **proxy de imagens** no servidor (baixa a imagem da fonte, limita tipo e tamanho, guarda em cache e serve do próprio domínio, sem expor o IP de quem lê), **só para fontes cuja licença permite** (por exemplo, as de licença aberta como Agência Brasil, PLOS e eLife). Custa banda e memória no plano gratuito e exige revisar os termos de cada fonte; fica como próximo passo opcional.
+
 ## Fontes (lista curada)
 51 fontes verificadas funcionando em 2026-10-18 (`feed_sources.py`):
 - **Saúde:** Fiocruz, OPAS/OMS, OMS, CDC (MMWR), BMJ, JAMA Network, PLOS Medicine, medRxiv, ScienceDaily, Medical Xpress, Agência Brasil, Folha e G1.
@@ -57,7 +68,7 @@ O tipo diz que **espécie de fonte** é. Notícias e comunicados **não passam p
 ## Limites
 - A classificação por tema é por palavras (como os alertas): erra e deixa de fora; notícias em português citam o assunto de passagem, então "Para você" tem ruído.
 - Itens sem data usam o horário da busca e aparecem como "data não informada".
-- Sem busca por texto, sem salvar item e sem "marcar como lido" no feed; sem imagens.
+- Sem busca por texto, sem salvar item e sem "marcar como lido" no feed; sem fotos das fontes (as capas são geradas, ver "Visual do feed").
 - Cobertura desigual: ótima em saúde, boa em computação, engenharia, exatas e ambiente, razoável em ciências agrárias, direito e economia (quase tudo em inglês; ver "Lacunas").
 - A primeira busca (banco vazio) pode levar cerca de um minuto; a tela mostra "Buscando as primeiras novidades" e tenta de novo.
 - O feed não tem tradução; fontes em inglês aparecem em inglês.

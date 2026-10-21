@@ -18,6 +18,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
+from html import unescape
 from typing import Any
 from xml.etree.ElementTree import Element
 
@@ -41,6 +42,7 @@ HTTP_TIMEOUT = 15
 WORKERS = 8
 ON_DEMAND_BUDGET = 12  # fontes buscadas quando alguem abre o feed e os dados estao velhos
 PAGE_SIZE = 20
+PER_SOURCE_ROUND = 2  # por "rodada", cada fonte entra com ate isto antes de a proxima rodada comecar: a rolagem mistura as fontes
 PER_SOURCE_VIEW = 12  # no maximo isto de cada fonte na tela, para uma fonte que publica muito nao tomar o feed
 MAX_CANDIDATES = 800
 RECENT_TTL = 30.0  # segundos que a lista de candidatos fica em memoria
@@ -149,7 +151,7 @@ def clean_snippet(html: str, limit: int = SNIPPET_CHARS) -> str:
             tag.decompose()
         text = soup.get_text()
     else:
-        text = html
+        text = unescape(html)  # feeds que codificam duas vezes deixam "&#8220;" como texto
     text = _SPACES.sub(" ", _TAG.sub(" ", text)).strip()
     if len(text) <= limit:
         return text
@@ -192,7 +194,7 @@ def parse_feed(content: bytes) -> list[Entry]:
     for element in root.iter():
         if _local(element.tag) not in ("item", "entry"):
             continue
-        title = " ".join(text_of(_children(element, "title")[0]).split())[:TITLE_CHARS] if _children(element, "title") else ""
+        title = " ".join(unescape(text_of(_children(element, "title")[0])).split())[:TITLE_CHARS] if _children(element, "title") else ""  # alguns feeds codificam duas vezes
         link = _entry_link(element)
         if not title or not link:
             continue
@@ -322,6 +324,21 @@ Fetcher = Callable[[str, str, str], FetchResult]
 
 
 # ---------------------------------------------------------------------- servico
+def _mix_sources(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Mistura as fontes sem perder a ordem por data: as `PER_SOURCE_ROUND` mais novas de cada fonte vem primeiro, depois as proximas.
+
+    Sem isso, uma fonte que publica tudo de uma vez (ou sem data no feed) ocupava a primeira tela inteira.
+    """
+    seen: dict[str, int] = {}
+    banded = []
+    for row in rows:  # `rows` ja vem do mais novo para o mais antigo
+        source_id = str(row.get("source", {}).get("id", ""))
+        banded.append((seen.get(source_id, 0) // PER_SOURCE_ROUND, row))
+        seen[source_id] = seen.get(source_id, 0) + 1
+    banded.sort(key=lambda pair: pair[0])  # estavel: dentro de cada rodada, a ordem por data continua
+    return [row for _, row in banded]
+
+
 class FeedService:
     def __init__(self, store: FeedStore, fetcher: Fetcher = http_fetch, clock: Callable[[], datetime] = _now) -> None:
         self._store = store
@@ -434,13 +451,14 @@ class FeedService:
                 continue
             rows.append({
                 "id": item.id, "kind": "artigo" if is_article else "noticia", "title": item.title, "snippet": item.snippet, "url": item.url,
-                "publishedAt": item.published_at, "dateKnown": item.date_known, "areas": [interests.area_label(a) for a in item.areas],
+                "publishedAt": item.published_at, "dateKnown": item.date_known, "areas": [interests.area_label(a) for a in item.areas], "areaKeys": list(item.areas),
                 "matched": list(dict.fromkeys(matched)),
                 "source": {"id": source.id, "name": source.name, "tier": source.tier, "tierLabel": TIERS[source.tier][0], "language": source.language, "site": source.site},
             })
         if kind in ("todos", "artigos") and not language and article_items:
             rows += [dict(entry) for entry in article_items if not area or entry.get("area") == area]
         rows.sort(key=lambda row: row["publishedAt"], reverse=True)
+        rows = _mix_sources(rows)
         total = len(rows)
         start = (max(page, 1) - 1) * PAGE_SIZE
         return FeedPage(rows[start:start + PAGE_SIZE], total, start + PAGE_SIZE < total, personalized, self._store.latest_fetch())

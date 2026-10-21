@@ -608,7 +608,7 @@
    "meta": {
     "arquivoUrl": "https://www.gov.br/conitec/pt-br/midias/dados-em-excel/recomendacoesdaconitec_20260615.xlsx/@@download/file",
     "defasado": false,
-    "dias": 3,
+    "dias": "<dias>",
     "extraidoEm": "<date>",
     "fonte": "CONITEC, recomendacoes sobre tecnologias avaliadas (planilha oficial)",
     "medicamentos": 782,
@@ -647,7 +647,7 @@
      "arquivoModificado": "<date>",
      "arquivoUrl": "https://dados.anvisa.gov.br/dados/DADOS_ABERTOS_MEDICAMENTOS.csv",
      "defasado": false,
-     "dias": 3,
+     "dias": "<dias>",
      "dicionarioUrl": "https://dados.anvisa.gov.br/dados/Documentacao_e_Dicionario_de_Dados_Registros_Validos_Medicamento_V1.pdf",
      "extraidoEm": "<date>",
      "fonte": "ANVISA, dados abertos de medicamentos registrados (DATAVISA)",
@@ -656,7 +656,7 @@
     "conitec": {
      "arquivoUrl": "https://www.gov.br/conitec/pt-br/midias/dados-em-excel/recomendacoesdaconitec_20260615.xlsx/@@download/file",
      "defasado": false,
-     "dias": 3,
+     "dias": "<dias>",
      "extraidoEm": "<date>",
      "fonte": "CONITEC, recomendacoes sobre tecnologias avaliadas (planilha oficial)",
      "medicamentos": 782,
@@ -665,7 +665,7 @@
     "rename": {
      "arquivoUrl": "https://bvsms.saude.gov.br/bvs/publicacoes/relacao_nacional_medicamentos_2024_2ed.pdf",
      "defasado": false,
-     "dias": 3,
+     "dias": "<dias>",
      "extraidoEm": "<date>",
      "fonte": "RENAME 2024 (2ª edição, 2025)",
      "licenca": "CC BY-NC-SA 4.0 (uso não comercial, com atribuição e mesma licença)",
@@ -764,7 +764,7 @@
      "arquivoModificado": "<date>",
      "arquivoUrl": "https://dados.anvisa.gov.br/dados/DADOS_ABERTOS_MEDICAMENTOS.csv",
      "defasado": false,
-     "dias": 3,
+     "dias": "<dias>",
      "dicionarioUrl": "https://dados.anvisa.gov.br/dados/Documentacao_e_Dicionario_de_Dados_Registros_Validos_Medicamento_V1.pdf",
      "extraidoEm": "<date>",
      "fonte": "ANVISA, dados abertos de medicamentos registrados (DATAVISA)",
@@ -773,7 +773,7 @@
     "conitec": {
      "arquivoUrl": "https://www.gov.br/conitec/pt-br/midias/dados-em-excel/recomendacoesdaconitec_20260615.xlsx/@@download/file",
      "defasado": false,
-     "dias": 3,
+     "dias": "<dias>",
      "extraidoEm": "<date>",
      "fonte": "CONITEC, recomendacoes sobre tecnologias avaliadas (planilha oficial)",
      "medicamentos": 782,
@@ -782,7 +782,7 @@
     "rename": {
      "arquivoUrl": "https://bvsms.saude.gov.br/bvs/publicacoes/relacao_nacional_medicamentos_2024_2ed.pdf",
      "defasado": false,
-     "dias": 3,
+     "dias": "<dias>",
      "extraidoEm": "<date>",
      "fonte": "RENAME 2024 (2ª edição, 2025)",
      "licenca": "CC BY-NC-SA 4.0 (uso não comercial, com atribuição e mesma licença)",
@@ -1474,6 +1474,9 @@
    "hasMore": false,
    "items": [
     {
+     "areaKeys": [
+      "medicina"
+     ],
      "areas": [
       "Medicina"
      ],
@@ -3149,7 +3152,7 @@
      "arquivoModificado": "<date>",
      "arquivoUrl": "https://dados.anvisa.gov.br/dados/DADOS_ABERTOS_MEDICAMENTOS.csv",
      "defasado": false,
-     "dias": 3,
+     "dias": "<dias>",
      "dicionarioUrl": "https://dados.anvisa.gov.br/dados/Documentacao_e_Dicionario_de_Dados_Registros_Validos_Medicamento_V1.pdf",
      "extraidoEm": "<date>",
      "fonte": "ANVISA, dados abertos de medicamentos registrados (DATAVISA)",
@@ -3158,7 +3161,7 @@
     "conitec": {
      "arquivoUrl": "https://www.gov.br/conitec/pt-br/midias/dados-em-excel/recomendacoesdaconitec_20260615.xlsx/@@download/file",
      "defasado": false,
-     "dias": 3,
+     "dias": "<dias>",
      "extraidoEm": "<date>",
      "fonte": "CONITEC, recomendacoes sobre tecnologias avaliadas (planilha oficial)",
      "medicamentos": 782,
@@ -3167,7 +3170,7 @@
     "rename": {
      "arquivoUrl": "https://bvsms.saude.gov.br/bvs/publicacoes/relacao_nacional_medicamentos_2024_2ed.pdf",
      "defasado": false,
-     "dias": 3,
+     "dias": "<dias>",
      "extraidoEm": "<date>",
      "fonte": "RENAME 2024 (2ª edição, 2025)",
      "licenca": "CC BY-NC-SA 4.0 (uso não comercial, com atribuição e mesma licença)",
