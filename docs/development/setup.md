@@ -8,7 +8,7 @@
 ## Passo a passo
 ```bash
 git clone <URL do repositório privado>
-cd Biomedical_data_digger
+cd <pasta do repositório clonado>
 
 python -m venv .venv_local
 # Windows (PowerShell):  .venv_local\Scripts\Activate.ps1
