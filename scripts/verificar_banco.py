@@ -30,7 +30,7 @@ from profiles import ProfileStore  # noqa: E402
 from reports import ReportStore  # noqa: E402
 
 EXPECTED_TABLES = (
-    "users", "account_tokens", "email_verification", "terms_acceptance", "subscriptions", "payment_requests", "suspended_accounts", "user_profiles", "library_items", "reading_lists", "reading_list_items",
+    "users", "account_tokens", "email_verification", "terms_acceptance", "subscriptions", "payment_requests", "suspended_accounts", "user_profiles", "user_names", "library_items", "reading_lists", "reading_list_items",
     "saved_analyses", "reports", "report_items", "report_substances", "report_versions", "report_sources", "report_log",
     "interest_prefs", "interest_baselines", "alert_seen", "alerts", "notifications", "retraction_status", "regulatory_state",
     "watch_state", "notification_prefs", "feed_items", "feed_state",

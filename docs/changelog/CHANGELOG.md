@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 2026-10 — Duas páginas iniciais e nome da conta
+
+### Adicionado
+- **Início do convidado** com foco em levar aos planos: como funciona, para quem é, comparação Gratuito × Pro com os limites reais e chamada para criar conta.
+- **Início de quem tem conta** como painel de trabalho: "Bem-vindo, Nome", números da conta (com barra de uso quando a cobrança está ativa), primeiros passos, avisos, últimos salvos, novidades dos interesses e atalhos.
+- **Nome da conta**, pedido no cadastro e editável em Perfil → Conta e dados. Nova tabela `user_names`; `name` nas respostas de `/api/auth/me`, login, cadastro e `/api/account`; nova rota `PUT /api/account/name`. Opcional na API.
+
+### Alterado
+- `scripts/verificar_banco.py` passa a conferir 30 tabelas.
+
 ## 2026-10 — O produto passa a se chamar Nexus Science
 
 ### Alterado

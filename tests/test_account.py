@@ -169,7 +169,7 @@ def test_delete_requires_the_password_and_removes_everything(env):
     assert env.profiles.get(EMAIL).configured is False
     owned = [("library_items", "user_email"), ("reading_lists", "owner_email"), ("saved_analyses", "user_email"), ("reports", "owner_email"),
              ("interest_prefs", "user_email"), ("interest_baselines", "user_email"), ("alert_seen", "user_email"), ("alerts", "user_email"),
-             ("user_profiles", "user_email")]
+             ("user_profiles", "user_email"), ("user_names", "user_email")]
     for table, column in owned:
         assert env.database.query(f"SELECT COUNT(*) FROM {table} WHERE {column} = ?", (EMAIL,))[0][0] == 0, table  # noqa: S608
     assert env.client(None).post("/api/auth/login", json={"email": EMAIL, "password": PASSWORD}).status_code == 401
@@ -183,10 +183,10 @@ def test_a_deleted_account_is_logged_out_everywhere_and_the_email_can_be_reused(
     cookie = first.cookies.get(SESSION_COOKIE)
     second = env.client(None)
     second.cookies.set(SESSION_COOKIE, cookie)  # a mesma sessao em outro aparelho
-    assert second.get("/api/auth/me").json() == {"user": EMAIL}
+    assert second.get("/api/auth/me").json() == {"user": EMAIL, "name": ""}
     first.request("DELETE", "/api/account", json={"password": PASSWORD})
-    assert first.get("/api/auth/me").json() == {"user": None}  # o cookie foi limpo
-    assert second.get("/api/auth/me").json() == {"user": None}  # o outro aparelho cai junto
+    assert first.get("/api/auth/me").json() == {"user": None, "name": ""}  # o cookie foi limpo
+    assert second.get("/api/auth/me").json() == {"user": None, "name": ""}  # o outro aparelho cai junto
     assert second.get("/api/account").status_code == 401
     again = env.client()  # o mesmo e-mail pode ser cadastrado de novo, sem dados antigos
     assert again.get("/api/account").json()["counts"]["library"] == 0
@@ -195,7 +195,7 @@ def test_a_deleted_account_is_logged_out_everywhere_and_the_email_can_be_reused(
 def test_a_valid_cookie_for_an_account_that_never_existed_is_not_a_session(env):
     ghost = env.client(None)
     ghost.cookies.set(SESSION_COOKIE, SessionSigner(SECRET).issue("fantasma@exemplo.com"))
-    assert ghost.get("/api/auth/me").json() == {"user": None} and ghost.get("/api/account").status_code == 401
+    assert ghost.get("/api/auth/me").json() == {"user": None, "name": ""} and ghost.get("/api/account").status_code == 401
 
 
 def test_session_survives_when_the_accounts_database_fails(env, monkeypatch):
@@ -203,5 +203,5 @@ def test_session_survives_when_the_accounts_database_fails(env, monkeypatch):
     monkeypatch.setattr(env.accounts, "exists", MagicMock(side_effect=__import__("account_store").AccountStoreError("fora do ar")))
     other = env.client(None)
     other.cookies.set(SESSION_COOKIE, SessionSigner(SECRET).issue("nova@exemplo.com"))
-    assert other.get("/api/auth/me").json() == {"user": "nova@exemplo.com"}  # falha do banco nao derruba sessao
-    assert client.get("/api/auth/me").json() == {"user": EMAIL}
+    assert other.get("/api/auth/me").json() == {"user": "nova@exemplo.com", "name": ""}  # falha do banco nao derruba sessao
+    assert client.get("/api/auth/me").json() == {"user": EMAIL, "name": ""}

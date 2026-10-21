@@ -24,9 +24,13 @@ from billing import BillingStore
 from domain import AuthRequiredError, NexusError
 from library_store import LibraryStore
 from notifications import NotificationStore
-from profiles import ProfileStore
+from profiles import ProfileError, ProfileStore
 from reports import ReportStore
 from timeutil import utcnow_iso
+
+
+class NameIn(BaseModel):
+    name: str = Field(max_length=120)
 
 
 class PasswordIn(BaseModel):
@@ -137,10 +141,20 @@ def register_account_routes(
             }
         profile = profiles.get(user) if profiles else None
         return {
-            "email": user, "createdAt": created, "counts": counts, "interests": interests,
+            "email": user, "name": profiles.name(user) if profiles else "", "createdAt": created, "counts": counts, "interests": interests,
             "emailVerified": tokens.is_verified(user) if tokens is not None else None, "emailEnabled": mail_enabled,
             "profile": {"profile": profile.key, "healthPack": profile.health_pack, "configured": profile.configured} if profile else None,
         }
+
+    @app.put("/api/account/name")
+    def set_name(body: NameIn, request: Request) -> dict[str, str]:
+        user = require_user(request)
+        if profiles is None:
+            raise NexusError("O perfil não está disponível neste servidor.")
+        try:
+            return {"name": profiles.set_name(user, body.name)}
+        except ProfileError as error:
+            raise NexusError(str(error)) from error
 
     @app.post("/api/account/password")
     def change_password(body: PasswordIn, request: Request) -> dict[str, bool]:
@@ -170,7 +184,7 @@ def register_account_routes(
         profile = profiles.get(user) if profiles else None
         payload: dict[str, Any] = {
             "exportedAt": utcnow_iso(),
-            "account": {"email": user, "createdAt": created, "emailVerified": tokens.is_verified(user) if tokens is not None else None,
+            "account": {"email": user, "name": profiles.name(user) if profiles else "", "createdAt": created, "emailVerified": tokens.is_verified(user) if tokens is not None else None,
                         "terms": _terms(consent, user)},
             "profile": {"profile": profile.key, "healthPack": profile.health_pack} if profile else None,
             "library": [{**item.work.to_dict(), "tags": list(item.tags), "savedAt": item.saved_at} for item in library.items(user)],

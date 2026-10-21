@@ -234,11 +234,11 @@ def test_register_login_logout_flow_and_cookie_flags(env):
     assert registered.status_code == 200 and registered.json()["user"] == "ana@exemplo.com"
     cookie = registered.headers["set-cookie"].lower()
     assert "httponly" in cookie and "samesite=lax" in cookie
-    assert env.client.get("/api/auth/me").json() == {"user": "ana@exemplo.com"}
+    assert env.client.get("/api/auth/me").json() == {"user": "ana@exemplo.com", "name": ""}
     assert "ana@exemplo.com" in env.client.get("/ia").text
 
     env.client.post("/api/auth/logout")
-    assert env.client.get("/api/auth/me").json() == {"user": None}
+    assert env.client.get("/api/auth/me").json() == {"user": None, "name": ""}
 
     assert env.client.post("/api/auth/login", json=credentials).status_code == 200
     assert env.client.get("/api/auth/me").json()["user"] == "ana@exemplo.com"
@@ -272,7 +272,7 @@ def test_auth_endpoints_are_rate_limited(env):
 
 def test_forged_and_tampered_session_cookies_are_ignored(env):
     env.client.cookies.set(SESSION_COOKIE, "ZmFrZQ.9999999999.assinatura")
-    assert env.client.get("/api/auth/me").json() == {"user": None}
+    assert env.client.get("/api/auth/me").json() == {"user": None, "name": ""}
 
 
 def test_logged_in_users_are_limited_by_account_not_by_ip(env):

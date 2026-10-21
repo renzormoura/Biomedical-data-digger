@@ -124,11 +124,14 @@
   const authError = document.getElementById("auth-error");
   const logoutButton = document.getElementById("logout-button");
   const profileLink = document.getElementById("profile-link");
-  const session = { admin: false, user: accountButton.dataset.user || "", profile: accountButton.dataset.profile || "", healthPack: accountButton.dataset.healthPack !== "0" };
+  const session = { admin: false, user: accountButton.dataset.user || "", name: accountButton.dataset.name || "", profile: accountButton.dataset.profile || "", healthPack: accountButton.dataset.healthPack !== "0" };
 
+  const nameField = document.getElementById("auth-name-field");
+  const nameInput = document.getElementById("auth-name");
   let userHook = null; // o sininho se registra aqui depois de montado
-  function setUser(user) {
+  function setUser(user, name = "") {
     session.user = user || "";
+    session.name = user ? name : "";
     document.getElementById("account-label").textContent = user || "Entrar";
     accountButton.setAttribute("aria-label", user ? `Meu perfil (${user})` : "Entrar na conta");
     accountButton.title = user ? "Meu perfil" : "Entrar na conta";
@@ -136,6 +139,7 @@
     profileLink.hidden = !user;
     if (!user) paintAdmin(false);
     dialog.querySelectorAll(".field, [data-auth='login'], [data-auth='register']").forEach((el) => { el.hidden = Boolean(user); });
+    nameField.hidden = true;
     if (userHook) userHook();
   }
   const adminLink = document.getElementById("admin-link");
@@ -150,7 +154,7 @@
     try { paintAdmin((await api("/api/admin/session")).admin === true); } catch { paintAdmin(false); }
   }
   let currentView = "";
-  setUser(session.user);
+  setUser(session.user, session.name);
 
   // ------------------------------------------------------------------ avisos (sininho)
   const CHECK_EVERY_MS = 15 * 60 * 1000;
@@ -255,11 +259,13 @@
     const password = document.getElementById("auth-password").value;
     if (!email || !password) { authError.textContent = "Informe e-mail e senha."; authError.hidden = false; return; }
     const acceptTerms = document.getElementById("auth-terms").checked;
+    const name = nameInput.value.trim();
+    if (kind === "register" && !name) { authError.textContent = "Diga como podemos te chamar."; authError.hidden = false; nameInput.focus(); return; }
     if (kind === "register" && !acceptTerms) { authError.textContent = "Para criar a conta, aceite os Termos de Uso e a Política de Privacidade."; authError.hidden = false; return; }
     try {
-      const data = await api(`/api/auth/${kind}`, { method: "POST", body: kind === "register" ? { email, password, acceptTerms } : { email, password } });
+      const data = await api(`/api/auth/${kind}`, { method: "POST", body: kind === "register" ? { email, password, acceptTerms, name } : { email, password } });
       document.getElementById("auth-password").value = "";
-      setUser(data.user);
+      setUser(data.user, data.name);
       dialog.close();
       toast(kind === "register" ? "Conta criada!" : "Login realizado!");
       render(); // reabre a tela atual já com os dados da conta
@@ -268,8 +274,12 @@
       authError.hidden = false;
     }
   }
-  dialog.querySelector("[data-auth='login']").addEventListener("click", () => authenticate("login"));
-  dialog.querySelector("[data-auth='register']").addEventListener("click", () => authenticate("register"));
+  dialog.querySelector("[data-auth='login']").addEventListener("click", () => { nameField.hidden = true; authenticate("login"); });
+  // o nome so e pedido ao criar conta: o primeiro clique mostra o campo, o segundo envia
+  dialog.querySelector("[data-auth='register']").addEventListener("click", () => {
+    if (nameField.hidden) { nameField.hidden = false; authError.hidden = true; nameInput.focus(); return; }
+    authenticate("register");
+  });
   dialog.querySelector("[data-auth='forgot']").addEventListener("click", async () => {
     const note = document.getElementById("auth-note");
     const email = document.getElementById("auth-email").value.trim();
@@ -611,8 +621,9 @@
     ["partial", "Precisão estatística", "5/10"], ["met", "Método descrito no resumo", "10/10"],
   ];
 
-  function renderHome() {
-    setTitle("Início");
+
+  /** Busca da pagina inicial (campo, seletor de fonte e contadores), igual para convidado e para quem tem conta. */
+  function homeSearch() {
     const input = h("input", { type: "search", id: "home-q", placeholder: "Tema, título, DOI ou palavra-chave", "aria-label": "Buscar artigos", maxlength: "300", autocomplete: "off" });
     const sourceBox = h("span", { class: "search-source" });
     const sourceCount = h("strong", {}, "—");
@@ -631,6 +642,166 @@
       mount(sourceBox, sourceSelect);
     }).catch(() => { /* a busca funciona sem o seletor */ });
     api("/api/feed/sources").then((data) => { feedCount.textContent = String(data.sources.length); }).catch(() => { feedCount.textContent = ""; });
+    const form = h("form", { class: "home-search", role: "search", onsubmit: (e) => { e.preventDefault(); go(input.value.trim()); } },
+      input, sourceBox,
+      h("button", { type: "submit", class: "btn btn-primary" }, icon("search"), "Buscar"));
+    return { form, sourceCount, feedCount };
+  }
+
+  // O inicio muda conforme a pessoa: convidado ve a vitrine do produto; quem tem conta ve o painel de trabalho.
+  function renderHome() {
+    if (session.user) renderDashboard(); else renderGuestHome();
+  }
+
+  const DASH_DEFAULT_SHORTCUTS = [["Buscar artigos", "#/busca"], ["Minha biblioteca", "#/biblioteca"], ["Relatórios", "#/relatorio"], ["Feed de novidades", "#/feed"]];
+
+  function dashSection(title, action, body) {
+    return h("section", { class: "dash-section card" },
+      h("div", { class: "dash-head" }, h("h2", {}, title), action || null), body);
+  }
+
+  async function renderDashboard() {
+    setTitle("Início");
+    const { form } = homeSearch();
+    const first = session.name.split(" ")[0];
+    const today = new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" });
+    const tiles = h("div", { class: "dash-tiles", "aria-label": "Sua conta em números" }, skeleton("row", 1, "Carregando sua conta…"));
+    const alertsBox = h("div", {}, skeleton("row", 2, "Carregando avisos…"));
+    const recentBox = h("div", {}, skeleton("row", 2, "Carregando seus artigos…"));
+    const feedBox = h("section", { class: "dash-feed", hidden: "" });
+    const stepsBox = h("div", { hidden: "" });
+    const shortcuts = PROFILE_SHORTCUTS[session.profile] || DASH_DEFAULT_SHORTCUTS;
+
+    mount($app,
+      h("section", { class: "home-hero dash-hero" },
+        h("p", { class: "eyebrow" }, today.charAt(0).toUpperCase() + today.slice(1)),
+        h("h1", { class: "display" }, first ? `Bem-vindo, ${first}` : "Bem-vindo de volta"),
+        h("p", { class: "lead" }, "O que vamos pesquisar hoje?"),
+        form),
+      tiles,
+      stepsBox,
+      h("div", { class: "dash-grid" },
+        dashSection("Avisos", h("a", { class: "dash-link", href: "#/perfil/notificacoes" }, "Notificações"), alertsBox),
+        dashSection("Últimos salvos", h("a", { class: "dash-link", href: "#/biblioteca" }, "Biblioteca"), recentBox)),
+      feedBox,
+      h("nav", { class: "dash-shortcuts", "aria-label": "Atalhos" },
+        shortcuts.map(([label, href]) => h("a", { class: "btn btn-secondary", href }, label)),
+        h("a", { class: "btn btn-ghost", href: "/ia" }, "Laboratório de IA")));
+
+    const [accountRes, billingRes, alertsRes, libraryRes] = await Promise.allSettled([
+      api("/api/account"), api("/api/billing/me"), api("/api/alerts"), api("/api/library")]);
+    if (currentView !== "") return;  // a pessoa ja foi para outra tela
+    const account = accountRes.status === "fulfilled" ? accountRes.value : null;
+    const billing = billingRes.status === "fulfilled" ? billingRes.value : null;
+
+    // -- numeros e plano
+    const tile = (href, label, value, limit) => {
+      const meter = limit && billing && billing.enforced ? h("div", { class: "meter", role: "img", "aria-label": `${value} de ${limit}` }, (() => {
+        const bar = h("i", {}); bar.style.width = `${Math.min(100, Math.round((value / limit) * 100))}%`; return bar;
+      })()) : null;
+      return h("a", { class: "dash-tile", href }, h("strong", {}, String(value)), h("span", {}, limit && billing && billing.enforced ? `${label} · de ${limit}` : label), meter);
+    };
+    if (account) {
+      const limits = billing ? billing.limits : {};
+      mount(tiles,
+        tile("#/biblioteca", "artigos salvos", account.counts.library, limits.library),
+        tile("#/biblioteca", "listas", account.counts.lists, limits.lists),
+        tile("#/relatorio", "relatórios", account.counts.reports, limits.reports),
+        billing && billing.enforced ? h("a", { class: "dash-tile dash-plan", href: "#/planos" }, h("strong", {}, billing.planName), h("span", {}, billing.active ? "seu plano" : "Ver planos e limites")) : null);
+    } else { tiles.remove(); }
+
+    // -- primeiros passos (some quando tudo foi feito)
+    if (account) {
+      const interestsDone = account.interests.topics + account.interests.terms > 0;
+      const steps = [
+        [interestsDone, "Escolha seus interesses", "#/perfil/interesses"],
+        [Boolean(account.profile && account.profile.configured), "Diga o que você faz", "#/perfil/uso"],
+        [account.counts.library > 0, "Salve seu primeiro artigo", "#/busca"],
+        [account.counts.lists > 0, "Crie uma lista de leitura", "#/biblioteca"],
+        [account.counts.reports > 0, "Gere um relatório", "#/relatorio"],
+      ];
+      const done = steps.filter(([ok]) => ok).length;
+      if (done < steps.length) {
+        const bar = h("i", {}); bar.style.width = `${Math.round((done / steps.length) * 100)}%`;
+        stepsBox.hidden = false;
+        mount(stepsBox, h("section", { class: "dash-steps card" },
+          h("div", { class: "dash-head" }, h("h2", {}, "Primeiros passos"), h("span", { class: "muted" }, `${done} de ${steps.length}`)),
+          h("div", { class: "meter", role: "img", "aria-label": `${done} de ${steps.length} passos feitos` }, bar),
+          h("ul", { class: "checklist dash-checklist" }, steps.map(([ok, label, href]) => h("li", { class: ok ? "is-done" : "" },
+            icon(ok ? "check" : "plus"), ok ? h("span", {}, label) : h("a", { href }, label))))));
+      }
+    }
+
+    // -- avisos
+    const alertItems = alertsRes.status === "fulfilled" ? (alertsRes.value.alerts || []).slice(0, 4) : [];
+    mount(alertsBox, alertItems.length
+      ? h("ul", { class: "plain-list dash-list" }, alertItems.map((item) => h("li", { class: item.read ? "" : "is-unread" },
+        h("a", { href: item.href, onclick: () => { if (!item.read) api("/api/alerts/read", { method: "POST", body: { id: item.id } }).catch(() => {}); } }, item.title),
+        h("small", { class: "muted" }, item.work ? [metaLine(item.work), item.topic].filter(Boolean).join(" · ") : item.body))))
+      : emptyState("bell", "Nenhum aviso por enquanto", "Avisamos de artigos retratados que você guarda e de novidades nos seus interesses.",
+        h("a", { class: "btn btn-secondary btn-sm", href: "#/perfil/interesses" }, "Escolher interesses")));
+
+    // -- ultimos salvos
+    const saved = libraryRes.status === "fulfilled"
+      ? [...libraryRes.value.items].sort((a, b) => String(b.savedAt).localeCompare(String(a.savedAt))).slice(0, 4) : [];
+    mount(recentBox, saved.length
+      ? h("ul", { class: "plain-list dash-list" }, saved.map((work) => h("li", {},
+        h("a", { href: articleHref(work) }, work.title), h("small", { class: "muted" }, metaLine(work)))))
+      : emptyState("library", "Nada salvo ainda", "Salve artigos com o botão “Salvar” e eles aparecem aqui.",
+        h("a", { class: "btn btn-primary btn-sm", href: "#/busca" }, "Buscar artigos")));
+
+    // -- novidades (dos interesses; se nao houver, as gerais)
+    try {
+      let data = await api("/api/feed?mode=voce");
+      let personal = true;
+      if (!data.items.length) { data = await api("/api/feed?mode=tudo"); personal = false; }
+      if (currentView !== "" || !data.items.length) return;
+      feedBox.hidden = false;
+      mount(feedBox,
+        h("div", { class: "dash-head" }, h("h2", {}, personal ? "Novidades para você" : "Novidades da ciência"), h("a", { class: "dash-link", href: "#/feed" }, "Ver o feed")),
+        h("div", { class: "feed-list" }, data.items.slice(0, 6).map((item) => feedCard(item))));
+    } catch { /* o resto do painel segue funcionando sem o feed */ }
+  }
+
+
+  const AUDIENCES = [
+    ["Estudantes", "TCC, dissertação e tese", "Ache referências confiáveis, salve em listas e gere as citações em ABNT ou APA."],
+    ["Pesquisadores", "Revisões e acompanhamento da área", "Veja a nota de cada artigo, acompanhe novidades e entregue relatórios com o método declarado."],
+    ["Profissionais de saúde", "Decisão com evidência", "Cruze medicamentos com ANVISA, Conitec e Rename e receba aviso quando um estudo for retratado."],
+  ];
+  const STEPS = [
+    ["1", "Busque", "Uma pesquisa em várias fontes abertas, sem artigos repetidos."],
+    ["2", "Avalie", "Nota de 0 a 100 com os critérios à vista, para decidir o que ler."],
+    ["3", "Entregue", "Listas, relatório com método e citações prontas para o seu gerenciador."],
+  ];
+  const planCards = (data) => h("div", { class: "gplan-grid" }, data.plans.map((plan) => {
+    const featured = plan.priceCents > 0;
+    return h("article", { class: `gplan-card${featured ? " is-featured" : ""}` },
+      featured ? h("span", { class: "gplan-flag" }, "Mais completo") : null,
+      h("h3", {}, plan.name),
+      h("p", { class: "gplan-price" }, plan.priceCents ? h("strong", {}, plan.price) : h("strong", {}, "Grátis"), plan.priceCents ? h("span", { class: "muted" }, " por mês") : null),
+      h("p", { class: "muted" }, plan.description),
+      h("ul", { class: "checklist" },
+        h("li", {}, icon("check"), h("span", {}, `${plan.limits.library} artigos na biblioteca`)),
+        h("li", {}, icon("check"), h("span", {}, `${plan.limits.lists} listas de leitura`)),
+        h("li", {}, icon("check"), h("span", {}, `${plan.limits.reports} ${plan.limits.reports === 1 ? "relatório" : "relatórios"} de tema`))),
+      h("button", { type: "button", class: `btn ${featured ? "btn-primary" : "btn-secondary"}`,
+        onclick: () => openAuth(featured ? "Crie sua conta para assinar o plano Pro." : "Crie sua conta grátis para salvar artigos e acompanhar interesses.") },
+      featured ? "Começar e assinar" : "Criar conta grátis"));
+  }));
+
+  function renderGuestHome() {
+    setTitle("Início");
+    const { form, sourceCount, feedCount } = homeSearch();
+    const plansBox = h("section", { class: "home-section", "aria-labelledby": "planos", hidden: "" });
+    api("/api/billing/plans").then((data) => {
+      plansBox.hidden = false;
+      mount(plansBox,
+        h("p", { class: "eyebrow" }, "Planos"),
+        h("h2", { id: "planos" }, "Comece grátis. Cresça quando precisar."),
+        h("p", { class: "lead" }, "Buscar, ler e navegar pelo feed é livre, sem conta. A conta grátis já guarda seus artigos; o Pro amplia os limites para quem pesquisa todo dia."),
+        planCards(data));
+    }).catch(() => { /* sem planos publicados, a secao simplesmente nao aparece */ });
 
     const stat = (value, label) => h("div", { class: "stat" }, value, h("span", {}, label));
     mount($app,
@@ -638,9 +809,7 @@
         h("p", { class: "eyebrow" }, "Plataforma de pesquisa científica"),
         h("h1", { class: "display" }, "Encontre, entenda e organize a pesquisa."),
         h("p", { class: "lead" }, "Busque em várias fontes, veja com critérios abertos o quanto cada artigo merece confiança e transforme suas leituras em um relatório com método."),
-        h("form", { class: "home-search", role: "search", onsubmit: (e) => { e.preventDefault(); go(input.value.trim()); } },
-          input, sourceBox,
-          h("button", { type: "submit", class: "btn btn-primary" }, icon("search"), "Buscar")),
+        form,
         h("p", { class: "examples" }, "Exemplos: ", TOPICS.map((t) => h("a", { href: Lib.buildHash("/busca", { q: t }) }, t)))),
 
       profileShortcuts(),
@@ -669,13 +838,24 @@
             h("ul", { class: "criteria-mini" }, SAMPLE_CRITERIA.map(([status, name, pts]) => h("li", {},
               h("span", { class: `st-${status}` }, icon(STATUS_ICONS[status])), h("span", {}, name), h("span", { class: "pts" }, pts))))))),
 
+      h("section", { class: "home-section", "aria-labelledby": "como" },
+        h("p", { class: "eyebrow" }, "Como funciona"),
+        h("h2", { id: "como" }, "Da pergunta ao relatório em três passos."),
+        h("ol", { class: "steps-3" }, STEPS.map(([n, title, text]) => h("li", {}, h("span", { class: "step-n", "aria-hidden": "true" }, n), h("h3", {}, title), h("p", { class: "muted" }, text))))),
+
+      h("section", { class: "home-section", "aria-labelledby": "publico" },
+        h("p", { class: "eyebrow" }, "Para quem é"),
+        h("h2", { id: "publico" }, "Feito para quem precisa de fonte confiável."),
+        h("div", { class: "feature-grid" }, AUDIENCES.map(([who, what, text]) => h("div", { class: "feature" },
+          h("h3", {}, who), h("p", { class: "audience-what" }, what), h("p", { class: "muted" }, text))))),
+
+      plansBox,
+
       h("section", { class: "cta" },
-        h("div", {}, h("h2", {}, "Comece sem conta."),
-          h("p", { class: "muted" }, "Buscar, ler e navegar pelo feed é livre. Crie uma conta para salvar artigos, acompanhar interesses e gerar relatórios.")),
+        h("div", {}, h("h2", {}, "Crie sua conta grátis."),
+          h("p", { class: "muted" }, "Sem cartão. Salve artigos, acompanhe seus interesses e gere relatórios com método. Buscar e ler continua livre.")),
         h("div", { class: "row" },
-          session.user
-            ? h("a", { class: "btn btn-primary", href: "#/biblioteca" }, "Abrir minha biblioteca")
-            : h("button", { type: "button", class: "btn btn-primary", onclick: () => openAuth("Crie uma conta para salvar artigos, acompanhar interesses e montar listas.") }, "Criar conta ou entrar"),
+          h("button", { type: "button", class: "btn btn-primary", onclick: () => openAuth("Crie uma conta para salvar artigos, acompanhar interesses e montar listas.") }, "Criar conta grátis"),
           h("a", { class: "btn btn-outline", href: "/ia" }, "Conhecer o Laboratório de IA"))));
   }
 
@@ -1704,7 +1884,22 @@
         !account.emailVerified && account.emailEnabled ? h("div", { class: "row" }, resend) : null);
     }).catch(() => emailBox.remove());
 
+    const nameInputField = h("input", { type: "text", id: "profile-name", autocomplete: "given-name", maxlength: "60", value: session.name });
+    const nameStatus = h("p", { class: "note", role: "status" });
+    const nameForm = h("form", { class: "stack", onsubmit: async (event) => {
+      event.preventDefault();
+      nameStatus.textContent = "";
+      try {
+        const result = await api("/api/account/name", { method: "PUT", body: { name: nameInputField.value } });
+        session.name = result.name;
+        nameInputField.value = result.name;
+        nameStatus.textContent = "Nome salvo.";
+      } catch (error) { nameStatus.textContent = error.message; }
+    } }, h("div", { class: "field" }, h("label", { for: "profile-name" }, "Como podemos te chamar?"), nameInputField), nameStatus,
+      h("div", { class: "row" }, h("button", { type: "submit", class: "btn btn-primary" }, "Salvar nome")));
+
     mount(content,
+      h("section", { class: "card stack" }, h("h2", {}, "Nome"), nameForm),
       h("section", { class: "card stack" }, h("h2", {}, "E-mail"), emailBox),
       h("section", { class: "card stack" }, h("h2", {}, "Senha"), passwordForm),
       h("section", { class: "card stack" }, h("h2", {}, "Seus dados"),
@@ -2213,7 +2408,7 @@
           h("ul", { class: "checklist" },
             h("li", {}, icon("check"), h("span", {}, `${plan.limits.library} artigos na biblioteca`)),
             h("li", {}, icon("check"), h("span", {}, `${plan.limits.lists} listas de leitura`)),
-            h("li", {}, icon("check"), h("span", {}, plan.limits.reports ? `${plan.limits.reports} relatórios de tema` : "Sem relatórios de tema"))),
+            h("li", {}, icon("check"), h("span", {}, plan.limits.reports ? `${plan.limits.reports} ${plan.limits.reports === 1 ? "relatório" : "relatórios"} de tema` : "Sem relatórios de tema"))),
           current ? h("p", { class: "note" }, mine.active && plan.priceCents ? `Plano atual, até ${fmtDay(mine.expiresAt)}.` : "Plano atual.")
             : plan.priceCents ? h("button", { type: "button", class: "btn btn-primary", onclick: () => choose(plan) }, "Assinar com Pix") : null);
       }));

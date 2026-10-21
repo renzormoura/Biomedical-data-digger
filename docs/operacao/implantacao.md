@@ -29,7 +29,7 @@ Cria, na mesma região (`virginia`), o **PostgreSQL** (`nexus-science-db`, plano
    ```bash
    DATABASE_URL="postgresql://..." python scripts/verificar_banco.py
    ```
-   Ele conecta, cria as 29 tabelas que faltarem (só `CREATE TABLE IF NOT EXISTS`), confere se todas existem e faz uma escrita e leitura de teste sem deixar rastro. Saída esperada: "Banco pronto."
+   Ele conecta, cria as 30 tabelas que faltarem (só `CREATE TABLE IF NOT EXISTS`), confere se todas existem e faz uma escrita e leitura de teste sem deixar rastro. Saída esperada: "Banco pronto."
 3. O serviço também cria as tabelas na subida e **falha rápido** se o banco estiver fora (melhor do que falhar no primeiro login).
 4. Confirme o **backup automático** do plano contratado e teste uma restauração (ver *Backup e recuperação* abaixo).
 

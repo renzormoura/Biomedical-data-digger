@@ -240,7 +240,7 @@ def run_scenario(r: Recorder) -> None:  # noqa: C901 - e um roteiro linear de pr
     c("GET", "/api/admin/usage", label="sem token")
     c("GET", "/api/admin/usage", label="com token", headers={"Authorization": "Bearer " + "a" * 30})
     # conta
-    c("POST", "/api/auth/register", json={"email": EMAIL, "password": PASSWORD, "acceptTerms": True})
+    c("POST", "/api/auth/register", json={"email": EMAIL, "password": PASSWORD, "acceptTerms": True, "name": "  Ana   Silva "})
     c("POST", "/api/auth/logout")
     c("POST", "/api/auth/login", json={"email": EMAIL, "password": PASSWORD})
     c("GET", "/api/auth/me", label="logado")
@@ -253,6 +253,7 @@ def run_scenario(r: Recorder) -> None:  # noqa: C901 - e um roteiro linear de pr
     c("POST", "/api/auth/forgot", json={"email": EMAIL}, label="conhecido")
     c("POST", "/api/auth/reset", json={"token": "invalido", "password": "outra-senha-forte-789"}, label="invalido")
     c("GET", "/api/account")
+    c("PUT", "/api/account/name", json={"name": "Ana S."})
     c("GET", "/api/profile", label="inicial")
     c("PUT", "/api/profile", json={"profile": "saude"})
     c("GET", "/api/interests", label="inicial")

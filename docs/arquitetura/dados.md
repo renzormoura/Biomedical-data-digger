@@ -15,6 +15,7 @@
 | Tabela | Colunas | Uso |
 |---|---|---|
 | `users` | `email` (PK), `password_hash`, `password_salt`, `created_at` | Contas. Hash PBKDF2-SHA256 de 600.000 iterações |
+| `user_names` | `user_email` (PK), `display_name`, `updated_at` | Nome de exibição (pedido no cadastro, editável no perfil) |
 | `user_profiles` | `user_email` (PK), `profile`, `health_pack`, `updated_at` | Perfil de uso e liga/desliga do pacote Saúde no Brasil |
 
 | `account_tokens` | `token_hash` (PK), `email`, `purpose` (`reset`/`verify`), `expires_at`, `created_at` | Tokens de uso único dos links de e-mail; **só o hash SHA-256** é guardado |

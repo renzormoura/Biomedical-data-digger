@@ -17,6 +17,7 @@
 | Análises salvas | Uso | Função do produto | `saved_analyses` | Idem |
 | Relatórios (itens, notas, versões, histórico) | Uso | Função do produto | `reports*` | Idem (versões: 50; histórico: 200) |
 | Interesses e avisos | Uso | Alertas e sininho | `interest_*`, `alerts`, `notifications` | Idem (avisos: até 200) |
+| Nome de exibição | Informado pela pessoa | Cumprimentar na tela inicial | `user_names` | Idem |
 | Perfil de uso | Escolha da pessoa | Ajustar o que é destacado | `user_profiles` | Idem |
 | Cookie de sessão | Login | Manter a pessoa logada | Navegador | 7 dias |
 | Endereço IP | Conexão | Limitar abuso (limitadores em memória) | **Memória do processo**, não gravado em banco | Até o reinício do serviço |

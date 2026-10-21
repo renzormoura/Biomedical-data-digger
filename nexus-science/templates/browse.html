@@ -28,7 +28,7 @@
         <section class="alerts-panel" id="alerts-panel" role="dialog" aria-label="Avisos de artigos novos" hidden></section>
       </div>
       <button type="button" class="btn btn-ghost" id="theme-toggle" aria-label="Alternar tema claro ou escuro"><svg class="icon" aria-hidden="true"><use href="#i-theme"/></svg><span class="btn-label" id="theme-label">Tema</span></button>
-      <button type="button" class="btn btn-ghost" id="account-button" data-user="{{ user or '' }}" data-profile="{{ profile }}" data-health-pack="{{ health_pack }}"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><span class="btn-label" id="account-label">{{ user or "Entrar" }}</span></button>
+      <button type="button" class="btn btn-ghost" id="account-button" data-user="{{ user or '' }}" data-name="{{ name or '' }}" data-profile="{{ profile }}" data-health-pack="{{ health_pack }}"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><span class="btn-label" id="account-label">{{ user or "Entrar" }}</span></button>
     </div>
   </header>
 
@@ -38,6 +38,8 @@
     <form method="dialog" id="auth-form" class="auth-card">
       <h2 id="auth-title">Conta</h2>
       <p class="hint" id="auth-hint">Entre para salvar artigos, criar listas e exportar. Buscar e ler não exige conta.</p>
+      <div class="field" id="auth-name-field" hidden><label for="auth-name">Como podemos te chamar?</label>
+        <input type="text" id="auth-name" autocomplete="given-name" maxlength="60"></div>
       <div class="field"><label for="auth-email">E-mail</label>
         <input type="email" id="auth-email" autocomplete="email" maxlength="320" required></div>
       <div class="field"><label for="auth-password">Senha</label>

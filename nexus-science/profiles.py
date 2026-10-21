@@ -26,11 +26,23 @@ _KEYS = {key: default for key, _label, _desc, default in PROFILES}
 _SCHEMA = (
     """CREATE TABLE IF NOT EXISTS user_profiles (
         user_email TEXT PRIMARY KEY, profile TEXT NOT NULL, health_pack INTEGER NOT NULL, updated_at TEXT NOT NULL)""",
+    """CREATE TABLE IF NOT EXISTS user_names (
+        user_email TEXT PRIMARY KEY, display_name TEXT NOT NULL, updated_at TEXT NOT NULL)""",
 )
+
+NAME_MAX = 60
 
 
 class ProfileError(NexusError):
     """Perfil invalido; a mensagem e segura para o usuario."""
+
+
+def clean_name(raw: str) -> str:
+    """Nome de exibicao: sem espacos sobrando, sem caracteres de controle, de 1 a 60 caracteres."""
+    name = " ".join(raw.split())
+    if not name or len(name) > NAME_MAX or any(not ch.isprintable() for ch in name):
+        raise ProfileError(f"Informe um nome de até {NAME_MAX} caracteres.")
+    return name
 
 
 @dataclass(frozen=True)
@@ -69,6 +81,23 @@ class ProfileStore:
 
     def delete(self, user: str) -> None:
         self._db.execute("DELETE FROM user_profiles WHERE user_email = ?", (user,))
+        self._db.execute("DELETE FROM user_names WHERE user_email = ?", (user,))
+
+    def name(self, user: str | None) -> str:
+        """Nome de exibicao da conta; vazio se a pessoa nao informou."""
+        if not user:
+            return ""
+        rows = self._db.query("SELECT display_name FROM user_names WHERE user_email = ?", (user,))
+        return str(rows[0][0]) if rows else ""
+
+    def set_name(self, user: str, raw: str) -> str:
+        name = clean_name(raw)
+        self._db.execute(
+            """INSERT INTO user_names (user_email, display_name, updated_at) VALUES (?, ?, ?)
+               ON CONFLICT (user_email) DO UPDATE SET display_name = excluded.display_name, updated_at = excluded.updated_at""",
+            (user, name, utcnow_iso()),
+        )
+        return name
 
     def set(self, user: str, key: str, health_pack: bool | None = None) -> Profile:
         if key not in _KEYS:

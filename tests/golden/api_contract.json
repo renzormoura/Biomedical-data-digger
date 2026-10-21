@@ -94,6 +94,7 @@
     "topics": 0,
     "unread": 0
    },
+   "name": "Ana Silva",
    "profile": {
     "configured": false,
     "healthPack": true,
@@ -110,6 +111,7 @@
     "createdAt": "<ts>",
     "email": "contrato@exemplo.com",
     "emailVerified": true,
+    "name": "Ana S.",
     "terms": {
      "acceptedAt": "<ts>",
      "version": "<date>"
@@ -475,6 +477,7 @@
  },
  "GET /api/auth/me [apos exclusao]": {
   "json": {
+   "name": "",
    "user": null
   },
   "status": 200,
@@ -482,6 +485,7 @@
  },
  "GET /api/auth/me [logado]": {
   "json": {
+   "name": "Ana Silva",
    "user": "contrato@exemplo.com"
   },
   "status": 200,
@@ -489,6 +493,7 @@
  },
  "GET /api/auth/me [visitante]": {
   "json": {
+   "name": "",
    "user": null
   },
   "status": 200,
@@ -3492,6 +3497,7 @@
  },
  "POST /api/auth/login": {
   "json": {
+   "name": "Ana Silva",
    "user": "contrato@exemplo.com"
   },
   "status": 200,
@@ -3506,6 +3512,7 @@
  },
  "POST /api/auth/register": {
   "json": {
+   "name": "Ana Silva",
    "user": "contrato@exemplo.com"
   },
   "status": 200,
@@ -4233,6 +4240,13 @@
      "year": "2024"
     }
    ]
+  },
+  "status": 200,
+  "type": "application/json"
+ },
+ "PUT /api/account/name": {
+  "json": {
+   "name": "Ana S."
   },
   "status": 200,
   "type": "application/json"

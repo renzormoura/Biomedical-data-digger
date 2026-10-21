@@ -124,3 +124,36 @@ def test_home_page_carries_the_profile_for_the_first_paint(env):
     client.put("/api/profile", json={"profile": "saude"})
     assert 'data-profile="saude"' in client.get("/").text and 'data-health-pack="1"' in client.get("/").text
     assert 'id="profile-link"' in page
+
+
+def test_display_name_is_cleaned_validated_and_removed_with_the_account(store):
+    assert store.name("ana@exemplo.com") == "" and store.name(None) == ""
+    assert store.set_name("ana@exemplo.com", "  Ana   Paula  ") == "Ana Paula"
+    assert store.name("ana@exemplo.com") == "Ana Paula" and store.name("bia@exemplo.com") == ""
+    store.set_name("ana@exemplo.com", "Ana")
+    assert store.name("ana@exemplo.com") == "Ana"
+    for bad in ("", "   ", "x" * 61, "Ana\x00", "Ana\nPaula\x07"):
+        with pytest.raises(ProfileError):
+            store.set_name("ana@exemplo.com", bad)
+    store.delete("ana@exemplo.com")
+    assert store.name("ana@exemplo.com") == ""
+
+
+def test_name_is_asked_at_signup_and_editable_in_the_account(env):
+    app_client = env.client(None)
+    app_client.post("/api/auth/register", json={"email": "caio@exemplo.com", "password": "senha-forte-123", "name": "  Caio   Lima "})
+    assert app_client.get("/api/auth/me").json() == {"user": "caio@exemplo.com", "name": "Caio Lima"}
+    assert app_client.get("/api/account").json()["name"] == "Caio Lima"
+    assert app_client.put("/api/account/name", json={"name": "Caio L."}).json() == {"name": "Caio L."}
+    assert app_client.get("/api/auth/me").json()["name"] == "Caio L."
+    assert app_client.put("/api/account/name", json={"name": "   "}).status_code == 400
+    assert app_client.put("/api/account/name", json={}).status_code == 422
+    assert env.client("duda@exemplo.com").get("/api/auth/me").json() == {"user": "duda@exemplo.com", "name": ""}  # sem nome: a conta vale
+    assert env.client(None).get("/api/auth/me").json() == {"user": None, "name": ""}
+    assert env.client(None).put("/api/account/name", json={"name": "X"}).status_code == 401
+
+
+def test_signup_with_an_invalid_name_is_rejected(env):
+    response = env.client(None).post("/api/auth/register", json={"email": "eva@exemplo.com", "password": "senha-forte-123", "name": "x" * 61})
+    assert response.status_code == 400
+    assert not AccountStore().exists("eva@exemplo.com")

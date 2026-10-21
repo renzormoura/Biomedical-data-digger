@@ -48,7 +48,7 @@ from library_store import LibraryStore
 from mailer import Mailer
 from notifications import NotificationService
 from profiles import DEFAULT as DEFAULT_PROFILE
-from profiles import ProfileStore
+from profiles import ProfileError, ProfileStore, clean_name
 from ratelimit import RateLimitExceeded, SlidingWindowLimiter, client_key
 from reports import ReportStore
 from routes.hardening import install_http_hardening
@@ -70,6 +70,7 @@ class CredentialsIn(BaseModel):
     accept_terms: bool = Field(False, alias="acceptTerms")
     email: str = Field(max_length=320)
     password: str = Field(max_length=200)
+    name: str = Field("", max_length=120)  # so no cadastro; vazio = sem nome (a conta continua valida)
 
 
 # ---------------------------------------------------------------------------
@@ -175,7 +176,8 @@ def create_app(
         profile = profiles.get(user) if profiles is not None else DEFAULT_PROFILE
         return templates.TemplateResponse(
             request, "browse.html",
-            {"user": user, "asset_version": asset_version, "profile": profile.key or "", "health_pack": "1" if profile.health_pack else "0"},
+            {"user": user, "name": profiles.name(user) if profiles is not None else "", "asset_version": asset_version,
+             "profile": profile.key or "", "health_pack": "1" if profile.health_pack else "0"},
         )
 
     @app.get("/ia")
@@ -217,7 +219,8 @@ def create_app(
 
     @app.get("/api/auth/me")
     def me(request: Request) -> dict[str, Any]:
-        return {"user": current_user(request)}
+        user = current_user(request)
+        return {"user": user, "name": profiles.name(user) if profiles is not None else ""}
 
     def credentials(body: CredentialsIn) -> tuple[str, str]:
         try:
@@ -231,17 +234,25 @@ def create_app(
         email, password = credentials(body)
         if settings.require_terms and not body.accept_terms:
             raise NexusError("Aceite os Termos de Uso e a Política de Privacidade para criar a conta.")
+        name = ""
+        if profiles is not None and body.name.strip():  # valida antes de criar: nome invalido nao deixa conta pela metade
+            try:
+                name = clean_name(body.name)
+            except ProfileError as error:
+                raise NexusError(str(error)) from error
         try:
             created = account_store_factory().create_user(email, password)
         except AccountStoreError as error:
             raise NexusError(str(error)) from error
         if not created:
             return JSONResponse({"error": "Este e-mail já está cadastrado."}, status_code=409)
+        if profiles is not None and name:
+            profiles.set_name(email, name)
         if consent is not None and body.accept_terms:
             consent.record(email, legal.VERSION)
         if recovery is not None:
             recovery.send_verification(email)
-        response = JSONResponse({"user": email})
+        response = JSONResponse({"user": email, "name": name})
         start_session(response, email)
         return response
 
@@ -259,7 +270,7 @@ def create_app(
             return JSONResponse({"error": "E-mail ou senha inválidos."}, status_code=401)
         if flags is not None and flags.is_suspended(email):
             return JSONResponse({"error": "Esta conta está suspensa. Fale com o suporte."}, status_code=403)
-        response = JSONResponse({"user": email})
+        response = JSONResponse({"user": email, "name": profiles.name(email) if profiles is not None else ""})
         start_session(response, email)
         return response
 
