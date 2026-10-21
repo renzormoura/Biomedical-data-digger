@@ -67,6 +67,7 @@ h1 .o { color: var(--accent-text); }
 .facts b { display: block; font-size: clamp(2.6rem, 6vw, 4.6rem); letter-spacing: -0.05em; line-height: 1; color: var(--accent-text); }
 .cta { text-align: center; padding: 130px 0 150px; }
 .cta h2 { font-size: clamp(2rem, 5vw, 3.8rem); letter-spacing: -0.04em; margin-bottom: 26px; }
+@media (max-width: 560px) { .stage { padding-top: 56px; gap: 14px; } .copy h2 { font-size: 1.7rem; } .copy p { font-size: .95rem; } .card { height: calc(100svh - 270px); min-height: 380px; border-radius: 18px; } .scene { padding: 14px; } .s2 .crit li:last-child { display: none; } .crit { gap: 7px; font-size: .85rem; } .ring { width: 92px; height: 92px; } .res div { padding: 9px 11px; font-size: .85rem; } .res div:nth-child(3) { display: none; } h1 { font-size: 3.1rem; } .exp span { font-size: .78rem; padding: 7px 11px; } }
 @media (max-width: 860px) { .stage { grid-template-columns: 1fr; gap: 20px; align-content: center; } .rail { display: none; } .copy { padding-left: 0; } .copy ol { gap: 0; } .copy li { display: none; } .copy li.on { display: block; } .card { height: 56vh; } .facts { grid-template-columns: 1fr; } .facts div { border-right: 0; border-bottom: 1px solid var(--border); } }
 </style>
 </head>
@@ -74,7 +75,7 @@ h1 .o { color: var(--accent-text); }
 <header class="topbar"><div class="wrap">
   <a class="logo" href="#"><i></i>Nexus Science</a>
   <nav><a href="#jornada">A jornada</a><a href="#numeros">Números</a></nav>
-  <div style="display:flex;gap:10px;align-items:center"><button class="toggle" aria-label="Alternar tema">◐</button><a class="btn primary" href="#">Criar conta grátis</a></div>
+  <div style="display:flex;gap:10px;align-items:center"><button class="toggle" aria-label="Alternar tema">◐</button><a class="btn primary" href="#">Criar conta<span class="hide-s"> grátis</span></a></div>
 </div></header>
 
 <main>

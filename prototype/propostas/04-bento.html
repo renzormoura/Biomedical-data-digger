@@ -57,14 +57,14 @@ h1 .g { background: linear-gradient(100deg, var(--accent), #ffc08f, var(--accent
 .plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; padding-bottom: 80px; } .plan { padding: 26px; border: 1px solid var(--border); border-radius: 22px; background: var(--surface); position: relative; isolation: isolate; overflow: hidden; } .plan.hot { border-color: var(--accent); } .plan .p { font-size: 2rem; font-weight: 800; letter-spacing: -0.04em; margin: 8px 0; } .plan ul { list-style: none; padding: 0; color: var(--muted); font-size: .9rem; display: grid; gap: 6px; margin: 12px 0 18px; } .plan li::before { content: "✓ "; color: var(--accent-text); }
 .sh { font-size: clamp(1.7rem, 3.6vw, 2.6rem); letter-spacing: -0.035em; margin-bottom: 22px; }
 @media (max-width: 920px) { .hero { grid-template-columns: 1fr; } .bento { grid-template-columns: 1fr 1fr; } .t-busca { grid-column: span 2; } .plans { grid-template-columns: 1fr; } }
-@media (max-width: 560px) { .bento { grid-template-columns: 1fr; grid-auto-rows: auto; } .tile { min-height: 210px; } .t-busca, .t-lib, .t-sus { grid-column: auto; } .t-busca { min-height: 400px; } .t-feed { min-height: 360px; } .orbit { transform: scale(.82); } }
+@media (max-width: 560px) { .hero { padding-top: 92px; } .bento { grid-template-columns: 1fr 1fr; grid-auto-rows: auto; gap: 10px; padding-bottom: 50px; } .tile { min-height: 190px; padding: 16px; border-radius: 18px; } .t-busca, .t-feed, .t-sus, .t-lib { grid-column: span 2; } .t-busca { min-height: 390px; order: 1; } .t-nota { order: 2; } .t-alert { order: 3; } .t-feed { min-height: 290px; order: 4; } .t-rel { order: 5; } .t-num { order: 6; } .t-lib { order: 7; } .t-sus { order: 8; min-height: 260px; } .t-alert .alerts div:nth-child(2) { display: none; } .t-alert .bell { width: 30px; height: 30px; right: 14px; top: 16px; } .t-alert .sm, .t-rel .sm { font-size: .78rem; } .t-num b { font-size: 2.3rem; } .orbit { transform: scale(.8); top: 54%; } .fan { transform: scale(.8); transform-origin: 100% 100%; right: 16px; } .plan { padding: 20px; } }
 </style>
 </head>
 <body>
 <header class="topbar"><div class="wrap">
   <a class="logo" href="#"><i></i>Nexus Science</a>
   <nav><a href="#modulos">Módulos</a><a href="#planos">Planos</a></nav>
-  <div style="display:flex;gap:10px;align-items:center"><button class="toggle" aria-label="Alternar tema">◐</button><a class="btn primary" href="#">Criar conta grátis</a></div>
+  <div style="display:flex;gap:10px;align-items:center"><button class="toggle" aria-label="Alternar tema">◐</button><a class="btn primary" href="#">Criar conta<span class="hide-s"> grátis</span></a></div>
 </div></header>
 
 <main class="wrap">

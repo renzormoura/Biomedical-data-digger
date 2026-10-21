@@ -54,19 +54,20 @@ h2 { font-size: clamp(1.8rem, 4vw, 2.8rem); letter-spacing: -0.035em; line-heigh
 .pal footer { display: flex; gap: 16px; padding: 10px 16px; border-top: 1px solid var(--border); font-size: .76rem; color: var(--muted); }
 .toast { position: fixed; right: 18px; bottom: 18px; z-index: 70; padding: 12px 18px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--accent); transform: translateY(80px); opacity: 0; transition: .35s; } .toast.on { transform: none; opacity: 1; }
 @media (max-width: 860px) { .keys { grid-template-columns: 1fr 1fr; } .man { grid-template-columns: 1fr; } .term pre { font-size: .78rem; } }
-@media (max-width: 560px) { .tbl th, .tbl td { padding: 12px 6px; font-size: .78rem; } .tbl th:nth-child(n+2):nth-child(-n+4), .tbl td:nth-child(n+2):nth-child(-n+4) { display: none; } .keys { grid-template-columns: 1fr; } }
+.touch { display: none; } @media (pointer: coarse) { .kb { display: none; } .touch { display: inline; } .key .kbd { display: none; } }
+@media (max-width: 560px) { .hero { padding: 96px 0 50px; } h1 { font-size: 2.5rem; } .pal { padding-top: 8vh; } .term .bar span { font-size: .7rem; } .tbl th, .tbl td { padding: 12px 6px; font-size: .78rem; } .tbl th:nth-child(n+2):nth-child(-n+4), .tbl td:nth-child(n+2):nth-child(-n+4) { display: none; } .keys { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
 <header class="topbar"><div class="wrap">
   <a class="logo" href="#"><i></i>Nexus Science</a>
   <nav><a href="#atalhos">Atalhos</a><a href="#recursos">Recursos</a><a href="#planos">Planos</a></nav>
-  <div style="display:flex;gap:10px;align-items:center"><button class="btn" id="openPal" style="padding:7px 12px;font-size:.85rem">Comandos <span class="kbd">Ctrl K</span></button><button class="toggle" aria-label="Alternar tema">◐</button></div>
+  <div style="display:flex;gap:10px;align-items:center"><button class="btn" id="openPal" style="padding:7px 12px;font-size:.85rem">Comandos <span class="kbd kb">Ctrl K</span></button><button class="toggle" aria-label="Alternar tema">◐</button></div>
 </div></header>
 
 <main>
 <section class="hero"><div class="wrap">
-  <span class="hint">Aperte <span class="kbd">Ctrl</span> <span class="kbd">K</span> e experimente</span>
+  <span class="hint"><span class="kb">Aperte <span class="kbd">Ctrl</span> <span class="kbd">K</span> e experimente</span><span class="touch">Toque em <b>Comandos</b> e experimente</span></span>
   <h1>Pesquisa na velocidade do <span class="c">teclado</span></h1>
   <p class="lead">Busque em várias fontes, veja a nota de confiabilidade e gere o relatório sem tirar a mão do teclado. Ou use o mouse, como preferir.</p>
   <a class="btn primary" href="#">Criar conta grátis</a>
