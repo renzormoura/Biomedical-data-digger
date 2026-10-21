@@ -1,7 +1,7 @@
 # Licença e confidencialidade
 
 ## Situação
-O Lastro é um **produto comercial proprietário**. O código-fonte é **privado e confidencial**; a documentação e a descrição de funcionamento podem ser compartilhadas conforme [Publicação da documentação](../operacao/publicacao-da-documentacao.md).
+O Nexus Science é um **produto comercial proprietário**. O código-fonte é **privado e confidencial**; a documentação e a descrição de funcionamento podem ser compartilhadas conforme [Publicação da documentação](../operacao/publicacao-da-documentacao.md).
 
 O arquivo [LICENSE](../../LICENSE) na raiz declara "todos os direitos reservados". **Pendência:** preencher o nome do titular (pessoa ou empresa) antes de qualquer distribuição.
 

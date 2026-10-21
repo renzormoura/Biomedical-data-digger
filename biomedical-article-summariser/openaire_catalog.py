@@ -13,7 +13,7 @@ from citations import Author
 
 API_URL = "https://api.openaire.eu/graph/v1/researchProducts"
 HTTP_TIMEOUT = 25
-USER_AGENT = "Lastro/1.0 (navegador de artigos)"
+USER_AGENT = "NexusScience/1.0 (navegador de artigos)"
 SORTS = {"relevance": None, "recent": "publicationDate DESC", "cited": "citationCount DESC"}
 _TAG = re.compile(r"<[^>]+>")
 _BLOCK_TAG = re.compile(r"</?(?:p|br|div|li|ul|ol|h\d|tr|td)\b[^>]*>", re.IGNORECASE)

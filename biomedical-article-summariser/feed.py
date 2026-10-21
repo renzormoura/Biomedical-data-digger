@@ -46,7 +46,7 @@ PER_SOURCE_ROUND = 2  # por "rodada", cada fonte entra com ate isto antes de a p
 PER_SOURCE_VIEW = 12  # no maximo isto de cada fonte na tela, para uma fonte que publica muito nao tomar o feed
 MAX_CANDIDATES = 800
 RECENT_TTL = 30.0  # segundos que a lista de candidatos fica em memoria
-USER_AGENT = "Lastro/1.0 (agregador de manchetes academicas)"
+USER_AGENT = "NexusScience/1.0 (agregador de manchetes academicas)"
 FUTURE_TOLERANCE = timedelta(days=2)
 
 _SCHEMA = (

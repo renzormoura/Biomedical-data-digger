@@ -281,7 +281,7 @@ class VerificacaoExterna:
         self._session = requests.Session()
         self._session.headers.update(
             {
-                "User-Agent": "Lastro/1.0 (verificacao de contexto de saude)",
+                "User-Agent": "NexusScience/1.0 (verificacao de contexto de saude)",
                 "Accept": "text/html,application/xhtml+xml,application/json;q=0.9",
             }
         )

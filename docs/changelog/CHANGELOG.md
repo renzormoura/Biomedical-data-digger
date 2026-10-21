@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 2026-10 — O produto passa a se chamar Nexus Science
+
+### Alterado
+- Nome visível ao usuário trocado de "Lastro" para **Nexus Science**, nos mesmos lugares da troca anterior (telas, e-mails, textos legais, relatórios, documentos baixados e documentação). A identificação nas consultas a serviços externos passou a ser `NexusScience/1.0`.
+- Mesmos nomes técnicos internos mantidos (repositório, pastas, módulos, serviço no Render e variáveis de ambiente).
+
 ## 2026-10 — Acabamento da interface
 
 ### Alterado

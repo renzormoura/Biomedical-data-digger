@@ -534,7 +534,7 @@ def method_paragraphs(report: Report, today: date | None = None) -> list[str]:
         LIMITS_NOTE,
         "Os dados estatísticos são frases copiadas do resumo, escolhidas por palavras-chave. A seleção pode omitir frases e "
         "foi lido apenas o resumo, não o texto completo.",
-        f"Relatório na versão {report.version}, gerado em {today:%d/%m/%Y} pelo Lastro. "
+        f"Relatório na versão {report.version}, gerado em {today:%d/%m/%Y} pelo Nexus Science. "
         "Nenhum texto deste relatório foi gerado por IA.",
     ]
 

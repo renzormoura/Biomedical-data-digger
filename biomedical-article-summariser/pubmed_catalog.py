@@ -22,7 +22,7 @@ from xmlutil import parse_xml, text_of
 
 BASE_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
 HTTP_TIMEOUT = 25
-USER_AGENT = "Lastro/1.0 (navegador de artigos)"
+USER_AGENT = "NexusScience/1.0 (navegador de artigos)"
 MAX_KEYWORDS = 12
 _KNOWN_LABELS = frozenset(STUDY_TYPE_LABELS.values())
 _UNSAFE = re.compile(r"[\[\]\"\\]")

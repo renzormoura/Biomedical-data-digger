@@ -209,7 +209,7 @@ def register_admin_routes(app: FastAPI, ctx: ApiContext) -> None:
                 ctx.mailer.send(EmailMessage(
                     subscription.email, "Sua assinatura foi ativada",
                     f"Olá!\n\nRecebemos o seu pagamento: o plano {catalog[subscription.plan].name} está ativo até "
-                    f"{subscription.expires_at.strftime('%d/%m/%Y')}.\n\nObrigado por apoiar o Lastro.\n",
+                    f"{subscription.expires_at.strftime('%d/%m/%Y')}.\n\nObrigado por apoiar o Nexus Science.\n",
                 ))
             except MailError as error:
                 logger.warning("Falha ao avisar a ativacao da assinatura: {}", error)

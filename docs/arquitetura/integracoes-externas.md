@@ -57,7 +57,7 @@ Todos com prazo de 12 s, em paralelo, "melhor esforço": falha vira "sem dados".
 Geram `dados_brasil/*.json`, que são versionados. Ver [Atualização dos dados do Brasil](../operacao/dados-brasil.md).
 
 ## Comportamento comum
-- **Identificação:** requisições levam `User-Agent: Lastro/1.0`.
+- **Identificação:** requisições levam `User-Agent: NexusScience/1.0`.
 - **Prazos:** de 12 s (enriquecimento) a 25 s (PubMed, texto completo); busca combinada limitada a 8 s no total.
 - **Falha:** cada serviço falha sozinho; a pessoa vê um aviso (busca) ou "sem dados" (enriquecimento). Erros nunca expõem URLs internas nem credenciais.
 - **Cache:** busca 10 min, obra 1 h, enriquecimento por artigo; feed por fonte (3 h).

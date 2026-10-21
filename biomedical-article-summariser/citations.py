@@ -18,7 +18,7 @@ import article_services
 from domain import DiggerError
 
 HTTP_TIMEOUT = 15
-USER_AGENT = {"User-Agent": "Lastro/1.0"}
+USER_AGENT = {"User-Agent": "NexusScience/1.0"}
 
 
 @dataclass(frozen=True)

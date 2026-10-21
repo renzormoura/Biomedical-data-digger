@@ -53,7 +53,7 @@
     svg.append(use);
     return svg;
   }
-  const setTitle = (text) => { document.title = `${text} — Lastro`; };
+  const setTitle = (text) => { document.title = `${text} — Nexus Science`; };
 
   let toastTimer;
   function toast(message) {
@@ -1404,7 +1404,7 @@
     const close = () => { dialogEl.close(); dialogEl.remove(); };
     dialogEl.addEventListener("close", () => dialogEl.remove());
     dialogEl.append(h("div", { class: "auth-card stack" },
-      h("h2", { id: "profile-title" }, "Como você vai usar o Lastro?"),
+      h("h2", { id: "profile-title" }, "Como você vai usar o Nexus Science?"),
       h("p", { class: "hint" }, "Isso só escolhe o que fica em destaque. Você pode mudar quando quiser em Perfil e preferências, e nada fica bloqueado."),
       profileForm({
         onSaved: () => { close(); render(); },

@@ -31,7 +31,7 @@ Block = tuple[str, str]  # (tipo, texto); tipos: title, meta, h1, h2, h3, p, quo
 FULLTEXT_URL = "https://www.ebi.ac.uk/europepmc/webservices/rest/{pmcid}/fullTextXML"
 MAX_FULLTEXT_BYTES = 15_000_000
 HTTP_TIMEOUT = 25
-USER_AGENT = "Lastro/1.0 (navegador de artigos)"
+USER_AGENT = "NexusScience/1.0 (navegador de artigos)"
 _PMC = re.compile(r"^PMC\d{1,10}$")
 _XML_BAD = re.compile("[\x00-\x08\x0b\x0c\x0e-\x1f￾￿]")
 _FILENAME_BAD = re.compile(r"[^a-z0-9]+")
@@ -81,7 +81,7 @@ def _identity_lines(work: Work) -> list[str]:
 
 
 def _footer(work: Work, what: str) -> list[Block]:
-    return [("meta", f"{what} gerado em {date.today():%d/%m/%Y} pelo Lastro a partir do registro "
+    return [("meta", f"{what} gerado em {date.today():%d/%m/%Y} pelo Nexus Science a partir do registro "
                      f"{work.source or 'da fonte'}. O texto foi copiado do registro; nada foi gerado por IA.")]
 
 
@@ -436,6 +436,6 @@ def analysis_blocks(article_title: str, label: str, markdown: str) -> list[Block
     return [
         ("title", label or "Análise"), *([("meta", f"Artigo: {article_title}")] if article_title else []),
         *markdown_to_blocks(markdown),
-        ("meta", f"Gerado em {date.today():%d/%m/%Y} no Laboratório do Lastro. Análises com IA podem conter erros: "
+        ("meta", f"Gerado em {date.today():%d/%m/%Y} no Laboratório do Nexus Science. Análises com IA podem conter erros: "
                  "confira sempre com o artigo original."),
     ]

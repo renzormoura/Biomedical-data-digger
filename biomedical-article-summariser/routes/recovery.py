@@ -80,7 +80,7 @@ class RecoveryContext:
             return False
         token = self.tokens.issue(email, VERIFY)
         return self._send(EmailMessage(
-            email, "Confirme seu e-mail no Lastro",
+            email, "Confirme seu e-mail no Nexus Science",
             "Olá!\n\nConfirme seu e-mail para ativar os avisos por e-mail e proteger sua conta:\n\n"
             f"{self._link('confirmar', token)}\n\nO link vale por 48 horas. Se você não criou esta conta, ignore esta mensagem.\n",
         ))
@@ -90,7 +90,7 @@ class RecoveryContext:
             return False
         token = self.tokens.issue(email, RESET)
         return self._send(EmailMessage(
-            email, "Redefinir sua senha no Lastro",
+            email, "Redefinir sua senha no Nexus Science",
             "Olá!\n\nRecebemos um pedido para redefinir a sua senha. Para escolher uma nova, abra:\n\n"
             f"{self._link('redefinir', token)}\n\nO link vale por 1 hora e só pode ser usado uma vez. "
             "Se você não pediu isso, ignore esta mensagem: sua senha continua a mesma.\n",

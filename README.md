@@ -1,4 +1,4 @@
-# Lastro
+# Nexus Science
 
 Plataforma web de pesquisa científica: **encontrar, entender, acompanhar e entregar**. Busca em várias fontes abertas, nota de confiabilidade com critérios abertos, avisos por interesse, feed de novidades, relatórios com método declarado e citações prontas para Zotero, Mendeley e EndNote. Para saúde no Brasil, um pacote opcional cruza medicamentos com ANVISA, Conitec e Rename. Um Laboratório de IA opcional complementa o que é feito sem IA.
 

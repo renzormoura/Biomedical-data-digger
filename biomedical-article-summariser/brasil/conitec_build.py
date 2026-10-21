@@ -27,7 +27,7 @@ PAGE_URL = "https://www.gov.br/conitec/pt-br/assuntos/avaliacao-de-tecnologias-e
 ALLOWED_HOST = "www.gov.br"
 MAX_BYTES = 8_000_000
 HTTP_TIMEOUT = 40
-USER_AGENT = "Lastro/1.0 (atualizacao de dados oficiais)"
+USER_AGENT = "NexusScience/1.0 (atualizacao de dados oficiais)"
 SNAPSHOT_PATH = Path(__file__).resolve().parent.parent / "dados_brasil" / "conitec.json"
 _LINK = re.compile(r'href="([^"]*recomendacoesdaconitec_(\d{8})\.xlsx[^"]*)"', re.IGNORECASE)
 _NS = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
