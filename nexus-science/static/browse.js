@@ -908,8 +908,8 @@
       const wob = now / 4000;
       ctx.clearRect(0, 0, W, H);
       hubs.forEach((hub) => {
-        const tx = hub.anchor ? W * hub.anchor[0] + Math.sin(wob + hub.a) * 10 : W / 2 + Math.cos(hub.a + wob * 0.25) * Math.min(W, H) * 0.5;
-        const ty = hub.anchor ? H * hub.anchor[1] + Math.cos(wob * 1.3 + hub.a) * 8 : H / 2 + Math.sin(hub.a + wob * 0.25) * Math.min(W, H) * 0.31;
+        const tx = hub.anchor ? W * hub.anchor[0] + Math.sin(wob + hub.a) * 10 : W * 0.78 + Math.cos(hub.a + wob * 0.25) * W * 0.14;  // no computador, so no lado direito: o texto fica livre
+        const ty = hub.anchor ? H * hub.anchor[1] + Math.cos(wob * 1.3 + hub.a) * 8 : H * 0.5 + Math.sin(hub.a + wob * 0.25) * H * 0.34;
         hub.x += (tx - hub.x) * (0.02 + 0.05 * ease); hub.y += (ty - hub.y) * (0.02 + 0.05 * ease);
       });
       nodes.forEach((p) => {

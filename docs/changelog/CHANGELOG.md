@@ -2,6 +2,10 @@
 
 ## 2026-10 — Início animado: jornada para o convidado e painel em blocos
 
+### Corrigido (textos)
+- **Topo do convidado:** a rede de pontos e linhas passava por trás do texto principal; agora os pontos ficam do lado direito no computador, a rede some atrás do texto com uma máscara e, no celular, só aparece nas bordas de cima e de baixo.
+- **Laboratório de IA:** endereços longos em `code` quebram a linha em vez de passar da largura da tela no celular.
+
 ### Corrigido (celular)
 - **Jornada:** no celular virou três passos empilhados que animam uma vez; antes, o palco fixo trocava de cena e o anel de nota girava para trás enquanto o dedo deslizava.
 - **Topo:** os botões têm o mesmo tamanho (40 px) e o da paleta de comandos, que repetia o menu de baixo, não aparece em telas pequenas.

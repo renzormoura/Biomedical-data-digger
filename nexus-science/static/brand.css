@@ -1258,3 +1258,11 @@ body.pal-open { overflow: hidden; }
   .lib-tools { display: contents; }
   .lib-filter { grid-column: 1 / -1; }
 }
+
+/* a rede de fontes nao passa por tras do texto: no computador so aparece no lado direito; no celular, so nas faixas de cima e de baixo */
+.jr-net { -webkit-mask-image: linear-gradient(90deg, transparent 0%, transparent 44%, #000 70%); mask-image: linear-gradient(90deg, transparent 0%, transparent 44%, #000 70%); }
+@media (max-width: 760px) { .jr-net { -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 16%, transparent 84%, #000 100%); mask-image: linear-gradient(180deg, #000 0%, transparent 16%, transparent 84%, #000 100%); } }
+
+/* enderecos longos em codigo quebram a linha em vez de vazar da tela */
+code { overflow-wrap: anywhere; }
+pre code { overflow-wrap: normal; }
