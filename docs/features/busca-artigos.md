@@ -6,7 +6,8 @@ Permitir que a pessoa pesquise um tema, um título, um DOI ou uma palavra-chave 
 ## O que a pessoa vê
 - Campo de busca no topo e na página inicial, com seletor de **fonte** (padrão: "Todas as fontes").
 - Filtros: ano de publicação (de/até), tipo de estudo, somente acesso aberto e idioma (português, inglês, espanhol).
-- Ordenação: **Relevância**, **Mais recentes** ou **Mais citados**.
+- Ordenação em **pílulas** (Relevância, Mais recentes, Mais citados), no topo da lista.
+- **Nota de confiabilidade em cada resultado:** um anel com a nota de 0 a 100 à esquerda do título (laranja cheio para Alta, mais claro para Moderada, cinza para Baixa, vermelho para retratado, traço quando o registro não tem resumo para avaliar). Vem da mesma conta da página do artigo, feita por código e sem IA, e fica em cache. O resultado é um cartão com brilho que segue o cursor; a tecla **/** leva ao campo de busca de qualquer tela do navegador de artigos.
 - Cada resultado mostra título (link para a página do artigo), autores, periódico e ano, selos (tipo de estudo, acesso aberto, idioma, fonte, retratado), trecho do resumo com os termos buscados destacados e os botões **Salvar** e **Abrir**.
 - Avisos quando uma fonte demorou ou não respondeu ("OpenAIRE demorou demais e ficou de fora desta busca").
 - Acima da lista, o [Panorama do tema](panorama-do-tema.md).

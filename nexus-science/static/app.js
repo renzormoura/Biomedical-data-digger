@@ -164,22 +164,46 @@
     output.setAttribute("aria-busy", String(busy));
   }
 
+  // Carregando: esqueleto do texto que vem e um cronometro, para a espera parecer menor e nao parecer travada.
   function showLoading(panel, label) {
     const output = $('[data-role="output"]', panel);
     output.replaceChildren();
+    output.classList.remove("reveal");
+    clearInterval(panel.tick);
     const box = document.createElement("div");
-    box.className = "loading";
+    box.className = "lab-loading";
+    box.setAttribute("role", "status");
+    const head = document.createElement("div");
+    head.className = "lab-loading-head";
     const spinner = document.createElement("div");
     spinner.className = "spinner";
     spinner.setAttribute("aria-hidden", "true");
     const text = document.createElement("span");
     text.textContent = `${label}… isso pode levar alguns segundos.`;
-    box.append(spinner, text);
+    const timer = document.createElement("span");
+    timer.className = "lab-timer";
+    timer.textContent = "0 s";
+    head.append(spinner, text, timer);
+    box.append(head);
+    [88, 100, 94, 72, 100, 83, 60].forEach((width, index) => {
+      const line = document.createElement("i");
+      line.className = "lab-skeleton";
+      line.setAttribute("aria-hidden", "true");
+      line.style.setProperty("--w", `${width}%`);
+      line.style.setProperty("--i", String(index));
+      box.append(line);
+    });
     output.append(box);
     $('[data-role="output-title"]', panel).textContent = label;
+    const started = Date.now();
+    panel.tick = setInterval(() => {
+      if (!box.isConnected) { clearInterval(panel.tick); return; }
+      timer.textContent = `${Math.round((Date.now() - started) / 1000)} s`;
+    }, 1000);
   }
 
   function showError(panel, message) {
+    clearInterval(panel.tick);
     const output = $('[data-role="output"]', panel);
     $('[data-role="output-meta"]', panel).textContent = "";
     output.replaceChildren();
@@ -203,8 +227,12 @@
   }
 
   function showResult(panel, label, data) {
+    clearInterval(panel.tick);
     const output = $('[data-role="output"]', panel);
     output.innerHTML = data.html; // sanitizado no servidor (markdown_lite)
+    output.classList.remove("reveal");
+    void output.offsetWidth;  // reinicia a animacao de entrada dos blocos
+    output.classList.add("reveal");
     panel.dataset.lastMarkdown = data.markdown;
     $('[data-role="output-title"]', panel).textContent = label;
     $('[data-role="output-meta"]', panel).textContent = describeMeta(data.meta);

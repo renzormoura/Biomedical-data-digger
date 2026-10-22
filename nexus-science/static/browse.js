@@ -1070,6 +1070,17 @@
   // do mais forte ao mais fraco: uma escala de um tom so (laranja ate cinza) em vez de varias cores
   const DESIGN_TONES = { sistematica: "t1", ensaio: "t2", observacional: "t3", revisao: "t4", opiniao: "t5", preprint: "t6", desconhecido: "t7" };
 
+  /** Anel com a nota de confiabilidade de um cartao (so codigo, sem IA); sem base para avaliar mostra um traco. */
+  function scoreRing(rating, { small = false } = {}) {
+    const tone = Lib.scoreTone(rating);
+    const value = rating && typeof rating.score === "number" ? rating.score : null;
+    const ring = h("span", { class: `score-ring tone-${tone}${small ? " is-small" : ""}`, role: "img",
+      "aria-label": value === null ? "Nota de confiabilidade indisponível" : `Nota de confiabilidade ${value} de 100, faixa ${rating.band}`,
+      title: value === null ? "Sem resumo para avaliar" : `Confiabilidade: ${rating.band}` }, h("b", {}, value === null ? "—" : String(value)));
+    ring.style.setProperty("--p", String(value === null ? 0 : value));
+    return ring;
+  }
+
   function panoramaView(info) {
     const pct = Math.round((info.openAccess / info.sample) * 100);
     const strongest = info.strongest;
@@ -1167,16 +1178,21 @@
           h("div", { class: "results-head" },
             h("div", {}, h("strong", {}, `${Lib.formatCount(data.total)} ${data.total === 1 ? "resultado" : "resultados"}`),
               h("span", { class: "muted" }, ` · ${activeSource().name}`)),
-            h("label", { class: "sort-inline" }, h("span", {}, "Ordenar"), sort)),
+            h("div", { class: "seg", role: "group", "aria-label": "Ordenar por" }, options.sorts.map((item) => h("button", {
+              type: "button", class: `seg-btn${item.id === st.sort ? " on" : ""}`, "aria-pressed": String(item.id === st.sort),
+              onclick: () => { sort.value = item.id; apply(); },
+            }, item.name)))),
           notesBlock(data.notes || []),
           panoramaBox,
           data.works.length
             ? h("ol", { class: "results" }, data.works.map((work) => h("li", { class: "result" },
-              h("h3", {}, h("a", { href: articleHref(work) }, highlighted(work.title, st.q))),
-              h("div", { class: "meta" }, metaLine(work)),
-              badges(work),
-              work.snippet ? h("p", { class: "snippet" }, highlighted(work.snippet, st.q)) : null,
-              h("div", { class: "row" }, saveButton(work), h("a", { class: "btn btn-sm btn-ghost", href: articleHref(work) }, "Abrir")))))
+              scoreRing(work.rating),
+              h("div", { class: "result-main" },
+                h("h3", {}, h("a", { href: articleHref(work) }, highlighted(work.title, st.q))),
+                h("div", { class: "meta" }, metaLine(work)),
+                badges(work),
+                work.snippet ? h("p", { class: "snippet" }, highlighted(work.snippet, st.q)) : null,
+                h("div", { class: "row" }, saveButton(work), h("a", { class: "btn btn-sm btn-ghost", href: articleHref(work) }, "Abrir"))))))
             : emptyState("search", "Nenhum artigo encontrado", "Tente menos termos, outro idioma ou limpe os filtros."),
           data.pages > 1 ? h("nav", { class: "pager", "aria-label": "Páginas" },
             h("button", { type: "button", class: "btn btn-secondary btn-sm", disabled: data.page <= 1, onclick: () => goPage(data.page - 1) }, "Anterior"),
@@ -1581,6 +1597,10 @@
   }
 
   // ------------------------------------------------------------------ Biblioteca
+  const LIB_SORT_LABELS = { recentes: "Salvos há pouco", nota: "Maior nota", ano: "Mais recentes (ano)", titulo: "Título (A–Z)" };
+  const LIB_VIEW_KEY = "nexus.libview";
+  const readView = () => { try { return localStorage.getItem(LIB_VIEW_KEY) === "table" ? "table" : "cards"; } catch { return "cards"; } };
+
   async function renderLibrary(params) {
     setTitle("Biblioteca");
     if (!session.user) {
@@ -1593,46 +1613,103 @@
     if (!data) { mount($app, h("h1", {}, "Biblioteca"), errorBox("Não foi possível carregar sua biblioteca.")); return; }
     const saved = await guarded(() => api("/api/analyses"));
     const reports = await guarded(() => api("/api/reports"));
+    const billing = await api("/api/billing/me").catch(() => null);  // so para as barras de uso (com cobranca ativa)
     const activeTag = params.get("tag") || "";
     const allTags = [...new Set(data.items.flatMap((i) => i.tags))].sort();
-    const shown = data.items.filter((i) => !activeTag || i.tags.includes(activeTag));
+    const view = { mode: readView(), sort: "recentes", text: "" };
 
-    const listName = h("input", { type: "text", id: "list-name", placeholder: "nome da lista (ex.: Leituras da semana 3)", maxlength: "80" });
+    const listName = h("input", { type: "text", id: "list-name", placeholder: "Nova lista (ex.: Leituras da semana 3)", maxlength: "80", "aria-label": "Nome da nova lista" });
     const createList = async () => {
       if (!listName.value.trim()) return;
       if (await guarded(() => api("/api/lists", { method: "POST", body: { name: listName.value } }))) renderLibrary(params);
     };
+    listName.addEventListener("keydown", (event) => { if (event.key === "Enter") { event.preventDefault(); createList(); } });
+
+    // -- numeros da biblioteca (com a barra de uso quando a cobranca esta ativa)
+    const limits = billing && billing.enforced ? billing.limits : {};
+    const statTile = (label, value, limit, href) => {
+      const number = h("strong", { class: "b-n" }, "0");
+      countTo(number, value);
+      const tile = h("a", { class: "bento-tile b-num lib-stat", href }, number, h("span", { class: "b-l" }, limit ? `${label} · de ${limit}` : label));
+      if (limit) { const bar = h("i", {}); bar.style.setProperty("--w", `${Math.min(100, Math.round((value / limit) * 100))}%`); tile.append(h("div", { class: "meter b-meter", role: "img", "aria-label": `${value} de ${limit}` }, bar)); }
+      return reveal(tile);
+    };
+    const analysesCount = saved ? saved.analyses.length : 0;
+    const reportsCount = reports ? reports.reports.length : 0;
+    const stats = h("div", { class: "lib-stats", "aria-label": "Sua biblioteca em números" },
+      statTile(data.items.length === 1 ? "artigo salvo" : "artigos salvos", data.items.length, limits.library, "#/biblioteca"),
+      statTile(data.lists.length === 1 ? "lista" : "listas", data.lists.length, limits.lists, "#/biblioteca"),
+      statTile(reportsCount === 1 ? "relatório" : "relatórios", reportsCount, limits.reports, "#/relatorio"),
+      statTile(analysesCount === 1 ? "análise salva" : "análises salvas", analysesCount, 0, "#/biblioteca"));
+
+    // -- artigos: filtro, ordem e duas formas de ver (cartoes ou tabela)
+    const itemsBox = h("div", { class: "lib-items" });
+    const countText = h("span", { class: "muted lib-count" });
+    const removeItem = async (item) => { if (await guarded(() => api(`/api/library?ref=${encodeURIComponent(item.ref)}`, { method: "DELETE" }))) renderLibrary(params); };
+    const metaOf = (item) => [item.authors, item.journal].filter(Boolean).join(" · ");
+    const cardOf = (item, index) => {
+      const card = h("article", { class: "lib-card" },
+        h("div", { class: "lib-card-top" }, scoreRing(item.rating, { small: true }),
+          h("span", { class: "chip" }, (item.studyTypes || [])[0] || "Artigo"), h("span", { class: "muted lib-year" }, item.year ? String(item.year) : "")),
+        h("h3", {}, h("a", { href: articleHref(item) }, item.title)),
+        h("p", { class: "meta" }, metaOf(item)),
+        item.tags.length ? h("div", { class: "chips" }, item.tags.map((t) => h("span", { class: "chip" }, t))) : null,
+        h("div", { class: "row lib-card-actions" }, h("a", { class: "btn btn-sm btn-secondary", href: articleHref(item) }, "Abrir"),
+          h("button", { type: "button", class: "btn btn-sm btn-ghost", "aria-label": `Remover ${item.title} da biblioteca`, onclick: () => removeItem(item) }, "Remover")));
+      card.style.setProperty("--i", String(Math.min(index, 8)));
+      return card;
+    };
+    const tableOf = (shown) => h("div", { class: "table-wrap" }, h("table", { class: "library-table" },
+      h("thead", {}, h("tr", {},
+        h("th", { scope: "col", class: "col-score" }, "Nota"), h("th", { scope: "col" }, "Artigo"), h("th", { scope: "col", class: "col-year" }, "Ano"),
+        h("th", { scope: "col", class: "col-type" }, "Tipo"), h("th", { scope: "col" }, "Etiquetas"),
+        h("th", { scope: "col", class: "col-actions" }, h("span", { class: "visually-hidden" }, "Ações")))),
+      h("tbody", {}, shown.map((item) => h("tr", {},
+        h("td", { class: "col-score" }, scoreRing(item.rating, { small: true })),
+        h("td", { class: "col-title" }, h("a", { href: articleHref(item) }, item.title), h("div", { class: "meta" }, metaOf(item))),
+        h("td", { class: "col-year" }, item.year || "—"),
+        h("td", { class: "col-type" }, (item.studyTypes || [])[0] || "Artigo"),
+        h("td", {}, item.tags.length ? h("div", { class: "chips" }, item.tags.map((t) => h("span", { class: "chip" }, t))) : h("span", { class: "muted" }, "—")),
+        h("td", { class: "col-actions" }, h("button", { type: "button", class: "btn btn-sm btn-ghost", "aria-label": `Remover ${item.title} da biblioteca`, onclick: () => removeItem(item) }, "Remover")))))));
+    const paintItems = () => {
+      const shown = Lib.sortLibrary(Lib.filterLibrary(data.items, view.text, activeTag), view.sort);
+      countText.textContent = shown.length === data.items.length ? `${data.items.length} ${data.items.length === 1 ? "artigo" : "artigos"}` : `${shown.length} de ${data.items.length}`;
+      mount(itemsBox, shown.length
+        ? (view.mode === "table" ? tableOf(shown) : h("div", { class: "lib-grid" }, shown.map(cardOf)))
+        : emptyState("search", "Nada com esse filtro", "Tente outra palavra ou limpe a etiqueta.", h("a", { class: "btn btn-secondary btn-sm", href: "#/biblioteca" }, "Limpar filtros")));
+    };
+    const filterInput = h("input", { type: "search", class: "lib-filter", placeholder: "Filtrar por título, autor ou etiqueta", "aria-label": "Filtrar os artigos salvos", maxlength: "100" });
+    filterInput.addEventListener("input", Lib.debounce(() => { view.text = filterInput.value; paintItems(); }, 150));
+    const sortSelect = h("select", { "aria-label": "Ordenar os artigos salvos" }, Lib.LIBRARY_SORTS.map((key) => h("option", { value: key }, LIB_SORT_LABELS[key])));
+    sortSelect.addEventListener("change", () => { view.sort = sortSelect.value; paintItems(); });
+    const viewButtons = [["cards", "Cartões"], ["table", "Tabela"]].map(([mode, label]) => h("button", { type: "button", class: `seg-btn${view.mode === mode ? " on" : ""}`, "aria-pressed": String(view.mode === mode), onclick: (event) => {
+      view.mode = mode;
+      try { localStorage.setItem(LIB_VIEW_KEY, mode); } catch { /* sem armazenamento */ }
+      viewButtons.forEach((button) => { const on = button === event.currentTarget; button.classList.toggle("on", on); button.setAttribute("aria-pressed", String(on)); });
+      paintItems();
+    } }, label));
+    paintItems();
 
     mount($app,
       h("h1", {}, "Biblioteca"),
-      h("p", { class: "lead" }, `${data.items.length} ${data.items.length === 1 ? "artigo salvo" : "artigos salvos"}. Etiquete, exporte e monte listas para compartilhar.`),
-      data.items.length ? h("div", { class: "library-toolbar" },
-        allTags.length ? h("div", { class: "chips", role: "group", "aria-label": "Filtrar por etiqueta" },
-          h("a", { class: `chip${activeTag ? "" : " active"}`, href: "#/biblioteca" }, "Todas"),
-          allTags.map((t) => h("a", { class: `chip${t === activeTag ? " active" : ""}`, href: Lib.buildHash("/biblioteca", { tag: t }) }, t))) : h("span", {}),
+      h("p", { class: "lead" }, "Seus artigos com a nota de confiabilidade de cada um. Etiquete, exporte e monte listas para compartilhar."),
+      stats,
+      data.items.length ? h("div", { class: "lib-toolbar" },
+        h("div", { class: "lib-tools" }, filterInput, sortSelect, h("div", { class: "seg", role: "group", "aria-label": "Forma de ver" }, viewButtons), countText),
         exportMenu()) : null,
+      data.items.length && allTags.length ? h("div", { class: "chips", role: "group", "aria-label": "Filtrar por etiqueta" },
+        h("a", { class: `chip${activeTag ? "" : " active"}`, href: "#/biblioteca" }, "Todas"),
+        allTags.map((t) => h("a", { class: `chip${t === activeTag ? " active" : ""}`, href: Lib.buildHash("/biblioteca", { tag: t }) }, t))) : null,
       !data.items.length
         ? emptyState("library", "Sua biblioteca está vazia", "Salve artigos com o botão “Salvar” e eles ficam aqui, organizados em listas.", h("a", { class: "btn btn-primary", href: "#/busca" }, "Buscar artigos"))
-        : h("div", { class: "table-wrap" }, h("table", { class: "library-table" },
-          h("thead", {}, h("tr", {},
-            h("th", { scope: "col" }, "Artigo"), h("th", { scope: "col", class: "col-year" }, "Ano"),
-            h("th", { scope: "col", class: "col-type" }, "Tipo"), h("th", { scope: "col" }, "Etiquetas"),
-            h("th", { scope: "col", class: "col-actions" }, h("span", { class: "visually-hidden" }, "Ações")))),
-          h("tbody", {}, shown.map((item) => h("tr", {},
-            h("td", { class: "col-title" }, h("a", { href: articleHref(item) }, item.title), h("div", { class: "meta" }, [item.authors, item.journal].filter(Boolean).join(" · "))),
-            h("td", { class: "col-year" }, item.year || "—"),
-            h("td", { class: "col-type" }, (item.studyTypes || [])[0] || "Artigo"),
-            h("td", {}, item.tags.length ? h("div", { class: "chips" }, item.tags.map((t) => h("span", { class: "chip" }, t))) : h("span", { class: "muted" }, "—")),
-            h("td", { class: "col-actions" }, h("button", { type: "button", class: "btn btn-sm btn-ghost", "aria-label": `Remover ${item.title} da biblioteca`, onclick: async () => {
-              if (await guarded(() => api(`/api/library?ref=${encodeURIComponent(item.ref)}`, { method: "DELETE" }))) renderLibrary(params);
-            } }, "Remover"))))))),
-      h("h2", {}, "Listas de leitura"),
-      h("div", { class: "row" }, listName, h("button", { type: "button", class: "btn btn-primary", onclick: createList }, "Criar lista")),
+        : itemsBox,
+      h("h2", { class: "lib-h" }, "Listas de leitura"),
+      h("div", { class: "shelf-new" }, listName, h("button", { type: "button", class: "btn btn-primary", onclick: createList }, icon("plus"), "Criar lista")),
       data.lists.length ? data.lists.map((list) => renderListCard(list, params))
         : h("p", { class: "muted" }, "Nenhuma lista ainda. Crie uma e adicione artigos pela página de cada artigo."),
-      h("h2", {}, "Relatórios de tema"),
+      h("h2", { class: "lib-h" }, "Relatórios de tema"),
       reportRows(reports, () => renderLibrary(params)),
-      h("h2", {}, "Análises salvas"),
+      h("h2", { class: "lib-h" }, "Análises salvas"),
       saved && saved.analyses.length
         ? h("ul", { class: "analysis-list" }, saved.analyses.map((item) => analysisRow(item, { showTitle: true, onChange: () => renderLibrary(params) })))
         : h("p", { class: "muted" }, "Nenhuma análise salva ainda. No Laboratório de IA, clique em \"Salvar no artigo\" depois de gerar uma análise."));
@@ -1658,6 +1735,7 @@
     const expanded = openLists.has(list.id);
     const toggle = h("button", { type: "button", class: "list-toggle", "aria-expanded": String(expanded), "aria-controls": bodyId },
       icon("chevron"), h("span", { class: "list-name" }, list.name),
+      list.shareToken ? h("span", { class: "chip shelf-shared" }, "link ativo") : null,
       h("span", { class: "muted count" }, `${list.works.length} ${list.works.length === 1 ? "artigo" : "artigos"}`));
     const body = h("div", { id: bodyId, class: "list-body stack", hidden: expanded ? null : "" },
       list.works.length ? h("ul", { class: "list-items" }, list.works.map((w) => h("li", {},
@@ -1682,7 +1760,7 @@
       toggle.setAttribute("aria-expanded", String(open));
       if (open) openLists.add(list.id); else openLists.delete(list.id);
     });
-    return h("section", { class: "list-block" }, h("h3", {}, toggle), body);
+    return h("section", { class: "list-block" }, h("span", { class: "shelf-fan", "aria-hidden": "true" }, h("i"), h("i"), h("i")), h("h3", {}, toggle), body);
   }
 
   // cartões da situação no Brasil (artigo e relatório): dados oficiais locais, sem IA

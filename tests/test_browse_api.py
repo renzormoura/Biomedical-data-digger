@@ -74,6 +74,20 @@ def test_search_response_shape_and_snippet_truncation(env):
     assert "abstract" not in first and "saved" not in first  # visitante: sem marcacao de salvos
 
 
+def test_every_card_carries_a_reliability_rating_without_extra_calls(env):
+    env.catalog.works["1"] = make_work("1", abstract="Background: x. Methods: We pooled 14 trials (n=18,450). Results: RR 0.89; 95% CI 0.81-0.98; p=0.02. Conclusions: y.")
+    env.catalog.works["2"] = make_work("2", abstract="")
+    works = {w["ref"]: w for w in env.client.get("/api/discover/search").json()["works"]}
+    assert set(works["1"]["rating"]) == {"score", "band"} and works["1"]["rating"]["band"] in {"Alta", "Moderada", "Baixa"}
+    assert isinstance(works["1"]["rating"]["score"], int) and 0 <= works["1"]["rating"]["score"] <= 100
+    assert works["2"]["rating"] == {"score": None, "band": "Indeterminada"}  # sem resumo nao ha base para a nota
+    client = env.login(env.build())
+    client.post("/api/library", json={"ref": "1"})
+    assert client.get("/api/library").json()["items"][0]["rating"] == works["1"]["rating"]  # a biblioteca mostra a mesma nota
+    # a nota do cartao e a da pagina do artigo: uma so conta
+    assert env.client.get("/api/discover/work", params={"ref": "1"}).json()["reliability"]["score"] == works["1"]["rating"]["score"]
+
+
 @pytest.mark.parametrize("params", [{"yf": 1500}, {"yt": 9999}, {"page": 0}, {"page": 501}, {"per_page": 50}, {"q": "x" * 301}])
 def test_search_rejects_out_of_range_parameters(env, params):
     assert env.client.get("/api/discover/search", params=params).status_code == 422

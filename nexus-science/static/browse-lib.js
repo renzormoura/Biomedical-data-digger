@@ -118,6 +118,44 @@
     return out;
   }
 
+  const RATING_TONES = { Alta: "high", Moderada: "mid", Baixa: "low", Retratado: "bad" };
+  /** Tom visual da nota de um cartão: high, mid, low, bad (retratado) ou none (sem base para avaliar). */
+  function scoreTone(rating) {
+    return (rating && typeof rating.score === "number" && RATING_TONES[rating.band]) || "none";
+  }
+
+  const ACCENTS = new RegExp(`[${String.fromCharCode(0x300)}-${String.fromCharCode(0x36f)}]`, "g");  // marcas de acento depois de decompor
+  const fold = (text) => String(text || "").normalize("NFD").replace(ACCENTS, "").toLowerCase();
+  /** Filtra a biblioteca por etiqueta e por texto (todas as palavras, sem acento, em título, autores, revista e etiquetas). */
+  function filterLibrary(items, text, tag) {
+    const words = fold(text).split(/\s+/).filter(Boolean);
+    return items.filter((item) => {
+      if (tag && !(item.tags || []).includes(tag)) return false;
+      if (!words.length) return true;
+      const haystack = fold([item.title, item.authors, item.journal, ...(item.tags || [])].join(" "));
+      return words.every((word) => haystack.includes(word));
+    });
+  }
+
+  const LIBRARY_SORTS = ["recentes", "nota", "ano", "titulo"];
+  /** Ordena a biblioteca sem alterar a lista original; sem valor (nota, ano) vai para o fim; empates mantêm a ordem. */
+  function sortLibrary(items, mode) {
+    const rank = (item) => (mode === "nota" ? item.rating && typeof item.rating.score === "number" ? item.rating.score : null : item.year ?? null);
+    const copy = items.map((item, index) => ({ item, index }));
+    copy.sort((a, b) => {
+      if (mode === "titulo") return String(a.item.title).localeCompare(String(b.item.title), "pt-BR") || a.index - b.index;
+      if (mode === "nota" || mode === "ano") {
+        const x = rank(a.item), y = rank(b.item);
+        if (x === null && y === null) return a.index - b.index;
+        if (x === null) return 1;
+        if (y === null) return -1;
+        return y - x || a.index - b.index;
+      }
+      return String(b.item.savedAt || "").localeCompare(String(a.item.savedAt || "")) || a.index - b.index;  // recentes
+    });
+    return copy.map((entry) => entry.item);
+  }
+
   /** Progresso (0 a 1) da rolagem dentro de uma seção alta com palco fixo: `top` é o topo da seção na tela. */
   function journeyProgress(top, sectionHeight, viewportHeight) {
     const total = sectionHeight - viewportHeight;
@@ -150,5 +188,6 @@
   return {
     SEARCH_DEFAULTS, FEED_AREAS, feedArea, parseRoute, buildHash, searchStateFromParams, paramsFromSearchState, apiParamsFromSearchState,
     safeHttpUrl, formatCount, debounce, pageWindow, aiLabHref, journeyProgress, journeyScene, countAt, stepsSummary,
+    scoreTone, filterLibrary, sortLibrary, LIBRARY_SORTS,
   };
 });

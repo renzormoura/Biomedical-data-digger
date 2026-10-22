@@ -46,7 +46,7 @@
     return (((index + delta) % length) + length) % length;
   }
 
-  const SPOT = ".card, .feed-card, .feature, .gplan-card, .plan-card, .panel:not([role=\"tabpanel\"]), .bento-tile";
+  const SPOT = ".card, .feed-card, .feature, .gplan-card, .plan-card, .panel:not([role=\"tabpanel\"]), .bento-tile, .lib-card, .list-block, .results .result";
 
   function start(win) {
     const doc = win.document;
@@ -160,7 +160,14 @@
     function toggle() { if (dialog && !dialog.hidden) close(); else open(); }
 
     doc.addEventListener("keydown", (event) => {
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") { event.preventDefault(); toggle(); }
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") { event.preventDefault(); toggle(); return; }
+      // "/" leva ao campo de busca (e abre a busca, se a pessoa estiver em outra tela do navegador de artigos)
+      if (event.key !== "/" || event.ctrlKey || event.metaKey || event.altKey || (dialog && !dialog.hidden)) return;
+      const target = event.target;
+      if (target && (/^(input|textarea|select)$/i.test(target.tagName) || target.isContentEditable)) return;
+      const focusSearch = () => { const field = doc.getElementById("q") || doc.getElementById("home-q"); if (field) { field.focus(); field.select(); return true; } return false; };
+      if (focusSearch()) event.preventDefault();
+      else if (home === "") { event.preventDefault(); win.location.hash = "#/busca"; win.setTimeout(focusSearch, 450); }
     });
     const button = doc.getElementById("palette-button");
     if (button) button.addEventListener("click", toggle);

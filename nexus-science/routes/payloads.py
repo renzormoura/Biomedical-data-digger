@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from functools import lru_cache
 from typing import Any
 
 from fastapi.responses import Response
@@ -13,6 +14,7 @@ from brasil import anvisa, conitec, consulta, disponibilidade, rename, sigtap
 from catalog import Work
 from domain import NexusError
 from enrichment import Enrichment
+from extraction import extract_findings, split_sections
 from library_store import ReadingList, SavedAnalysis
 from routes.schemas import SNIPPET_CHARS
 
@@ -118,13 +120,20 @@ def conitec_registro(item: conitec.Registro) -> dict[str, Any]:
     }
 
 
+@lru_cache(maxsize=4096)
+def rating_of(work: Work) -> dict[str, Any]:
+    """Nota de confiabilidade resumida (so codigo, sem IA) para mostrar em cada cartao; o `Work` e imutavel, entao o resultado vale em cache."""
+    result = reliability.assess(work, tuple(split_sections(work.abstract)), tuple(extract_findings(work.abstract)))
+    return {"score": result.score, "band": result.band}
+
+
 def work_card(work: Work, saved: bool | None = None) -> dict[str, Any]:
     snippet = work.abstract[:SNIPPET_CHARS] + ("…" if len(work.abstract) > SNIPPET_CHARS else "")
     card: dict[str, Any] = {
         "ref": work.ref, "title": work.title, "authors": work.author_line, "journal": work.journal, "year": work.year,
         "doi": work.doi, "pmid": work.pmid, "studyTypes": list(work.study_types), "openAccess": work.open_access,
         "oaUrl": work.oa_url, "citedBy": work.cited_by, "language": work.language, "source": work.source,
-        "snippet": snippet, "keywords": list(work.keywords),
+        "snippet": snippet, "keywords": list(work.keywords), "rating": dict(rating_of(work)),
     }
     if saved is not None:
         card["saved"] = saved

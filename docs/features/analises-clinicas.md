@@ -44,6 +44,12 @@ Cada área é uma especificação declarativa (`pages.py`: botões, rótulos, p�
 - A injeção de prompt é tratada por heurística; a avaliação com o modelo real mostrou que só o prompt falha em ≈20% das tentativas, por isso a defesa em código. Não cobre todo ataque (ver [Segurança](../arquitetura/seguranca.md)).
 - Prompts de áreas clínicas foram usados em contexto de pronto-socorro: **não alterar sem validação clínica**. A revisão de 2026-10 (abaixo) só **restringiu** o que o modelo pode afirmar, mas ainda **não foi validada com o modelo real nem por profissional de saúde**: rode `RUN_LIVE_EVALS=1 GROQ_API_KEY=... pytest evals -m live` antes de colocar em produção.
 
+## Aparência do Laboratório (2026-10)
+- **Início de cada área:** em vez de uma frase solta, um cartão "Comece por aqui" com os três passos (colar o ID ou a URL, escolher o modelo, clicar em uma análise ou em "Extrair do artigo", que não usa IA).
+- **Enquanto a análise roda:** um esqueleto do texto que vem e um **cronômetro** ("12 s") no lugar do círculo girando, e a borda do painel de resultado fica laranja.
+- **Quando chega:** os blocos do resultado entram em sequência. No computador o painel de resultado fica **fixo** ao rolar os controles.
+- Os grupos de botões abrem com animação, os botões de análise sobem ao passar o mouse e a aba escolhida ganha uma barra laranja.
+
 ## Princípios dos prompts (revisão de 2026-10)
 - **Um prompt de sistema só diz o que vale para todas as análises:** marcadores do texto não confiável (`<<<SOURCE_TITLE_START>>>` etc., o mesmo formato de `wrap_source`), idioma (português, salvo outro escolhido na personalização), restrição à fonte, frase única para dado ausente, números copiados sem cálculo, segurança e formato-padrão. Foi removida a sobra do exercício original que obrigava "resumo em bullets + parágrafo" em **todas** as análises, inclusive na crítica metodológica e no glossário.
 - **Ausência de dado:** a frase é sempre "Não descrito no resumo fornecido", e o modelo é instruído a **omitir campos vazios** em vez de repeti-la dezenas de vezes (economia de saída). Variantes como "Não descrito no artigo" foram eliminadas dos prompts escritos à mão; "Não avaliável pelo resumo fornecido" e "Não explicado no resumo fornecido" continuam, por terem sentido próprio.

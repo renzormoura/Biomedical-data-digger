@@ -935,6 +935,10 @@
     "oaUrl": "",
     "openAccess": false,
     "pmid": "1",
+    "rating": {
+     "band": "Alta",
+     "score": 100
+    },
     "ref": "1",
     "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
     "source": "Europe PMC",
@@ -1243,6 +1247,10 @@
      "oaUrl": "",
      "openAccess": false,
      "pmid": "1",
+     "rating": {
+      "band": "Alta",
+      "score": 100
+     },
      "ref": "1",
      "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
      "source": "Europe PMC",
@@ -1264,6 +1272,10 @@
      "oaUrl": "",
      "openAccess": false,
      "pmid": "2",
+     "rating": {
+      "band": "Alta",
+      "score": 100
+     },
      "ref": "2",
      "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
      "source": "Europe PMC",
@@ -1285,6 +1297,10 @@
      "oaUrl": "",
      "openAccess": false,
      "pmid": "3",
+     "rating": {
+      "band": "Alta",
+      "score": 100
+     },
      "ref": "3",
      "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
      "source": "Europe PMC",
@@ -1320,6 +1336,10 @@
      "oaUrl": "",
      "openAccess": false,
      "pmid": "1",
+     "rating": {
+      "band": "Alta",
+      "score": 100
+     },
      "ref": "1",
      "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
      "source": "Europe PMC",
@@ -1341,6 +1361,10 @@
      "oaUrl": "",
      "openAccess": false,
      "pmid": "2",
+     "rating": {
+      "band": "Alta",
+      "score": 100
+     },
      "ref": "2",
      "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
      "source": "Europe PMC",
@@ -1375,6 +1399,10 @@
      "oaUrl": "",
      "openAccess": false,
      "pmid": "2",
+     "rating": {
+      "band": "Alta",
+      "score": 100
+     },
      "ref": "2",
      "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
      "source": "Europe PMC",
@@ -1396,6 +1424,10 @@
      "oaUrl": "",
      "openAccess": false,
      "pmid": "3",
+     "rating": {
+      "band": "Alta",
+      "score": 100
+     },
      "ref": "3",
      "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
      "source": "Europe PMC",
@@ -1645,6 +1677,10 @@
     "pmcid": "",
     "pmid": "1",
     "published": "",
+    "rating": {
+     "band": "Alta",
+     "score": 100
+    },
     "ref": "1",
     "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
     "source": "Europe PMC",
@@ -2876,6 +2912,10 @@
      "oaUrl": "",
      "openAccess": false,
      "pmid": "1",
+     "rating": {
+      "band": "Alta",
+      "score": 100
+     },
      "ref": "1",
      "saved": true,
      "savedAt": "<ts>",
@@ -2902,6 +2942,10 @@
      "oaUrl": "",
      "openAccess": false,
      "pmid": "2",
+     "rating": {
+      "band": "Alta",
+      "score": 100
+     },
      "ref": "2",
      "saved": true,
      "savedAt": "<ts>",
@@ -3045,6 +3089,10 @@
        "oaUrl": "",
        "openAccess": false,
        "pmid": "1",
+       "rating": {
+        "band": "Alta",
+        "score": 100
+       },
        "ref": "1",
        "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
        "source": "Europe PMC",
@@ -3066,6 +3114,10 @@
        "oaUrl": "",
        "openAccess": false,
        "pmid": "2",
+       "rating": {
+        "band": "Alta",
+        "score": 100
+       },
        "ref": "2",
        "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
        "source": "Europe PMC",
@@ -3270,6 +3322,10 @@
       "oaUrl": "",
       "openAccess": false,
       "pmid": "1",
+      "rating": {
+       "band": "Alta",
+       "score": 100
+      },
       "ref": "1",
       "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
       "source": "Europe PMC",
@@ -3441,6 +3497,10 @@
      "oaUrl": "",
      "openAccess": false,
      "pmid": "1",
+     "rating": {
+      "band": "Alta",
+      "score": 100
+     },
      "ref": "1",
      "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
      "source": "Europe PMC",
@@ -3462,6 +3522,10 @@
      "oaUrl": "",
      "openAccess": false,
      "pmid": "2",
+     "rating": {
+      "band": "Alta",
+      "score": 100
+     },
      "ref": "2",
      "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
      "source": "Europe PMC",
@@ -3992,6 +4056,10 @@
       "oaUrl": "",
       "openAccess": false,
       "pmid": "1",
+      "rating": {
+       "band": "Alta",
+       "score": 100
+      },
       "ref": "1",
       "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
       "source": "Europe PMC",
@@ -4142,6 +4210,10 @@
        "oaUrl": "",
        "openAccess": false,
        "pmid": "1",
+       "rating": {
+        "band": "Alta",
+        "score": 100
+       },
        "ref": "1",
        "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
        "source": "Europe PMC",
@@ -4293,6 +4365,10 @@
       "oaUrl": "",
       "openAccess": false,
       "pmid": "1",
+      "rating": {
+       "band": "Alta",
+       "score": 100
+      },
       "ref": "1",
       "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
       "source": "Europe PMC",
@@ -4371,6 +4447,10 @@
      "oaUrl": "",
      "openAccess": false,
      "pmid": "2",
+     "rating": {
+      "band": "Alta",
+      "score": 100
+     },
      "ref": "2",
      "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
      "source": "Europe PMC",
@@ -4392,6 +4472,10 @@
      "oaUrl": "",
      "openAccess": false,
      "pmid": "3",
+     "rating": {
+      "band": "Alta",
+      "score": 100
+     },
      "ref": "3",
      "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
      "source": "Europe PMC",
@@ -4593,6 +4677,10 @@
       "oaUrl": "",
       "openAccess": false,
       "pmid": "1",
+      "rating": {
+       "band": "Alta",
+       "score": 100
+      },
       "ref": "1",
       "snippet": "Background: Metformin is widely used. Methods: We pooled 14 trials (n=18,450). Results: Lower risk (RR 0.89; 95% CI 0.81-0.98; p=0.02). Conclusions: A modest reduction. Registered NCT01234567.",
       "source": "Europe PMC",

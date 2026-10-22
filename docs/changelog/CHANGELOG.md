@@ -3,6 +3,10 @@
 ## 2026-10 — Início animado: jornada para o convidado e painel em blocos
 
 ### Adicionado
+- **Nota de confiabilidade em cada resultado da busca e em cada item da biblioteca** (`rating` com `score` e `band` em todo cartão de artigo da API; conta por código, em cache).
+- **Busca:** resultados em cartões com o anel da nota, ordem em pílulas e atalho "/" para o campo de busca.
+- **Biblioteca:** números no topo, filtro por texto, ordem por nota/ano/título, visão em cartões ou tabela e listas como estantes.
+- **Laboratório de IA:** cartão "Comece por aqui", carregando com esqueleto e cronômetro, resultado que entra em sequência e painel de resultado fixo ao rolar.
 - **Paleta de comandos** (Ctrl/Cmd+K ou botão "Comandos") no navegador de artigos e no Laboratório de IA, e **brilho que segue o cursor** nos cartões (novo `static/fx.js`, testado em `tests/js/fx.test.js`).
 - Topo do convidado com **rede de fontes** ao fundo e **faixa de fontes** passando.
 

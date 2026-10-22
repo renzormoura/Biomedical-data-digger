@@ -143,3 +143,40 @@ test("stepsSummary conta os passos feitos e aponta o próximo", () => {
   assert.equal(Lib.stepsSummary(steps.map((s) => ({ ...s, done: true }))).next, null);
   assert.deepEqual(Lib.stepsSummary([]), { done: 0, total: 0, percent: 0, next: null });
 });
+
+test("scoreTone traduz a faixa da nota em tom visual", () => {
+  assert.equal(Lib.scoreTone({ score: 90, band: "Alta" }), "high");
+  assert.equal(Lib.scoreTone({ score: 60, band: "Moderada" }), "mid");
+  assert.equal(Lib.scoreTone({ score: 30, band: "Baixa" }), "low");
+  assert.equal(Lib.scoreTone({ score: 0, band: "Retratado" }), "bad");
+  assert.equal(Lib.scoreTone({ score: null, band: "Indeterminada" }), "none");
+  assert.equal(Lib.scoreTone(undefined), "none");
+});
+
+const LIB = [
+  { ref: "1", title: "Metformina em idosos", authors: "Ana Souza", journal: "Revista Clínica", year: 2020, tags: ["TCC"], rating: { score: 60, band: "Moderada" }, savedAt: "2026-10-01T10:00:00" },
+  { ref: "2", title: "Efeitos de dieta", authors: "João Álvares", journal: "Nutrição Hoje", year: 2024, tags: ["Saúde"], rating: { score: 90, band: "Alta" }, savedAt: "2026-10-03T10:00:00" },
+  { ref: "3", title: "Aprendizagem de máquina", authors: "Lia Costa", journal: "Computação", year: null, tags: [], rating: { score: null, band: "Indeterminada" }, savedAt: "2026-10-02T10:00:00" },
+];
+const refs = (list) => list.map((item) => item.ref);
+
+test("filterLibrary combina etiqueta e texto sem acento, todas as palavras", () => {
+  assert.deepEqual(refs(Lib.filterLibrary(LIB, "", "")), ["1", "2", "3"]);
+  assert.deepEqual(refs(Lib.filterLibrary(LIB, "", "TCC")), ["1"]);
+  assert.deepEqual(refs(Lib.filterLibrary(LIB, "alvares", "")), ["2"]);          // autor com acento
+  assert.deepEqual(refs(Lib.filterLibrary(LIB, "maquina aprendizagem", "")), ["3"]);
+  assert.deepEqual(refs(Lib.filterLibrary(LIB, "nutricao", "")), ["2"]);          // revista
+  assert.deepEqual(refs(Lib.filterLibrary(LIB, "saude", "")), ["2"]);             // etiqueta
+  assert.deepEqual(refs(Lib.filterLibrary(LIB, "metformina dieta", "")), []);     // todas as palavras
+  assert.deepEqual(refs(Lib.filterLibrary(LIB, "metformina", "Saúde")), []);
+});
+
+test("sortLibrary ordena sem mexer na lista original e manda o que não tem valor para o fim", () => {
+  const before = refs(LIB);
+  assert.deepEqual(refs(Lib.sortLibrary(LIB, "recentes")), ["2", "3", "1"]);
+  assert.deepEqual(refs(Lib.sortLibrary(LIB, "nota")), ["2", "1", "3"]);
+  assert.deepEqual(refs(Lib.sortLibrary(LIB, "ano")), ["2", "1", "3"]);
+  assert.deepEqual(refs(Lib.sortLibrary(LIB, "titulo")), ["3", "2", "1"]);
+  assert.deepEqual(refs(LIB), before);
+  assert.deepEqual(Lib.LIBRARY_SORTS, ["recentes", "nota", "ano", "titulo"]);
+});
