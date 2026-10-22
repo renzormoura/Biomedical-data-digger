@@ -508,6 +508,23 @@
   }
   setUser(accountButton.dataset.user);
 
+  // administradores tambem veem o item "Admin" no menu de baixo desta pagina (na outra ele e montado pelo browse.js)
+  async function showAdminTab() {
+    const nav = $("#bottomnav");
+    if (!accountButton.dataset.user || !nav || nav.querySelector("[data-admin]")) return;
+    try {
+      const data = await (await fetch("/api/admin/session")).json();
+      if (data.admin !== true) return;
+    } catch { return; }
+    const link = document.createElement("a");
+    link.href = "/#/admin";
+    link.dataset.admin = "1";
+    link.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg><span>Admin</span>';
+    nav.append(link);
+    nav.classList.add("has-admin");
+  }
+  showAdminTab();
+
   accountButton.addEventListener("click", () => {
     authError.hidden = true;
     dialog.showModal();
