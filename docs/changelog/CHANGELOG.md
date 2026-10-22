@@ -2,6 +2,10 @@
 
 ## 2026-10 — Início animado: jornada para o convidado e painel em blocos
 
+### Adicionado (administração no celular)
+- Quem é administrador ganha o item **Admin** (escudo) no menu de baixo.
+- Painel feito para a tela pequena: números em duas colunas, abas fixas no topo (agora com o estilo das abas do perfil), usuários em cartões em vez de tabela e botões de ação em largura total.
+
 ### Corrigido (textos)
 - **Topo do convidado:** a rede de pontos e linhas passava por trás do texto principal; agora os pontos ficam do lado direito no computador, a rede some atrás do texto com uma máscara e, no celular, só aparece nas bordas de cima e de baixo.
 - **Laboratório de IA:** endereços longos em `code` quebram a linha em vez de passar da largura da tela no celular.

@@ -317,7 +317,10 @@
   // ------------------------------------------------------------------ navegação
   function renderBottomNav(view) {
     const items = [["#/", "Início", "", "home"], ["#/feed", "Feed", "feed", "feed"], ["#/busca", "Busca", "busca", "search"], ["#/biblioteca", "Biblioteca", "biblioteca", "bookmark"], ["/ia", "Laboratório", "lab", "spark"]];
-    mount(document.getElementById("bottomnav"), items.map(([href, label, key, name]) => h("a", {
+    if (session.admin) items.push(["#/admin", "Admin", "admin", "shield"]);
+    const nav = document.getElementById("bottomnav");
+    nav.classList.toggle("has-admin", session.admin);
+    mount(nav, items.map(([href, label, key, name]) => h("a", {
       href, "aria-current": key === view || (key === "busca" && view === "artigo") ? "page" : null,
     }, icon(name), h("span", {}, label))));
   }
@@ -2787,10 +2790,10 @@
     setTitle("Administração");
     const active = ADMIN_TABS.some(([key]) => key === tab) ? tab : "";
     const content = h("div", { class: "stack" });
-    mount($app, h("section", { class: "stack" },
+    mount($app, h("section", { class: "stack admin-page" },
       h("p", { class: "eyebrow" }, "Administração"), h("h1", {}, "Painel do administrador"),
       h("nav", { class: "profile-tabs", "aria-label": "Seções da administração" }, ADMIN_TABS.map(([key, label]) =>
-        h("a", { href: key ? `#/admin/${key}` : "#/admin", "aria-current": key === active ? "page" : null }, label))),
+        h("a", { class: "profile-tab", href: key ? `#/admin/${key}` : "#/admin", "aria-current": key === active ? "page" : null }, label))),
       content));
 
     // acesso: a propria sessao de administrador; o token (so para emergencia) fica apenas na aba do navegador
@@ -2835,12 +2838,12 @@
       const detail = h("div", { class: "stack" });
       const search = h("input", { type: "search", value: query, placeholder: "Buscar por e-mail", "aria-label": "Buscar por e-mail", maxlength: "100" });
       const rows = data.users.map((user) => h("tr", { class: user.suspended ? "is-suspended" : "" },
-        h("td", {}, h("button", { type: "button", class: "link-button", onclick: () => openUser(user.email) }, user.email)),
-        h("td", {}, h("span", { class: `plan-badge${user.plan !== "gratuito" ? " is-pro" : ""}` }, PLAN_NAMES[user.plan] || user.plan), user.expiresAt ? h("small", { class: "muted" }, ` até ${fmtDay(user.expiresAt)}`) : null),
-        h("td", {}, user.verified ? "Sim" : "Não"),
-        h("td", {}, `${user.usage.library} / ${user.usage.lists} / ${user.usage.reports}`),
-        h("td", {}, fmtDay(user.createdAt)),
-        h("td", {}, user.suspended ? "Suspensa" : "Ativa")));
+        h("td", { class: "cell-main" }, h("button", { type: "button", class: "link-button", onclick: () => openUser(user.email) }, user.email)),
+        h("td", { "data-label": "Plano" }, h("span", { class: `plan-badge${user.plan !== "gratuito" ? " is-pro" : ""}` }, PLAN_NAMES[user.plan] || user.plan), user.expiresAt ? h("small", { class: "muted" }, ` até ${fmtDay(user.expiresAt)}`) : null),
+        h("td", { "data-label": "E-mail confirmado" }, user.verified ? "Sim" : "Não"),
+        h("td", { "data-label": "Biblioteca / listas / relatórios" }, `${user.usage.library} / ${user.usage.lists} / ${user.usage.reports}`),
+        h("td", { "data-label": "Criada em" }, fmtDay(user.createdAt)),
+        h("td", { "data-label": "Situação" }, user.suspended ? "Suspensa" : "Ativa")));
       const pages = Math.max(1, Math.ceil(data.total / limit));
 
       async function openUser(email) {

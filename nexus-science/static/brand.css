@@ -1266,3 +1266,28 @@ body.pal-open { overflow: hidden; }
 /* enderecos longos em codigo quebram a linha em vez de vazar da tela */
 code { overflow-wrap: anywhere; }
 pre code { overflow-wrap: normal; }
+
+/* ---- Administracao no celular: seis itens no menu de baixo, usuarios em cartoes e acoes em largura total ---- */
+@media (max-width: 900px) {
+  .bottom-nav.has-admin { grid-template-columns: repeat(6, 1fr); }
+  .bottom-nav.has-admin a { font-size: 0.66rem; }
+}
+@media (max-width: 760px) {
+  .admin-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .admin-stat { padding: 12px 14px; }
+  .admin-stat strong { font-size: 1.3rem; overflow-wrap: anywhere; }
+  .profile-tabs { position: sticky; top: 56px; z-index: 5; margin: 8px -16px 16px; padding: 0 16px; background: var(--bg); }
+  .admin-table { display: block; font-size: 0.9rem; }
+  .admin-table thead { display: none; }
+  .admin-table tbody { display: grid; gap: 10px; }
+  .admin-table tr { display: grid; gap: 6px; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+  .admin-table td { display: flex; justify-content: space-between; gap: 12px; padding: 0; border: 0; white-space: normal; text-align: right; }
+  .admin-table td[data-label]::before { content: attr(data-label); color: var(--muted); font-size: 0.78rem; text-align: left; }
+  .admin-table td.cell-main { display: block; text-align: left; font-weight: 600; overflow-wrap: anywhere; }
+  .table-wrap:has(.admin-table) { border: 0; overflow: visible; }
+  .admin-list li { flex-direction: column; align-items: stretch; }
+  .admin-page .card .row > .btn, .admin-page .card .row > select, .admin-page .card .row > input { flex: 1 1 100%; min-height: 44px; }
+  .admin-page .card .row > .btn-sm { justify-content: center; }
+  .admin-page form.row > * { flex: 1 1 100%; min-height: 44px; }
+  .admin-page .card { scroll-margin-top: 120px; }
+}
