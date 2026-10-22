@@ -8,7 +8,7 @@ A vitrine é uma página que se conta rolando:
 2. **Jornada:** uma seção alta (≈330% da tela) com um **palco fixo**. À esquerda, três passos (buscar, avaliar, entregar), de que só o atual fica aceso; à direita, um cartão que se transforma em três cenas: a **busca** (cinco fontes que surgem e três resultados com nota), a **nota** (anel que se preenche e critérios que aparecem um a um) e o **relatório** (linhas que se escrevem e os botões de exportação). Uma barra lateral mostra o progresso. Os dados do cartão são **fictícios**, como o exemplo de nota que já existia.
 3. **Números** que contam de zero quando entram na tela (fontes de busca, fontes do feed, critérios), **para quem é**, **planos** (Gratuito, Pro e Max, lidos de `GET /api/billing/plans`) e a chamada final "Criar conta grátis".
 
-No celular, só o passo atual aparece acima do cartão, a seção fica um pouco mais curta e o cartão esconde o item que não cabe; nada rola para o lado.
+**No celular a jornada é outra:** três passos **empilhados**, cada um com a sua cena, que anima **uma vez** quando o passo aparece. Não há palco fixo nem troca de cena enquanto o dedo desliza (a barra de endereço do navegador mexe na altura da tela e fazia a cena e o anel de nota trocarem e girarem para trás). No computador o anel também enche uma vez e fica. Os desfoques grandes do fundo ficam parados e a rede de fontes usa menos pontos.
 
 ## Quem tem conta: painel em blocos
 - **"Bem-vindo, Nome"** e a data de hoje; sem nome cadastrado, "Bem-vindo de volta". Logo abaixo, a busca.

@@ -2,6 +2,12 @@
 
 ## 2026-10 — Início animado: jornada para o convidado e painel em blocos
 
+### Corrigido (celular)
+- **Jornada:** no celular virou três passos empilhados que animam uma vez; antes, o palco fixo trocava de cena e o anel de nota girava para trás enquanto o dedo deslizava.
+- **Topo:** os botões têm o mesmo tamanho (40 px) e o da paleta de comandos, que repetia o menu de baixo, não aparece em telas pequenas.
+- **Menos botões:** nos cartões da busca o "Salvar" mostra só o ícone e o "Abrir" some (o título já abre); na biblioteca somem "Abrir" e a troca cartões/tabela, e a barra de filtro foi reorganizada; no painel some o bloco de atalhos.
+- Os anéis de nota não animam mais ao redesenhar a lista (giravam a cada letra do filtro).
+
 ### Adicionado
 - **Nota de confiabilidade em cada resultado da busca e em cada item da biblioteca** (`rating` com `score` e `band` em todo cartão de artigo da API; conta por código, em cache).
 - **Busca:** resultados em cartões com o anel da nota, ordem em pílulas e atalho "/" para o campo de busca.

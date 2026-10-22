@@ -505,7 +505,7 @@
     const wrap = h("span", { class: "save-wrap" }, button, picker);
     const refresh = () => {
       button.setAttribute("aria-pressed", String(Boolean(work.saved)));
-      button.replaceChildren(icon("bookmark", work.saved), work.saved ? "Salvo" : "Salvar", icon("chevron"));
+      button.replaceChildren(icon("bookmark", work.saved), h("span", { class: "save-label" }, work.saved ? "Salvo" : "Salvar"), icon("chevron"));
       if (work.saved && popNext) button.firstChild.classList.add("pop");
       popNext = false;
     };
@@ -814,8 +814,8 @@
   ];
   const JOURNEY_EXPORTS = ["Baixar Word", "Exportar para Zotero", "Citação ABNT"];
 
-  /** O cartao fixo da jornada: tres cenas (busca, nota, relatorio) com dados ficticios, como o exemplo de nota que ja existia. */
-  function journeyCard() {
+  /** As tres cenas da jornada (busca, nota, relatorio), com dados ficticios, como o exemplo de nota que ja existia. Cada chamada cria nos novos. */
+  function journeyScenes() {
     const scene1 = h("div", { class: "jr-scene s1" },
       h("div", { class: "jr-query" }, "metformina em idosos"),
       h("div", { class: "jr-sources" }, indexed(JOURNEY_SOURCES.map((name) => h("span", {}, name)))),
@@ -830,19 +830,42 @@
     const scene3 = h("div", { class: "jr-scene s3" },
       h("div", { class: "jr-doc" }, h("h4", {}, "Relatório · Metformina em idosos"), h("span", { class: "jr-method" }, "Método: 5 fontes · 12 estudos incluídos"), indexed(lines)),
       h("div", { class: "jr-exports" }, indexed(JOURNEY_EXPORTS.map((name) => h("span", {}, name)))));
-    return { card: h("div", { class: "jr-card", "aria-hidden": "true" }, h("div", { class: "jr-bar" }, h("i"), h("i"), h("i")), scene1, scene2, scene3), ring };
+    return { scenes: [scene1, scene2, scene3], ring };
   }
+  const jrBar = () => h("div", { class: "jr-bar" }, h("i"), h("i"), h("i"));
 
-  /** Secao alta com palco fixo: a rolagem vira progresso, e o progresso troca a cena, o texto e a barra lateral. */
+  /**
+   * A jornada tem duas formas. No computador, uma secao alta com palco fixo: a rolagem vira progresso e troca a cena, o texto e a barra.
+   * No celular, tres passos empilhados, cada um com a sua cena, que anima UMA vez quando o passo aparece: sem palco fixo, sem troca de
+   * cena enquanto o dedo desliza e sem o anel girando para tras (a barra de endereco do navegador mexe na altura e confundia a conta).
+   */
   function journeySection() {
-    const { card, ring } = journeyCard();
+    // -- computador
+    const { scenes, ring } = journeyScenes();
     const items = JOURNEY.map(([n, title, text], i) => h("li", { class: i === 0 ? "on" : "" }, h("span", { class: "jr-n" }, n), h("h2", {}, title), h("p", {}, text)));
-    const stage = h("div", { class: "jr-stage" }, h("div", { class: "jr-rail", "aria-hidden": "true" }, h("i")), h("div", { class: "jr-copy" }, h("ol", {}, items)), card);
+    const card = h("div", { class: "jr-card", "aria-hidden": "true" }, jrBar(), scenes);
+    const stage = h("div", { class: "jr-stage jr-live" }, h("div", { class: "jr-rail", "aria-hidden": "true" }, h("i")), h("div", { class: "jr-copy" }, h("ol", {}, items)), card);
     stage.dataset.s = "1";
-    const section = h("section", { class: "journey", id: "jornada", "aria-label": "Como funciona, passo a passo" }, stage);
+    // -- celular
+    const steps = JOURNEY.map(([n, title, text], i) => {
+      const built = journeyScenes();
+      const step = h("article", { class: "jr-step jr-live" },
+        h("div", { class: "jr-copy-m" }, h("span", { class: "jr-n" }, n), h("h2", {}, title), h("p", {}, text)),
+        h("div", { class: "jr-card", "aria-hidden": "true" }, jrBar(), built.scenes[i]));
+      step.dataset.s = "0";
+      const play = () => { step.dataset.s = String(i + 1); built.ring.classList.add("on"); };
+      if (reducedMotion() || !("IntersectionObserver" in window)) play();
+      else {
+        const io = new IntersectionObserver(([entry]) => { if (entry.isIntersecting) { io.disconnect(); play(); } }, { threshold: 0.3 });
+        io.observe(step);
+      }
+      return step;
+    });
+    const section = h("section", { class: "journey", id: "jornada", "aria-label": "Como funciona, passo a passo" }, stage, h("div", { class: "jr-steps" }, steps));
     let scene = 0;
     const update = () => {
-      if (!section.isConnected) { removeEventListener("scroll", onScroll); removeEventListener("resize", onScroll); return; }  // saiu da pagina inicial
+      if (!section.isConnected) { removeEventListener("scroll", update); removeEventListener("resize", update); return; }  // saiu da pagina inicial
+      if (stage.offsetParent === null) return;  // no celular o palco fixo nao existe
       const progress = Lib.journeyProgress(section.getBoundingClientRect().top, section.offsetHeight, innerHeight);
       stage.style.setProperty("--prog", progress.toFixed(3));
       const next = Lib.journeyScene(progress);
@@ -850,11 +873,10 @@
       scene = next;
       stage.dataset.s = String(next);
       items.forEach((li, i) => li.classList.toggle("on", i + 1 === next));
-      ring.classList.toggle("on", next === 2);
+      if (next === 2) ring.classList.add("on");  // o anel enche uma vez e fica: voltar a rolagem nao o faz girar para tras
     };
-    const onScroll = update;  // leve (uma leitura de posicao e troca de classes), entao roda direto no evento
-    addEventListener("scroll", onScroll, { passive: true });
-    addEventListener("resize", onScroll);
+    addEventListener("scroll", update, { passive: true });
+    addEventListener("resize", update);
     setTimeout(update, 0);  // depois de montada
     return section;
   }
@@ -874,7 +896,7 @@
       W = canvas.clientWidth; H = canvas.clientHeight;
       canvas.width = W * dpr; canvas.height = H * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const count = Math.round(Math.min(80, (W * H) / 16000));
+      const count = Math.round(Math.min(W < 700 ? 34 : 80, (W * H) / 16000));
       nodes = Array.from({ length: count }, () => ({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - 0.5) * 0.35, vy: (Math.random() - 0.5) * 0.35, r: 1.3 + Math.random() * 1.7 }));
       hubs = NET_HUBS.map((name, i) => ({ name, a: (i / NET_HUBS.length) * Math.PI * 2 - Math.PI / 2, x: Math.random() * W, y: Math.random() * H, anchor: W < 700 ? NET_MOBILE_ANCHORS[i] : null }));
     }
