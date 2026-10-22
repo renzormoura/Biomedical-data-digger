@@ -22,6 +22,13 @@ No celular, só o passo atual aparece acima do cartão, a seção fica um pouco 
 
 Os dados vêm em paralelo (`/api/account`, `/api/billing/me`, `/api/alerts`, `/api/library`, `/api/feed`); cada bloco aparece quando o seu chega e uma falha de um deles não derruba os outros.
 
+## O mesmo estilo em todas as telas
+- **Entrada animada:** cada tela do navegador de artigos entra subindo e aparecendo, com os blocos em sequência; resultados da busca, cartões do feed, números do perfil e do painel de administração, e planos entram escalonados. No Laboratório de IA, cada área entra suavemente ao ser aberta.
+- **Brilho que segue o cursor** nos cartões, blocos e planos (só com mouse; no toque não existe).
+- **Paleta de comandos (Ctrl/Cmd+K, ou o botão "Comandos" no topo, só o ícone em telas menores):** vai para Início, Busca, Feed, Biblioteca, Relatórios, Interesses e alertas, Perfil, Planos e Laboratório de IA, alterna o tema, e transforma qualquer texto digitado em "Buscar artigos". Setas escolhem, Enter abre, Esc fecha; funciona também no Laboratório de IA. Vem de `static/fx.js`.
+- **Topo do convidado:** além da jornada, uma **rede de fontes** ao fundo (PubMed, Europe PMC, arXiv, OpenAlex e DOAJ como nós rotulados que se organizam, ligam-se ao cursor e, no celular, ao toque) e uma **faixa de fontes** passando (busca e feed). A rede só anima enquanto o topo está na tela e pausa fora dela.
+- **Perfil:** mostra o nome e a inicial dele no avatar, e os números contam de zero. **Administração:** os números contam, e a visão geral passou a mostrar também o plano Max.
+
 ## Animações e acessibilidade
 - Tudo é feito com classes de CSS e propriedades definidas por script (`style.setProperty`), sem estilo nem script em linha, por causa da política de segurança do site. Sem bibliotecas.
 - Com **"reduzir movimento"** ligado no aparelho, as animações somem: os blocos aparecem de uma vez, os números não contam e o título não anima.

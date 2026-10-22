@@ -1043,3 +1043,69 @@ a.bento-tile:hover { transform: translateY(-3px); }
 .sus-details { display: grid; gap: 4px; font-size: 0.92rem; }
 .sus-procs li { display: grid; gap: 1px; padding: 6px 0; font-size: 0.88rem; }
 .sus-procs code { color: var(--accent-text); }
+
+/* ---- Estilo animado em todas as telas: entrada das paginas, brilho do cursor, paleta de comandos, rede e faixa de fontes ---- */
+@keyframes page-in { from { opacity: 0; transform: translateY(14px); } }
+@keyframes row-in { from { opacity: 0; transform: translateY(10px); } }
+#app > :not(.journey):not(.rv) { animation: page-in 0.55s cubic-bezier(.2, .8, .2, 1) both; }
+#app > :nth-child(2) { animation-delay: 0.05s; } #app > :nth-child(3) { animation-delay: 0.1s; } #app > :nth-child(4) { animation-delay: 0.15s; } #app > :nth-child(n+5) { animation-delay: 0.2s; }
+.results > li, .feed-list > *, .account-stats > *, .admin-stats > *, .plan-grid > * { animation: row-in 0.5s cubic-bezier(.2, .8, .2, 1) both; }
+.results > li:nth-child(2), .feed-list > :nth-child(2), .account-stats > :nth-child(2), .admin-stats > :nth-child(2), .plan-grid > :nth-child(2) { animation-delay: 0.04s; }
+.results > li:nth-child(3), .feed-list > :nth-child(3), .account-stats > :nth-child(3), .admin-stats > :nth-child(3), .plan-grid > :nth-child(3) { animation-delay: 0.08s; }
+.results > li:nth-child(4), .feed-list > :nth-child(4), .account-stats > :nth-child(4), .admin-stats > :nth-child(4) { animation-delay: 0.12s; }
+.results > li:nth-child(5), .feed-list > :nth-child(5), .admin-stats > :nth-child(5) { animation-delay: 0.16s; }
+.results > li:nth-child(n+6), .feed-list > :nth-child(n+6), .admin-stats > :nth-child(n+6) { animation-delay: 0.2s; }
+
+/* brilho que segue o cursor (a posicao vem do fx.js) */
+.card, .feed-card, .feature, .gplan-card, .plan-card, .panel:not([role="tabpanel"]) { position: relative; isolation: isolate; }
+.card::before, .feed-card::before, .feature::before, .gplan-card::before, .plan-card::before, .panel:not([role="tabpanel"])::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 50%), var(--accent-soft), transparent 60%);
+}
+.card:hover::before, .feed-card:hover::before, .feature:hover::before, .gplan-card:hover::before, .plan-card:hover::before, .panel:not([role="tabpanel"]):hover::before { opacity: 1; }
+/* Laboratorio de IA: cada area entra suavemente ao ser aberta */
+.panel[role="tabpanel"]:not([hidden]) { animation: page-in 0.5s cubic-bezier(.2, .8, .2, 1) both; }
+.feature, .gplan-card, .plan-card { transition: border-color 0.3s, transform 0.3s; }
+.feature:hover, .gplan-card:hover, .plan-card:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--accent) 55%, var(--border)); }
+.btn-primary { transition: transform 0.2s, background 0.2s, box-shadow 0.2s; }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 30px -10px var(--accent); }
+
+/* paleta de comandos (Ctrl/Cmd + K) */
+.pal { position: fixed; inset: 0; z-index: 90; display: grid; place-items: start center; padding-top: 14vh; background: color-mix(in srgb, var(--bg) 62%, transparent); backdrop-filter: blur(6px); animation: pal-fade 0.18s; }
+.pal[hidden] { display: none; }
+@keyframes pal-fade { from { opacity: 0; } }
+.pal-box { width: min(620px, calc(100% - 28px)); overflow: hidden; border: 1px solid var(--line-strong); border-radius: 16px; background: var(--surface); box-shadow: 0 40px 120px -20px rgba(0, 0, 0, 0.7); animation: pal-drop 0.25s cubic-bezier(.2, .8, .2, 1); }
+@keyframes pal-drop { from { transform: translateY(-14px) scale(0.98); opacity: 0; } }
+.pal-input { width: 100%; padding: 18px 20px; border: 0; border-bottom: 1px solid var(--border); outline: 0; background: transparent; color: var(--text); font: inherit; font-size: 1.05rem; }
+.pal-list { list-style: none; margin: 0; padding: 8px; max-height: 340px; overflow-y: auto; }
+.pal-item, .pal-empty { padding: 11px 12px; border-radius: 10px; }
+.pal-item { cursor: pointer; }
+.pal-item.is-selected { background: var(--accent-soft); outline: 1px solid var(--accent); }
+.pal-empty { color: var(--muted); }
+.pal-foot { display: flex; gap: 16px; padding: 10px 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.76rem; }
+body.pal-open { overflow: hidden; }
+
+/* topo do convidado: rede de fontes ao fundo e faixa de fontes passando */
+/* o topo sangra ate as bordas da tela, para o brilho e a rede nao terminarem num retangulo */
+.jr-hero { margin-inline: -20px; padding-inline: 20px; }
+@media (max-width: 900px) { .jr-hero { margin-inline: -14px; padding-inline: 14px; } }
+.jr-net { position: absolute; inset: 0; z-index: -1; width: 100%; height: 100%; }
+.jr-hero::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(70% 70% at 35% 48%, var(--bg) 25%, transparent 78%); opacity: 0.85; }
+.mq { margin: 0 -20px 20px; padding: 18px 0; overflow: hidden; border-block: 1px solid var(--border); user-select: none; }
+.mq-row + .mq-row { margin-top: 8px; }
+.mq-track { display: flex; gap: 40px; width: max-content; animation: mq-left 70s linear infinite; font-size: clamp(1.8rem, 5vw, 3.6rem); font-weight: 800; letter-spacing: -0.04em; text-transform: uppercase; line-height: 1.1; white-space: nowrap; }
+.mq-row.rev .mq-track { animation-name: mq-right; animation-duration: 90s; }
+.mq-track span:nth-child(odd) { color: transparent; -webkit-text-stroke: 1.2px var(--line-strong); }
+.mq-track span:nth-child(even) { color: var(--accent-text); }
+.mq:hover .mq-track { animation-play-state: paused; }
+@keyframes mq-left { to { transform: translateX(-50%); } }
+@keyframes mq-right { from { transform: translateX(-50%); } to { transform: none; } }
+@media (max-width: 560px) { .mq { margin: 0 -14px 14px; } }
+
+@media (prefers-reduced-motion: reduce) {
+  #app > *, .results > li, .feed-list > *, .account-stats > *, .admin-stats > *, .plan-grid > *, .panel[role="tabpanel"] { animation: none; }
+  .mq-track { animation: none; flex-wrap: wrap; width: auto; justify-content: center; padding: 0 16px; }
+  .pal, .pal-box { animation: none; }
+  .mq-track span[aria-hidden="true"] { display: none; }  /* sem movimento, as copias da faixa so repetiriam os nomes */
+}
+@media (max-width: 1100px) { #palette-button .btn-label { display: none; } }  /* so o icone, para o menu principal nao ganhar rolagem */

@@ -14,7 +14,8 @@
 | `templates/_icons.html` | Sprite SVG (ícones referenciados por `<use href="#i-…">`) |
 | `templates/_footer.html` | Rodapé: produto, fontes de busca, registros abertos |
 | `static/browse.js` | Aplicação: telas, chamadas à API, estado de sessão |
-| `static/browse-lib.js` | Funções puras (rotas, parâmetros de busca, paginação) com testes em `tests/js/` |
+| `static/browse-lib.js` | Funções puras (rotas, parâmetros de busca, paginação, progresso da jornada, contadores) com testes em `tests/js/` |
+| `static/fx.js` | Efeitos compartilhados pelas duas telas (navegador e Laboratório de IA): **paleta de comandos** (Ctrl/Cmd+K ou botão "Comandos") e **brilho que segue o cursor** nos cartões. A busca de comandos é pura e testada em `tests/js/fx.test.js` |
 | `static/brand.css` | Variáveis de tema, componentes e telas do produto |
 | `static/browse.css` | Estilos auxiliares do navegador |
 | `static/app.js`, `static/app.css` | Laboratório de IA |
@@ -51,6 +52,7 @@ Hash desconhecido volta ao início. Parâmetros de URL são tratados como **entr
 - Texto de fontes externas é inserido como texto (nunca como HTML); links externos só `http(s)` (`safeHttpUrl`).
 
 ## Testes
-- `tests/js/browse-lib.test.js` (`node --test`): rotas, estado de busca, parâmetros, paginação.
+- `tests/js/browse-lib.test.js` (`node --test`): rotas, estado de busca, parâmetros, paginação, progresso da jornada e contadores.
+- `tests/js/fx.test.js` (`node --test`): busca de comandos da paleta (sem acento, por prefixo e palavra-chave, ordem, busca livre) e navegação por setas.
 - Testes de integração em `tests/test_browse_api.py` verificam a página servida e os cabeçalhos.
 - A verificação visual é manual (desktop e celular); não há teste visual automatizado.

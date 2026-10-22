@@ -2,7 +2,12 @@
 
 ## 2026-10 — Início animado: jornada para o convidado e painel em blocos
 
+### Adicionado
+- **Paleta de comandos** (Ctrl/Cmd+K ou botão "Comandos") no navegador de artigos e no Laboratório de IA, e **brilho que segue o cursor** nos cartões (novo `static/fx.js`, testado em `tests/js/fx.test.js`).
+- Topo do convidado com **rede de fontes** ao fundo e **faixa de fontes** passando.
+
 ### Alterado
+- Todas as telas ganharam entrada animada, listas escalonadas e botões com brilho; o perfil mostra o nome e os números do perfil e da administração contam (a visão geral da administração também mostra o plano Max).
 - **Início do convidado:** virou a "jornada": uma seção em que a rolagem conta o produto num cartão fixo (busca, nota de confiabilidade, relatório), com título animado, números que contam, planos e chamada final. Substitui os blocos de funcionalidades, confiança e "como funciona".
 - **Início de quem tem conta:** painel em blocos, com números que contam, anel de primeiros passos, sino animado, leque da biblioteca, consulta rápida "Consta no SUS?", atalhos e brilho que segue o cursor. No celular, 2 colunas.
 - Todas as animações respeitam "reduzir movimento" e usam só CSS e `style.setProperty` (a política de segurança continua sem estilo em linha).

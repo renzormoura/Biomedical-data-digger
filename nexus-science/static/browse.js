@@ -714,13 +714,6 @@
     const tiles = [savedTile, listsTile, reportsTile, stepsTile, alertsTile, recentTile, susTile, linksTile];
     tiles.forEach((tile, i) => reveal(tile, i * 0.06));
     const bento = h("section", { class: "bento", "aria-label": "Seu painel" }, tiles);
-    bento.addEventListener("pointermove", (event) => {  // brilho que segue o cursor, no bloco sob o mouse
-      const tile = event.target.closest && event.target.closest(".bento-tile");
-      if (!tile) return;
-      const box = tile.getBoundingClientRect();
-      tile.style.setProperty("--mx", `${event.clientX - box.left}px`);
-      tile.style.setProperty("--my", `${event.clientY - box.top}px`);
-    });
 
     mount($app,
       h("section", { class: "home-hero dash-hero" },
@@ -866,6 +859,92 @@
     return section;
   }
 
+  // ---- fundo de rede do topo do convidado: as fontes (nos rotulados) se organizam, os demais derivam e se ligam ao cursor
+  const NET_HUBS = ["PubMed", "Europe PMC", "arXiv", "OpenAlex", "DOAJ"];
+  const NET_MOBILE_ANCHORS = [[0.2, 0.1], [0.5, 0.06], [0.8, 0.1], [0.3, 0.95], [0.7, 0.95]];
+  function networkBackdrop(canvas, host) {
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    let W = 0, H = 0, nodes = [], hubs = [], running = false, start = performance.now();
+    let color = "#ff6a00", ink = "#ededee", frames = 0;
+    const mouse = { x: -999, y: -999 };
+    const readTheme = () => { const style = getComputedStyle(document.documentElement); color = style.getPropertyValue("--accent").trim() || color; ink = style.getPropertyValue("--text").trim() || ink; };
+    function resize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = canvas.clientWidth; H = canvas.clientHeight;
+      canvas.width = W * dpr; canvas.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const count = Math.round(Math.min(80, (W * H) / 16000));
+      nodes = Array.from({ length: count }, () => ({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - 0.5) * 0.35, vy: (Math.random() - 0.5) * 0.35, r: 1.3 + Math.random() * 1.7 }));
+      hubs = NET_HUBS.map((name, i) => ({ name, a: (i / NET_HUBS.length) * Math.PI * 2 - Math.PI / 2, x: Math.random() * W, y: Math.random() * H, anchor: W < 700 ? NET_MOBILE_ANCHORS[i] : null }));
+    }
+    function frame(now) {
+      if (!running) return;
+      if (!canvas.isConnected) { running = false; return; }  // saiu da pagina inicial
+      if (++frames % 90 === 0) readTheme();
+      const ease = 1 - Math.pow(1 - Math.min(1, (now - start) / 2600), 3);
+      const wob = now / 4000;
+      ctx.clearRect(0, 0, W, H);
+      hubs.forEach((hub) => {
+        const tx = hub.anchor ? W * hub.anchor[0] + Math.sin(wob + hub.a) * 10 : W / 2 + Math.cos(hub.a + wob * 0.25) * Math.min(W, H) * 0.5;
+        const ty = hub.anchor ? H * hub.anchor[1] + Math.cos(wob * 1.3 + hub.a) * 8 : H / 2 + Math.sin(hub.a + wob * 0.25) * Math.min(W, H) * 0.31;
+        hub.x += (tx - hub.x) * (0.02 + 0.05 * ease); hub.y += (ty - hub.y) * (0.02 + 0.05 * ease);
+      });
+      nodes.forEach((p) => {
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0 || p.x > W) p.vx *= -1;
+        if (p.y < 0 || p.y > H) p.vy *= -1;
+        const dx = mouse.x - p.x, dy = mouse.y - p.y;
+        if (Math.hypot(dx, dy) < 150) { p.x += dx * 0.012; p.y += dy * 0.012; }
+      });
+      const points = [...nodes, ...hubs];
+      ctx.lineWidth = 1; ctx.strokeStyle = color;
+      for (let i = 0; i < points.length; i++) {
+        for (let j = i + 1; j < points.length; j++) {
+          const d = Math.hypot(points[i].x - points[j].x, points[i].y - points[j].y);
+          if (d < 130) { ctx.globalAlpha = (1 - d / 130) * 0.4; ctx.beginPath(); ctx.moveTo(points[i].x, points[i].y); ctx.lineTo(points[j].x, points[j].y); ctx.stroke(); }
+        }
+        const dm = Math.hypot(mouse.x - points[i].x, mouse.y - points[i].y);
+        if (dm < 170) { ctx.globalAlpha = (1 - dm / 170) * 0.8; ctx.beginPath(); ctx.moveTo(points[i].x, points[i].y); ctx.lineTo(mouse.x, mouse.y); ctx.stroke(); }
+      }
+      ctx.fillStyle = color; ctx.globalAlpha = 0.8;
+      nodes.forEach((p) => { ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.283); ctx.fill(); });
+      hubs.forEach((hub) => {
+        ctx.globalAlpha = 1; ctx.beginPath(); ctx.arc(hub.x, hub.y, 5, 0, 6.283); ctx.fill();
+        ctx.globalAlpha = 0.22; ctx.beginPath(); ctx.arc(hub.x, hub.y, 5 + 7 * Math.abs(Math.sin(now / 900 + hub.a)), 0, 6.283); ctx.fill();
+        ctx.globalAlpha = 0.9; ctx.fillStyle = ink; ctx.font = "600 12px system-ui, sans-serif"; ctx.textAlign = "center"; ctx.fillText(hub.name, hub.x, hub.y - 15); ctx.fillStyle = color;
+      });
+      ctx.globalAlpha = 1;
+      requestAnimationFrame(frame);
+    }
+    host.addEventListener("pointermove", (event) => { if (event.pointerType === "touch") return; const box = canvas.getBoundingClientRect(); mouse.x = event.clientX - box.left; mouse.y = event.clientY - box.top; });
+    host.addEventListener("pointerleave", () => { mouse.x = mouse.y = -999; });
+    host.addEventListener("pointerdown", (event) => {  // celular: um toque atrai e liga os nos por um instante
+      if (event.pointerType === "mouse") return;
+      const box = canvas.getBoundingClientRect(); mouse.x = event.clientX - box.left; mouse.y = event.clientY - box.top;
+      clearTimeout(canvas.tapTimer); canvas.tapTimer = setTimeout(() => { mouse.x = mouse.y = -999; }, 1400);
+    });
+    window.addEventListener("resize", () => { if (canvas.isConnected) resize(); });
+    readTheme(); resize();
+    if (reducedMotion()) { start -= 5000; running = true; frame(performance.now()); running = false; return; }  // quadro unico, sem movimento
+    if ("IntersectionObserver" in window) {  // so anima enquanto o topo esta na tela
+      new IntersectionObserver(([entry]) => { const was = running; running = entry.isIntersecting; if (running && !was) requestAnimationFrame(frame); }).observe(host);
+    } else { running = true; requestAnimationFrame(frame); }
+  }
+
+  const STRIP_ROWS = [
+    ["PubMed", "Europe PMC", "arXiv", "OpenAlex", "DOAJ"],
+    ["Nature", "The BMJ", "JAMA", "PLOS ONE", "eLife", "MIT News", "Quanta", "Fiocruz", "Jornal da USP"],
+  ];
+  /** Faixas com as fontes, passando de lado (a CSS para a animacao com "reduzir movimento"). */
+  function sourceStrip() {
+    return h("div", { class: "mq", "aria-label": "Algumas das fontes que o Nexus Science reúne" },
+      STRIP_ROWS.map((names, row) => {
+        const run = (copy) => names.map((name) => h("span", { "aria-hidden": copy ? "true" : null }, name));
+        return h("div", { class: `mq-row${row ? " rev" : ""}` }, h("div", { class: "mq-track" }, run(false), run(true), run(true), run(true)));
+      }));
+  }
+
   const planCards = (data) => h("div", { class: "gplan-grid" }, data.plans.map((plan, i) => {
     const featured = plan.key === "pro";
     const paid = plan.priceCents > 0;
@@ -904,16 +983,20 @@
       stat(sourceCount, "fontes de busca em uma só"), stat(feedCount, "fontes de novidades no feed"), stat(eight, "critérios abertos de confiabilidade"));
     whenVisible(stats, () => [sourceCount, feedCount, eight].forEach((el) => countTo(el, Number(el.dataset.target || el.textContent) || 0)));
 
-    mount($app,
-      h("section", { class: "home-hero jr-hero" },
-        h("div", { class: "jr-orb a", "aria-hidden": "true" }), h("div", { class: "jr-orb b", "aria-hidden": "true" }),
+    const net = h("canvas", { class: "jr-net", "aria-hidden": "true" });
+    const hero = h("section", { class: "home-hero jr-hero" },
+        h("div", { class: "jr-orb a", "aria-hidden": "true" }), h("div", { class: "jr-orb b", "aria-hidden": "true" }), net,
         h("p", { class: "eyebrow" }, "Plataforma de pesquisa científica"),
         h("h1", { class: "display jr-title" }, line("Da pergunta", 0), line(["ao ", h("span", { class: "jr-accent" }, "relatório.")], 1)),
         h("p", { class: "lead" }, "Busque em várias fontes, veja com critérios abertos o quanto cada artigo merece confiança e transforme suas leituras em um relatório com método."),
         form,
         h("p", { class: "examples" }, "Exemplos: ", TOPICS.map((t) => h("a", { href: Lib.buildHash("/busca", { q: t }) }, t))),
         h("a", { class: "jr-scroll", href: "#/", onclick: (event) => { event.preventDefault(); document.getElementById("jornada").scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth" }); } },
-          h("i", { "aria-hidden": "true" }), "Role para ver como funciona")),
+          h("i", { "aria-hidden": "true" }), "Role para ver como funciona"));
+    setTimeout(() => networkBackdrop(net, hero), 0);  // depois de montar, quando o canvas ja tem tamanho
+    mount($app,
+      hero,
+      sourceStrip(),
 
       journeySection(),
 
@@ -1904,13 +1987,17 @@
     if (!account) { mount(content, errorBox("Não foi possível carregar o seu perfil agora.")); return; }
     const chosen = options.profiles.find((p) => p.key === (account.profile && account.profile.profile));
     const since = account.createdAt ? fmtDate(account.createdAt.slice(0, 10)) : "";
-    const stat = (value, label, href) => h("a", { class: "account-stat", href }, h("strong", {}, Lib.formatCount(value)), h("span", {}, label));
+    const stat = (value, label, href) => {
+      const number = h("strong", {}, Lib.formatCount(value));
+      if (value > 0 && value < 1000) { number.textContent = "0"; countTo(number, value); }  // conta de zero ao valor
+      return h("a", { class: "account-stat", href }, number, h("span", {}, label));
+    };
     const interests = account.interests || {};
     const checked = interests.lastChecked ? fmtDate(interests.lastChecked.slice(0, 10)) : "";
     mount(content,
       h("section", { class: "card account-head" },
-        h("span", { class: "avatar", "aria-hidden": "true" }, account.email.slice(0, 1).toUpperCase()),
-        h("div", {}, h("strong", { class: "account-email" }, account.email), since ? h("p", { class: "muted" }, `Membro desde ${since}`) : null)),
+        h("span", { class: "avatar", "aria-hidden": "true" }, (account.name || account.email).slice(0, 1).toUpperCase()),
+        h("div", {}, h("strong", { class: "account-email" }, account.name || account.email), account.name ? h("p", { class: "muted" }, account.email) : null, since ? h("p", { class: "muted" }, `Membro desde ${since}`) : null)),
       h("div", { class: "account-stats" },
         stat(account.counts.library, account.counts.library === 1 ? "artigo salvo" : "artigos salvos", "#/biblioteca"),
         stat(account.counts.lists, account.counts.lists === 1 ? "lista" : "listas", "#/biblioteca"),
@@ -2614,7 +2701,11 @@
     const run = (action, done) => async () => {
       try { await action(); if (done) toast(done); refresh(); } catch (error) { toast(error.message); }
     };
-    const stat = (label, value) => h("div", { class: "admin-stat" }, h("strong", {}, String(value)), h("span", {}, label));
+    const stat = (label, value) => {
+      const number = h("strong", {}, String(value));
+      if (typeof value === "number" && value > 0 && value < 100000) { number.textContent = "0"; countTo(number, value); }
+      return h("div", { class: "admin-stat" }, number, h("span", {}, label));
+    };
 
     function askToken(message) {
       const input = h("input", { type: "password", id: "admin-token", autocomplete: "off", maxlength: "200", "aria-label": "Token de administrador" });
@@ -2632,7 +2723,7 @@
       const data = await call("/api/admin/overview");
       mount(content,
         h("div", { class: "admin-stats" }, stat("contas", data.users), stat("com e-mail confirmado", data.verified), stat("novas em 7 dias", data.newLast7Days),
-          stat("no plano Pro", data.byPlan.pro), stat("no plano gratuito", data.byPlan.gratuito), stat("assinaturas vencendo em 7 dias", data.expiringSoon),
+          stat("no plano Pro", data.byPlan.pro), stat("no plano Max", data.byPlan.max || 0), stat("no plano gratuito", data.byPlan.gratuito), stat("assinaturas vencendo em 7 dias", data.expiringSoon),
           stat("suspensas", data.suspended), stat("pagamentos a conferir", data.pendingPayments), stat("receita em 30 dias", brl(data.revenueLast30DaysCents)),
           stat("receita total", brl(data.revenueTotalCents))),
         data.pendingPayments ? h("p", {}, h("a", { class: "btn btn-primary", href: "#/admin/pagamentos" }, `Conferir ${data.pendingPayments} pagamento(s) pendente(s)`)) : null);

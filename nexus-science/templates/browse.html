@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="/static/browse.css?v={{ asset_version }}">
   <link rel="stylesheet" href="/static/brand.css?v={{ asset_version }}">
   <script src="/static/browse-lib.js?v={{ asset_version }}" defer></script>
+  <script src="/static/fx.js?v={{ asset_version }}" defer></script>
   <script src="/static/browse.js?v={{ asset_version }}" defer></script>
 </head>
 <body>
@@ -27,6 +28,7 @@
         <button type="button" class="btn btn-ghost" id="bell-button" aria-haspopup="dialog" aria-expanded="false" aria-controls="alerts-panel" aria-label="Avisos de artigos novos"><svg class="icon" aria-hidden="true"><use href="#i-bell"/></svg><span class="bell-count" id="bell-count" hidden></span></button>
         <section class="alerts-panel" id="alerts-panel" role="dialog" aria-label="Avisos de artigos novos" hidden></section>
       </div>
+      <button type="button" class="btn btn-ghost" id="palette-button" aria-label="Abrir a paleta de comandos (Ctrl K)" title="Comandos (Ctrl K)"><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg><span class="btn-label">Comandos</span></button>
       <button type="button" class="btn btn-ghost" id="theme-toggle" aria-label="Alternar tema claro ou escuro"><svg class="icon" aria-hidden="true"><use href="#i-theme"/></svg><span class="btn-label" id="theme-label">Tema</span></button>
       <button type="button" class="btn btn-ghost" id="account-button" data-user="{{ user or '' }}" data-name="{{ name or '' }}" data-profile="{{ profile }}" data-health-pack="{{ health_pack }}"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><span class="btn-label" id="account-label">{{ user or "Entrar" }}</span></button>
     </div>

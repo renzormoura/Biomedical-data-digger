@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="/static/app.css?v={{ asset_version }}">
   <link rel="stylesheet" href="/static/brand.css?v={{ asset_version }}">
   <script src="/static/app.js?v={{ asset_version }}" defer></script>
+  <script src="/static/fx.js?v={{ asset_version }}" defer></script>
 </head>
 <body>
   {% include "_icons.html" %}
@@ -28,6 +29,7 @@
       <a href="/ia" aria-current="page">Laboratório de IA</a>
     </nav>
     <div class="topbar-actions">
+      <button type="button" class="btn btn-ghost" id="palette-button" aria-label="Abrir a paleta de comandos (Ctrl K)" title="Comandos (Ctrl K)"><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg><span class="btn-label">Comandos</span></button>
       <button type="button" class="btn btn-ghost" id="theme-toggle" aria-label="Alternar tema claro ou escuro"><svg class="icon" aria-hidden="true"><use href="#i-theme"/></svg><span class="btn-label" id="theme-label">Tema</span></button>
       <button type="button" class="btn btn-ghost" id="account-button" data-user="{{ user or '' }}"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><span class="btn-label" id="account-label">{{ user or "Entrar" }}</span></button>
     </div>
