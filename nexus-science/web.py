@@ -11,6 +11,7 @@ from collections.abc import Callable
 from typing import Any
 
 from fastapi import FastAPI, Request
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -119,6 +120,7 @@ def create_app(
     }
 
     install_http_hardening(app, settings)
+    app.add_middleware(GZipMiddleware, minimum_size=1024)  # o JS e o CSS passam de 200 KB; comprimidos ficam em cerca de um quinto
 
     # -- identidade ----------------------------------------------------------
     # a sessao e um cookie assinado, sem estado: conferimos (com cache curto) se a conta ainda existe, para que

@@ -45,7 +45,8 @@ def install_http_hardening(app: FastAPI, settings: Settings) -> None:
         if request.url.path.startswith("/api/"):
             response.headers["Cache-Control"] = "no-store"
         elif request.url.path.startswith("/static/"):
-            response.headers["Cache-Control"] = "public, max-age=3600"
+            # o endereco leva ?v=<versao dos arquivos>: com versao, o navegador guarda por um ano; sem ela, por uma hora
+            response.headers["Cache-Control"] = "public, max-age=31536000, immutable" if "v" in request.query_params else "public, max-age=3600"
         return response
 
     @app.exception_handler(NexusError)

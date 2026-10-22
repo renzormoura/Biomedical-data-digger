@@ -2,6 +2,11 @@
 
 ## 2026-10 — Início animado: jornada para o convidado e painel em blocos
 
+### Desempenho (abrir o site e entrar na conta)
+- **Banco PostgreSQL:** as conexões passam a ser reaproveitadas (até 4 livres, testadas quando ficam paradas e trocadas se o Neon as derrubou). Antes cada consulta abria uma conexão nova com TLS, e um login ou uma abertura de página fazia várias.
+- **Compressão (gzip):** `browse.js` caiu de 211 KB para 57 KB.
+- **Cache:** arquivos estáticos com `?v=` ficam um ano no navegador (sem versão, uma hora).
+
 ### Corrigido (rolagem pesada)
 - Tirados os desfoques caros (topo e barra de busca com `backdrop-filter`, borrões animados da vitrine) e o cálculo da jornada roda no máximo uma vez por quadro e só perto da tela; a barra de progresso usa `transform` em vez de mudar a altura (que refazia o layout a cada rolada). A rede do topo desenha com menos pixels.
 
