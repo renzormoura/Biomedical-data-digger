@@ -1291,3 +1291,12 @@ pre code { overflow-wrap: normal; }
   .admin-page form.row > * { flex: 1 1 100%; min-height: 44px; }
   .admin-page .card { scroll-margin-top: 120px; }
 }
+
+/* ---- Rolagem leve: nada de desfoque caro nem layout a cada rolada ---- */
+html { scroll-behavior: auto; }
+.topbar, .search-bar { backdrop-filter: none; background: color-mix(in srgb, var(--bg) 97%, transparent); }
+.jr-orb { filter: none; animation: none; background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 55%, transparent), transparent); opacity: 0.22; }
+.jr-orb.b { opacity: 0.14; }
+.jr-rail i { height: 100%; transform: scaleY(var(--prog, 0)); transform-origin: top; will-change: transform; }
+.jr-card { box-shadow: 0 30px 60px -44px var(--accent); }
+.jr-hero, .jr-net { contain: paint; }

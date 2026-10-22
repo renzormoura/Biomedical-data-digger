@@ -2,6 +2,9 @@
 
 ## 2026-10 — Início animado: jornada para o convidado e painel em blocos
 
+### Corrigido (rolagem pesada)
+- Tirados os desfoques caros (topo e barra de busca com `backdrop-filter`, borrões animados da vitrine) e o cálculo da jornada roda no máximo uma vez por quadro e só perto da tela; a barra de progresso usa `transform` em vez de mudar a altura (que refazia o layout a cada rolada). A rede do topo desenha com menos pixels.
+
 ### Adicionado (administração no celular)
 - Quem é administrador ganha o item **Admin** (escudo) no menu de baixo.
 - Painel feito para a tela pequena: números em duas colunas, abas fixas no topo (agora com o estilo das abas do perfil), usuários em cartões em vez de tabela e botões de ação em largura total.

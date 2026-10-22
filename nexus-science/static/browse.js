@@ -865,12 +865,15 @@
       return step;
     });
     const section = h("section", { class: "journey", id: "jornada", "aria-label": "Como funciona, passo a passo" }, stage, h("div", { class: "jr-steps" }, steps));
-    let scene = 0;
+    let scene = 0, queued = false;
+    const rail = stage.querySelector(".jr-rail i");
     const update = () => {
-      if (!section.isConnected) { removeEventListener("scroll", update); removeEventListener("resize", update); return; }  // saiu da pagina inicial
+      if (!section.isConnected) { removeEventListener("scroll", onScroll); removeEventListener("resize", onScroll); return; }  // saiu da pagina inicial
       if (stage.offsetParent === null) return;  // no celular o palco fixo nao existe
-      const progress = Lib.journeyProgress(section.getBoundingClientRect().top, section.offsetHeight, innerHeight);
-      stage.style.setProperty("--prog", progress.toFixed(3));
+      const box = section.getBoundingClientRect();
+      if (box.bottom < -200 || box.top > innerHeight + 200) return;  // longe da tela: nada a calcular
+      const progress = Lib.journeyProgress(box.top, box.height, innerHeight);
+      rail.style.setProperty("--prog", progress.toFixed(3));
       const next = Lib.journeyScene(progress);
       if (next === scene) return;
       scene = next;
@@ -878,8 +881,9 @@
       items.forEach((li, i) => li.classList.toggle("on", i + 1 === next));
       if (next === 2) ring.classList.add("on");  // o anel enche uma vez e fica: voltar a rolagem nao o faz girar para tras
     };
-    addEventListener("scroll", update, { passive: true });
-    addEventListener("resize", update);
+    const onScroll = () => { if (queued) return; queued = true; requestAnimationFrame(() => { queued = false; update(); }); };
+    addEventListener("scroll", onScroll, { passive: true });
+    addEventListener("resize", onScroll);
     setTimeout(update, 0);  // depois de montada
     return section;
   }
@@ -895,7 +899,7 @@
     const mouse = { x: -999, y: -999 };
     const readTheme = () => { const style = getComputedStyle(document.documentElement); color = style.getPropertyValue("--accent").trim() || color; ink = style.getPropertyValue("--text").trim() || ink; };
     function resize() {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       W = canvas.clientWidth; H = canvas.clientHeight;
       canvas.width = W * dpr; canvas.height = H * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
